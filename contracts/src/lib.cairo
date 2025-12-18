@@ -13,6 +13,18 @@ pub mod elements {
         pub mod interface;
         pub mod moonrock;
     }
+    pub mod curses {
+        pub mod demultiplier;
+        pub mod double_draw;
+        pub mod index;
+        pub mod interface;
+    }
+    pub mod powers {
+        pub mod burn;
+        pub mod index;
+        pub mod interface;
+        pub mod reroll;
+    }
 }
 
 pub mod models {
@@ -27,9 +39,11 @@ pub mod events {
 
 pub mod types {
     pub mod bag;
+    pub mod curse;
     pub mod effect;
     pub mod milestone;
     pub mod orb;
+    pub mod power;
     pub mod rarity;
 }
 
@@ -43,4 +57,10 @@ pub mod components {
 
 pub mod systems {
     pub mod play;
+}
+
+#[cfg(test)]
+pub mod tests {
+    pub mod setup;
+    pub mod test_setup;
 }
