@@ -12,8 +12,6 @@ const config: StorybookConfig = {
 	stories: [
 		"../src/components/elements/**/*.stories.@(js|jsx|mjs|ts|tsx)",
 		"../src/components/icons/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-		"../src/components/containers/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-		"../src/components/modules/**/*.stories.@(js|jsx|mjs|ts|tsx)",
 	],
 
 	addons: [
@@ -27,6 +25,15 @@ const config: StorybookConfig = {
 	},
 
 	async viteFinal(config) {
+		if (Array.isArray(config.plugins)) {
+			config.plugins = config.plugins.filter(
+				(plugin) =>
+					plugin &&
+					typeof plugin === "object" &&
+					"name" in plugin &&
+					plugin.name !== "vite-plugin-pwa",
+			);
+		}
 		return mergeConfig(config, {
 			resolve: {
 				alias: {
