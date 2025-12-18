@@ -1,0 +1,24 @@
+{
+  "name": "glitchbomb",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:check": "turbo run lint:check",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
+    "format:all": "turbo run format:all",
+    "format:check:all": "turbo run format:check:all",
+    "test": "turbo run test",
+    "storybook": "cd client && pnpm storybook",
+    "build-storybook": "cd client && pnpm build-storybook"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "@biomejs/biome": "^2.3.10"
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
+}

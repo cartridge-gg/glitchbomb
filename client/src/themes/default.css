@@ -1,0 +1,21 @@
+@layer base {
+	:root {
+		--green-100: #55dd63;
+		--green-500: #1c3f19;
+		--green-900: #14240c;
+
+		--orange-100: #ff9d00;
+		--orange-900: #463105;
+
+		--red-100: #ff1e00;
+		--red-900: #470d06;
+
+		--black-100: #000000;
+		--black-150: #010101;
+
+		--radius: 0.5rem;
+		--green-gradient-100: linear-gradient(0deg, #040603 55%, #0c1806 68%);
+		--orange-gradient-100: linear-gradient(0deg, #040603 55%, #141200 68%);
+		--red-gradient-100: linear-gradient(0deg, #040603 55%, #141200 68%);
+	}
+}

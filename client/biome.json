@@ -1,0 +1,76 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
+	"vcs": {
+		"enabled": false,
+		"clientKind": "git",
+		"useIgnoreFile": false
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!**/tsconfig*.json",
+			"!**/dist",
+			"!**/.vercel",
+			"!**/node_modules",
+			"!**/public",
+			"!**/src/**/*.gen.ts",
+			"!**/src/index.css",
+			"!**/*.css"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "space",
+		"indentWidth": 2
+	},
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off",
+				"useKeyWithClickEvents": "off",
+				"noRedundantAlt": "off",
+				"useSemanticElements": "off",
+				"noStaticElementInteractions": "off",
+				"noRedundantRoles": "off",
+				"useAriaPropsSupportedByRole": "off"
+			},
+			"complexity": {
+				"noForEach": "off",
+				"noBannedTypes": "off",
+				"noStaticOnlyClass": "off"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "off",
+				"noEmptyPattern": "off"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "off",
+				"noExplicitAny": "off",
+				"noImplicitAnyLet": "off",
+				"noAssignInExpressions": "off"
+			},
+			"style": {
+				"noUnusedTemplateLiteral": "warn",
+				"noNonNullAssertion": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": false,
+			"allowWrongLineComments": true
+		},
+		"linter": {
+			"enabled": true
+		}
+	}
+}
