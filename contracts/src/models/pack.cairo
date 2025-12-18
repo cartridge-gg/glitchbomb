@@ -78,6 +78,7 @@ mod tests {
     #[test]
     fn test_pack_next() {
         let mut pack = PackTrait::new(1);
+        pack.open();
         assert_eq!(pack.next(), 2);
         pack.assert_not_over();
     }
@@ -85,7 +86,8 @@ mod tests {
     #[test]
     fn test_pack_is_over() {
         let mut pack = PackTrait::new(1);
-        for _ in 0..DEFAULT_GAMES_COUNT {
+        pack.open();
+        for _ in 0..DEFAULT_GAMES_COUNT - 1 {
             pack.next();
         }
         assert!(pack.is_over());
@@ -95,7 +97,8 @@ mod tests {
     #[test]
     fn test_pack_is_not_over() {
         let mut pack = PackTrait::new(1);
-        for _ in 0..DEFAULT_GAMES_COUNT - 1 {
+        pack.open();
+        for _ in 0..DEFAULT_GAMES_COUNT - 2 {
             pack.next();
         }
         assert!(!pack.is_over());

@@ -111,3 +111,16 @@ pub impl GameAssert of AssertTrait {
         assert(!self.is_over(), Errors::GAME_IS_OVER);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_game_new() {
+        let game = GameTrait::new(1, 1, 100);
+        assert_eq!(game.pack_id, 1);
+        assert_eq!(game.id, 1);
+        assert_eq!(game.moonrocks, 100);
+    }
+}
