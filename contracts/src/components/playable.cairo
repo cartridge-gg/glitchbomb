@@ -69,13 +69,13 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Effect] Pull orb
+            // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let mut rng = RandomTrait::new();
-            let (_orb, earnings) = game.pull(rng.felt());
+            let (_orbs, earnings) = game.pull(rng.felt());
             store.set_game(@game);
 
             // [Event] Emit event
-            // TODO: emit an event with the orb
+            // TODO: emit an event with the orbs
 
             // [Effect] Update pack earnings if exists
             if (earnings == 0) {
