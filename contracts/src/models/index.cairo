@@ -22,7 +22,7 @@ pub struct Game {
     pub milestone: u16,
     pub multiplier: u16,
     pub chips: u16,
-    pub discards: u64,
-    pub bag: felt252,
+    pub discards: u64, // Bitmap: Each bit represents a pulled orb index (0-49)
+    pub bag: felt252, // Packed: Each orb is 5 bits, indicating its variant from the Orb enum.
     pub shop: u128 // Packed: orbs (30 bits) | refresh_used (1) | burn_used (1) | purchase_counts (60 bits)
 }
