@@ -7,11 +7,11 @@ pub mod errors {
 }
 
 pub trait PackerTrait<T, U, V> {
-    fn get(packed: T, index: u8, size: V, len: U) -> U;
-    fn contains(packed: T, value: U, size: V, len: U) -> bool;
-    fn unpack(packed: T, size: V, len: U) -> Array<U>;
-    fn remove(packed: T, item: U, size: V, len: U) -> T;
-    fn replace(packed: T, index: u8, size: V, value: U, len: U) -> T;
+    fn get(packed: T, index: u8, size: V) -> U;
+    fn contains(packed: T, value: U, size: V) -> bool;
+    fn unpack(packed: T, size: V) -> Array<U>;
+    fn remove(packed: T, item: U, size: V) -> T;
+    fn replace(packed: T, index: u8, size: V, value: U) -> T;
     fn pack(unpacked: Array<U>, size: V) -> T;
 }
 
@@ -29,7 +29,6 @@ pub impl Packer<
     +Copy<T>,
     U,
     +PartialEq<U>,
-    +PartialOrd<U>,
     +Into<u8, U>,
     +Into<U, T>,
     +TryInto<T, U>,
@@ -41,16 +40,16 @@ pub impl Packer<
     +Copy<V>,
 > of PackerTrait<T, U, V> {
     #[inline]
-    fn get(packed: T, index: u8, size: V, len: U) -> U {
-        let unpacked: Array<U> = Self::unpack(packed, size, len);
+    fn get(packed: T, index: u8, size: V) -> U {
+        let unpacked: Array<U> = Self::unpack(packed, size);
         *unpacked.at(index.into())
     }
 
-    fn contains(mut packed: T, value: U, size: V, len: U) -> bool {
+    fn contains(mut packed: T, value: U, size: V) -> bool {
         let modulo: T = size.into();
         let mut index: u8 = 0;
         loop {
-            if index.into() == len {
+            if packed.is_zero() {
                 break false;
             }
             let raw: U = (packed % modulo).try_into().unwrap();
@@ -62,11 +61,11 @@ pub impl Packer<
         }
     }
 
-    fn unpack(mut packed: T, size: V, len: U) -> Array<U> {
+    fn unpack(mut packed: T, size: V) -> Array<U> {
         let mut result: Array<U> = array![];
         let modulo: T = size.into();
         let mut index: u8 = 0;
-        while index.into() < len {
+        while packed.is_non_zero() {
             let value: U = (packed % modulo)
                 .try_into()
                 .expect(errors::PACKER_VALUE_CONVERSION_FAILED);
@@ -77,13 +76,13 @@ pub impl Packer<
         result
     }
 
-    fn remove(mut packed: T, item: U, size: V, len: U) -> T {
+    fn remove(mut packed: T, item: U, size: V) -> T {
         // [Compute] Loop over the packed value and remove the value at the given index
         let mut removed = false;
         let mut result: Array<U> = array![];
         let mut idx: u8 = 0;
         let modulo: T = size.into();
-        while idx.into() < len {
+        while packed.is_non_zero() {
             let current: U = (packed % modulo).try_into().unwrap();
             if current != item {
                 result.append(current);
@@ -99,13 +98,13 @@ pub impl Packer<
         Self::pack(result, size)
     }
 
-    fn replace(mut packed: T, index: u8, size: V, value: U, len: U) -> T {
+    fn replace(mut packed: T, index: u8, size: V, value: U) -> T {
         // [Compute] Loop over the packed value and remove the value at the given index
         let mut removed = false;
         let mut result: Array<U> = array![];
         let mut idx: u8 = 0;
         let modulo: T = size.into();
-        while idx.into() < len {
+        while packed.is_non_zero() {
             let item: U = (packed % modulo).try_into().unwrap();
             if idx != index {
                 result.append(item);
@@ -148,9 +147,8 @@ mod tests {
         let packed: u64 = 0xab0598c6fe1234d7;
         let index: u8 = 8;
         let size: u8 = 16;
-        let len: u8 = 16;
         let value: u8 = 0xa;
-        let new_packed = Packer::replace(packed, index, size, value, len);
+        let new_packed = Packer::replace(packed, index, size, value);
         assert_eq!(new_packed, 0xab0598cafe1234d7);
     }
 
@@ -159,8 +157,7 @@ mod tests {
         let packed: u64 = 0xab0598c6fe1234d7;
         let item: u8 = 0x6;
         let size: u8 = 16;
-        let len: u8 = 16;
-        let new_packed = Packer::remove(packed, item, size, len);
+        let new_packed = Packer::remove(packed, item, size);
         assert_eq!(new_packed, 0xab0598cfe1234d7);
     }
 
@@ -169,8 +166,7 @@ mod tests {
         let packed: u64 = 0xab0598c6fe1234d7;
         let index: u8 = 8;
         let size: u8 = 16;
-        let len: u8 = 16;
-        let item: u8 = Packer::get(packed, index, size, len);
+        let item: u8 = Packer::get(packed, index, size);
         assert_eq!(item, 0x6);
     }
 }

@@ -3,7 +3,8 @@ use super::interface::EffectTrait;
 
 pub impl Immune of EffectTrait {
     #[inline]
-    fn apply(ref game: Game, count: u8) {
+    fn apply(ref game: Game, count: u8) -> u16 {
         game.immune(count);
+        0
     }
 }
