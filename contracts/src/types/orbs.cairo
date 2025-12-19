@@ -12,7 +12,8 @@ pub impl OrbsImpl of OrbsTrait {
     #[inline]
     fn initial() -> felt252 {
         array![
-            Orb::Bomb1, Orb::Bomb1, Orb::Bomb2, Orb::Bomb3, Orb::Point5, Orb::Point5, Orb::Point5,
+            Orb::Bomb1, Orb::Bomb1, Orb::Bomb2, Orb::Bomb2, Orb::Bomb3,
+            Orb::Point5, Orb::Point5, Orb::Point5,
             Orb::Multiplier100, Orb::PointOrb1, Orb::PointBomb4, Orb::Health1,
         ]
             .pack()
