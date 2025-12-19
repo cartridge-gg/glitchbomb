@@ -146,8 +146,13 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Buy items
-            game.buy(ref indices);
+            let cost = game.buy(ref indices);
             store.set_game(@game);
+
+            // [Effect] Update pack earnings if exists
+            let mut pack = store.pack(pack_id);
+            pack.spend(cost);
+            store.set_pack(@pack);
         }
     }
 }
