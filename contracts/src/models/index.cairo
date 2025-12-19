@@ -24,5 +24,5 @@ pub struct Game {
     pub chips: u16,
     pub shop: u32,
     pub discards: u64,
-    pub bag: felt252 // Up to 50 * u5
+    pub bag: felt252,
 }
