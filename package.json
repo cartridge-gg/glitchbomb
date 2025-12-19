@@ -12,8 +12,10 @@
 		"format:check": "turbo run format:check",
 		"format:all": "turbo run format:all",
 		"format:check:all": "turbo run format:check:all",
+		"format:cairo": "cd contracts && pnpm format",
 		"format:check:cairo": "cd contracts && pnpm format:check:cairo",
 		"lint:check:cairo": "cd contracts && pnpm lint:check:cairo",
+		"format:ts": "cd client && pnpm biome format --write .",
 		"format:check:ts": "cd client && pnpm biome check .",
 		"lint:check:ts": "cd client && pnpm lint",
 		"test": "turbo run test",
@@ -24,8 +26,9 @@
 		"build-storybook": "cd client && pnpm build-storybook"
 	},
 	"devDependencies": {
-		"turbo": "^2.3.3",
-		"@biomejs/biome": "^2.3.10"
+		"@biomejs/biome": "^2.3.10",
+		"husky": "^9.1.7",
+		"turbo": "^2.3.3"
 	},
 	"packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }

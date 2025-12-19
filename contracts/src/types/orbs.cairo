@@ -1,4 +1,5 @@
 use core::num::traits::Pow;
+use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::dice::{Dice, DiceTrait};
 use crate::helpers::packer::Packer;
 use crate::types::orb::Orb;
@@ -62,8 +63,15 @@ pub impl OrbsImpl of OrbsTrait {
         dice.face_count = cosmics.len();
         let index = dice.roll() - 1;
         orbs.append(*cosmics.at(index.into()));
+        // [Compute] Shuffle the orbs
+        let mut deck: Deck = DeckTrait::new(seed, orbs.len());
+        let mut shop: Orbs = array![];
+        while deck.remaining > 0 {
+            let index = deck.draw() - 1;
+            shop.append(*orbs.at(index.into()));
+        }
         // [Return] The shop orbs
-        orbs
+        shop
     }
 
     #[inline]

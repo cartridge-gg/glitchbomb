@@ -1,3 +1,4 @@
+use core::dict::Felt252Dict;
 use core::num::traits::Zero;
 use crate::constants::{DEFAULT_LEVEL, MAX_CAPACITY, MAX_HEALTH};
 use crate::helpers::bitmap::Bitmap;
@@ -9,6 +10,7 @@ use crate::types::orb::{Orb, OrbTrait};
 use crate::types::orbs::{Orbs, OrbsTrait};
 
 pub const BASE_MULTIPLIER: u16 = 100;
+pub const SUPP_MULTIPLIER: u16 = 20;
 
 pub mod Errors {
     pub const GAME_INVALID_ID: felt252 = 'Game: invalid ID';
@@ -181,16 +183,26 @@ pub impl GameImpl of GameTrait {
         // [Effect] Buy items
         let orbs: Orbs = OrbsTrait::unpack(self.shop.into());
         let max_index: u32 = orbs.len();
-        // TODO: use the multiplier to increase price of similar orbs
-        let mut multiplier: u16 = BASE_MULTIPLIER;
+        // [Info] There is a cost multiplier when a same orb is bought multiple times
+        let mut multipliers: Felt252Dict<u16> = Default::default();
         while let Option::Some(index) = indices.pop_front() {
             // [Check] Index is within range
             let current: u32 = (*index).into();
             assert(current < max_index, Errors::GAME_INVALID_INDEX);
             // [Effect] Buy orb
             let orb = *orbs.at((*index).into());
+            let orb_id: u8 = orb.into();
             let base_cost = orb.cost();
-            self.spend(base_cost * multiplier / BASE_MULTIPLIER);
+            let orb_multiplier = multipliers.get(orb_id.into());
+            let multiplier = if orb_multiplier.is_zero() {
+                BASE_MULTIPLIER
+            } else {
+                orb_multiplier + SUPP_MULTIPLIER
+            };
+            // [Compute] Cost rounded up to the nearest integer
+            let cost = (base_cost * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
+            self.spend(cost);
+            multipliers.insert(orb_id.into(), multiplier);
             // [Effect] Add orb to the bag
             self.add(orb);
         }
@@ -273,6 +285,7 @@ mod tests {
 
     const PACK_ID: u64 = 1;
     const GAME_ID: u8 = 2;
+    const SEED: felt252 = 'SEED';
 
     #[test]
     fn test_game_new() {
@@ -287,4 +300,163 @@ mod tests {
         assert_eq!(game.milestone, Milestone::get(DEFAULT_LEVEL));
         assert_eq!(game.multiplier, BASE_MULTIPLIER);
     }
+
+    #[test]
+    fn test_game_start() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        let cost = game.start();
+        assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL));
+        assert_eq!(game.bag != 0, true);
+    }
+
+    #[test]
+    fn test_game_add() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let bag = game.bag;
+        game.add(Orb::Point5);
+        assert_eq!(game.bag != bag, true);
+        assert_eq!(game.bag != 0, true);
+    }
+
+    #[test]
+    fn test_game_take_damage() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.take_damage(1);
+        assert_eq!(game.health, MAX_HEALTH - 1);
+    }
+
+    #[test]
+    fn test_game_earn_points() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(10);
+        assert_eq!(game.points, 10);
+    }
+
+    #[test]
+    fn test_game_earn_chips() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_chips(10);
+        assert_eq!(game.chips, 10);
+    }
+
+    #[test]
+    fn test_game_spend() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_chips(20);
+        game.spend(10);
+        assert_eq!(game.chips, 10);
+    }
+
+    #[test]
+    fn test_game_heal() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.take_damage(MAX_HEALTH - 1);
+        game.heal(MAX_HEALTH - 1);
+        assert_eq!(game.health, MAX_HEALTH);
+    }
+
+    #[test]
+    fn test_game_restore() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.take_damage(MAX_HEALTH - 1);
+        game.restore();
+        assert_eq!(game.health, MAX_HEALTH);
+    }
+
+    #[test]
+    fn test_game_level_up() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.level_up();
+        assert_eq!(game.level, DEFAULT_LEVEL + 1);
+    }
+
+    #[test]
+    fn test_game_immune() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.immune(1);
+        assert_eq!(game.immunity, 1);
+    }
+
+    #[test]
+    fn test_game_boost() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.boost(50);
+        assert_eq!(game.multiplier, BASE_MULTIPLIER + 50);
+    }
+
+    #[test]
+    fn test_game_pullable_orbs_count() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let count = game.pullable_orbs_count();
+        game.add(Orb::Point5);
+        assert_eq!(game.pullable_orbs_count(), count + 1);
+    }
+
+    #[test]
+    fn test_game_pulled_bombs_count() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        assert_eq!(game.pulled_bombs_count(), 0);
+    }
+
+    #[test]
+    fn test_game_is_over() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.take_damage(MAX_HEALTH);
+        assert_eq!(game.is_over(), true);
+    }
+
+    #[test]
+    fn test_game_assess() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.take_damage(MAX_HEALTH);
+        game.assess();
+        assert_eq!(game.over, true);
+    }
+
+    #[test]
+    fn test_game_cash_out() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        let cash = game.cash_out();
+        assert_eq!(cash, 100);
+        assert_eq!(game.over, true);
+    }
+
+    #[test]
+    fn test_game_enter() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(1);
+        assert_eq!(game.shop != 0, true);
+    }
+
+    #[test]
+    fn test_game_buy() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        // [Info] Shop: [19, 13, 9, 19, 18, 12]
+        let mut indices: Span<u8> = [0, 3, 5].span();
+        game.buy(ref indices);
+        assert_eq!(game.chips, 100 - (5 + 6 + 8));
+        assert_eq!(game.shop, 0);
+    }
 }
+
