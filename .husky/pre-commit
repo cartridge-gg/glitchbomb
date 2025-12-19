@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Format TypeScript files with Biome
+cd client && pnpm biome format --write . || true
+cd ..
+
+# Add formatted files back to staging
+git add -u
