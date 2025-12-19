@@ -240,6 +240,8 @@ pub impl GameImpl of GameTrait {
         self.level_up();
         self.restore();
         self.shop = 0;
+        // [Effect] Lose unspent chips
+        self.chips = 0;
         // [Return] Entry fee
         Milestone::cost(self.level)
     }
