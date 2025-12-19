@@ -11,6 +11,9 @@ pub trait IPlay<T> {
     fn cash_out(ref self: T, pack_id: u64, game_id: u8);
     fn enter(ref self: T, pack_id: u64, game_id: u8);
     fn buy(ref self: T, pack_id: u64, game_id: u8, indices: Span<u8>);
+    fn exit(ref self: T, pack_id: u64, game_id: u8);
+    fn refresh(ref self: T, pack_id: u64, game_id: u8);
+    fn burn(ref self: T, pack_id: u64, game_id: u8, bag_index: u8);
 }
 
 #[dojo::contract]
@@ -116,6 +119,27 @@ pub mod Play {
             let world = self.world(@NAMESPACE());
             // [Effect] Buy items
             self.playable.buy(world, pack_id, game_id, ref indices)
+        }
+
+        fn exit(ref self: ContractState, pack_id: u64, game_id: u8) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Exit shop
+            self.playable.exit(world, pack_id, game_id)
+        }
+
+        fn refresh(ref self: ContractState, pack_id: u64, game_id: u8) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Refresh shop
+            self.playable.refresh(world, pack_id, game_id)
+        }
+
+        fn burn(ref self: ContractState, pack_id: u64, game_id: u8, bag_index: u8) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Burn orb from bag
+            self.playable.burn(world, pack_id, game_id, bag_index)
         }
     }
 }

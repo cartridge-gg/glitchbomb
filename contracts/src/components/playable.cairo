@@ -145,14 +145,70 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Effect] Buy items
-            let cost = game.buy(ref indices);
+            // [Effect] Buy items (stays in shop)
+            game.buy(ref indices);
+            store.set_game(@game);
+        }
+
+        fn exit(
+            ref self: ComponentState<TContractState>,
+            world: WorldStorage,
+            pack_id: u64,
+            game_id: u8,
+        ) {
+            // [Setup] Store
+            let store = StoreTrait::new(world);
+
+            // [Check] Game is not over
+            let mut game = store.game(pack_id, game_id);
+            game.assert_not_over();
+
+            // [Effect] Exit shop and get next level cost
+            let cost = game.exit();
             store.set_game(@game);
 
-            // [Effect] Update pack earnings if exists
+            // [Effect] Spend moonrocks for next level
             let mut pack = store.pack(pack_id);
             pack.spend(cost);
             store.set_pack(@pack);
+        }
+
+        fn refresh(
+            ref self: ComponentState<TContractState>,
+            world: WorldStorage,
+            pack_id: u64,
+            game_id: u8,
+        ) {
+            // [Setup] Store
+            let store = StoreTrait::new(world);
+
+            // [Check] Game is not over
+            let mut game = store.game(pack_id, game_id);
+            game.assert_not_over();
+
+            // [Effect] Refresh shop (costs 4 chips, can only do once)
+            let mut rng = RandomTrait::new();
+            game.refresh(rng.felt());
+            store.set_game(@game);
+        }
+
+        fn burn(
+            ref self: ComponentState<TContractState>,
+            world: WorldStorage,
+            pack_id: u64,
+            game_id: u8,
+            bag_index: u8,
+        ) {
+            // [Setup] Store
+            let store = StoreTrait::new(world);
+
+            // [Check] Game is not over
+            let mut game = store.game(pack_id, game_id);
+            game.assert_not_over();
+
+            // [Effect] Burn orb from bag (costs 4 chips, can only do once)
+            game.burn(bag_index);
+            store.set_game(@game);
         }
     }
 }

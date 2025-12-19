@@ -22,7 +22,7 @@ pub struct Game {
     pub milestone: u16,
     pub multiplier: u16,
     pub chips: u16,
-    pub shop: u32,
     pub discards: u64,
     pub bag: felt252,
+    pub shop: u128 // Packed: orbs (30 bits) | refresh_used (1) | burn_used (1) | purchase_counts (60 bits)
 }
