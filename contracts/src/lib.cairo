@@ -4,7 +4,7 @@ pub mod store;
 pub mod elements {
     pub mod effects {
         pub mod boost;
-        pub mod cheddah;
+        pub mod chips;
         pub mod earn;
         pub mod explode;
         pub mod heal;
@@ -38,17 +38,28 @@ pub mod events {
 }
 
 pub mod types {
-    pub mod bag;
     pub mod curse;
     pub mod effect;
+    pub mod image;
+    pub mod metadata;
     pub mod milestone;
     pub mod orb;
+    pub mod orbs;
     pub mod power;
     pub mod rarity;
 }
 
 pub mod helpers {
+    pub mod bitmap;
+    pub mod deck;
+    pub mod dice;
     pub mod packer;
+    pub mod power;
+    pub mod random;
+}
+
+pub mod interfaces {
+    pub mod vrf;
 }
 
 pub mod components {
@@ -56,6 +67,7 @@ pub mod components {
 }
 
 pub mod systems {
+    pub mod collection;
     pub mod play;
 }
 

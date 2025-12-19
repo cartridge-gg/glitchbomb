@@ -6,9 +6,11 @@ pub fn NAME() -> ByteArray {
 #[starknet::interface]
 pub trait IPlay<T> {
     fn new(ref self: T);
-    fn open(ref self: T, pack_id: u64);
     fn start(ref self: T, pack_id: u64);
     fn pull(ref self: T, pack_id: u64, game_id: u8);
+    fn cash_out(ref self: T, pack_id: u64, game_id: u8);
+    fn enter(ref self: T, pack_id: u64, game_id: u8);
+    fn buy(ref self: T, pack_id: u64, game_id: u8, indices: Span<u8>);
 }
 
 #[dojo::contract]
@@ -49,7 +51,7 @@ pub mod Play {
     impl StarterpackImpl of IStarterpack<ContractState> {
         fn on_issue(
             ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, quantity: u32,
-        ) {// TODO: implement
+        ) { // TODO: implement
         }
 
         fn supply(self: @ContractState, starterpack_id: u32) -> Option<u32> {
@@ -81,13 +83,6 @@ pub mod Play {
             self.playable.new(world)
         }
 
-        fn open(ref self: ContractState, pack_id: u64) {
-            // [Setup] World
-            let world = self.world(@NAMESPACE());
-            // [Effect] Open pack
-            self.playable.open(world, pack_id)
-        }
-
         fn start(ref self: ContractState, pack_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
@@ -100,6 +95,27 @@ pub mod Play {
             let world = self.world(@NAMESPACE());
             // [Effect] Pull game
             self.playable.pull(world, pack_id, game_id)
+        }
+
+        fn cash_out(ref self: ContractState, pack_id: u64, game_id: u8) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Cash out game
+            self.playable.cash_out(world, pack_id, game_id)
+        }
+
+        fn enter(ref self: ContractState, pack_id: u64, game_id: u8) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Enter game
+            self.playable.enter(world, pack_id, game_id)
+        }
+
+        fn buy(ref self: ContractState, pack_id: u64, game_id: u8, mut indices: Span<u8>) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Buy items
+            self.playable.buy(world, pack_id, game_id, ref indices)
         }
     }
 }

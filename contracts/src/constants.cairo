@@ -1,13 +1,60 @@
+pub const CONFIG_ID: felt252 = 0;
+
+pub const MAX_HEALTH: u8 = 5;
+pub const MAX_CAPACITY: u32 = 50;
+
+pub const DEFAULT_MOONROCKS: u16 = 100;
+pub const DEFAULT_ENTRY_PRICE: u256 = 1_000_000_000_000_000_000_000;
+pub const DEFAULT_GAMES_COUNT: u8 = 5;
+pub const DEFAULT_LEVEL: u8 = 1;
+
 #[inline]
 pub fn NAMESPACE() -> ByteArray {
     "GLITCHBOMB"
 }
 
-pub const CONFIG_ID: felt252 = 0;
-pub const DEFAULT_MOONROCKS: u16 = 100;
-pub const DEFAULT_ENTRY_PRICE: u256 = 1_000_000_000_000_000_000_000;
-pub const DEFAULT_GAMES_COUNT: u8 = 5;
-pub const DEFAULT_LEVEL: u8 = 1;
-pub const MAX_HEALTH: u8 = 5;
-pub const BASE_MULTIPLIER: u16 = 100;
-pub const MAX_POINTS: u16 = 9999;
+#[inline]
+pub fn NAME() -> ByteArray {
+    "Glitch Bomb"
+}
+
+#[inline]
+pub fn SYMBOL() -> ByteArray {
+    "GLITCHBOMB"
+}
+
+#[inline]
+pub fn DESCRIPTION() -> ByteArray {
+    "Glitch Bomb is a cosmic-themed push-your-luck rogue-like bag-building game where players draw orbs from a bag to score points while avoiding bombs. What makes this game compelling is its brilliant tension between greed and survival, where every tap of the moon bag could yield valuable points or deal devastating damage, ending a nail-biting, breath taking, one of a lifetime run. Will you risk it for moon rocks, or will you just kick rocks?"
+}
+
+#[inline]
+pub fn DEVELOPER() -> ByteArray {
+    "Cartridge"
+}
+
+#[inline]
+pub fn PUBLISHER() -> ByteArray {
+    "Cartridge"
+}
+
+#[inline]
+pub fn GENRE() -> ByteArray {
+    "Push-Your-Luck"
+}
+
+#[inline]
+pub fn IMAGE() -> ByteArray {
+    "https://static.cartridge.gg/presets/glitch-bomb/icon.png"
+}
+
+#[inline]
+pub fn BANNER() -> ByteArray {
+    "https://static.cartridge.gg/presets/glitch-bomb/cover.png"
+}
+
+#[inline]
+pub fn CLIENT_URL() -> ByteArray {
+    "https://glitchbomb.gg"
+}
+

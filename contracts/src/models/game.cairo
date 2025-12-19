@@ -1,31 +1,59 @@
-use crate::constants::{BASE_MULTIPLIER, DEFAULT_LEVEL, MAX_HEALTH};
+use core::num::traits::Zero;
+use crate::constants::{DEFAULT_LEVEL, MAX_CAPACITY, MAX_HEALTH};
+use crate::helpers::bitmap::Bitmap;
+use crate::helpers::deck::{Deck, DeckTrait};
+use crate::helpers::power::TwoPower;
 pub use crate::models::index::Game;
 use crate::types::milestone::Milestone;
 use crate::types::orb::{Orb, OrbTrait};
+use crate::types::orbs::{Orbs, OrbsTrait};
+
+pub const BASE_MULTIPLIER: u16 = 100;
 
 pub mod Errors {
-    pub const GAME_CANNOT_AFFORD: felt252 = 'Game: cannot afford';
+    pub const GAME_INVALID_ID: felt252 = 'Game: invalid ID';
     pub const GAME_IS_OVER: felt252 = 'Game: is over';
+    pub const GAME_NOT_OVER: felt252 = 'Game: not over';
+    pub const GAME_IN_SHOP: felt252 = 'Game: in shop';
+    pub const GAME_NOT_SHOP: felt252 = 'Game: not in shop';
+    pub const GAME_STAGE_NOT_COMPLETED: felt252 = 'Game: stage not completed';
+    pub const GAME_CANNOT_AFFORD: felt252 = 'Game: cannot afford';
+    pub const GAME_BAG_FULL: felt252 = 'Game: bag full';
+    pub const GAME_INVALID_INDICES: felt252 = 'Game: indicies must be sorted';
+    pub const GAME_INVALID_INDEX: felt252 = 'Game: index out of range';
 }
 
 #[generate_trait]
 pub impl GameImpl of GameTrait {
-    fn new(pack_id: u64, game_id: u8, moonrocks: u16) -> Game {
+    fn new(pack_id: u64, game_id: u8) -> Game {
+        // [Check] Inputs
+        GameAssert::assert_valid_id(game_id);
+        // [Effect] Create game
         Game {
             pack_id: pack_id,
             id: game_id,
+            over: false,
             level: DEFAULT_LEVEL,
             health: MAX_HEALTH,
             immunity: 0,
             points: 0,
             milestone: Milestone::get(DEFAULT_LEVEL),
             multiplier: BASE_MULTIPLIER,
-            cheddah: 0,
-            moonrocks: moonrocks,
-            drawn_orbs: 0,
-            pullable_orbs: 0,
-            pulled_orbs: 0,
+            chips: 0,
+            bag: 0,
+            discards: 0,
+            shop: 0,
         }
+    }
+
+    #[inline]
+    fn add(ref self: Game, orb: Orb) {
+        // [Check] Bag is not full
+        let mut bag: Orbs = OrbsTrait::unpack(self.bag);
+        self.assert_not_full(bag.len());
+        // [Effect] Add orb to the bag
+        bag.append(orb);
+        self.bag = bag.pack();
     }
 
     #[inline]
@@ -39,18 +67,31 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn earn_cheddah(ref self: Game, cheddah: u16) {
-        self.cheddah += cheddah;
+    fn earn_chips(ref self: Game, chips: u16) {
+        self.chips += chips;
     }
 
     #[inline]
-    fn earn_moonrocks(ref self: Game, moonrocks: u16) {
-        self.moonrocks += moonrocks;
+    fn spend(ref self: Game, cost: u16) {
+        // [Check] Game can afford
+        self.assert_can_afford(cost);
+        // [Effect] Spend chips
+        self.chips -= cost;
     }
 
     #[inline]
     fn heal(ref self: Game, health: u8) {
         self.health += core::cmp::min(health, MAX_HEALTH - self.health);
+    }
+
+    #[inline]
+    fn restore(ref self: Game) {
+        self.health = MAX_HEALTH;
+    }
+
+    #[inline]
+    fn level_up(ref self: Game) {
+        self.level += 1;
     }
 
     #[inline]
@@ -65,14 +106,25 @@ pub impl GameImpl of GameTrait {
 
     #[inline]
     fn pullable_orbs_count(self: @Game) -> u8 {
-        // TODO: implement
-        0
+        let bag: Orbs = OrbsTrait::unpack(*self.bag);
+        let exp: u8 = bag.len().try_into().unwrap();
+        let full: u64 = TwoPower::pow(exp).try_into().unwrap() - 1;
+        Bitmap::popcount(full ^ *self.discards)
     }
 
     #[inline]
     fn pulled_bombs_count(self: @Game) -> u8 {
-        // TODO: implement
-        0
+        let bag: Orbs = OrbsTrait::unpack(*self.bag);
+        let mut discards: u64 = *self.discards;
+        let mut count: u8 = 0;
+        let mut index = 0;
+        while discards.is_non_zero() {
+            // TODO: test if cheaper with a if statement
+            count += bag.at(index).one_if_bomb() * (discards % 2).try_into().unwrap();
+            index += 1;
+            discards /= 2;
+        }
+        count
     }
 
     #[inline]
@@ -81,34 +133,137 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn start(ref self: Game) { // TODO: implement
+    fn assess(ref self: Game) {
+        self.over = self.is_over();
     }
 
     #[inline]
-    fn apply(ref self: Game, orb: Orb) {
-        orb.apply(ref self);
-        // TODO: assess game over
+    fn start(ref self: Game) -> u16 {
+        // [Effect] Set the initial bag
+        self.bag = OrbsTrait::initial();
+        // [Return] Entry fee
+        Milestone::cost(self.level)
     }
 
     #[inline]
-    fn pull(ref self: Game) { // TODO: implement
+    fn cash_out(ref self: Game) -> u16 {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_not_shop();
+        // [Effect] Convert points
+        let moonrocks = self.points;
+        self.points = 0;
+        // [Effect] Update state
+        self.over = true;
+        // [Return] Moonrocks
+        moonrocks
     }
 
     #[inline]
-    fn buy(ref self: Game, index: u8) { // TODO: implement
+    fn enter(ref self: Game, seed: felt252) {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_not_shop();
+        self.assert_stage_completed();
+        // [Effect] Generate and set the shop
+        let orbs: Orbs = OrbsTrait::shop(seed);
+        self.shop = orbs.pack().try_into().expect('Shop: packing failed');
+        // [Effect] Convert points
+        self.earn_chips(self.points);
+        self.points = 0;
+    }
+
+    #[inline]
+    fn buy(ref self: Game, ref indices: Span<u8>) -> u16 {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_in_shop();
+        // [Effect] Buy items
+        let orbs: Orbs = OrbsTrait::unpack(self.shop.into());
+        let max_index: u32 = orbs.len();
+        // TODO: use the multiplier to increase price of similar orbs
+        let mut multiplier: u16 = BASE_MULTIPLIER;
+        while let Option::Some(index) = indices.pop_front() {
+            // [Check] Index is within range
+            let current: u32 = (*index).into();
+            assert(current < max_index, Errors::GAME_INVALID_INDEX);
+            // [Effect] Buy orb
+            let orb = *orbs.at((*index).into());
+            let base_cost = orb.cost();
+            self.spend(base_cost * multiplier / BASE_MULTIPLIER);
+            // [Effect] Add orb to the bag
+            self.add(orb);
+        }
+        // [Effect] Exit and enter the next stage
+        self.level_up();
+        self.restore();
+        self.shop = 0;
+        // [Return] Entry fee
+        Milestone::cost(self.level)
+    }
+
+    #[inline]
+    fn pull(ref self: Game, seed: felt252) -> (Orb, u16) {
+        // [Check] Game is not over
+        self.assert_not_over();
+        // [Effect] Pull orb from the remaining orbs in the bag
+        let bag: Orbs = OrbsTrait::unpack(self.bag);
+        let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());
+        let index: u8 = deck.draw() - 1;
+        let orb: Orb = *bag.at(index.into());
+        // TODO: perform another draw if a corresponding curse is enabled
+        // [Effect] Add the orb to the discards
+        self.discards = Bitmap::set(self.discards, index);
+        // [Effect] Apply the orb
+        let earnings = orb.apply(ref self);
+        // [Effect] Assess the game
+        self.assess();
+        // [Return] The pulled orb
+        (orb, earnings)
     }
 }
 
 #[generate_trait]
 pub impl GameAssert of AssertTrait {
     #[inline]
-    fn assert_can_afford(self: @Game, cost: u16) {
-        assert(self.moonrocks >= @cost, Errors::GAME_CANNOT_AFFORD);
+    fn assert_valid_id(game_id: u8) {
+        assert(game_id != 0, Errors::GAME_INVALID_ID);
     }
 
     #[inline]
     fn assert_not_over(self: @Game) {
-        assert(!self.is_over(), Errors::GAME_IS_OVER);
+        assert(!*self.over, Errors::GAME_IS_OVER);
+    }
+
+    #[inline]
+    fn assert_is_over(self: @Game) {
+        assert(*self.over || self.id == @0, Errors::GAME_NOT_OVER);
+    }
+
+    #[inline]
+    fn assert_not_shop(self: @Game) {
+        assert(self.shop == @0, Errors::GAME_IN_SHOP);
+    }
+
+    #[inline]
+    fn assert_in_shop(self: @Game) {
+        assert(self.shop != @0, Errors::GAME_NOT_SHOP);
+    }
+
+    #[inline]
+    fn assert_stage_completed(self: @Game) {
+        let milestone: u16 = Milestone::get(*self.level);
+        assert(self.points >= @milestone, Errors::GAME_STAGE_NOT_COMPLETED);
+    }
+
+    #[inline]
+    fn assert_can_afford(self: @Game, cost: u16) {
+        assert(self.chips >= @cost, Errors::GAME_CANNOT_AFFORD);
+    }
+
+    #[inline]
+    fn assert_not_full(self: @Game, len: u32) {
+        assert(len < MAX_CAPACITY, Errors::GAME_BAG_FULL);
     }
 }
 
@@ -116,11 +271,20 @@ pub impl GameAssert of AssertTrait {
 mod tests {
     use super::*;
 
+    const PACK_ID: u64 = 1;
+    const GAME_ID: u8 = 2;
+
     #[test]
     fn test_game_new() {
-        let game = GameTrait::new(1, 1, 100);
-        assert_eq!(game.pack_id, 1);
-        assert_eq!(game.id, 1);
-        assert_eq!(game.moonrocks, 100);
+        let game = GameTrait::new(PACK_ID, GAME_ID);
+        assert_eq!(game.pack_id, PACK_ID);
+        assert_eq!(game.id, GAME_ID);
+        assert_eq!(game.over, false);
+        assert_eq!(game.level, DEFAULT_LEVEL);
+        assert_eq!(game.health, MAX_HEALTH);
+        assert_eq!(game.immunity, 0);
+        assert_eq!(game.points, 0);
+        assert_eq!(game.milestone, Milestone::get(DEFAULT_LEVEL));
+        assert_eq!(game.multiplier, BASE_MULTIPLIER);
     }
 }
