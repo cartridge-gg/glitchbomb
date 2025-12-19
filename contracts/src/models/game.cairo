@@ -1,4 +1,3 @@
-use core::dict::Felt252Dict;
 use core::num::traits::Zero;
 use crate::constants::{DEFAULT_LEVEL, MAX_CAPACITY, MAX_HEALTH};
 use crate::helpers::bitmap::Bitmap;
@@ -11,6 +10,18 @@ use crate::types::orbs::{Orbs, OrbsTrait};
 
 pub const BASE_MULTIPLIER: u16 = 100;
 pub const SUPP_MULTIPLIER: u16 = 20;
+pub const SHOP_ACTION_COST: u16 = 4;
+
+// Shop field bit layout (u128):
+// Bits 0-29: 6 orbs * 5 bits = orb types
+// Bit 30: refresh_used flag
+// Bit 31: burn_used flag
+// Bits 32-91: 20 orb types * 3 bits = purchase counts (up to 7 each)
+const ORBS_BITS: u8 = 30;
+const REFRESH_BIT: u8 = 30;
+const BURN_BIT: u8 = 31;
+const PURCHASE_OFFSET: u8 = 32;
+const BITS_PER_PURCHASE: u8 = 3;
 
 pub mod Errors {
     pub const GAME_INVALID_ID: felt252 = 'Game: invalid ID';
@@ -23,6 +34,10 @@ pub mod Errors {
     pub const GAME_BAG_FULL: felt252 = 'Game: bag full';
     pub const GAME_INVALID_INDICES: felt252 = 'Game: indicies must be sorted';
     pub const GAME_INVALID_INDEX: felt252 = 'Game: index out of range';
+    pub const GAME_SHOP_REFRESH_USED: felt252 = 'Game: shop refresh used';
+    pub const GAME_SHOP_BURN_USED: felt252 = 'Game: shop burn used';
+    pub const GAME_CANNOT_BURN_BOMB: felt252 = 'Game: cannot burn bomb';
+    pub const GAME_INVALID_BAG_INDEX: felt252 = 'Game: invalid bag index';
 }
 
 #[generate_trait]
@@ -42,8 +57,8 @@ pub impl GameImpl of GameTrait {
             milestone: Milestone::get(DEFAULT_LEVEL),
             multiplier: BASE_MULTIPLIER,
             chips: 0,
-            bag: 0,
             discards: 0,
+            bag: 0,
             shop: 0,
         }
     }
@@ -167,51 +182,138 @@ pub impl GameImpl of GameTrait {
         self.assert_not_over();
         self.assert_not_shop();
         self.assert_stage_completed();
-        // [Effect] Generate and set the shop
+        // [Effect] Generate and set the shop (orbs in bits 0-29, flags/counts reset)
         let orbs: Orbs = OrbsTrait::shop(seed);
-        self.shop = orbs.pack().try_into().expect('Shop: packing failed');
-        // [Effect] Convert points
+        let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
+        self.shop = packed_orbs; // Only orbs, flags and counts are 0
+        // [Effect] Convert points to chips
         self.earn_chips(self.points);
         self.points = 0;
     }
 
     #[inline]
-    fn buy(ref self: Game, ref indices: Span<u8>) -> u16 {
+    fn buy(ref self: Game, ref indices: Span<u8>) {
         // [Check] Game state
         self.assert_not_over();
         self.assert_in_shop();
-        // [Effect] Buy items
-        let orbs: Orbs = OrbsTrait::unpack(self.shop.into());
+        // [Effect] Extract orbs from shop (lower 30 bits)
+        let orbs: Orbs = Self::get_shop_orbs(self.shop);
         let max_index: u32 = orbs.len();
-        // [Info] There is a cost multiplier when a same orb is bought multiple times
-        let mut multipliers: Felt252Dict<u16> = Default::default();
         while let Option::Some(index) = indices.pop_front() {
             // [Check] Index is within range
             let current: u32 = (*index).into();
             assert(current < max_index, Errors::GAME_INVALID_INDEX);
             // [Effect] Buy orb
-            let orb = *orbs.at((*index).into());
+            let orb = *orbs.at(current);
             let orb_id: u8 = orb.into();
             let base_cost = orb.cost();
-            let orb_multiplier = multipliers.get(orb_id.into());
-            let multiplier = if orb_multiplier.is_zero() {
-                BASE_MULTIPLIER
-            } else {
-                orb_multiplier + SUPP_MULTIPLIER
-            };
+            // [Compute] Get purchase count from shop field
+            let purchase_count = Self::get_purchase_count(self.shop, orb_id);
+            let multiplier = BASE_MULTIPLIER + (purchase_count.into() * SUPP_MULTIPLIER);
             // [Compute] Cost rounded up to the nearest integer
             let cost = (base_cost * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
             self.spend(cost);
-            multipliers.insert(orb_id.into(), multiplier);
+            // [Effect] Increment purchase count in shop field
+            self.shop = Self::inc_purchase_count(self.shop, orb_id);
             // [Effect] Add orb to the bag
             self.add(orb);
-        }
-        // [Effect] Exit and enter the next stage
+        };
+    }
+
+    #[inline]
+    fn exit(ref self: Game) -> u16 {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_in_shop();
+        // [Effect] Exit shop and enter the next stage
         self.level_up();
         self.restore();
         self.shop = 0;
         // [Return] Entry fee
         Milestone::cost(self.level)
+    }
+
+    #[inline]
+    fn refresh(ref self: Game, seed: felt252) {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_in_shop();
+        self.assert_refresh_available();
+        // [Effect] Spend chips
+        self.spend(SHOP_ACTION_COST);
+        // [Effect] Generate new shop orbs
+        let orbs: Orbs = OrbsTrait::shop(seed);
+        let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
+        // [Effect] Set new orbs + mark refresh used (bit 30), reset purchase counts
+        self.shop = packed_orbs + TwoPower::pow(REFRESH_BIT);
+    }
+
+    #[inline]
+    fn burn(ref self: Game, bag_index: u8) {
+        // [Check] Game state
+        self.assert_not_over();
+        self.assert_in_shop();
+        self.assert_burn_available();
+        // [Check] Bag index is valid
+        let bag: Orbs = OrbsTrait::unpack(self.bag);
+        let bag_len: u8 = bag.len().try_into().unwrap();
+        assert(bag_index < bag_len, Errors::GAME_INVALID_BAG_INDEX);
+        // [Check] Cannot burn a bomb
+        let orb = *bag.at(bag_index.into());
+        assert(orb.one_if_bomb() == 0, Errors::GAME_CANNOT_BURN_BOMB);
+        // [Effect] Spend chips
+        self.spend(SHOP_ACTION_COST);
+        // [Effect] Remove orb from bag
+        let mut new_bag: Orbs = array![];
+        let mut i: u8 = 0;
+        while i < bag_len {
+            if i != bag_index {
+                new_bag.append(*bag.at(i.into()));
+            }
+            i += 1;
+        }
+        self.bag = new_bag.pack();
+        // [Effect] Mark burn as used (bit 31)
+        self.shop = self.shop + TwoPower::pow(BURN_BIT);
+    }
+
+    // Helper: Extract shop orbs from the lower 30 bits
+    #[inline]
+    fn get_shop_orbs(shop: u128) -> Orbs {
+        let orbs_mask: u128 = TwoPower::pow(ORBS_BITS) - 1;
+        let packed_orbs: felt252 = (shop & orbs_mask).try_into().unwrap();
+        OrbsTrait::unpack(packed_orbs)
+    }
+
+    // Helper: Get purchase count for an orb type from shop field
+    #[inline]
+    fn get_purchase_count(shop: u128, orb_id: u8) -> u8 {
+        let bit_offset: u8 = PURCHASE_OFFSET + (orb_id * BITS_PER_PURCHASE);
+        let shift: u128 = TwoPower::pow(bit_offset);
+        let mask: u128 = TwoPower::pow(BITS_PER_PURCHASE) - 1;
+        ((shop / shift) & mask).try_into().unwrap()
+    }
+
+    // Helper: Increment purchase count for an orb type in shop field
+    #[inline]
+    fn inc_purchase_count(shop: u128, orb_id: u8) -> u128 {
+        let bit_offset: u8 = PURCHASE_OFFSET + (orb_id * BITS_PER_PURCHASE);
+        let shift: u128 = TwoPower::pow(bit_offset);
+        shop + shift
+    }
+
+    // Helper: Check if refresh has been used
+    #[inline]
+    fn is_refresh_used(shop: u128) -> bool {
+        let shift: u128 = TwoPower::pow(REFRESH_BIT);
+        (shop / shift) % 2 == 1
+    }
+
+    // Helper: Check if burn has been used
+    #[inline]
+    fn is_burn_used(shop: u128) -> bool {
+        let shift: u128 = TwoPower::pow(BURN_BIT);
+        (shop / shift) % 2 == 1
     }
 
     #[inline]
@@ -260,6 +362,16 @@ pub impl GameAssert of AssertTrait {
     #[inline]
     fn assert_in_shop(self: @Game) {
         assert(self.shop != @0, Errors::GAME_NOT_SHOP);
+    }
+
+    #[inline]
+    fn assert_refresh_available(self: @Game) {
+        assert(!GameTrait::is_refresh_used(*self.shop), Errors::GAME_SHOP_REFRESH_USED);
+    }
+
+    #[inline]
+    fn assert_burn_available(self: @Game) {
+        assert(!GameTrait::is_burn_used(*self.shop), Errors::GAME_SHOP_BURN_USED);
     }
 
     #[inline]
@@ -452,11 +564,70 @@ mod tests {
         game.start();
         game.earn_points(100);
         game.enter(SEED);
-        // [Info] Shop: [19, 13, 9, 19, 18, 12]
-        let mut indices: Span<u8> = [0, 3, 5].span();
+        // [Info] Buy from shop positions
+        let mut indices: Span<u8> = [0, 3].span();
         game.buy(ref indices);
-        assert_eq!(game.chips, 100 - (5 + 6 + 8));
+        // [Check] Still in shop
+        assert_eq!(game.shop != 0, true);
+    }
+
+    #[test]
+    fn test_game_buy_then_exit() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        let mut indices: Span<u8> = [0].span();
+        game.buy(ref indices);
+        let cost = game.exit();
         assert_eq!(game.shop, 0);
+        assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
+    }
+
+    #[test]
+    fn test_game_refresh() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        let old_shop = game.shop;
+        game.refresh('NEW_SEED');
+        // [Check] Shop changed and refresh flag is set
+        assert_eq!(game.shop != old_shop, true);
+        assert_eq!(GameTrait::is_refresh_used(game.shop), true);
+        assert_eq!(game.chips, 100 - SHOP_ACTION_COST);
+    }
+
+    #[test]
+    fn test_game_burn() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        let old_bag = game.bag;
+        // [Info] Burn a non-bomb orb (index 4 is Point5 in initial bag)
+        game.burn(4);
+        assert_eq!(game.bag != old_bag, true);
+        assert_eq!(GameTrait::is_burn_used(game.shop), true);
+        assert_eq!(game.chips, 100 - SHOP_ACTION_COST);
+    }
+
+    #[test]
+    fn test_game_price_escalation() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(200);
+        game.enter(SEED);
+        let initial_chips = game.chips;
+        // [Info] Buy same position twice - second should cost 20% more
+        let mut indices: Span<u8> = [0, 0].span();
+        game.buy(ref indices);
+        // [Check] Price escalated (base + base*1.2 rounded up)
+        let orbs = GameTrait::get_shop_orbs(game.shop);
+        let orb = *orbs.at(0);
+        let base = orb.cost();
+        let escalated = (base * 120 + 99) / 100; // Rounded up
+        assert_eq!(game.chips, initial_chips - base - escalated);
     }
 }
 
