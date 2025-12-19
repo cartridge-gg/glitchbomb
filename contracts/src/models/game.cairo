@@ -12,6 +12,9 @@ pub const BASE_MULTIPLIER: u16 = 100;
 pub const SUPP_MULTIPLIER: u16 = 20;
 pub const SHOP_ACTION_COST: u16 = 4;
 
+// Curse bit positions (u8 bitmap)
+pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
+
 // Shop field bit layout (u128):
 // Bits 0-29: 6 orbs * 5 bits = orb types
 // Bit 30: refresh_used flag
@@ -53,6 +56,7 @@ pub impl GameImpl of GameTrait {
             level: DEFAULT_LEVEL,
             health: MAX_HEALTH,
             immunity: 0,
+            curses: 0,
             points: 0,
             milestone: Milestone::get(DEFAULT_LEVEL),
             multiplier: BASE_MULTIPLIER,
@@ -318,24 +322,55 @@ pub impl GameImpl of GameTrait {
         (shop / shift) % 2 == 1
     }
 
+    // Helper: Check if a curse is active
     #[inline]
-    fn pull(ref self: Game, seed: felt252) -> (Orb, u16) {
+    fn has_curse(curses: u8, curse_bit: u8) -> bool {
+        (curses / TwoPower::pow(curse_bit).try_into().unwrap()) % 2 == 1
+    }
+
+    // Helper: Add a curse
+    #[inline]
+    fn add_curse(ref self: Game, curse_bit: u8) {
+        let mask: u8 = TwoPower::pow(curse_bit).try_into().unwrap();
+        self.curses = self.curses | mask;
+    }
+
+    #[inline]
+    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16) {
         // [Check] Game is not over
         self.assert_not_over();
-        // [Effect] Pull orb from the remaining orbs in the bag
+        // [Effect] Pull orb(s) from the remaining orbs in the bag
         let bag: Orbs = OrbsTrait::unpack(self.bag);
         let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());
-        let index: u8 = deck.draw() - 1;
-        let orb: Orb = *bag.at(index.into());
-        // TODO: perform another draw if a corresponding curse is enabled
-        // [Effect] Add the orb to the discards
-        self.discards = Bitmap::set(self.discards, index);
-        // [Effect] Apply the orb
-        let earnings = orb.apply(ref self);
+
+        // [Info] Determine how many orbs to draw (2 if DoubleDraw curse is active)
+        let draw_count: u8 = if Self::has_curse(self.curses, CURSE_DOUBLE_DRAW) {
+            2
+        } else {
+            1
+        };
+
+        let mut pulled_orbs: Array<Orb> = array![];
+        let mut total_earnings: u16 = 0;
+        let mut draws_done: u8 = 0;
+
+        // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
+        while draws_done < draw_count && deck.remaining > 0 {
+            let index: u8 = deck.draw() - 1;
+            let orb: Orb = *bag.at(index.into());
+            // [Effect] Add the orb to the discards
+            self.discards = Bitmap::set(self.discards, index);
+            // [Effect] Apply the orb
+            let earnings = orb.apply(ref self);
+            total_earnings += earnings;
+            pulled_orbs.append(orb);
+            draws_done += 1;
+        }
+
         // [Effect] Assess the game
         self.assess();
-        // [Return] The pulled orb
-        (orb, earnings)
+        // [Return] The pulled orbs and total earnings
+        (pulled_orbs, total_earnings)
     }
 }
 
@@ -810,6 +845,86 @@ mod tests {
         game.spend(game.chips - 3);
         // [Check] Burn without enough chips should panic
         game.burn(4);
+    }
+
+    // ==================== DoubleDraw Curse Tests ====================
+
+    #[test]
+    fn test_game_has_curse_false_by_default() {
+        let game = GameTrait::new(PACK_ID, GAME_ID);
+        assert_eq!(game.curses, 0);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
+    }
+
+    #[test]
+    fn test_game_add_curse() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
+        GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
+    }
+
+    #[test]
+    fn test_game_pull_without_double_draw() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Check] No curse active
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
+        // [Effect] Pull orb
+        let (orbs, _earnings) = game.pull(SEED);
+        // [Check] Only 1 orb pulled
+        assert_eq!(orbs.len(), 1);
+    }
+
+    #[test]
+    fn test_game_pull_with_double_draw() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Effect] Add DoubleDraw curse
+        GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
+        // [Effect] Pull orbs
+        let (orbs, _earnings) = game.pull(SEED);
+        // [Check] 2 orbs pulled due to DoubleDraw curse
+        assert_eq!(orbs.len(), 2);
+    }
+
+    #[test]
+    fn test_game_pull_double_draw_updates_discards() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let discards_before = game.discards;
+        // [Effect] Add DoubleDraw curse and pull
+        GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
+        let (orbs, _earnings) = game.pull(SEED);
+        // [Check] 2 orbs pulled and discards updated for both
+        assert_eq!(orbs.len(), 2);
+        // Discards should have 2 bits set (2 orbs pulled)
+        assert_eq!(Bitmap::popcount(game.discards), Bitmap::popcount(discards_before) + 2);
+    }
+
+    #[test]
+    fn test_game_pull_double_draw_when_only_one_orb_left() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Effect] Add DoubleDraw curse
+        GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
+        // [Effect] Pull until only 1 orb remains (initial bag has 11 orbs)
+        // Pull 5 times (each pulls 2) = 10 orbs, leaving 1
+        let mut i: u8 = 0;
+        while i < 5 && !game.over {
+            game.pull(SEED + i.into());
+            i += 1;
+        }
+        // [Check] If not dead, pull the last orb
+        if !game.over {
+            let pullable = game.pullable_orbs_count();
+            if pullable > 0 {
+                let (orbs, _earnings) = game.pull('FINAL');
+                // [Check] Should only pull what's available (1 orb max)
+                assert!(orbs.len() <= pullable.into());
+            }
+        }
     }
 }
 
