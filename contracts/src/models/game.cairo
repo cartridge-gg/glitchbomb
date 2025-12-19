@@ -14,6 +14,7 @@ pub const SHOP_ACTION_COST: u16 = 4;
 
 // Curse bit positions (u8 bitmap)
 pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
+pub const CURSE_DEMULTIPLIER: u8 = 1; // Bit 1: Multiplier boosts are halved
 
 // Shop field bit layout (u128):
 // Bits 0-29: 6 orbs * 5 bits = orb types
@@ -122,7 +123,13 @@ pub impl GameImpl of GameTrait {
 
     #[inline]
     fn boost(ref self: Game, multiplier: u16) {
-        self.multiplier += multiplier;
+        // If Demultiplier curse is active, halve the boost
+        let actual_boost = if Self::has_curse(self.curses, CURSE_DEMULTIPLIER) {
+            multiplier / 2
+        } else {
+            multiplier
+        };
+        self.multiplier += actual_boost;
     }
 
     #[inline]
@@ -925,6 +932,78 @@ mod tests {
                 assert!(orbs.len() <= pullable.into());
             }
         }
+    }
+
+    // ==================== Demultiplier Curse Tests ====================
+
+    #[test]
+    fn test_game_demultiplier_curse_not_active_by_default() {
+        let game = GameTrait::new(PACK_ID, GAME_ID);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), false);
+    }
+
+    #[test]
+    fn test_game_add_demultiplier_curse() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), false);
+        GameTrait::add_curse(ref game, CURSE_DEMULTIPLIER);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
+    }
+
+    #[test]
+    fn test_game_boost_without_demultiplier() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let multiplier_before = game.multiplier;
+        // [Effect] Boost without curse
+        game.boost(50);
+        // [Check] Full boost applied
+        assert_eq!(game.multiplier, multiplier_before + 50);
+    }
+
+    #[test]
+    fn test_game_boost_with_demultiplier() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let multiplier_before = game.multiplier;
+        // [Effect] Add Demultiplier curse
+        GameTrait::add_curse(ref game, CURSE_DEMULTIPLIER);
+        // [Effect] Boost with curse active
+        game.boost(50);
+        // [Check] Only half boost applied (50 / 2 = 25)
+        assert_eq!(game.multiplier, multiplier_before + 25);
+    }
+
+    #[test]
+    fn test_game_boost_with_demultiplier_odd_value() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let multiplier_before = game.multiplier;
+        // [Effect] Add Demultiplier curse
+        GameTrait::add_curse(ref game, CURSE_DEMULTIPLIER);
+        // [Effect] Boost with odd value (rounds down)
+        game.boost(51);
+        // [Check] Half boost applied (51 / 2 = 25, integer division)
+        assert_eq!(game.multiplier, multiplier_before + 25);
+    }
+
+    #[test]
+    fn test_game_multiple_curses_active() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Effect] Add both curses
+        GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
+        GameTrait::add_curse(ref game, CURSE_DEMULTIPLIER);
+        // [Check] Both curses are active
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
+        // [Check] DoubleDraw still works (pulls 2 orbs)
+        let (orbs, _earnings) = game.pull(SEED);
+        assert_eq!(orbs.len(), 2);
+        // [Check] Demultiplier still works (halves boost)
+        let multiplier_before = game.multiplier;
+        game.boost(100);
+        assert_eq!(game.multiplier, multiplier_before + 50);
     }
 }
 
