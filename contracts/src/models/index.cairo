@@ -1,3 +1,29 @@
+use starknet::ContractAddress;
+
+#[derive(Drop, Serde)]
+#[dojo::model]
+pub struct Config {
+    #[key]
+    pub id: felt252,
+    pub vrf: ContractAddress,
+    pub token: ContractAddress,
+    pub registry: ContractAddress,
+    pub owner: ContractAddress,
+    pub fee_receiver: ContractAddress,
+    pub entry_price: felt252,
+}
+
+#[derive(Drop, Serde, IntrospectPacked)]
+#[dojo::model]
+pub struct Starterpack {
+    #[key]
+    pub id: u32,
+    pub reissuable: bool,
+    pub referral_percentage: u8,
+    pub price: u256,
+    pub payment_token: ContractAddress,
+}
+
 #[derive(Drop, Serde, Debug, IntrospectPacked)]
 #[dojo::model]
 pub struct Pack {

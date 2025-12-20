@@ -28,9 +28,11 @@ pub mod elements {
 }
 
 pub mod models {
+    pub mod config;
     pub mod game;
     pub mod index;
     pub mod pack;
+    pub mod starterpack;
 }
 
 pub mod events {
@@ -59,16 +61,26 @@ pub mod helpers {
 }
 
 pub mod interfaces {
+    pub mod erc20;
+    pub mod registry;
     pub mod vrf;
 }
 
 pub mod components {
     pub mod playable;
+    pub mod starterpack;
 }
 
 pub mod systems {
     pub mod collection;
     pub mod play;
+    pub mod setup;
+}
+
+pub mod mocks {
+    pub mod registry;
+    pub mod token;
+    pub mod vrf;
 }
 
 #[cfg(test)]

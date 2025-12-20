@@ -1,6 +1,6 @@
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-use crate::models::index::{Game, Pack};
+use crate::models::index::{Config, Game, Pack, Starterpack};
 
 #[derive(Copy, Drop)]
 pub struct Store {
@@ -11,6 +11,26 @@ pub struct Store {
 pub impl StoreImpl of StoreTrait {
     fn new(world: WorldStorage) -> Store {
         Store { world }
+    }
+
+    // Config
+
+    fn config(self: @Store) -> Config {
+        self.world.read_model(0)
+    }
+
+    fn set_config(mut self: Store, config: @Config) {
+        self.world.write_model(config)
+    }
+
+    // Starterpack
+
+    fn starterpack(self: @Store, starterpack_id: u32) -> Starterpack {
+        self.world.read_model(starterpack_id)
+    }
+
+    fn set_starterpack(mut self: Store, starterpack: @Starterpack) {
+        self.world.write_model(starterpack)
     }
 
     // Pack
