@@ -5,7 +5,6 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait IPlay<T> {
-    fn new(ref self: T);
     fn start(ref self: T, pack_id: u64);
     fn pull(ref self: T, pack_id: u64, game_id: u8);
     fn cash_out(ref self: T, pack_id: u64, game_id: u8);
@@ -18,7 +17,6 @@ pub trait IPlay<T> {
 
 #[dojo::contract]
 pub mod Play {
-    use quest::interfaces::IQuestRewarder;
     use starknet::ContractAddress;
     use starterpack::interface::IStarterpackImplementation as IStarterpack;
     use crate::components::playable::PlayableComponent;
@@ -29,6 +27,7 @@ pub mod Play {
 
     component!(path: PlayableComponent, storage: playable, event: PlayableEvent);
     impl PlayableInternalImpl = PlayableComponent::InternalImpl<ContractState>;
+    impl PlayableStarterpackImpl = PlayableComponent::StarterpackImpl<ContractState>;
 
     // Storage
 
@@ -54,38 +53,21 @@ pub mod Play {
     impl StarterpackImpl of IStarterpack<ContractState> {
         fn on_issue(
             ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, quantity: u32,
-        ) { // TODO: implement
+        ) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Issue starterpack
+            self.playable.on_issue(world, recipient, starterpack_id, quantity)
         }
 
         fn supply(self: @ContractState, starterpack_id: u32) -> Option<u32> {
+            // [Info] The total supply is unlimited
             Option::None
         }
     }
 
     #[abi(embed_v0)]
-    impl QuestRewarderImpl of IQuestRewarder<ContractState> {
-        fn on_quest_unlock(
-            ref self: ContractState, player: ContractAddress, quest_id: felt252, interval_id: u64,
-        ) {}
-
-        fn on_quest_complete(
-            ref self: ContractState, player: ContractAddress, quest_id: felt252, interval_id: u64,
-        ) {}
-
-        fn on_quest_claim(
-            ref self: ContractState, player: ContractAddress, quest_id: felt252, interval_id: u64,
-        ) {}
-    }
-
-    #[abi(embed_v0)]
     impl PlayImpl of IPlay<ContractState> {
-        fn new(ref self: ContractState) {
-            // [Setup] World
-            let world = self.world(@NAMESPACE());
-            // [Effect] Initialize components
-            self.playable.new(world)
-        }
-
         fn start(ref self: ContractState, pack_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
