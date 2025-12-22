@@ -1,7 +1,7 @@
 use crate::models::game::{Game, GameTrait};
 use crate::types::effect::{Effect, EffectTrait};
 
-#[derive(Drop, Copy, PartialEq)]
+#[derive(Drop, Copy, PartialEq, Debug)]
 pub enum Orb {
     None,
     Bomb1,

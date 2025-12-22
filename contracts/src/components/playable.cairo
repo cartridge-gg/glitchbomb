@@ -118,13 +118,11 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
-            game.assert_not_over();
-
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
-            let mut rng = RandomTrait::new();
-            let (_orbs, earnings) = game.pull(rng.felt());
+            let mut game = store.game(pack_id, game_id);
+            let config = store.config();
+            let mut rng = RandomTrait::new_vrf(config.vrf());
+            let (_orbs, earnings) = game.pull(rng.next_seed());
             store.set_game(@game);
 
             // [Event] Emit event
@@ -187,8 +185,9 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Enter shop
-            let mut rng = RandomTrait::new();
-            game.enter(rng.felt());
+            let config = store.config();
+            let mut rng = RandomTrait::new_vrf(config.vrf());
+            game.enter(rng.next_seed());
             store.set_game(@game);
         }
 
@@ -260,8 +259,9 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Refresh shop (costs 4 chips, can only do once)
-            let mut rng = RandomTrait::new();
-            game.refresh(rng.felt());
+            let config = store.config();
+            let mut rng = RandomTrait::new_vrf(config.vrf());
+            game.refresh(rng.next_seed());
             store.set_game(@game);
         }
 

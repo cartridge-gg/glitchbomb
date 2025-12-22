@@ -8,6 +8,7 @@ pub mod setup {
     };
     use starknet::ContractAddress;
     use starknet::testing::{set_account_contract_address, set_contract_address};
+    use starterpack::interface::IStarterpackImplementationDispatcher;
     use crate::constants::NAMESPACE;
     use crate::interfaces::erc20::IERC20Dispatcher;
     use crate::interfaces::registry::IStarterpackRegistryDispatcher;
@@ -38,11 +39,12 @@ pub mod setup {
         pub token: IERC20Dispatcher,
         pub vrf: IVrfProviderDispatcher,
         pub registry: IStarterpackRegistryDispatcher,
+        pub starterpack: IStarterpackImplementationDispatcher,
     }
 
     #[derive(Copy, Drop)]
     pub struct Context {
-        pub player_id: felt252,
+        pub player: ContractAddress,
     }
 
     #[inline]
@@ -105,10 +107,11 @@ pub mod setup {
             token: IERC20Dispatcher { contract_address: token_address },
             vrf: IVrfProviderDispatcher { contract_address: vrf_address },
             registry: IStarterpackRegistryDispatcher { contract_address: registry_address },
+            starterpack: IStarterpackImplementationDispatcher { contract_address: play_address },
         };
 
         // [Setup] Context
-        let context = Context { player_id: PLAYER().into() };
+        let context = Context { player: PLAYER() };
 
         // [Return]
         (world, systems, context)

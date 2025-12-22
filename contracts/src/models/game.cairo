@@ -33,7 +33,8 @@ pub mod Errors {
     pub const GAME_NOT_OVER: felt252 = 'Game: not over';
     pub const GAME_IN_SHOP: felt252 = 'Game: in shop';
     pub const GAME_NOT_SHOP: felt252 = 'Game: not in shop';
-    pub const GAME_STAGE_NOT_COMPLETED: felt252 = 'Game: stage not completed';
+    pub const GAME_NOT_COMPLETED: felt252 = 'Game: stage is not completed';
+    pub const GAME_IS_COMPLETED: felt252 = 'Game: stage is completed';
     pub const GAME_CANNOT_AFFORD: felt252 = 'Game: cannot afford';
     pub const GAME_BAG_FULL: felt252 = 'Game: bag full';
     pub const GAME_INVALID_INDICES: felt252 = 'Game: indicies must be sorted';
@@ -161,6 +162,11 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
+    fn is_completed(self: @Game) -> bool {
+        self.points >= @Milestone::get(*self.level)
+    }
+
+    #[inline]
     fn assess(ref self: Game) {
         self.over = self.is_over();
     }
@@ -192,7 +198,7 @@ pub impl GameImpl of GameTrait {
         // [Check] Game state
         self.assert_not_over();
         self.assert_not_shop();
-        self.assert_stage_completed();
+        self.assert_is_completed();
         // [Effect] Generate and set the shop (orbs in bits 0-29, flags/counts reset)
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
@@ -240,8 +246,8 @@ pub impl GameImpl of GameTrait {
         self.level_up();
         self.restore();
         self.shop = 0;
-        // [Effect] Lose unspent chips
-        self.chips = 0;
+        // [Effect] Reset multiplier
+        self.multiplier = BASE_MULTIPLIER;
         // [Return] Entry fee
         Milestone::cost(self.level)
     }
@@ -348,6 +354,7 @@ pub impl GameImpl of GameTrait {
     fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16) {
         // [Check] Game is not over
         self.assert_not_over();
+        self.assert_not_completed();
         // [Effect] Pull orb(s) from the remaining orbs in the bag
         let bag: Orbs = OrbsTrait::unpack(self.bag);
         let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());
@@ -421,9 +428,13 @@ pub impl GameAssert of AssertTrait {
     }
 
     #[inline]
-    fn assert_stage_completed(self: @Game) {
-        let milestone: u16 = Milestone::get(*self.level);
-        assert(self.points >= @milestone, Errors::GAME_STAGE_NOT_COMPLETED);
+    fn assert_is_completed(self: @Game) {
+        assert(self.is_completed(), Errors::GAME_NOT_COMPLETED);
+    }
+
+    #[inline]
+    fn assert_not_completed(self: @Game) {
+        assert(!self.is_completed(), Errors::GAME_IS_COMPLETED);
     }
 
     #[inline]
@@ -923,6 +934,7 @@ mod tests {
         let mut i: u8 = 0;
         while i < 5 && !game.over {
             game.pull(SEED + i.into());
+            game.points = 0; // Reset points to keep pulling
             i += 1;
         }
         // [Check] If not dead, pull the last orb

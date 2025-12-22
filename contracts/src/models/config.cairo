@@ -1,6 +1,7 @@
 use starknet::ContractAddress;
 use crate::interfaces::erc20::IERC20Dispatcher;
 use crate::interfaces::registry::IStarterpackRegistryDispatcher;
+use crate::interfaces::vrf::IVrfProviderDispatcher;
 pub use crate::models::index::Config;
 
 pub mod errors {
@@ -39,6 +40,11 @@ pub impl ConfigImpl of ConfigTrait {
     #[inline]
     fn token(self: @Config) -> IERC20Dispatcher {
         IERC20Dispatcher { contract_address: *self.token }
+    }
+
+    #[inline]
+    fn vrf(self: @Config) -> IVrfProviderDispatcher {
+        IVrfProviderDispatcher { contract_address: *self.vrf }
     }
 }
 
