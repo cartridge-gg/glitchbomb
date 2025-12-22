@@ -1,0 +1,40 @@
+[world]
+name = "Glitch Bomb"
+seed = "glitchbomb-v0.0.0"
+description = "Glitch Bomb is a cosmic-themed push-your-luck rogue-like bag-building game where players draw orbs from a bag to score points while avoiding bombs. What makes this game compelling is its brilliant tension between greed and survival, where every tap of the moon bag could yield valuable points or deal devastating damage, ending a nail-biting, breath taking, one of a lifetime run. Will you risk it for moon rocks, or will you just kick rocks?"
+website = "https://glitchbomb.gg"
+
+[namespace]
+default = "GLITCHBOMB"
+
+[env]
+rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
+world_address = "0x03e39d8d17d9f7416b877c3e15861080f3fdcb4d002c66fde3fbbfc1e7e6da45"
+account_address = "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753"
+keystore_path = "./keystore_sepolia.json"
+
+[migration]
+order_inits = [
+  "GLITCHBOMB-Setup",
+  "GLITCHBOMB-Play",
+  "GLITCHBOMB-Collection",
+  "GLITCHBOMB-Token",
+]
+skip_contracts = ["GLITCHBOMB-VRF", "GLITCHBOMB-Registry"]
+disable_multicall = true
+
+[writers]
+"GLITCHBOMB" = ["GLITCHBOMB-Play"]
+
+[owners]
+"GLITCHBOMB" = ["GLITCHBOMB-Setup", "GLITCHBOMB-Collection"]
+
+[init_call_args]
+"GLITCHBOMB-Setup" = [
+  "0x0",                                                                # Token
+  "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f", # VRF
+  "0x03eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43", # Starterpack Registry
+  "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Owner
+  "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Fee Receiver
+  "0xF4240",                                                            # Entry Price: 1,000,000
+]

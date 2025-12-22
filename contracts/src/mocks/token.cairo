@@ -48,7 +48,7 @@ mod Token {
     impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
 
     impl ERC20ImmutableConfig of ERC20Component::ImmutableConfig {
-        const DECIMALS: u8 = 18;
+        const DECIMALS: u8 = 6;
     }
 
     #[storage]
@@ -95,7 +95,7 @@ mod Token {
         }
 
         fn decimals(self: @ContractState) -> u8 {
-            18
+            6
         }
     }
 
