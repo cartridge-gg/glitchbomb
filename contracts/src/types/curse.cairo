@@ -1,11 +1,17 @@
 use crate::elements::curses;
-use crate::models::game::Game;
+use crate::models::game::{Game, GameTrait};
+use crate::types::orb::Orb;
 
 #[derive(Drop, Copy)]
 pub enum Curse {
     None,
+    // Passive curses (rules that pervade gameplay)
     Demultiplier,
     DoubleDraw,
+    // Bag curses (add curse orbs to the bag)
+    DoubleBomb, // Adds Bomb2 to bag
+    NormalBomb, // Adds Bomb1 to bag
+    ScoreDecrease // Adds CurseScoreDecrease to bag
 }
 
 #[generate_trait]
@@ -13,9 +19,30 @@ pub impl CurseImpl of CurseTrait {
     #[inline]
     fn apply(self: @Curse, ref game: Game) {
         match self {
+            // Passive curses - set bits in game.curses
             Curse::Demultiplier => curses::demultiplier::Demultiplier::apply(ref game, 1),
             Curse::DoubleDraw => curses::double_draw::DoubleDraw::apply(ref game, 2),
+            // Bag curses - add orbs to the bag
+            Curse::DoubleBomb => game.add(Orb::Bomb2),
+            Curse::NormalBomb => game.add(Orb::Bomb1),
+            Curse::ScoreDecrease => {
+                // Only add if player has points to lose
+                if game.points > 0 {
+                    game.add(Orb::CurseScoreDecrease);
+                }
+            },
             _ => {},
+        }
+    }
+
+    /// Returns true if this curse adds an orb to the bag
+    #[inline]
+    fn is_bag_curse(self: @Curse) -> bool {
+        match self {
+            Curse::DoubleBomb => true,
+            Curse::NormalBomb => true,
+            Curse::ScoreDecrease => true,
+            _ => false,
         }
     }
 }
@@ -25,6 +52,9 @@ pub impl IntoCurseU8 of Into<Curse, u8> {
         match self {
             Curse::Demultiplier => 1,
             Curse::DoubleDraw => 2,
+            Curse::DoubleBomb => 3,
+            Curse::NormalBomb => 4,
+            Curse::ScoreDecrease => 5,
             _ => 0,
         }
     }
@@ -35,6 +65,9 @@ pub impl IntoU8Curse of Into<u8, Curse> {
         match self {
             1 => Curse::Demultiplier,
             2 => Curse::DoubleDraw,
+            3 => Curse::DoubleBomb,
+            4 => Curse::NormalBomb,
+            5 => Curse::ScoreDecrease,
             _ => Curse::None,
         }
     }

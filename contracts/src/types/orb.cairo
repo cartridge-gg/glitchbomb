@@ -1,3 +1,4 @@
+use crate::elements::effects::lose::MAX_LOSS_PERCENT;
 use crate::models::game::{Game, GameTrait};
 use crate::types::effect::{Effect, EffectTrait};
 
@@ -23,6 +24,7 @@ pub enum Orb {
     Moonrock15,
     Moonrock40,
     Chips15,
+    CurseScoreDecrease // Curse orb: reduces score
 }
 
 #[generate_trait]
@@ -49,6 +51,7 @@ pub impl OrbImpl of OrbTrait {
             Orb::Moonrock15 => Effect::Moonrock.apply(ref game, 15),
             Orb::Moonrock40 => Effect::Moonrock.apply(ref game, 40),
             Orb::Chips15 => Effect::Chips.apply(ref game, 15),
+            Orb::CurseScoreDecrease => Effect::Lose.apply(ref game, MAX_LOSS_PERCENT),
             _ => 0,
         }
     }
@@ -107,6 +110,7 @@ pub impl IntoOrbU8 of Into<Orb, u8> {
             Orb::Moonrock15 => 17,
             Orb::Moonrock40 => 18,
             Orb::Chips15 => 19,
+            Orb::CurseScoreDecrease => 20,
             _ => 0,
         }
     }
@@ -135,6 +139,7 @@ pub impl IntoU8Orb of Into<u8, Orb> {
             17 => Orb::Moonrock15,
             18 => Orb::Moonrock40,
             19 => Orb::Chips15,
+            20 => Orb::CurseScoreDecrease,
             _ => Orb::None,
         }
     }
