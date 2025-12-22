@@ -11,6 +11,7 @@ pub mod elements {
         pub mod immune;
         pub mod index;
         pub mod interface;
+        pub mod lose;
         pub mod moonrock;
     }
     pub mod curses {
