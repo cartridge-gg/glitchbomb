@@ -14,6 +14,7 @@ pub mod PlayableComponent {
     use crate::systems::collection::{
         ICollectionDispatcher, ICollectionDispatcherTrait, NAME as COLLECTION,
     };
+    use crate::types::curse::{Curse, CurseTrait};
 
     // Storage
 
@@ -233,59 +234,26 @@ pub mod PlayableComponent {
 
             // [Effect] Exit shop and get next level cost
             let cost = game.exit();
+
+            // [Effect] Apply curse at levels 4, 6, and 7
+            let new_level = game.level;
+            if new_level == 4 || new_level == 6 || new_level == 7 {
+                let config = store.config();
+                let mut rng = RandomTrait::new_vrf(config.vrf());
+                let curse: Curse = if rng.bool() {
+                    Curse::DoubleDraw
+                } else {
+                    Curse::Demultiplier
+                };
+                curse.apply(ref game);
+            }
+
             store.set_game(@game);
 
             // [Effect] Spend moonrocks for next level
             let mut pack = store.pack(pack_id);
             pack.spend(cost);
             store.set_pack(@pack);
-        }
-
-        fn refresh(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
-        ) {
-            // [Setup] Store
-            let store = StoreTrait::new(world);
-
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
-
-            // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
-            game.assert_not_over();
-
-            // [Effect] Refresh shop (costs 4 chips, can only do once)
-            let config = store.config();
-            let mut rng = RandomTrait::new_vrf(config.vrf());
-            game.refresh(rng.next_seed());
-            store.set_game(@game);
-        }
-
-        fn burn(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
-            bag_index: u8,
-        ) {
-            // [Setup] Store
-            let store = StoreTrait::new(world);
-
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
-
-            // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
-            game.assert_not_over();
-
-            // [Effect] Burn orb from bag (costs 4 chips, can only do once)
-            game.burn(bag_index);
-            store.set_game(@game);
         }
     }
 
