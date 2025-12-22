@@ -16,8 +16,7 @@ mod Vrf {
 
         #[external(v0)]
         fn consume_random(ref self: ContractState, source: Source) -> felt252 {
-            let mut random = RandomImpl::new();
-            random.felt()
+            starknet::get_tx_info().unbox().transaction_hash
         }
 
         #[external(v0)]

@@ -86,5 +86,6 @@ pub mod mocks {
 #[cfg(test)]
 pub mod tests {
     pub mod setup;
+    pub mod test_play;
     pub mod test_setup;
 }
