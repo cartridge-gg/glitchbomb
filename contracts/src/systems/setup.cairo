@@ -18,7 +18,6 @@ pub mod Setup {
     use core::num::traits::Zero;
     use dojo::world::{IWorldDispatcherTrait, WorldStorageTrait};
     use starknet::ContractAddress;
-    use crate::components::starterpack::StarterpackComponent;
     use crate::constants::{CONFIG_ID, NAMESPACE};
     use crate::mocks::registry::NAME as REGISTRY;
     use crate::mocks::token::NAME as TOKEN;
@@ -27,27 +26,16 @@ pub mod Setup {
     use crate::store::StoreTrait;
     use super::ISetup;
 
-    // Components
-
-    component!(path: StarterpackComponent, storage: starterpack, event: StarterpackEvent);
-    impl StarterpackInternalImpl = StarterpackComponent::InternalImpl<ContractState>;
-
     // Storage
 
     #[storage]
-    struct Storage {
-        #[substorage(v0)]
-        starterpack: StarterpackComponent::Storage,
-    }
+    struct Storage {}
 
     // Events
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
-        #[flat]
-        StarterpackEvent: StarterpackComponent::Event,
-    }
+    enum Event {}
 
     fn dojo_init(
         ref self: ContractState,
@@ -99,9 +87,6 @@ pub mod Setup {
                 contract_address: token,
                 block_number: 1,
             );
-
-        // [Effect] Initialize components
-        self.starterpack.initialize(world);
     }
 
     #[abi(embed_v0)]

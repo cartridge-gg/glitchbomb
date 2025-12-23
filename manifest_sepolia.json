@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x3e39d8d17d9f7416b877c3e15861080f3fdcb4d002c66fde3fbbfc1e7e6da45",
-    "seed": "glitchbomb-v0.0.0",
+    "address": "0x132702ac1712a4f188bf319f8a95bc2e0189d5fa8a32c9c83ea1ecc4a6c0131",
+    "seed": "glitchbomb-v0.0.1",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,7 +33,7 @@
   },
   "contracts": [
     {
-      "address": "0x18ce11d13f49705e3775fee9cbc1767d829ff940f121290757804e07e2570b1",
+      "address": "0xef233615a3b0afadf62cdbd9da668d0f6df96536379ff1cb456ee5604673f6",
       "class_hash": "0x7024fc584f96b691a2304c243bb9cb1acd0e0ffd1a6a491d8671eb160bd192b",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "address": "0x2bace2e9a9b066368f5e7d814ba427e7a78704adcd1432f66559123147f6736",
-      "class_hash": "0x51158024ba37da4e99a3079c9de3da248da5db79229f0482a03461e65a44ad2",
+      "address": "0x57eba870af41f981ccd6791c0f05c62481dd75d5c5a35eb5a3074d38980dc52",
+      "class_hash": "0x383974ab6cd36c37757e9122e1e8877f2e896d45ca5e27488143474f17d77fe",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -77,8 +77,8 @@
       ]
     },
     {
-      "address": "0x49b64238d169fc7dcb2f43f8bbad3be583dbe875d9e38f00d87f3ade7a3497a",
-      "class_hash": "0x33946a43446ea82ab58f6e0896f2a2f06b0bb07e88b91deea17cefed0a52c63",
+      "address": "0x213c79df08de46ec2388922ced9f14bf30aad1a090fa7f4decf685b554b43b3",
+      "class_hash": "0xcef487592d5e63a8af7649860d86b7f996d0707b110edc9941cebb4d9de3f8",
       "init_calldata": [
         "0x0",
         "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "address": "0x5a05cfaa516f33aa96fc06cc871a910f2a933f4f95f11ad9c879979217bf309",
+      "address": "0x3688a742fdddd830a63e3f4145576371927c26170137f8a8200ef406e312b81",
       "class_hash": "0x26fc3ce97e1d14e58e1f8ed5bd2a81a6be430186fede417f4db014372ecf53e",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Token",
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "address": "0x4b1890cd0b4d2292974a43f43e28708a9ba8d9cbac427ebf8b4ec4a741549dd",
+      "address": "0x89bc7efc153ea6cfa83b2595bc7fcd7bd7d221f5e53bef46c34de22f4d85fa",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -2926,6 +2926,11 @@
           "name": "PlayableEvent",
           "type": "glitchbomb::components::playable::PlayableComponent::Event",
           "kind": "flat"
+        },
+        {
+          "name": "StarterpackEvent",
+          "type": "glitchbomb::components::starterpack::StarterpackComponent::Event",
+          "kind": "flat"
         }
       ]
     },
@@ -3009,11 +3014,6 @@
           "name": "WorldProviderEvent",
           "type": "dojo::contract::components::world_provider::world_provider_cpt::Event",
           "kind": "nested"
-        },
-        {
-          "name": "StarterpackEvent",
-          "type": "glitchbomb::components::starterpack::StarterpackComponent::Event",
-          "kind": "flat"
         }
       ]
     },
