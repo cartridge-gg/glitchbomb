@@ -14,6 +14,7 @@ pub mod PlayableComponent {
     use crate::systems::collection::{
         ICollectionDispatcher, ICollectionDispatcherTrait, NAME as COLLECTION,
     };
+    use crate::types::curse::{Curse, CurseTrait};
 
     // Storage
 
@@ -233,6 +234,20 @@ pub mod PlayableComponent {
 
             // [Effect] Exit shop and get next level cost
             let cost = game.exit();
+
+            // [Effect] Apply curse at levels 4, 6, and 7
+            let new_level = game.level;
+            if new_level == 4 || new_level == 6 || new_level == 7 {
+                let config = store.config();
+                let mut rng = RandomTrait::new_vrf(config.vrf());
+                let curse: Curse = if rng.bool() {
+                    Curse::DoubleDraw
+                } else {
+                    Curse::Demultiplier
+                };
+                curse.apply(ref game);
+            }
+
             store.set_game(@game);
 
             // [Effect] Spend moonrocks for next level
