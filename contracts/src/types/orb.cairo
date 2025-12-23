@@ -1,4 +1,4 @@
-use crate::elements::effects::lose::MAX_LOSS_PERCENT;
+use crate::elements::effects::lose::LOSS_PERCENT;
 use crate::models::game::{Game, GameTrait};
 use crate::types::effect::{Effect, EffectTrait};
 
@@ -51,7 +51,7 @@ pub impl OrbImpl of OrbTrait {
             Orb::Moonrock15 => Effect::Moonrock.apply(ref game, 15),
             Orb::Moonrock40 => Effect::Moonrock.apply(ref game, 40),
             Orb::Chips15 => Effect::Chips.apply(ref game, 15),
-            Orb::CurseScoreDecrease => Effect::Lose.apply(ref game, MAX_LOSS_PERCENT),
+            Orb::CurseScoreDecrease => Effect::Lose.apply(ref game, LOSS_PERCENT),
             _ => 0,
         }
     }
