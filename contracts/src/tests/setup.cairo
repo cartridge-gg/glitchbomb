@@ -10,6 +10,7 @@ pub mod setup {
     use starknet::testing::{set_account_contract_address, set_contract_address};
     use starterpack::interface::IStarterpackImplementationDispatcher;
     use crate::constants::NAMESPACE;
+    use crate::events::index as events;
     use crate::interfaces::erc20::IERC20Dispatcher;
     use crate::interfaces::registry::IStarterpackRegistryDispatcher;
     use crate::interfaces::vrf::IVrfProviderDispatcher;
@@ -56,6 +57,16 @@ pub mod setup {
                 TestResource::Model(models::m_Game::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Starterpack::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Config::TEST_CLASS_HASH),
+                TestResource::Event(events::e_GameStarted::TEST_CLASS_HASH),
+                TestResource::Event(events::e_OrbPulled::TEST_CLASS_HASH),
+                TestResource::Event(events::e_MilestoneReached::TEST_CLASS_HASH),
+                TestResource::Event(events::e_ShopEntered::TEST_CLASS_HASH),
+                TestResource::Event(events::e_OrbPurchased::TEST_CLASS_HASH),
+                TestResource::Event(events::e_ShopRefreshed::TEST_CLASS_HASH),
+                TestResource::Event(events::e_OrbBurned::TEST_CLASS_HASH),
+                TestResource::Event(events::e_ShopExited::TEST_CLASS_HASH),
+                TestResource::Event(events::e_LevelStarted::TEST_CLASS_HASH),
+                TestResource::Event(events::e_GameOver::TEST_CLASS_HASH),
                 TestResource::Contract(Collection::TEST_CLASS_HASH),
                 TestResource::Contract(Play::TEST_CLASS_HASH),
                 TestResource::Contract(Setup::TEST_CLASS_HASH),
