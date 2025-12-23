@@ -1,4 +1,5 @@
 import ControllerConnector from "@cartridge/connector/controller";
+import { EntitiesProvider } from "@/contexts";
 import type { ControllerOptions, SessionPolicies } from "@cartridge/controller";
 import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -66,7 +67,9 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
-        <Router />
+        <EntitiesProvider>
+          <Router />
+        </EntitiesProvider>
       </StarknetConfig>
       <Toaster position="top-right" richColors />
     </>
