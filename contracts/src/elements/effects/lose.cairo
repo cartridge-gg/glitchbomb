@@ -1,5 +1,3 @@
-use core::hash::HashStateTrait;
-use core::poseidon::PoseidonTrait;
 use crate::helpers::dice::{Dice, DiceTrait};
 use super::index::Game;
 use super::interface::EffectTrait;
@@ -15,17 +13,10 @@ pub impl Lose of EffectTrait {
         let max_percent: u16 = count.into();
         let max_loss: u16 = (game.points * max_percent) / 100;
 
-        // Use dice with seed derived from game state
+        // Use dice with VRF seed from game
         let loss: u16 = if max_loss > 0 {
-            // Create seed from game state
-            let mut state = PoseidonTrait::new();
-            state = state.update(game.pack_id.into());
-            state = state.update(game.id.into());
-            state = state.update(game.discards.into());
-            let seed: felt252 = state.finalize();
-
-            // Roll dice for random loss (1 to max_loss)
-            let mut dice: Dice = DiceTrait::new(max_loss.into(), seed);
+            // Roll dice for random loss (1 to max_loss) using VRF seed
+            let mut dice: Dice = DiceTrait::new(max_loss.into(), game.seed);
             dice.roll().into()
         } else {
             0

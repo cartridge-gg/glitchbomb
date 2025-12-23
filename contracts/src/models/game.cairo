@@ -54,6 +54,7 @@ pub impl GameImpl of GameTrait {
         Game {
             pack_id: pack_id,
             id: game_id,
+            seed: 0,
             over: false,
             level: DEFAULT_LEVEL,
             health: MAX_HEALTH,
@@ -355,6 +356,8 @@ pub impl GameImpl of GameTrait {
         // [Check] Game is not over
         self.assert_not_over();
         self.assert_not_completed();
+        // [Effect] Store seed for effects that need randomness
+        self.seed = seed;
         // [Effect] Pull orb(s) from the remaining orbs in the bag
         let bag: Orbs = OrbsTrait::unpack(self.bag);
         let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());

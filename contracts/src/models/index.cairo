@@ -40,6 +40,7 @@ pub struct Game {
     pub pack_id: u64,
     #[key]
     pub id: u8,
+    pub seed: felt252, // Current VRF seed for random effects
     pub over: bool,
     pub level: u8,
     pub health: u8,
