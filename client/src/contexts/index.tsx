@@ -268,6 +268,7 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useEntitiesContext() {
   const context = useContext(EntitiesContext);
   if (!context) {
