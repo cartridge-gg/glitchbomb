@@ -9,9 +9,9 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    color: {
+    magnitude: {
       control: "select",
-      options: ["green", "orange", "red"],
+      options: [1, 2, 3, 4, 5],
     },
     count: {
       control: { type: "number", min: 1, max: 10 },
@@ -30,6 +30,6 @@ export const Default: Story = {
   args: {
     count: 3,
     size: "md",
-    color: "green",
+    magnitude: 1,
   },
 };
