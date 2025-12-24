@@ -15,7 +15,7 @@
 		"format:cairo": "cd contracts && pnpm format",
 		"format:check:cairo": "cd contracts && pnpm format:check:cairo",
 		"lint:check:cairo": "cd contracts && pnpm lint:check:cairo",
-		"format:ts": "cd client && pnpm biome format --write .",
+		"format:ts": "cd client && pnpm biome check --write .",
 		"format:check:ts": "cd client && pnpm biome check .",
 		"lint:check:ts": "cd client && pnpm lint",
 		"test": "turbo run test",

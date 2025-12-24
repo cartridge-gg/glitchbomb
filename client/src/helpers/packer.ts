@@ -1,0 +1,20 @@
+export const Packer = {
+  unpack(num: bigint, size: bigint): number[] {
+    const result: number[] = [];
+    const mask = (1n << size) - 1n;
+    while (num > 0n) {
+      result.push(Number(num & mask));
+      num >>= size;
+    }
+    return result;
+  },
+
+  pack(unpacked: number[], size: bigint) {
+    let packed = 0n;
+    for (let i = unpacked.length - 1; i >= 0; i--) {
+      packed <<= size;
+      packed += BigInt(unpacked[i]);
+    }
+    return packed;
+  },
+};

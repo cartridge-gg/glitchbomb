@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as Icons from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { BombIcon } from "./bomb";
 
 const meta = {
   title: "Assets/Icons",
@@ -20,7 +20,7 @@ export const Bomb: Story = {
     <div className="flex flex-col gap-4">
       <div className="flex justify-center items-end gap-4 text-green-100">
         {sizes.map((size, index) => (
-          <BombIcon
+          <Icons.BombIcon
             key={size}
             size={size}
             className={cn(index % 2 === 0 ? "opacity-100" : "opacity-20")}
@@ -29,7 +29,7 @@ export const Bomb: Story = {
       </div>
       <div className="flex justify-center items-end gap-4 text-orange-100">
         {sizes.map((size, index) => (
-          <BombIcon
+          <Icons.BombIcon
             key={size}
             size={size}
             className={cn(index % 2 === 1 ? "opacity-100" : "opacity-20")}
@@ -39,12 +39,36 @@ export const Bomb: Story = {
       </div>
       <div className="flex justify-center items-end gap-4 text-red-100">
         {sizes.map((size, index) => (
-          <BombIcon
+          <Icons.BombIcon
             key={size}
             size={size}
             className={cn(index % 2 === 0 ? "opacity-100" : "opacity-20")}
             variant="triple"
           />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Controller: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.ControllerIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Token: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.TokenIcon key={size} size={size} />
         ))}
       </div>
     </div>

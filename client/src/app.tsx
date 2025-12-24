@@ -10,6 +10,7 @@ import {
 import { Toaster } from "sonner";
 import { shortString } from "starknet";
 import { chains, DEFAULT_CHAIN_ID } from "@/config";
+import { EntitiesProvider } from "@/contexts";
 import Router from "@/routes";
 
 const provider = jsonRpcProvider({
@@ -51,7 +52,7 @@ const options: ControllerOptions = {
       : buildPolicies(),
   preset: "glitch-bomb",
   // namespace: "GLITCHBOMB",
-  // slot: "glitchbomb",
+  slot: "gb-bal",
 };
 
 const connectors = [new ControllerConnector(options) as never as Connector];
@@ -66,7 +67,9 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
-        <Router />
+        <EntitiesProvider>
+          <Router />
+        </EntitiesProvider>
       </StarknetConfig>
       <Toaster position="top-right" richColors />
     </>
