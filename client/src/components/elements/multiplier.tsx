@@ -32,13 +32,14 @@ function periodicNoise(
   angle: number,
   frameIndex: number,
   seed: number,
+  animationFrames: number,
 ): number {
   // Use sin and cos to create perfectly looping noise in space
   const x = Math.cos(angle) * 3;
   const y = Math.sin(angle) * 3;
 
   // Make time periodic as well for a perfect loop
-  const t = (frameIndex / ANIMATION_FRAMES) * Math.PI * 2; // 0 to 2π
+  const t = (frameIndex / animationFrames) * Math.PI * 2; // 0 to 2π
   const timeX = Math.cos(t) * 2;
   const timeY = Math.sin(t) * 2;
 
@@ -229,6 +230,8 @@ function generateRingClipPath(
   borderWidth: number,
   noisePoints: number,
   safetyMargin: number,
+  animationFrames: number,
+  cornerRadius: number,
 ): string {
   const outerPoints: string[] = [];
   const innerPoints: string[] = [];
@@ -241,15 +244,15 @@ function generateRingClipPath(
     const angle = t * Math.PI * 2; // For periodic noise
 
     // Generate periodic noise ONCE for this point
-    const noiseValue = periodicNoise(angle, frameIndex, seed);
+    const noiseValue = periodicNoise(angle, frameIndex, seed, animationFrames);
 
     // Calculate displacement: use a fixed reference size (e.g., 10) to keep displacement consistent
     const displacement = noiseValue * noiseAmplitude * 10;
 
     // Get base points and normal vector
-    const outerPoint = roundedSquarePoint(t, outerSize, CORNER_RADIUS);
-    const innerPoint = roundedSquarePoint(t, innerSize, CORNER_RADIUS);
-    const normal = roundedSquareNormal(t, outerSize, CORNER_RADIUS);
+    const outerPoint = roundedSquarePoint(t, outerSize, cornerRadius);
+    const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
+    const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
     // Apply SAME displacement to both polygons to maintain constant border width
     const outerX = outerPoint.x + normal.nx * displacement;
@@ -272,6 +275,8 @@ function generateContentClipPath(
   noiseAmplitude: number,
   noisePoints: number,
   safetyMargin: number,
+  animationFrames: number,
+  cornerRadius: number,
 ): string {
   const points: string[] = [];
   // Content uses the same radius as the OUTER polygon of the border
@@ -282,14 +287,14 @@ function generateContentClipPath(
     const angle = t * Math.PI * 2; // For periodic noise
 
     // Use the SAME periodic noise as the ring
-    const noiseValue = periodicNoise(angle, frameIndex, seed);
+    const noiseValue = periodicNoise(angle, frameIndex, seed, animationFrames);
 
     // Calculate displacement: use a fixed reference size (e.g., 10) to keep displacement consistent
     const displacement = noiseValue * noiseAmplitude * 10;
 
     // Get base point and normal vector
-    const point = roundedSquarePoint(t, outerSize, CORNER_RADIUS);
-    const normal = roundedSquareNormal(t, outerSize, CORNER_RADIUS);
+    const point = roundedSquarePoint(t, outerSize, cornerRadius);
+    const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
     // Apply noise displacement along the normal (perpendicular to border)
     const x = point.x + normal.nx * displacement;
@@ -305,6 +310,17 @@ export interface MultiplierProps
     VariantProps<typeof multiplierVariants> {
   count: number;
   magnitude: 1 | 2 | 3 | 4 | 5;
+  // Animation constants (optional, with defaults)
+  animationFrames?: number;
+  cornerRadius?: number;
+  safetyMarginMin?: number;
+  safetyMarginMax?: number;
+  noisePointsMin?: number;
+  noisePointsMax?: number;
+  noiseAmplitudeMin?: number;
+  noiseAmplitudeMax?: number;
+  borderWidthMin?: number;
+  borderWidthMax?: number;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -332,39 +348,48 @@ export const Multiplier = ({
   size,
   magnitude,
   className,
+  // Constants with defaults
+  animationFrames = ANIMATION_FRAMES,
+  cornerRadius = CORNER_RADIUS,
+  safetyMarginMin = SAFETY_MARGIN_MIN,
+  safetyMarginMax = SAFETY_MARGIN_MAX,
+  noisePointsMin = NOISE_POINTS_MIN,
+  noisePointsMax = NOISE_POINTS_MAX,
+  noiseAmplitudeMin = NOISE_AMPLITUDE_MIN,
+  noiseAmplitudeMax = NOISE_AMPLITUDE_MAX,
+  borderWidthMin = BORDER_WIDTH_MIN,
+  borderWidthMax = BORDER_WIDTH_MAX,
   ...props
 }: MultiplierProps) => {
   // Dynamic calculation of amplitude and border width
   // Linear interpolation between min/max bounds based on magnitude (1-5)
   const noiseAmplitude = useMemo(() => {
     const t = (magnitude - 1) / 4; // Normalize magnitude [1,5] to [0,1]
-    return (
-      NOISE_AMPLITUDE_MIN + t * (NOISE_AMPLITUDE_MAX - NOISE_AMPLITUDE_MIN)
-    );
-  }, [magnitude]);
+    return noiseAmplitudeMin + t * (noiseAmplitudeMax - noiseAmplitudeMin);
+  }, [magnitude, noiseAmplitudeMin, noiseAmplitudeMax]);
 
   const borderWidth = useMemo(() => {
     const t = (magnitude - 1) / 4; // Normalize magnitude [1,5] to [0,1]
-    return BORDER_WIDTH_MIN + t * (BORDER_WIDTH_MAX - BORDER_WIDTH_MIN);
-  }, [magnitude]);
+    return borderWidthMin + t * (borderWidthMax - borderWidthMin);
+  }, [magnitude, borderWidthMin, borderWidthMax]);
 
   // Safety margin interpolated between min/max
-  // magnitude = 1 → 1% margin
-  // magnitude = 5 → 5% margin
+  // magnitude = 1 → min% margin
+  // magnitude = 5 → max% margin
   const safetyMargin = useMemo(() => {
     const t = (magnitude - 1) / 4; // Normalize magnitude [1,5] to [0,1]
-    return SAFETY_MARGIN_MIN + t * (SAFETY_MARGIN_MAX - SAFETY_MARGIN_MIN);
-  }, [magnitude]);
+    return safetyMarginMin + t * (safetyMarginMax - safetyMarginMin);
+  }, [magnitude, safetyMarginMin, safetyMarginMax]);
 
   // Number of points INVERSELY proportional to magnitude
-  // magnitude = 1 → more points (256) = smoother shape
-  // magnitude = 5 → fewer points (128) = more chaotic shape
+  // magnitude = 1 → more points (max) = smoother shape
+  // magnitude = 5 → fewer points (min) = more chaotic shape
   const noisePoints = useMemo(() => {
     const t = (magnitude - 1) / 4; // Normalize magnitude [1,5] to [0,1]
     // Inverse interpolation: MAX when t=0, MIN when t=1
-    const points = NOISE_POINTS_MAX - t * (NOISE_POINTS_MAX - NOISE_POINTS_MIN);
+    const points = noisePointsMax - t * (noisePointsMax - noisePointsMin);
     return Math.round(points);
-  }, [magnitude]);
+  }, [magnitude, noisePointsMin, noisePointsMax]);
 
   const cssGradient = useMemo(() => {
     switch (magnitude) {
@@ -417,8 +442,8 @@ export const Multiplier = ({
     const borderFrames: string[] = [];
     const contentFrames: string[] = [];
 
-    for (let i = 0; i < ANIMATION_FRAMES; i++) {
-      const percentage = (i / (ANIMATION_FRAMES - 1)) * 100;
+    for (let i = 0; i < animationFrames; i++) {
+      const percentage = (i / (animationFrames - 1)) * 100;
 
       // Clip-path for border (ring)
       const ringClipPath = generateRingClipPath(
@@ -428,6 +453,8 @@ export const Multiplier = ({
         borderWidth,
         noisePoints,
         safetyMargin,
+        animationFrames,
+        cornerRadius,
       );
       borderFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
@@ -440,6 +467,8 @@ export const Multiplier = ({
         noiseAmplitude,
         noisePoints,
         safetyMargin,
+        animationFrames,
+        cornerRadius,
       );
       contentFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,
@@ -457,7 +486,15 @@ export const Multiplier = ({
 				@keyframes ${contentAnimationName} { ${contentFrames.join(" ")} }
 			`,
     };
-  }, [magnitude, noiseAmplitude, borderWidth, noisePoints, safetyMargin]);
+  }, [
+    magnitude,
+    noiseAmplitude,
+    borderWidth,
+    noisePoints,
+    safetyMargin,
+    animationFrames,
+    cornerRadius,
+  ]);
 
   return (
     <>
