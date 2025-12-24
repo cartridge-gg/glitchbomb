@@ -1,9 +1,10 @@
-import * as torii from "@dojoengine/torii-wasm";
 import {
   ClauseBuilder,
   type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
+import * as torii from "@dojoengine/torii-wasm";
+import { useAccount } from "@starknet-react/core";
 import {
   createContext,
   useCallback,
@@ -13,7 +14,6 @@ import {
   useState,
 } from "react";
 import { NAMESPACE } from "@/constants";
-import { useAccount } from "@starknet-react/core";
 import {
   CONFIG,
   Config,

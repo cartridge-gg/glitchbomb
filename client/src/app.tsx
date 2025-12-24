@@ -1,5 +1,4 @@
 import ControllerConnector from "@cartridge/connector/controller";
-import { EntitiesProvider } from "@/contexts";
 import type { ControllerOptions, SessionPolicies } from "@cartridge/controller";
 import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -11,6 +10,7 @@ import {
 import { Toaster } from "sonner";
 import { shortString } from "starknet";
 import { chains, DEFAULT_CHAIN_ID } from "@/config";
+import { EntitiesProvider } from "@/contexts";
 import Router from "@/routes";
 
 const provider = jsonRpcProvider({

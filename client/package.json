@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "format": "prettier ./src --write",
+    "format": "biome check --write .",
     "test": "jest --passWithNoTests",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
