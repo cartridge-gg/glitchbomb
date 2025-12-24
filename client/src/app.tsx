@@ -52,7 +52,7 @@ const options: ControllerOptions = {
       : buildPolicies(),
   preset: "glitch-bomb",
   // namespace: "GLITCHBOMB",
-  // slot: "glitchbomb",
+  slot: "gb-bal",
 };
 
 const connectors = [new ControllerConnector(options) as never as Connector];

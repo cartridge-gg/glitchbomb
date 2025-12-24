@@ -1,8 +1,9 @@
 import { createDojoConfig } from "@dojoengine/core";
 import { mainnet, sepolia } from "@starknet-react/chains";
-import { shortString } from "starknet";
+import { addAddressPadding, shortString } from "starknet";
+import manifestSepolia from "../../manifest_sepolia.json";
 // import manifestMainnet from "../../manifest_mainnet.json";
-// import manifestSepolia from "../../manifest_sepolia.json";
+import { NAMESPACE } from "./constants";
 
 export const DEFAULT_CHAIN = import.meta.env.VITE_DEFAULT_CHAIN;
 export const DEFAULT_CHAIN_ID = shortString.encodeShortString(
@@ -18,7 +19,7 @@ export const chainName = {
 };
 
 export const manifests = {
-  // [SEPOLIA_CHAIN_ID]: manifestSepolia,
+  [SEPOLIA_CHAIN_ID]: manifestSepolia,
   // [MAINNET_CHAIN_ID]: manifestMainnet,
 };
 
@@ -42,4 +43,40 @@ const dojoConfigMainnet = createDojoConfig({
 export const dojoConfigs = {
   [SEPOLIA_CHAIN_ID]: dojoConfigSepolia,
   [MAINNET_CHAIN_ID]: dojoConfigMainnet,
+};
+
+export const getContractAddress = (
+  chainId: bigint,
+  namespace: string,
+  contractName: string,
+) => {
+  const chainIdHex = `0x${chainId.toString(16)}`;
+
+  const manifest = manifests[chainIdHex];
+  const contract = manifest.contracts.find(
+    (i) => i.tag === `${namespace}-${contractName}`,
+  );
+  return contract?.address || addAddressPadding("0x0");
+};
+
+export const getVrfAddress = (chainId: bigint) => {
+  const decodedChainId = shortString.decodeShortString(
+    `0x${chainId.toString(16)}`,
+  );
+  const fromEnv: string = import.meta.env[`VITE_${decodedChainId}_VRF`];
+  if (fromEnv && BigInt(fromEnv) !== 0n) return fromEnv;
+  return getContractAddress(chainId, NAMESPACE, "VRF");
+};
+
+export const getTokenAddress = (chainId: bigint) => {
+  const decodedChainId = shortString.decodeShortString(
+    `0x${chainId.toString(16)}`,
+  );
+  const fromEnv = import.meta.env[`VITE_${decodedChainId}_TOKEN`];
+  if (fromEnv && BigInt(fromEnv) !== 0n) return fromEnv as string;
+  return getContractAddress(chainId, NAMESPACE, "Token");
+};
+
+export const getGameAddress = (chainId: bigint) => {
+  return getContractAddress(chainId, NAMESPACE, "Play");
 };

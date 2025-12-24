@@ -30,6 +30,7 @@ import {
 } from "@/models";
 
 interface EntitiesContextType {
+  client?: torii.ToriiClient;
   pack?: Pack;
   game?: Game;
   config?: Config;
@@ -251,6 +252,7 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const value: EntitiesContextType = {
+    client,
     pack,
     game,
     starterpack,

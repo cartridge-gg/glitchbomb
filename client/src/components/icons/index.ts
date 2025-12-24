@@ -25,3 +25,5 @@ export const iconVariants = cva(base, {
 });
 
 export * from "./bomb";
+export * from "./controller";
+export * from "./token";
