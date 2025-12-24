@@ -12,6 +12,7 @@ const config: StorybookConfig = {
   stories: [
     "../src/components/elements/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/components/icons/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/themes/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
 
   addons: [
