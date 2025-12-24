@@ -1,4 +1,4 @@
-// biome-ignore lint/suspicious/noExplicitAny: Required to compare any type of data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function equal(a: any, b: any): boolean {
   // If the values are strictly equal, return true
   if (a === b) return true;
