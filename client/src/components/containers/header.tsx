@@ -6,6 +6,7 @@ import { Connection } from "@/components/modules";
 import { getTokenAddress } from "@/config";
 import { useActions } from "@/hooks/actions";
 import { useTokens } from "@/hooks/tokens";
+import { cn } from "@/lib/utils";
 import logo from "/assets/logo.svg";
 
 export interface HeaderProps
@@ -39,7 +40,14 @@ export const Header = ({ variant, className, ...props }: HeaderProps) => {
         <img src={logo} alt="logo" className="size-10" />
       </Link>
       <div className="flex items-center gap-4">
-        <Balance balance={balance} onClick={mint} />
+        <Balance
+          balance={balance}
+          onClick={mint}
+          className={cn(
+            "transition-opacity duration-300",
+            account ? "opacity-100" : "opacity-0",
+          )}
+        />
         <Connection />
       </div>
     </div>
