@@ -24,6 +24,21 @@ export const iconVariants = cva(base, {
   },
 });
 
+export * from "./arrow-down";
 export * from "./bomb";
+export * from "./bomb-orb";
+export * from "./chip";
 export * from "./controller";
+export * from "./cross";
+export * from "./dot";
+export * from "./heart";
+export * from "./list";
+export * from "./moonrock";
+export * from "./orb";
+export * from "./orb-bomb";
+export * from "./orb-health";
+export * from "./orb-multiplier";
+export * from "./orb-point";
+export * from "./sparkles";
 export * from "./token";
+export * from "./warning";
