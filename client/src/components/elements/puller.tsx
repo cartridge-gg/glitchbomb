@@ -8,8 +8,7 @@ import { useEffect, useState } from "react";
 import { DotIcon, HeartIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const pullerVariants = cva(
+const pullerVariants = cva(
   "relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer outline-none border-none",
   {
     variants: {

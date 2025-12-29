@@ -8,8 +8,7 @@ export interface BalanceProps
   balance: number;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const balanceVariants = cva("", {
+const balanceVariants = cva("", {
   variants: {
     variant: {
       default: "px-3 md:px-4 py-2 text-2xl tracking-wide gap-2",

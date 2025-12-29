@@ -33,7 +33,7 @@ const buttonVariants = cva(
   },
 );
 
-const Button = React.forwardRef<
+export const Button = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> &
     VariantProps<typeof buttonVariants> & {
@@ -53,6 +53,3 @@ const Button = React.forwardRef<
 });
 
 Button.displayName = "Button";
-
-// eslint-disable-next-line react-refresh/only-export-components
-export { Button, buttonVariants };
