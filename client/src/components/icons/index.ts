@@ -5,6 +5,8 @@ import { cva } from "class-variance-authority";
 const base = "";
 
 export const size = {
+  "4xs": "h-1 w-1",
+  "3xs": "h-2 w-2",
   "2xs": "h-3 w-3",
   xs: "h-4 w-4",
   sm: "h-5 w-5",
