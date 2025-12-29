@@ -40,8 +40,7 @@ export interface MultiplierProps
   borderWidthMax?: number;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const multiplierVariants = cva(
+const multiplierVariants = cva(
   "relative flex items-center justify-center rounded-lg transition-all",
   {
     variants: {

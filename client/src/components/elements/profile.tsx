@@ -6,8 +6,7 @@ export interface ProfileProps
   extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof profileVariants> {}
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const profileVariants = cva("p-0 has-[>svg]:p-0", {
+const profileVariants = cva("p-0 has-[>svg]:p-0", {
   variants: {
     variant: {
       default: "text-primary-100",

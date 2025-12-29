@@ -6,8 +6,7 @@ export interface ConnectProps
   extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof connectVariants> {}
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const connectVariants = cva("p-0 has-[>svg]:p-0", {
+const connectVariants = cva("p-0 has-[>svg]:p-0", {
   variants: {
     variant: {
       default: "",
