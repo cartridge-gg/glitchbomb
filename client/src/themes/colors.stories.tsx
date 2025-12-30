@@ -21,7 +21,7 @@ function Palette({ color, label }: { color: string; label: string }) {
 }
 
 const meta: Meta<typeof Colors> = {
-  title: "Colors/Palette",
+  title: "Styles/Colors",
   component: Colors,
   tags: ["autodocs"],
   parameters: {
