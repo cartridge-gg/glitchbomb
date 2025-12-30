@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import {
-  CashOut,
+  Action,
   Counter,
   GoalTracker,
   Multiplier,
@@ -40,7 +40,13 @@ export const GameHeader = ({
 }: GameHeaderProps) => {
   return (
     <div className={gameHeaderVariants({ variant, className })} {...props}>
-      <CashOut />
+      <Action>
+        <p>
+          Cash
+          <br />
+          Out
+        </p>
+      </Action>
       <div className="grow flex flex-col justify-between gap-4">
         <div className="flex justify-around items-center">
           <Counter variant="moonrock" balance={moonrocks} />
