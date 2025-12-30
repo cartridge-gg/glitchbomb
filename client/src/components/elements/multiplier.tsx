@@ -22,11 +22,12 @@ const NOISE_AMPLITUDE_MAX = 0.5;
 const BORDER_WIDTH_MIN = 2;
 const BORDER_WIDTH_MAX = 5;
 
+export type MultiplierMagnitude = 1 | 2 | 3 | 4 | 5;
+
 export interface MultiplierProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof multiplierVariants> {
   count: number;
-  magnitude: 1 | 2 | 3 | 4 | 5;
   // Animation constants (optional, with defaults)
   animationFrames?: number;
   cornerRadius?: number;
@@ -48,7 +49,7 @@ const multiplierVariants = cva(
         default: "font-bold",
       },
       size: {
-        md: "size-20 text-lg",
+        md: "text-lg",
       },
     },
     defaultVariants: {
@@ -58,11 +59,24 @@ const multiplierVariants = cva(
   },
 );
 
+const multiplierContainerVariants = cva(
+  "relative inline-flex items-center justify-center rounded-lg",
+  {
+    variants: {
+      size: {
+        md: "min-w-20 min-h-20",
+      },
+    },
+    defaultVariants: {
+      size: "md",
+    },
+  },
+);
+
 export const Multiplier = ({
   count,
   variant,
   size,
-  magnitude,
   className,
   // Constants with defaults
   animationFrames = ANIMATION_FRAMES,
@@ -77,6 +91,9 @@ export const Multiplier = ({
   borderWidthMax = BORDER_WIDTH_MAX,
   ...props
 }: MultiplierProps) => {
+  const magnitude: MultiplierMagnitude = useMemo(() => {
+    return Math.floor(Math.min(Math.max(1, count), 5)) as MultiplierMagnitude;
+  }, [count]);
   // Dynamic calculation of amplitude and border width
   const noiseAmplitude = useMemo(
     () =>
@@ -199,7 +216,7 @@ export const Multiplier = ({
       <style>{clipPathAnimation.keyframes}</style>
 
       <div
-        className="relative inline-flex items-center justify-center rounded-lg"
+        className={multiplierContainerVariants({ size })}
         style={
           {
             "--electric-color": cssColor,
@@ -227,7 +244,7 @@ export const Multiplier = ({
         <div
           className={cn(
             multiplierVariants({ variant, size, className }),
-            "relative z-10",
+            "absolute inset-0 z-10",
           )}
           style={{
             backgroundImage: "var(--electric-gradient)",

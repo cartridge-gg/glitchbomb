@@ -21,11 +21,6 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    magnitude: {
-      control: "select",
-      options: [1, 2, 3, 4, 5],
-      description: "Multiplier magnitude level",
-    },
     count: {
       control: { type: "number", min: 1, max: 10 },
       description: "Multiplier count value",
@@ -90,7 +85,6 @@ export const Default: Story = {
   args: {
     count: 3,
     size: "md",
-    magnitude: 1,
     animationFrames: ANIMATION_FRAMES,
     cornerRadius: CORNER_RADIUS,
     safetyMarginMin: SAFETY_MARGIN_MIN,
@@ -107,35 +101,35 @@ export const Default: Story = {
 export const Magnitude2: Story = {
   args: {
     ...Default.args,
-    magnitude: 2,
+    count: 2,
   },
 };
 
 export const Magnitude3: Story = {
   args: {
     ...Default.args,
-    magnitude: 3,
+    count: 3,
   },
 };
 
 export const Magnitude4: Story = {
   args: {
     ...Default.args,
-    magnitude: 4,
+    count: 4,
   },
 };
 
 export const Magnitude5: Story = {
   args: {
     ...Default.args,
-    magnitude: 5,
+    count: 5,
   },
 };
 
 export const HighAmplitude: Story = {
   args: {
     ...Default.args,
-    magnitude: 5,
+    count: 5,
     noiseAmplitudeMin: 0.3,
     noiseAmplitudeMax: 0.8,
   },
@@ -144,7 +138,7 @@ export const HighAmplitude: Story = {
 export const ThickBorder: Story = {
   args: {
     ...Default.args,
-    magnitude: 3,
+    count: 3,
     borderWidthMin: 5,
     borderWidthMax: 10,
   },
@@ -153,7 +147,7 @@ export const ThickBorder: Story = {
 export const SmoothAnimation: Story = {
   args: {
     ...Default.args,
-    magnitude: 3,
+    count: 3,
     animationFrames: 120,
     noisePointsMin: 256,
     noisePointsMax: 512,

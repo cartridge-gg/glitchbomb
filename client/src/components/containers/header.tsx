@@ -13,8 +13,7 @@ export interface HeaderProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof headerVariants> {}
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const headerVariants = cva("", {
+const headerVariants = cva("", {
   variants: {
     variant: {
       default: "w-full py-4 px-4 flex justify-between items-center",
