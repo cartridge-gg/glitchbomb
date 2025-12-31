@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import SlotCounter from "react-slot-counter";
+import { useEffect, useState } from "react";
 
 export interface ScoreProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -10,11 +10,10 @@ export interface ScoreProps
 const scoreVariants = cva("relative", {
   variants: {
     variant: {
-      default:
-        "text-green-400 font-[900] text-5xl tracking-tight flex items-center justify-center",
+      default: "text-green-400 text-5xl flex items-center justify-center",
     },
     size: {
-      md: "h-[41px]",
+      md: "h-[41px] grow",
     },
   },
   defaultVariants: {
@@ -31,6 +30,26 @@ export const Score = ({
   style,
   ...props
 }: ScoreProps) => {
+  const [displayValue, setDisplayValue] = useState(value);
+  const [isGlitch, setIsGlitch] = useState(false);
+
+  useEffect(() => {
+    if (value !== displayValue) {
+      // Switch to glitch font
+      setIsGlitch(true);
+
+      // Update value after a short delay
+      setTimeout(() => {
+        setDisplayValue(value);
+
+        // Return to normal font
+        setTimeout(() => {
+          setIsGlitch(false);
+        }, 200);
+      }, 100);
+    }
+  }, [value, displayValue]);
+
   return (
     <div
       className={scoreVariants({ variant, size, className })}
@@ -40,11 +59,15 @@ export const Score = ({
       }}
       {...props}
     >
-      <SlotCounter
-        value={value}
-        autoAnimationStart={false}
-        useMonospaceWidth={true}
-      />
+      <span
+        className={
+          isGlitch
+            ? "font-glitch -translate-y-[1.5px] scale-[1.01]"
+            : "font-primary"
+        }
+      >
+        {displayValue}
+      </span>
     </div>
   );
 };
