@@ -46,7 +46,7 @@ const multiplierVariants = cva(
   {
     variants: {
       variant: {
-        default: "font-bold",
+        default: "h-full w-auto font-bold",
       },
       size: {
         md: "text-lg",
@@ -60,11 +60,11 @@ const multiplierVariants = cva(
 );
 
 const multiplierContainerVariants = cva(
-  "relative inline-flex items-center justify-center rounded-lg",
+  "relative flex items-center justify-center rounded-lg",
   {
     variants: {
       size: {
-        md: "min-w-20 min-h-20",
+        md: "h-full",
       },
     },
     defaultVariants: {
@@ -215,47 +215,48 @@ export const Multiplier = ({
       {/* Inject keyframes dynamically */}
       <style>{clipPathAnimation.keyframes}</style>
 
-      <div
-        className={multiplierContainerVariants({ size })}
-        style={
-          {
-            "--electric-color": cssColor,
-            "--electric-gradient": cssGradient,
-            "--electric-border-gradient": cssBorderGradient,
-            // Large CSS border to create safety margin
-            padding: `${safetyMargin}%`,
-          } as React.CSSProperties
-        }
-      >
-        {/* 1. Glow Layers */}
-        <div className="absolute inset-0 opacity-20 blur-xl bg-[var(--electric-color)]" />
-
-        {/* 2. Electric Border with animated clip-path */}
+      <div className={cn(multiplierContainerVariants({ size }), className)}>
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: "var(--electric-border-gradient)",
-            boxShadow: "0 0 8px var(--electric-color)",
-            animation: `${clipPathAnimation.borderName} 2s ease-in-out infinite`,
-          }}
-        />
-
-        {/* 3. Component Content with synchronized clip-path */}
-        <div
-          className={cn(
-            multiplierVariants({ variant, size, className }),
-            "absolute inset-0 z-10",
-          )}
-          style={{
-            backgroundImage: "var(--electric-gradient)",
-            animation: `${clipPathAnimation.contentName} 2s ease-in-out infinite`,
-          }}
-          {...props}
+          className="relative w-full h-full flex items-center justify-center"
+          style={
+            {
+              "--electric-color": cssColor,
+              "--electric-gradient": cssGradient,
+              "--electric-border-gradient": cssBorderGradient,
+              padding: `${safetyMargin}%`,
+            } as React.CSSProperties
+          }
         >
-          <p
-            className="font-secondary tracking-widest select-none"
-            style={{ color: "var(--electric-color)" }}
-          >{`${count}X`}</p>
+          {/* 1. Glow Layers */}
+          <div className="absolute inset-0 opacity-20 blur-xl bg-[var(--electric-color)]" />
+
+          {/* 2. Electric Border with animated clip-path */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: "var(--electric-border-gradient)",
+              boxShadow: "0 0 8px var(--electric-color)",
+              animation: `${clipPathAnimation.borderName} 2s ease-in-out infinite`,
+            }}
+          />
+
+          {/* 3. Component Content with synchronized clip-path */}
+          <div
+            className={cn(
+              multiplierVariants({ variant, size }),
+              "absolute inset-0 z-10",
+            )}
+            style={{
+              backgroundImage: "var(--electric-gradient)",
+              animation: `${clipPathAnimation.contentName} 2s ease-in-out infinite`,
+            }}
+            {...props}
+          >
+            <p
+              className="font-secondary tracking-widest select-none"
+              style={{ color: "var(--electric-color)" }}
+            >{`${count}X`}</p>
+          </div>
         </div>
       </div>
     </>

@@ -196,7 +196,7 @@ export const Animated = () => {
       <div className="flex flex-col items-center gap-4">
         <button
           onClick={randomize}
-          className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+          className="px-6 py-2 bg-green-950 text-white rounded-lg hover:bg-green-600 transition-colors"
           type="button"
         >
           Randomize

@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface ActionProps
   extends React.HTMLAttributes<HTMLButtonElement>,
@@ -8,14 +9,14 @@ export interface ActionProps
   disabled?: boolean;
 }
 
-const actionVariants = cva("select-none", {
+const actionVariants = cva("select-none flex-1 min-w-0 !px-0", {
   variants: {
     variant: {
       default:
-        "bg-green-500 hover:bg-green-300 rounded-xl uppercase text-sm tracking-widest text-center [&_p]:font-secondary border-0 data-[active=true]:border border-green-100 disabled:text-green-300",
+        "bg-green-950 hover:bg-green-900 rounded-xl uppercase text-sm tracking-widest text-center [&_p]:font-secondary border-0 data-[active=true]:border border-green-400 disabled:text-green-900",
     },
     size: {
-      md: "size-20",
+      md: "h-full",
     },
   },
   defaultVariants: {
@@ -38,7 +39,7 @@ export const Action = ({
       variant="secondary"
       data-active={active}
       disabled={disabled}
-      className={actionVariants({ variant, size, className })}
+      className={cn(actionVariants({ variant, size }), className)}
       {...props}
     >
       {children}

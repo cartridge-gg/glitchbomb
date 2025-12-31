@@ -15,7 +15,7 @@ export interface GameFooterProps
 const gameFooterVariants = cva("flex gap-6 items-center justify-between", {
   variants: {
     variant: {
-      default: "h-20 max-w-[420px] mx-auto",
+      default: "h-[70px] max-w-[420px] mx-auto",
     },
   },
   defaultVariants: {

@@ -1,48 +1,58 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion } from "framer-motion";
 
 export interface GoalTrackerProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof goalTrackerVariants> {
   value: number;
-  label?: string;
+  total: number;
 }
 
-const goalTrackerVariants = cva("flex rounded-full overflow-hidden", {
-  variants: {
-    variant: {
-      default: "text-green-100",
+const goalTrackerVariants = cva(
+  "relative flex rounded-full overflow-hidden justify-center items-center",
+  {
+    variants: {
+      variant: {
+        default: "text-green-400  bg-green-950",
+      },
+      size: {
+        md: "h-5 w-full",
+      },
     },
-    size: {
-      md: "h-5 w-full",
+    defaultVariants: {
+      variant: "default",
+      size: "md",
     },
   },
-  defaultVariants: {
-    variant: "default",
-    size: "md",
-  },
-});
+);
 
 export const GoalTracker = ({
   value,
-  label = "Goal :",
+  total,
   variant,
   size,
   className,
   ...props
 }: GoalTrackerProps) => {
+  const percentage = (value / total) * 100;
+
   return (
     <div
       className={goalTrackerVariants({ variant, size, className })}
       {...props}
     >
-      <div className="flex items-center justify-end h-full w-1/2 bg-green-300">
-        <p className="uppercase font-secondary text-2xs tracking-widest pr-1 pl-4 whitespace-nowrap">
-          {label}
-        </p>
-      </div>
-      <div className="flex items-center justify-start h-full w-1/2 bg-green-500">
-        <p className="uppercase font-secondary text-2xs tracking-widest pl-2 pr-4 whitespace-nowrap">{`${value} pts`}</p>
-      </div>
+      <motion.div
+        className="absolute inset-0 bg-green-900 h-full"
+        initial={{ width: "0%" }}
+        animate={{ width: `${percentage}%` }}
+        transition={{
+          duration: 0.5,
+          ease: "easeInOut",
+        }}
+      />
+      <p className="relative uppercase font-secondary text-2xs tracking-widest pr-1 pl-4 whitespace-nowrap">
+        {`Goal : ${total} pts`}
+      </p>
     </div>
   );
 };

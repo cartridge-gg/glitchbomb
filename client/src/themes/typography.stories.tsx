@@ -18,7 +18,7 @@ function Title({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between items-end">
-        <p className="text-[9px]/[9px] tracking-widest uppercase font-mono text-green-100">
+        <p className="text-[9px]/[9px] tracking-widest uppercase font-mono text-green-400">
           {name}
         </p>
         <p className={cn("uppercase", className)}>{label}</p>

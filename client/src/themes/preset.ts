@@ -15,10 +15,7 @@ export const preset: Partial<Config> = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "var(--green-100)",
-          100: "var(--green-100)",
-          300: "var(--green-300)",
-          500: "var(--green-500)",
+          DEFAULT: "var(--green-400)",
         },
         neon: {
           DEFAULT: "var(--neon-100)",
@@ -36,8 +33,15 @@ export const preset: Partial<Config> = {
         green: {
           DEFAULT: "var(--green-100)",
           100: "var(--green-100)",
+          200: "var(--green-200)",
           300: "var(--green-300)",
+          400: "var(--green-400)",
           500: "var(--green-500)",
+          600: "var(--green-600)",
+          700: "var(--green-700)",
+          800: "var(--green-800)",
+          900: "var(--green-900)",
+          950: "var(--green-950)",
         },
         yellow: {
           DEFAULT: "var(--yellow-100)",

@@ -22,10 +22,10 @@ const bombTrackerVariants = cva(
   {
     variants: {
       variant: {
-        default: "text-green-100",
+        default: "text-green-400",
       },
       size: {
-        md: "h-10 w-full",
+        md: "h-10 w-auto",
       },
     },
     defaultVariants: {

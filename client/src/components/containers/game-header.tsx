@@ -17,10 +17,10 @@ export interface GameHeaderProps
   milestone: number;
 }
 
-const gameHeaderVariants = cva("flex gap-3 items-stretch justify-between", {
+const gameHeaderVariants = cva("flex gap-6 items-stretch justify-between", {
   variants: {
     variant: {
-      default: "h-20 max-w-[420px] mx-auto",
+      default: "h-[76px] max-w-[420px] mx-auto",
     },
   },
   defaultVariants: {
@@ -47,15 +47,15 @@ export const GameHeader = ({
           Out
         </p>
       </Action>
-      <div className="grow flex flex-col justify-between gap-4">
+      <div className="flex flex-col justify-between min-w-[152px]">
         <div className="flex justify-around items-center">
           <Counter variant="moonrock" balance={moonrocks} />
           <Score value={score} />
           <Counter variant="chip" balance={chips} />
         </div>
-        <GoalTracker value={milestone} />
+        <GoalTracker value={score} total={milestone} />
       </div>
-      <Multiplier count={multiplier} />
+      <Multiplier className="flex-1 min-w-0 shrink" count={multiplier} />
     </div>
   );
 };
