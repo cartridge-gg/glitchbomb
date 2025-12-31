@@ -11,7 +11,7 @@ const scoreVariants = cva("relative", {
   variants: {
     variant: {
       default:
-        "text-green-100 font-[900] text-5xl tracking-tight flex items-center justify-center",
+        "text-green-400 font-[900] text-5xl tracking-tight flex items-center justify-center",
     },
     size: {
       md: "h-[41px]",
@@ -35,7 +35,7 @@ export const Score = ({
     <div
       className={scoreVariants({ variant, size, className })}
       style={{
-        filter: "drop-shadow(0px 0px 13px var(--green-300))",
+        filter: "drop-shadow(0px 0px 13px var(--green-900))",
         ...style,
       }}
       {...props}

@@ -29,6 +29,7 @@ const meta = {
     variant: "default",
     size: "md",
     onClick: fn(),
+    className: "size-20",
     children: (
       <p>
         Cash

@@ -52,12 +52,18 @@ export const Blue: Story = {
 export const Green: Story = {
   args: {
     children: (
-      <>
-        <Palette color="bg-green" label="bg-green" />
+      <div className="flex gap-4 flex-wrap">
         <Palette color="bg-green-100" label="bg-green-100" />
+        <Palette color="bg-green-200" label="bg-green-200" />
         <Palette color="bg-green-300" label="bg-green-300" />
+        <Palette color="bg-green-400" label="bg-green-400" />
         <Palette color="bg-green-500" label="bg-green-500" />
-      </>
+        <Palette color="bg-green-600" label="bg-green-600" />
+        <Palette color="bg-green-700" label="bg-green-700" />
+        <Palette color="bg-green-800" label="bg-green-800" />
+        <Palette color="bg-green-900" label="bg-green-900" />
+        <Palette color="bg-green-950" label="bg-green-950" />
+      </div>
     ),
   },
 };

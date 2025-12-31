@@ -41,7 +41,7 @@ const VARIANT_COLORS = {
     cssVar: "var(--red-100)",
   },
   point: {
-    cssVar: "var(--green-100)",
+    cssVar: "var(--green-400)",
   },
   multiplier: {
     cssVar: "var(--yellow-100)",

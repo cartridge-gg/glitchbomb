@@ -34,8 +34,8 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
   },
   {
     key: "points",
-    bgColor: "var(--green-300)", // Custom green from preset
-    iconColor: "var(--green-100)", // Custom green from preset
+    bgColor: "var(--green-900)", // Custom green from preset
+    iconColor: "var(--green-400)", // Custom green from preset
     Icon: SparklesIcon,
   },
   {

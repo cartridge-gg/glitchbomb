@@ -39,7 +39,7 @@ export const Default: Story = {
 export const Orbs: Story = {
   render: () => (
     <div className="flex justify-center items-end gap-4 text-white">
-      <Icons.OrbPointIcon className="h-[110px] w-[110px] text-green-100" />
+      <Icons.OrbPointIcon className="h-[110px] w-[110px] text-green-400" />
       <Icons.OrbBombIcon className="h-[110px] w-[110px] text-red-100" />
       <Icons.OrbHealthIcon className="h-[110px] w-[110px] text-salmon-100" />
       <Icons.OrbMultiplierIcon className="h-[110px] w-[110px] text-yellow-100" />
@@ -182,7 +182,7 @@ export const Warning: Story = {
 export const Bomb: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-center items-end gap-4 text-green-100">
+      <div className="flex justify-center items-end gap-4 text-green-400">
         {sizes.map((size, index) => (
           <Icons.BombIcon
             key={size}

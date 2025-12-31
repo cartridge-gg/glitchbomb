@@ -16,7 +16,7 @@ const meta = {
     },
   },
   args: {
-    score: 58,
+    score: 11,
     multiplier: 1,
     moonrocks: 80,
     chips: 36,
