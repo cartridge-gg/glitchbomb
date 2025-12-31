@@ -73,11 +73,6 @@ export const Distribution = ({
   const circumference = DistributionMath.calculateCircumference(radius);
   const center = size / 2;
 
-  // Overlap between segments in degrees
-  const overlapDegrees = 0.4;
-  const overlapPercentage =
-    DistributionMath.degreesToPercentage(overlapDegrees);
-
   // Minimum percentage needed to show an icon (adjust based on icon size)
   const minPercentageForIcon = DistributionMath.calculateMinPercentageForIcon(
     32,
@@ -112,13 +107,10 @@ export const Distribution = ({
         {/* Segments */}
         {segments.map((segment, index) => {
           const adjustedPercentage =
-            DistributionMath.calculateAdjustedPercentage(
-              segment.percentage,
-              overlapPercentage,
-            );
+            DistributionMath.calculateAdjustedPercentage(segment.percentage, 0);
           const adjustedOffset = DistributionMath.calculateAdjustedOffset(
             segment.offset,
-            overlapPercentage,
+            0,
             index === 0,
           );
 
