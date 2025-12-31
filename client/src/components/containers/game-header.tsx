@@ -48,7 +48,7 @@ export const GameHeader = ({
         </p>
       </Action>
       <div className="flex flex-col justify-between min-w-[152px]">
-        <div className="flex justify-around items-center">
+        <div className="flex justify-between items-center">
           <Counter variant="moonrock" balance={moonrocks} />
           <Score value={score} />
           <Counter variant="chip" balance={chips} />
