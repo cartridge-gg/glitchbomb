@@ -8,4 +8,5 @@ export * from "./goal-tracker";
 export * from "./multiplier";
 export * from "./profile";
 export * from "./puller";
+export * from "./recent-pulls";
 export * from "./score";

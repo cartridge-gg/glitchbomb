@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { GoalTracker } from "./goal-tracker";
 
 const meta = {
-  title: "Elements/GoalTracker",
+  title: "Elements/Goal Tracker",
   component: GoalTracker,
   parameters: {
     layout: "centered",
