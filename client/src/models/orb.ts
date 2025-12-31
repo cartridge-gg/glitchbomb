@@ -141,50 +141,100 @@ export class Orb {
     }
   }
 
+  public variant():
+    | "green"
+    | "yellow"
+    | "orange"
+    | "red"
+    | "blue"
+    | "default"
+    | "salmon" {
+    switch (this.value) {
+      case OrbType.Bomb1:
+        return "red";
+      case OrbType.Bomb2:
+        return "red";
+      case OrbType.Bomb3:
+        return "red";
+      case OrbType.Health1:
+        return "salmon";
+      case OrbType.Health2:
+        return "salmon";
+      case OrbType.Health3:
+        return "salmon";
+      case OrbType.Multiplier50:
+        return "yellow";
+      case OrbType.Multiplier100:
+        return "yellow";
+      case OrbType.Multiplier150:
+        return "yellow";
+      case OrbType.Point5:
+        return "green";
+      case OrbType.Point6:
+        return "green";
+      case OrbType.Point7:
+        return "green";
+      case OrbType.Point8:
+        return "green";
+      case OrbType.Point9:
+        return "green";
+      case OrbType.PointOrb1:
+        return "green";
+      case OrbType.PointBomb4:
+        return "green";
+      case OrbType.Moonrock15:
+        return "blue";
+      case OrbType.Moonrock40:
+        return "blue";
+      case OrbType.Chips15:
+        return "orange";
+      default:
+        return "default";
+    }
+  }
+
   public color(): string {
     switch (this.value) {
       case OrbType.Bomb1:
-        return "#FF6B6B";
+        return "var(--red-100)";
       case OrbType.Bomb2:
-        return "#4ECDC4";
+        return "var(--red-100)";
       case OrbType.Bomb3:
-        return "#45B7D1";
+        return "var(--red-100)";
       case OrbType.Health1:
-        return "#FFA07A";
+        return "var(--salmon-100)";
       case OrbType.Health2:
-        return "#98D8C8";
+        return "var(--salmon-100)";
       case OrbType.Health3:
-        return "#F7DC6F";
+        return "var(--salmon-100)";
       case OrbType.Multiplier50:
-        return "#BB8FCE";
+        return "var(--yellow-100)";
       case OrbType.Multiplier100:
-        return "#F39C12";
+        return "var(--yellow-100)";
       case OrbType.Multiplier150:
-        return "#52C97E";
+        return "var(--yellow-100)";
       case OrbType.Point5:
-        return "#E74C3C";
+        return "var(--green-400)";
       case OrbType.Point6:
-        return "#3498DB";
+        return "var(--green-400)";
       case OrbType.Point7:
-        return "#9B59B6";
+        return "var(--green-400)";
       case OrbType.Point8:
-        return "#1ABC9C";
+        return "var(--green-400)";
       case OrbType.Point9:
-        return "#E67E22";
+        return "var(--green-400)";
       case OrbType.PointOrb1:
-        return "#95A5A6";
+        return "var(--green-400)";
       case OrbType.PointBomb4:
-        return "#2E8B57";
+        return "var(--green-400)";
       case OrbType.Moonrock15:
-        return "#8B0000";
+        return "var(--blue-100)";
       case OrbType.Moonrock40:
-        return "#8B0000";
+        return "var(--blue-100)";
       case OrbType.Chips15:
-        return "#2E8B57";
-      case OrbType.CurseScoreDecrease:
-        return "#95A5A6";
+        return "var(--orange-100)";
       default:
-        return "#95A5A6";
+        return "var(--white-100)";
     }
   }
 }
