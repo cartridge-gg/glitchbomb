@@ -31,7 +31,6 @@ export const Dot = ({
   variant,
   size,
   className,
-  children,
   style,
   ...props
 }: DotProps) => {
