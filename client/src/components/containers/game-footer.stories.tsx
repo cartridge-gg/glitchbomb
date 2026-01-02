@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "@storybook/test";
 import { GameFooter } from "./game-footer";
 
 const meta = {
@@ -21,6 +22,7 @@ const meta = {
       double: { total: 1, count: 1 },
       triple: { total: 1, count: 1 },
     },
+    onRightClick: fn(),
   },
 } satisfies Meta<typeof GameFooter>;
 

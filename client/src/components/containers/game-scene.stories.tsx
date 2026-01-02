@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "@storybook/test";
 import { GameScene } from "./game-scene";
 
 const meta: Meta<typeof GameScene> = {
@@ -38,6 +39,7 @@ const meta: Meta<typeof GameScene> = {
       moonrocks: 8,
       health: 5,
     },
+    onPull: fn(),
   },
 };
 
