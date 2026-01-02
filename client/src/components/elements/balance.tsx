@@ -6,15 +6,17 @@ export interface BalanceProps
   extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof balanceVariants> {
   balance: number;
+  highlight?: boolean;
 }
 
-const balanceVariants = cva("", {
+const balanceVariants = cva("flex justify-center items-center", {
   variants: {
     variant: {
-      default: "px-3 md:px-4 py-2 text-2xl tracking-wide gap-2",
+      default: "",
+      secondary: "",
     },
     size: {
-      md: "h-10",
+      md: "h-12 w-full",
     },
   },
   defaultVariants: {
@@ -25,6 +27,7 @@ const balanceVariants = cva("", {
 
 export const Balance = ({
   balance,
+  highlight,
   variant,
   size,
   className,
@@ -33,11 +36,11 @@ export const Balance = ({
   return (
     <Button
       className={balanceVariants({ variant, size, className })}
-      variant="secondary"
+      variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <TokenIcon size="md" />
-      {`${balance.toLocaleString()}`}
+      <TokenIcon size="xs" />
+      <span className="font-secondary uppercase text-sm tracking-widest font-normal">{`${balance.toLocaleString()}`}</span>
     </Button>
   );
 };

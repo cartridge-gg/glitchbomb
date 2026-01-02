@@ -7,14 +7,16 @@ export interface BombDetail {
   count: number;
 }
 
+export interface BombDetails {
+  simple: BombDetail;
+  double: BombDetail;
+  triple: BombDetail;
+}
+
 export interface BombTrackerProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof bombTrackerVariants> {
-  details: {
-    simple: BombDetail;
-    double: BombDetail;
-    triple: BombDetail;
-  };
+  details: BombDetails;
 }
 
 const bombTrackerVariants = cva(

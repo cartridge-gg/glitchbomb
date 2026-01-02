@@ -107,6 +107,18 @@ export const Dot: Story = {
   ),
 };
 
+export const GlitchBomb: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.HeartIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
 export const Heart: Story = {
   render: () => (
     <div className="flex flex-col gap-4">

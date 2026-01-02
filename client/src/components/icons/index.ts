@@ -33,6 +33,7 @@ export * from "./chip";
 export * from "./controller";
 export * from "./cross";
 export * from "./dot";
+export * from "./glitch-bomb";
 export * from "./heart";
 export * from "./list";
 export * from "./moonrock";

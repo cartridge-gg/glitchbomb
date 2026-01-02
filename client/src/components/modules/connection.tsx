@@ -1,31 +1,11 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { cva, type VariantProps } from "class-variance-authority";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Connect, Profile } from "@/components/elements";
 
-export interface ConnectionProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof connectionVariants> {}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const connectionVariants = cva("", {
-  variants: {
-    variant: {
-      default: "flex",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
-
-export const Connection = ({
-  variant,
-  className,
-  ...props
-}: ConnectionProps) => {
+export const Connection = () => {
   const { account, connector } = useAccount();
+  const [username, setUsername] = useState<string>();
   const { connectAsync, connectors } = useConnect();
 
   const onProfileClick = useCallback(async () => {
@@ -35,17 +15,21 @@ export const Connection = ({
   }, [connector]);
 
   const onConnectClick = useCallback(async () => {
-    console.log({ connectors });
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
 
-  return (
-    <div className={connectionVariants({ variant, className })} {...props}>
-      {account ? (
-        <Profile onClick={onProfileClick} />
-      ) : (
-        <Connect onClick={onConnectClick} />
-      )}
-    </div>
+  useEffect(() => {
+    if (!connector) return;
+    (connector as never as ControllerConnector).controller
+      .username()
+      ?.then((username) => {
+        setUsername(username);
+      });
+  }, [connector]);
+
+  return account && username ? (
+    <Profile username={`${username}`} onClick={onProfileClick} />
+  ) : (
+    <Connect highlight onClick={onConnectClick} />
   );
 };

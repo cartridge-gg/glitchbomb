@@ -1,5 +1,7 @@
 import type { RawPack } from "@/models";
 
+export const PACK = "Pack";
+
 export class Pack {
   id: number;
   game_count: number;
@@ -9,6 +11,10 @@ export class Pack {
     this.id = id;
     this.game_count = game_count;
     this.moonrocks = moonrocks;
+  }
+
+  static getModelName(): string {
+    return PACK;
   }
 
   static from(data: RawPack): Pack {

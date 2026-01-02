@@ -1,18 +1,21 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { ControllerIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 export interface ProfileProps
   extends React.HTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof profileVariants> {}
+    VariantProps<typeof profileVariants> {
+  username: string;
+  highlight?: boolean;
+}
 
-const profileVariants = cva("p-0 has-[>svg]:p-0", {
+const profileVariants = cva("", {
   variants: {
     variant: {
-      default: "text-primary-100",
+      default: "",
+      secondary: "bg-green-950 hover:bg-green-900 border-0",
     },
     size: {
-      md: "h-10 w-10",
+      md: "h-12 w-full",
     },
   },
   defaultVariants: {
@@ -22,6 +25,8 @@ const profileVariants = cva("p-0 has-[>svg]:p-0", {
 });
 
 export const Profile = ({
+  username,
+  highlight,
   variant,
   size,
   className,
@@ -30,10 +35,12 @@ export const Profile = ({
   return (
     <Button
       className={profileVariants({ variant, size, className })}
-      variant="secondary"
+      variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <ControllerIcon size="md" />
+      <span className="truncate block w-full font-secondary uppercase text-sm tracking-widest font-normal">
+        {username}
+      </span>
     </Button>
   );
 };

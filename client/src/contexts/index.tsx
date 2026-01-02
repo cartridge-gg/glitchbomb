@@ -114,7 +114,6 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   // Handler for entity updates (packs)
   const onEntityUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
-      console.log(data);
       if (!data || data.error) return;
       (data.data || [data] || []).forEach((entity) => {
         if (entity.models[`${NAMESPACE}-${CONFIG}`]) {
@@ -227,7 +226,14 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
 
   // Initial fetch and subscription setup
   useEffect(() => {
-    if (entitiesSubscriptionRef.current) return;
+    if (
+      entitiesSubscriptionRef.current &&
+      !!pack &&
+      pack.id === packId &&
+      !!game &&
+      game.id === gameId
+    )
+      return;
     setStatus("loading");
     refresh()
       .then(() => {
@@ -249,7 +255,7 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
         gameSubscriptionRef.current.cancel();
       }
     };
-  }, [refresh]);
+  }, [refresh, packId, gameId, pack, game]);
 
   const value: EntitiesContextType = {
     client,
