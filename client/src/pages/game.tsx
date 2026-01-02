@@ -23,8 +23,6 @@ export const Game = () => {
   return (
     <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6">
       <GameHeader
-        packId={pack.id}
-        gameId={game.id}
         score={game.points}
         multiplier={game.multiplier}
         moonrocks={pack.moonrocks}
@@ -34,8 +32,6 @@ export const Game = () => {
         onLeftClick={() => cashOut(pack.id, game.id)}
       />
       <GameScene
-        packId={pack.id}
-        gameId={game.id}
         className="grow"
         lives={game.health}
         orbs={game.pullables.length}
