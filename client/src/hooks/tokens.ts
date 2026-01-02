@@ -5,17 +5,16 @@ import type {
   TokenBalance,
   TokenContract,
 } from "@dojoengine/torii-wasm";
-import { useAccount, useNetwork } from "@starknet-react/core";
+import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addAddressPadding, num } from "starknet";
-import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { equal } from "@/helpers";
 
 const CONTRACT_LIMIT = 1_000;
 const BALANCE_LIMIT = 1_000;
 
-function toDecimal(
+export function toDecimal(
   token: TokenContract,
   balance: TokenBalance | undefined,
 ): bigint {
@@ -72,9 +71,8 @@ export function useTokens(
     GetTokenBalanceRequest & { contractType?: ContractType },
 ) {
   const { account } = useAccount();
-  const { chain } = useNetwork();
   const { client } = useEntitiesContext();
-  const [balance, setBalance] = useState<number>(0);
+  const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const requestRef = useRef<(GetTokenRequest & GetTokenBalanceRequest) | null>(
     null,
   );
@@ -91,11 +89,7 @@ export function useTokens(
   const { contracts } = useTokenContracts(request);
 
   const fetchBalances = useCallback(async () => {
-    if (!requestRef.current || !client || !contracts.length || !account) return;
-    const tokenAddress = getTokenAddress(chain.id);
-    const tokenContract = contracts.find(
-      (c) => BigInt(c.contract_address) === BigInt(tokenAddress),
-    );
+    if (!requestRef.current || !client || !account) return;
     const contractAddresses =
       request.contractAddresses?.map((i: string) =>
         addAddressPadding(num.toHex64(i)),
@@ -104,7 +98,6 @@ export function useTokens(
       request.accountAddresses?.map((i: string) =>
         addAddressPadding(num.toHex64(i)),
       ) || [];
-    if (!tokenContract) return;
     // Fetch initial balance
     const balances = await client.getTokenBalances({
       contract_addresses: contractAddresses,
@@ -123,7 +116,7 @@ export function useTokens(
       accountAddresses,
       [],
       async (data: TokenBalance) => {
-        setBalance(Number(toDecimal(tokenContract, data)));
+        setTokenBalances((prev) => update(prev, data));
       },
     );
 
@@ -131,18 +124,8 @@ export function useTokens(
       subscriptionRef.current.cancel();
     }
     subscriptionRef.current = subscription;
-    const tokenBalance = balances.items.find(
-      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
-    );
-    setBalance(Number(toDecimal(tokenContract, tokenBalance)));
-  }, [
-    client,
-    contracts,
-    chain.id,
-    account,
-    request.contractAddresses,
-    request.accountAddresses,
-  ]);
+    setTokenBalances(balances.items);
+  }, [client, account, request.contractAddresses, request.accountAddresses]);
 
   useEffect(() => {
     if (
@@ -161,7 +144,37 @@ export function useTokens(
   }, [fetchBalances]);
 
   return {
-    balance,
+    tokenContracts: contracts,
+    tokenBalances,
     refetch,
   };
+}
+
+function update(
+  previousBalances: TokenBalance[],
+  newBalance: TokenBalance,
+): TokenBalance[] {
+  if (
+    BigInt(newBalance.account_address) === 0n &&
+    BigInt(newBalance.contract_address) === 0n
+  ) {
+    return previousBalances;
+  }
+  const existingBalanceIndex = previousBalances.findIndex(
+    (balance) =>
+      BigInt(balance.token_id || 0) === BigInt(newBalance.token_id || 0) &&
+      BigInt(balance.contract_address) ===
+        BigInt(newBalance.contract_address) &&
+      BigInt(balance.account_address) === BigInt(newBalance.account_address),
+  );
+
+  // If balance doesn't exist, append it to the list
+  if (existingBalanceIndex === -1) {
+    return [...previousBalances, newBalance];
+  }
+
+  // If balance exists, update it while preserving order
+  return previousBalances.map((balance, index) =>
+    index === existingBalanceIndex ? newBalance : balance,
+  );
 }

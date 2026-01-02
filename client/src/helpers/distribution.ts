@@ -6,6 +6,7 @@ export interface SegmentConfig {
   bgColor: string;
   iconColor: string;
   Icon: React.ForwardRefExoticComponent<IconProps>;
+  order: number;
 }
 
 export interface Segment {
@@ -40,7 +41,7 @@ export const DistributionMath = {
     let currentOffset = 0;
     const result: Segment[] = [];
 
-    for (const config of configs) {
+    for (const config of configs.sort((a, b) => a.order - b.order)) {
       const value = Math.max(0, values[config.key]);
       if (value === 0) continue;
 

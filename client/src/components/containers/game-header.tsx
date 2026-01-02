@@ -15,6 +15,7 @@ export interface GameHeaderProps
   moonrocks: number;
   chips: number;
   milestone: number;
+  onLeftClick: () => void;
 }
 
 const gameHeaderVariants = cva("flex gap-6 items-stretch justify-between", {
@@ -36,11 +37,12 @@ export const GameHeader = ({
   milestone,
   variant,
   className,
+  onLeftClick,
   ...props
 }: GameHeaderProps) => {
   return (
     <div className={gameHeaderVariants({ variant, className })} {...props}>
-      <Action>
+      <Action onClick={onLeftClick}>
         <p>
           Cash
           <br />

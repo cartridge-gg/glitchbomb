@@ -90,6 +90,56 @@ export class Orb {
     return this.value === OrbType.None;
   }
 
+  public isBomb(): boolean {
+    return (
+      this.value === OrbType.Bomb1 ||
+      this.value === OrbType.Bomb2 ||
+      this.value === OrbType.Bomb3
+    );
+  }
+
+  public isHealth(): boolean {
+    return (
+      this.value === OrbType.Health1 ||
+      this.value === OrbType.Health2 ||
+      this.value === OrbType.Health3
+    );
+  }
+
+  public isMultiplier(): boolean {
+    return (
+      this.value === OrbType.Multiplier50 ||
+      this.value === OrbType.Multiplier100 ||
+      this.value === OrbType.Multiplier150
+    );
+  }
+
+  public isPoint(): boolean {
+    return (
+      this.value === OrbType.Point5 ||
+      this.value === OrbType.Point6 ||
+      this.value === OrbType.Point7 ||
+      this.value === OrbType.Point8 ||
+      this.value === OrbType.Point9 ||
+      this.value === OrbType.PointOrb1 ||
+      this.value === OrbType.PointBomb4
+    );
+  }
+
+  public isMoonrock(): boolean {
+    return (
+      this.value === OrbType.Moonrock15 || this.value === OrbType.Moonrock40
+    );
+  }
+
+  public isChips(): boolean {
+    return this.value === OrbType.Chips15;
+  }
+
+  public isCurse(): boolean {
+    return this.value === OrbType.CurseScoreDecrease;
+  }
+
   public index(): number {
     return this.into();
   }

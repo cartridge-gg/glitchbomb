@@ -9,7 +9,7 @@ import { DotIcon, HeartIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
-  "relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer outline-none border-none",
+  "select-none relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer outline-none border-none",
   {
     variants: {
       variant: {
@@ -22,7 +22,7 @@ const pullerVariants = cva(
         rainbow: "",
       },
       size: {
-        md: "w-[166px] h-[166px]",
+        md: "w-[250px] h-[250px]",
       },
     },
     defaultVariants: {
@@ -112,6 +112,9 @@ export const Puller = ({
       className={cn(pullerVariants({ variant, size, className }))}
       whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      style={{
+        boxShadow: "0px 0px 50px 30px #000000",
+      }}
       {...props}
     >
       <div className="absolute inset-0 rounded-full overflow-hidden">
@@ -172,7 +175,7 @@ export const Puller = ({
       {/* 5. Content */}
       <div className="relative z-10 bg-transparent flex flex-col items-center gap-2.5 pt-4">
         <p
-          className="text-center text-[32px]/[28px] font-[900]"
+          className="text-center text-[50px]/[50px] font-[900]"
           style={{
             color: currentColor.cssVar,
             filter: `drop-shadow(0 0 20px color-mix(in srgb, ${currentColor.cssVar} 80%, transparent))`,

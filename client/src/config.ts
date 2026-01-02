@@ -77,6 +77,10 @@ export const getTokenAddress = (chainId: bigint) => {
   return getContractAddress(chainId, NAMESPACE, "Token");
 };
 
+export const getCollectionAddress = (chainId: bigint) => {
+  return getContractAddress(chainId, NAMESPACE, "Collection");
+};
+
 export const getGameAddress = (chainId: bigint) => {
   return getContractAddress(chainId, NAMESPACE, "Play");
 };

@@ -10,6 +10,7 @@ export interface GameFooterProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameFooterVariants> {
   details: BombTrackerProps["details"];
+  onRightClick: () => void;
 }
 
 const gameFooterVariants = cva("flex gap-6 items-center justify-between", {
@@ -27,6 +28,7 @@ export const GameFooter = ({
   details,
   variant,
   className,
+  onRightClick,
   ...props
 }: GameFooterProps) => {
   return (
@@ -35,7 +37,7 @@ export const GameFooter = ({
         <ListIcon />
       </Action>
       <BombTracker details={details} />
-      <Action>
+      <Action onClick={onRightClick}>
         <ArrowDownIcon />
       </Action>
     </div>

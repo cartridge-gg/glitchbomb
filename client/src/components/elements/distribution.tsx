@@ -3,6 +3,7 @@ import {
   BombOrbIcon,
   ChipIcon,
   CrossIcon,
+  HeartIcon,
   MoonrockIcon,
   SparklesIcon,
 } from "@/components/icons";
@@ -13,6 +14,7 @@ export interface DistributionValues {
   bombs: number;
   points: number;
   multipliers: number;
+  health: number;
   chips: number;
   moonrocks: number;
 }
@@ -31,37 +33,49 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
     bgColor: "var(--red-300)", // Custom red from preset
     iconColor: "var(--red-100)", // Custom red from preset
     Icon: BombOrbIcon,
+    order: 0,
   },
   {
     key: "points",
     bgColor: "var(--green-900)", // Custom green from preset
     iconColor: "var(--green-400)", // Custom green from preset
     Icon: SparklesIcon,
+    order: 1,
   },
   {
     key: "multipliers",
     bgColor: "var(--yellow-300)", // Custom yellow from preset
     iconColor: "var(--yellow-100)", // Custom yellow from preset
     Icon: CrossIcon,
+    order: 3,
+  },
+  {
+    key: "health",
+    bgColor: "var(--salmon-300)", // Custom salmon from preset
+    iconColor: "var(--salmon-100)", // Custom salmon from preset
+    Icon: HeartIcon,
+    order: 2,
   },
   {
     key: "chips",
     bgColor: "var(--orange-300)", // Custom orange from preset
     iconColor: "var(--orange-100)", // Custom orange from preset
     Icon: ChipIcon,
+    order: 5,
   },
   {
     key: "moonrocks",
     bgColor: "var(--blue-300)", // Custom blue from preset
     iconColor: "var(--blue-100)", // Custom blue from preset
     Icon: MoonrockIcon,
+    order: 4,
   },
 ];
 
 export const Distribution = ({
   values,
-  size = 200,
-  thickness = 30,
+  size = 450,
+  thickness = 75,
   className,
 }: DistributionProps) => {
   const segments = useMemo(
@@ -170,7 +184,7 @@ export const Distribution = ({
                 color: segment.config.iconColor,
               }}
             >
-              <IconComponent size="lg" />
+              <IconComponent size="2xl" />
             </div>
           );
         })}

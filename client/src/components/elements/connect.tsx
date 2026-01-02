@@ -1,18 +1,20 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { ControllerIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 export interface ConnectProps
   extends React.HTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof connectVariants> {}
+    VariantProps<typeof connectVariants> {
+  highlight?: boolean;
+}
 
-const connectVariants = cva("p-0 has-[>svg]:p-0", {
+const connectVariants = cva("", {
   variants: {
     variant: {
-      default: "",
+      default:
+        "font-secondary uppercase text-sm tracking-widest font-normal border-0",
     },
     size: {
-      md: "h-10 w-10",
+      md: "h-12 w-full",
     },
   },
   defaultVariants: {
@@ -22,6 +24,7 @@ const connectVariants = cva("p-0 has-[>svg]:p-0", {
 });
 
 export const Connect = ({
+  highlight,
   variant,
   size,
   className,
@@ -30,10 +33,10 @@ export const Connect = ({
   return (
     <Button
       className={connectVariants({ variant, size, className })}
-      variant="default"
+      variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <ControllerIcon size="md" />
+      Connect
     </Button>
   );
 };
