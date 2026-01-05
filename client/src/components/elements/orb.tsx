@@ -17,7 +17,7 @@ const orbVariants = cva(
         health: "",
       },
       size: {
-        md: "w-[250px] h-[250px]",
+        md: "w-[235px] h-[235px]",
       },
     },
     defaultVariants: {

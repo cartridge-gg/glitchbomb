@@ -9,7 +9,7 @@ import { DotIcon, HeartIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
-  "select-none relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer outline-none border-none",
+  "select-none relative rounded-full overflow-hidden cursor-pointer outline-none border-none",
   {
     variants: {
       variant: {
@@ -22,7 +22,8 @@ const pullerVariants = cva(
         rainbow: "",
       },
       size: {
-        md: "w-[250px] h-[250px]",
+        md: "w-[180px] h-[180px]",
+        lg: "w-[233px] h-[233px]",
       },
     },
     defaultVariants: {
@@ -173,9 +174,9 @@ export const Puller = ({
       </div>
 
       {/* 5. Content */}
-      <div className="relative z-10 bg-transparent flex flex-col items-center gap-2.5 pt-4">
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0 pt-4">
         <p
-          className="text-center text-[50px]/[50px] font-[900]"
+          className="text-center text-[35px]/[30px] font-[900]"
           style={{
             color: currentColor.cssVar,
             filter: `drop-shadow(0 0 20px color-mix(in srgb, ${currentColor.cssVar} 80%, transparent))`,
@@ -200,7 +201,7 @@ export const Puller = ({
             )}
           >
             <OrbIcon size="md" />
-            <p className="text-xs font-secondary uppercase">{`x ${orbs}`}</p>
+            <p className="text-xs font-secondary uppercase whitespace-nowrap">{`x ${orbs}`}</p>
           </div>
           <DotIcon
             size="3xs"
@@ -216,7 +217,7 @@ export const Puller = ({
             )}
           >
             <HeartIcon size="md" />
-            <p className="text-xs font-secondary uppercase">{`x ${lives}`}</p>
+            <p className="text-xs font-secondary uppercase whitespace-nowrap">{`x ${lives}`}</p>
           </div>
         </div>
       </div>

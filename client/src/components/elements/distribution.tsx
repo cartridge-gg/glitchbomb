@@ -74,8 +74,8 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
 
 export const Distribution = ({
   values,
-  size = 450,
-  thickness = 75,
+  size = 300,
+  thickness = 50,
   className,
 }: DistributionProps) => {
   const segments = useMemo(
@@ -103,7 +103,6 @@ export const Distribution = ({
       <svg
         width={size}
         height={size}
-        viewBox={`0 0 ${size} ${size}`}
         className="transform rotate-180"
         aria-label="Distribution chart"
       >
@@ -184,7 +183,7 @@ export const Distribution = ({
                 color: segment.config.iconColor,
               }}
             >
-              <IconComponent size="2xl" />
+              <IconComponent size="xl" />
             </div>
           );
         })}
