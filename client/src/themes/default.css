@@ -48,5 +48,11 @@
     --multiplier-four-200: linear-gradient(0deg, #CF070359, #FF945659);
     --multiplier-five-100: linear-gradient(0deg, #CD0096, #FF5678);
     --multiplier-five-200: linear-gradient(0deg, #57143B6E, #FD53796E);
+
+    --point-gradient-100: linear-gradient(0deg, #33B48B, #00FF4D);
+    --multiplier-gradient-100: linear-gradient(0deg, #F3AA17, #FFF121);
+    --hp-gradient-100: linear-gradient(0deg, #CD0096, #FF5678);
+    --moonrock-gradient-100: linear-gradient(0deg, #667AE5, #C65EE3);
+    --chip-gradient-100: linear-gradient(0deg, #CD0000, #FFAA56);
   }
 }

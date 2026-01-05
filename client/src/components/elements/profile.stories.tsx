@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn } from "@storybook/test";
+import { fn } from "storybook/test";
 import { Profile } from "./profile";
 
 const meta = {
@@ -9,14 +9,14 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  args: {
+    username: "John Doe",
+    highlight: false,
+    onClick: fn(),
+  },
 } satisfies Meta<typeof Profile>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    variant: "default",
-    onClick: fn(),
-  },
-};
+export const Default: Story = {};
