@@ -1,9 +1,13 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { useEffect, useState } from "react";
 import {
   Distribution,
   type DistributionValues,
+  Orb,
+  Outcome,
   Puller,
 } from "@/components/elements";
+import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -11,6 +15,10 @@ export interface GameSceneProps
   lives: number;
   orbs: number;
   values: DistributionValues;
+  orb?: {
+    variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
+    content: string;
+  };
   onPull: () => void;
 }
 
@@ -29,17 +37,62 @@ export const GameScene = ({
   lives,
   orbs,
   values,
+  orb,
   variant,
   className,
   onPull,
   ...props
 }: GameSceneProps) => {
+  // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    if (orb) {
+      // Phase 1: Show Orb
+      setPhase(1);
+
+      // Phase 2: After 1s, show Outcome and reduce Orb opacity
+      const phase2Timer = setTimeout(() => {
+        setPhase(2);
+      }, 1000);
+
+      // Phase 3: After 3s total (1s + 2s), fade everything out
+      const phase3Timer = setTimeout(() => {
+        setPhase(3);
+      }, 3000);
+
+      return () => {
+        clearTimeout(phase2Timer);
+        clearTimeout(phase3Timer);
+      };
+    } else {
+      setPhase(0);
+    }
+  }, [orb]);
+
   return (
     <div className={gameSceneVariants({ variant, className })} {...props}>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      {/* Distribution */}
+      <div
+        className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          phase === 0 && "opacity-100",
+          (phase === 1 || phase === 2) && "opacity-10",
+          phase === 3 && "opacity-100",
+        )}
+      >
         <Distribution values={values} />
       </div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+
+      {/* Puller */}
+      <div
+        className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          phase === 0 && "opacity-100 z-20",
+          (phase === 1 || phase === 2) && "opacity-0 z-0",
+          phase === 3 && "opacity-100 z-20",
+        )}
+      >
         <Puller
           className="h-[250px] w-[250px]"
           onClick={onPull}
@@ -54,6 +107,39 @@ export const GameScene = ({
           }
           orbs={orbs}
           lives={lives}
+        />
+      </div>
+
+      {/* Orb */}
+      <div
+        className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          phase === 0 && "opacity-0",
+          phase === 1 && "opacity-100",
+          phase === 2 && "opacity-50",
+          phase === 3 && "opacity-0",
+        )}
+      >
+        <Orb
+          variant={orb?.variant ?? "default"}
+          className="h-[370px] w-[370px]"
+        />
+      </div>
+
+      {/* Outcome */}
+      <div
+        className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          (phase === 0 || phase === 1) && "opacity-0",
+          phase === 2 && "opacity-100",
+          phase === 3 && "opacity-0",
+        )}
+      >
+        <Outcome
+          content={orb?.content ?? ""}
+          variant={orb?.variant ?? "default"}
+          size="md"
+          className="scale-[1.5]"
         />
       </div>
     </div>

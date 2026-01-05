@@ -86,6 +86,11 @@ export const preset: Partial<Config> = {
         "multiplier-four-200": "var(--multiplier-four-200)",
         "multiplier-five-100": "var(--multiplier-five-100)",
         "multiplier-five-200": "var(--multiplier-five-200)",
+        "point-gradient-100": "var(--point-gradient-100)",
+        "multiplier-gradient-100": "var(--multiplier-gradient-100)",
+        "hp-gradient-100": "var(--hp-gradient-100)",
+        "moonrock-gradient-100": "var(--moonrock-gradient-100)",
+        "chip-gradient-100": "var(--chip-gradient-100)",
       },
       fontFamily: {
         body: ["Rubik One", "sans"],

@@ -9,14 +9,14 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  args: {
+    username: "John Doe",
+    highlight: false,
+    onClick: fn(),
+  },
 } satisfies Meta<typeof Profile>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    variant: "default",
-    onClick: fn(),
-  },
-};
+export const Default: Story = {};

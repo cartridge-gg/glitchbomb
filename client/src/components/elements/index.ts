@@ -6,6 +6,8 @@ export * from "./counter";
 export * from "./distribution";
 export * from "./goal-tracker";
 export * from "./multiplier";
+export * from "./orb";
+export * from "./outcome";
 export * from "./profile";
 export * from "./puller";
 export * from "./recent-pulls";

@@ -43,6 +43,8 @@ export const Orbs: Story = {
       <Icons.OrbBombIcon className="h-[110px] w-[110px] text-red-100" />
       <Icons.OrbHealthIcon className="h-[110px] w-[110px] text-salmon-100" />
       <Icons.OrbMultiplierIcon className="h-[110px] w-[110px] text-yellow-100" />
+      <Icons.OrbChipIcon className="h-[110px] w-[110px] text-orange-100" />
+      <Icons.OrbMoonrockIcon className="h-[110px] w-[110px] text-blue-100" />
     </div>
   ),
 };

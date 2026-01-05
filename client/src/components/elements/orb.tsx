@@ -4,7 +4,7 @@ import * as icons from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const orbVariants = cva(
-  "select-none relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer outline-none border-none",
+  "select-none relative flex items-center justify-center rounded-full overflow-hidden outline-none border-none",
   {
     variants: {
       variant: {
@@ -14,6 +14,7 @@ const orbVariants = cva(
         multiplier: "",
         chip: "",
         moonrock: "",
+        health: "",
       },
       size: {
         md: "w-[250px] h-[250px]",
@@ -36,6 +37,10 @@ const iconVariants = (variant: string) => {
       return icons.OrbMultiplierIcon;
     case "health":
       return icons.OrbHealthIcon;
+    case "chip":
+      return icons.OrbChipIcon;
+    case "moonrock":
+      return icons.OrbMoonrockIcon;
     default:
       return icons.OrbIcon;
   }
@@ -61,6 +66,9 @@ const VARIANT_COLORS = {
   moonrock: {
     cssVar: "var(--blue-100)",
   },
+  health: {
+    cssVar: "var(--salmon-100)",
+  },
 } as const;
 
 export interface OrbProps
@@ -76,7 +84,7 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
     <motion.div
       className={cn(orbVariants({ variant, size, className }))}
       style={{
-        boxShadow: "0px 0px 50px 30px #000000",
+        boxShadow: "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
       }}
       {...props}
     >
