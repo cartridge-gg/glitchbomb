@@ -31,6 +31,7 @@ const meta: Meta<typeof Distribution> = {
       multipliers: 30,
       chips: 30,
       moonrocks: 30,
+      health: 30,
     },
   },
 };
@@ -48,6 +49,7 @@ export const SingleType: Story = {
       multipliers: 0,
       chips: 0,
       moonrocks: 0,
+      health: 0,
     },
   },
 };
@@ -60,6 +62,7 @@ export const SkewedDistribution: Story = {
       multipliers: 10,
       chips: 5,
       moonrocks: 0,
+      health: 0,
     },
   },
 };
@@ -72,6 +75,7 @@ export const Animated = () => {
     multipliers: 50,
     chips: 15,
     moonrocks: 10,
+    health: 15,
   });
 
   const randomize = () => {
@@ -81,6 +85,7 @@ export const Animated = () => {
       multipliers: Math.floor(Math.random() * 50) + 10,
       chips: Math.floor(Math.random() * 50) + 10,
       moonrocks: Math.floor(Math.random() * 50) + 10,
+      health: Math.floor(Math.random() * 50) + 10,
     });
   };
 

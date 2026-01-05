@@ -14,7 +14,7 @@ const outcomeVariants = cva("select-none uppercase relative text-center", {
       moonrock: "break-words",
     },
     size: {
-      md: "text-5xl leading-tight tracking-tighter",
+      md: "text-4xl leading-tight tracking-tighter",
     },
   },
   defaultVariants: {
@@ -90,7 +90,7 @@ export const Outcome = ({
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           WebkitTextFillColor: "transparent",
-          WebkitTextStroke: "16px transparent",
+          WebkitTextStroke: "12px transparent",
           paintOrder: "stroke fill",
         }}
         aria-hidden="true"

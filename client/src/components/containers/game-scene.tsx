@@ -94,7 +94,6 @@ export const GameScene = ({
         )}
       >
         <Puller
-          className="h-[250px] w-[250px]"
           onClick={onPull}
           variant={
             lives < 2
@@ -105,6 +104,7 @@ export const GameScene = ({
                   ? "default"
                   : "point"
           }
+          size="md"
           orbs={orbs}
           lives={lives}
         />
@@ -120,10 +120,7 @@ export const GameScene = ({
           phase === 3 && "opacity-0",
         )}
       >
-        <Orb
-          variant={orb?.variant ?? "default"}
-          className="h-[370px] w-[370px]"
-        />
+        <Orb variant={orb?.variant ?? "default"} />
       </div>
 
       {/* Outcome */}
