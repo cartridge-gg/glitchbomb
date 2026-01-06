@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type HTMLMotionProps, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ChipIcon } from "../icons";
+import { ChipIcon, TickIcon } from "../icons";
 import { Button } from "../ui/button";
 import { Orb } from "./orb";
 
@@ -31,6 +31,9 @@ export interface ItemProps
   title: string;
   description: string;
   cost: number;
+  disabled?: boolean;
+  selected?: boolean;
+  onAdd: () => void;
 }
 
 // Color mapping for variants
@@ -62,12 +65,27 @@ export const Item = ({
   title,
   description,
   cost,
+  disabled,
+  selected,
+  onAdd,
   variant,
   className,
+  onClick,
   ...props
 }: ItemProps) => {
+  const isClickable = !!onClick;
+
   return (
-    <motion.div className={cn(itemVariants({ variant, className }))} {...props}>
+    <motion.div
+      className={cn(
+        itemVariants({ variant, className }),
+        disabled && "opacity-40",
+        selected && "opacity-80",
+        isClickable ? "cursor-pointer" : "",
+      )}
+      onClick={onClick}
+      {...props}
+    >
       <div className="flex items-center justify-between gap-4">
         <div className="relative min-h-12 min-w-12">
           <Orb
@@ -90,8 +108,20 @@ export const Item = ({
           </p>
         </div>
       </div>
-      <Button className="h-12 w-10" variant="secondary">
-        <span className="text-base font-secondary">+</span>
+      <Button
+        className="h-12 w-10"
+        variant="secondary"
+        disabled={disabled || selected}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAdd();
+        }}
+      >
+        {selected ? (
+          <TickIcon size="xs" />
+        ) : (
+          <span className="text-base font-secondary">+</span>
+        )}
       </Button>
     </motion.div>
   );

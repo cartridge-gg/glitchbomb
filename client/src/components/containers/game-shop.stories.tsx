@@ -18,34 +18,33 @@ const meta = {
   ],
   argTypes: {
     balance: { control: "number" },
-    onSubmit: { action: "submitted" },
+    onPurchase: { action: "submitted" },
     onContinue: { action: "continued" },
+  },
+  args: {
+    balance: 30,
+    orbs: [
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Multiplier50),
+      new Orb(OrbType.Health1),
+      new Orb(OrbType.Moonrock15),
+      new Orb(OrbType.Chips15),
+      new Orb(OrbType.Moonrock40),
+    ],
+    onPurchase: (indices: number[]) => console.log(indices),
+    onInventory: fn(),
+    onContinue: fn(),
   },
 } satisfies Meta<typeof GameShop>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    balance: 100,
-    orbs: [
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Multiplier50),
-      new Orb(OrbType.Health1),
-      new Orb(OrbType.Moonrock15),
-      new Orb(OrbType.Chips15),
-      new Orb(OrbType.Moonrock40),
-    ],
-    onSubmit: fn(),
-    onInventory: fn(),
-    onContinue: fn(),
-  },
-};
+export const Default: Story = {};
 
 export const Reduced: Story = {
   args: {
-    balance: 100,
+    balance: 20,
     orbs: [
       new Orb(OrbType.Point5),
       new Orb(OrbType.Multiplier50),
@@ -54,11 +53,25 @@ export const Reduced: Story = {
       new Orb(OrbType.Chips15),
       new Orb(OrbType.Moonrock40),
     ],
-    onSubmit: fn(),
+    onPurchase: fn(),
     onInventory: fn(),
     onContinue: fn(),
   },
   render: (args) => {
     return <GameShop {...args} className="max-h-96" />;
+  },
+};
+
+export const ProgressivePricing: Story = {
+  args: {
+    balance: 30,
+    orbs: [
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point5),
+    ],
   },
 };
