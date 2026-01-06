@@ -26,7 +26,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs"],
+
   argTypes: {
     count: {
       control: { type: "number", min: 1, max: 10 },

@@ -8,7 +8,7 @@ const meta: Meta<typeof Distribution> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+
   argTypes: {
     values: {
       control: "object",
