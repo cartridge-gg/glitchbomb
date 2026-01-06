@@ -1,7 +1,10 @@
 use dojo::event::EventStorage;
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-use crate::events::orb_pulled::OrbPulledTrait;
+use crate::events::index::{
+    GameOverTrait, GameStartedTrait, OrbBurnedTrait, OrbPulledTrait, OrbPurchasedTrait,
+    ShopEnteredTrait, ShopExitedTrait, ShopRefreshedTrait,
+};
 use crate::models::index::{Config, Game, Pack, Starterpack};
 use crate::types::orb::Orb;
 
@@ -65,16 +68,52 @@ pub impl StoreImpl of StoreTrait {
         self.world.write_model(game)
     }
 
-    // Orb Pulled
+    // Events
+
+    #[inline]
+    fn game_started(mut self: Store, game: @Game) {
+        self.world.emit_event(@GameStartedTrait::new(game));
+    }
 
     #[inline]
     fn orb_pulled(mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8) {
         match orb {
             Option::Some(orb) => {
-                let event = OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox());
-                self.world.emit_event(@event);
+                self
+                    .world
+                    .emit_event(@OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox()));
             },
-            Option::None => { return; },
+            Option::None => {},
         }
+    }
+
+    #[inline]
+    fn shop_entered(mut self: Store, game: @Game) {
+        self.world.emit_event(@ShopEnteredTrait::new(game));
+    }
+
+    #[inline]
+    fn orb_purchased(mut self: Store, game: @Game, orb_id: u8, cost: u16) {
+        self.world.emit_event(@OrbPurchasedTrait::new(game, orb_id, cost));
+    }
+
+    #[inline]
+    fn shop_refreshed(mut self: Store, game: @Game) {
+        self.world.emit_event(@ShopRefreshedTrait::new(game));
+    }
+
+    #[inline]
+    fn orb_burned(mut self: Store, game: @Game, orb_id: u8, bag_index: u8) {
+        self.world.emit_event(@OrbBurnedTrait::new(game, orb_id, bag_index));
+    }
+
+    #[inline]
+    fn shop_exited(mut self: Store, game: @Game, cost: u16) {
+        self.world.emit_event(@ShopExitedTrait::new(game, cost));
+    }
+
+    #[inline]
+    fn game_over(mut self: Store, game: @Game, reason: u8) {
+        self.world.emit_event(@GameOverTrait::new(game, reason));
     }
 }
