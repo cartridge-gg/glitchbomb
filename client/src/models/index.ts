@@ -1,12 +1,9 @@
-export { Config } from "./config";
-export { Game } from "./game";
+export { CONFIG, Config } from "./config";
+export { GAME, Game } from "./game";
 export { Orb } from "./orb";
-export { Pack } from "./pack";
-export { Starterpack } from "./starterpack";
-export const CONFIG = "Config";
-export const GAME = "Game";
-export const PACK = "Pack";
-export const STARTERPACK = "Starterpack";
+export { ORB_PULLED, OrbPulled } from "./orb-pulled";
+export { PACK, Pack } from "./pack";
+export { STARTERPACK, Starterpack } from "./starterpack";
 
 export interface RawConfig {
   id: {
@@ -150,6 +147,12 @@ export interface RawGame {
     value: string;
     key: boolean;
   };
+  pull_count: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
   points: {
     type: "primitive";
     type_name: "u16";
@@ -189,6 +192,33 @@ export interface RawGame {
   shop: {
     type: "primitive";
     type_name: "u128";
+    value: string;
+    key: boolean;
+  };
+}
+
+export interface RawOrbPulled {
+  pack_id: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  game_id: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  id: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  orb: {
+    type: "primitive";
+    type_name: "u8";
     value: string;
     key: boolean;
   };

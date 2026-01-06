@@ -6,8 +6,8 @@ pub mod PlayableComponent {
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use starknet::ContractAddress;
     use crate::events::index::{
-        GameOver, GameStarted, LevelStarted, MilestoneReached, OrbBurned, OrbPulled, OrbPurchased,
-        ShopEntered, ShopExited, ShopRefreshed,
+        GameOver, GameStarted, LevelStarted, MilestoneReached, OrbBurned, OrbPurchased, ShopEntered,
+        ShopExited, ShopRefreshed,
     };
     use crate::helpers::random::RandomTrait;
     use crate::interfaces::erc20::IERC20DispatcherTrait;
@@ -151,32 +151,8 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Event] Emit OrbPulled for each orb (max 2 with DoubleDraw)
-            let orb: u8 = (*orbs.at(0)).into();
-            world
-                .emit_event(
-                    @OrbPulled {
-                        pack_id,
-                        game_id,
-                        orb_id: orb,
-                        points: game.points,
-                        health: game.health,
-                        is_game_over: game.over,
-                    },
-                );
-            if orbs.len() > 1 {
-                let orb: u8 = (*orbs.at(1)).into();
-                world
-                    .emit_event(
-                        @OrbPulled {
-                            pack_id,
-                            game_id,
-                            orb_id: orb,
-                            points: game.points,
-                            health: game.health,
-                            is_game_over: game.over,
-                        },
-                    );
-            }
+            store.orb_pulled(@game, orbs.get(0), 0);
+            store.orb_pulled(@game, orbs.get(1), 1);
 
             // [Event] Emit MilestoneReached if just crossed the threshold
             if !was_milestone_reached && game.points >= game.milestone {

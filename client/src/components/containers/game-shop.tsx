@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Counter, Item, Tag } from "@/components/elements";
 import type { Orb } from "@/models";
 import { BagIcon } from "../icons";
@@ -18,7 +18,7 @@ export interface GameShopProps
 const gameShopVariants = cva("select-none relative flex flex-col gap-5", {
   variants: {
     variant: {
-      default: "max-w-[420px] mx-auto",
+      default: "h-full max-w-[420px] mx-auto",
     },
   },
   defaultVariants: {
@@ -40,6 +40,19 @@ export const GameShop = ({
   const [basketItems, setBasketItems] = useState<
     { index: number; price: number }[]
   >([]);
+
+  // Create a stable key that changes when orbs or balance change
+  const resetKey = useMemo(
+    () => `${balance}-${orbs.length}-${orbs.map((o) => o.value).join(",")}`,
+    [balance, orbs],
+  );
+
+  // Reset all states when orbs or balance change
+  useEffect(() => {
+    if (resetKey) {
+      setBasketItems([]);
+    }
+  }, [resetKey]);
 
   // Get the actual orbs in the basket
   const basket = basketItems.map((item) => orbs[item.index]);

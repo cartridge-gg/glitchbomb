@@ -1,6 +1,6 @@
 [world]
 name = "Glitch Bomb"
-seed = "glitchbomb-v0.0.1"
+seed = "glitchbomb-v0.0.3"
 description = "Glitch Bomb is a cosmic-themed push-your-luck rogue-like bag-building game where players draw orbs from a bag to score points while avoiding bombs. What makes this game compelling is its brilliant tension between greed and survival, where every tap of the moon bag could yield valuable points or deal devastating damage, ending a nail-biting, breath taking, one of a lifetime run. Will you risk it for moon rocks, or will you just kick rocks?"
 website = "https://glitchbomb.gg"
 
@@ -9,7 +9,7 @@ default = "GLITCHBOMB"
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
-world_address = "0x0132702ac1712a4f188bf319f8a95bc2e0189d5fa8a32c9c83ea1ecc4a6c0131"
+world_address = "0x026bd38ff7807837dfb7a9a519784cbd9a1c7ab5812f7f03b9baf1549d53a8ec"
 account_address = "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753"
 keystore_path = "./keystore_sepolia.json"
 

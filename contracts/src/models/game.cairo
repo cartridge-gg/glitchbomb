@@ -60,6 +60,7 @@ pub impl GameImpl of GameTrait {
             health: MAX_HEALTH,
             immunity: 0,
             curses: 0,
+            pull_count: 0,
             points: 0,
             milestone: Milestone::get(DEFAULT_LEVEL),
             multiplier: BASE_MULTIPLIER,
@@ -116,6 +117,7 @@ pub impl GameImpl of GameTrait {
     #[inline]
     fn level_up(ref self: Game) {
         self.level += 1;
+        self.milestone = Milestone::get(self.level);
     }
 
     #[inline]
@@ -384,6 +386,8 @@ pub impl GameImpl of GameTrait {
             total_earnings += earnings;
             pulled_orbs.append(orb);
             draws_done += 1;
+            // [Effect] Increment pull count
+            self.pull_count += 1;
         }
 
         // [Effect] Assess the game

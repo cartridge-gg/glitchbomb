@@ -1,8 +1,8 @@
 export const Packer = {
-  unpack(num: bigint, size: bigint): number[] {
+  unpack(num: bigint, size: bigint, length: number = 0): number[] {
     const result: number[] = [];
     const mask = (1n << size) - 1n;
-    while (num > 0n) {
+    while (num > 0n && (result.length < length || !length)) {
       result.push(Number(num & mask));
       num >>= size;
     }
