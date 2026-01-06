@@ -1,9 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion } from "framer-motion";
 import { useState } from "react";
-import { Item, Tag } from "@/components/elements";
+import { Counter, Item, Tag } from "@/components/elements";
 import type { Orb } from "@/models";
-import { BagIcon, ChipIcon } from "../icons";
+import { BagIcon } from "../icons";
 import { Button } from "../ui/button";
 
 export interface GameShopProps
@@ -41,7 +40,6 @@ export const GameShop = ({
   const [basketItems, setBasketItems] = useState<
     { index: number; price: number }[]
   >([]);
-  const [shake, setShake] = useState(false);
 
   // Get the actual orbs in the basket
   const basket = basketItems.map((item) => orbs[item.index]);
@@ -95,10 +93,6 @@ export const GameShop = ({
     const adjustedPrice = getDisplayPrice(orb, index);
     if (adjustedPrice <= virtualBalance) {
       setBasketItems([...basketItems, { index, price: adjustedPrice }]);
-    } else {
-      // Trigger shake animation
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
     }
   };
 
@@ -135,25 +129,7 @@ export const GameShop = ({
     <div className={gameShopVariants({ variant, className })} {...props}>
       <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl/[22px]">Orb Shop</h1>
-        <motion.div
-          className="px-2.5 pl-2 h-[22px] flex items-center gap-0.5 text-black bg-orange-100 rounded border border-orange-300"
-          animate={
-            shake
-              ? {
-                  x: [0, -10, 10, -10, 10, 0],
-                  transition: { duration: 0.4 },
-                }
-              : {}
-          }
-        >
-          <ChipIcon size="xs" />
-          <div className="flex items-center justify-center gap-0.5 -translate-y-px">
-            <span className="text-[8px] font-secondary opacity-50">x</span>
-            <strong className="text-sm tracking-widest font-secondary">
-              {virtualBalance}
-            </strong>
-          </div>
-        </motion.div>
+        <Counter balance={virtualBalance} variant="chip" />
       </div>
       <div className="flex gap-4 justify-center items-center">
         <Tag count={basketCounts.point} variant="point" />
