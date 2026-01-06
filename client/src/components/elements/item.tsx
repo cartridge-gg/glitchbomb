@@ -18,13 +18,9 @@ const itemVariants = cva(
         moonrock: "",
         health: "",
       },
-      size: {
-        md: "max-w-[316px]",
-      },
     },
     defaultVariants: {
       variant: "default",
-      size: "md",
     },
   },
 );
@@ -67,15 +63,11 @@ export const Item = ({
   description,
   cost,
   variant,
-  size,
   className,
   ...props
 }: ItemProps) => {
   return (
-    <motion.div
-      className={cn(itemVariants({ variant, size, className }))}
-      {...props}
-    >
+    <motion.div className={cn(itemVariants({ variant, className }))} {...props}>
       <div className="flex items-center justify-between gap-4">
         <div className="relative min-h-12 min-w-12">
           <Orb

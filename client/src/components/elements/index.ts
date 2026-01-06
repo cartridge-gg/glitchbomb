@@ -5,6 +5,7 @@ export * from "./connect";
 export * from "./counter";
 export * from "./distribution";
 export * from "./goal-tracker";
+export * from "./item";
 export * from "./multiplier";
 export * from "./orb";
 export * from "./outcome";
