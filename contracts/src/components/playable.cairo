@@ -2,13 +2,8 @@
 pub mod PlayableComponent {
     // Imports
 
-    use dojo::event::EventStorage;
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use starknet::ContractAddress;
-    use crate::events::index::{
-        GameOver, GameStarted, LevelStarted, MilestoneReached, OrbBurned, OrbPurchased, ShopEntered,
-        ShopExited, ShopRefreshed,
-    };
     use crate::helpers::random::RandomTrait;
     use crate::interfaces::erc20::IERC20DispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
@@ -82,7 +77,7 @@ pub mod PlayableComponent {
     pub impl InternalImpl<
         TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
     > of InternalTrait<TContractState> {
-        fn start(ref self: ComponentState<TContractState>, mut world: WorldStorage, pack_id: u64) {
+        fn start(ref self: ComponentState<TContractState>, world: WorldStorage, pack_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -112,21 +107,12 @@ pub mod PlayableComponent {
             collection.update(pack_id.into());
 
             // [Event] Emit GameStarted
-            world
-                .emit_event(
-                    @GameStarted {
-                        pack_id,
-                        game_id,
-                        level: game.level,
-                        health: game.health,
-                        milestone: game.milestone,
-                    },
-                );
+            store.game_started(@game);
         }
 
         fn pull(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
         ) {
@@ -141,9 +127,6 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Info] Track if milestone was already reached before this pull
-            let was_milestone_reached = game.points >= game.milestone;
-
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let config = store.config();
             let mut rng = RandomTrait::new_vrf(config.vrf());
@@ -154,26 +137,9 @@ pub mod PlayableComponent {
             store.orb_pulled(@game, orbs.get(0), 0);
             store.orb_pulled(@game, orbs.get(1), 1);
 
-            // [Event] Emit MilestoneReached if just crossed the threshold
-            if !was_milestone_reached && game.points >= game.milestone {
-                world
-                    .emit_event(
-                        @MilestoneReached {
-                            pack_id,
-                            game_id,
-                            level: game.level,
-                            milestone: game.milestone,
-                            points: game.points,
-                        },
-                    );
-            }
-
             // [Event] Emit GameOver if dead
             if game.over {
-                world
-                    .emit_event(
-                        @GameOver { pack_id, game_id, reason: 0, final_points: game.points },
-                    );
+                store.game_over(@game, 0);
             }
 
             // [Effect] Update pack earnings if exists
@@ -187,7 +153,7 @@ pub mod PlayableComponent {
 
         fn cash_out(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
         ) {
@@ -203,12 +169,11 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Cash out
-            let final_points = game.points;
             let earnings = game.cash_out();
             store.set_game(@game);
 
             // [Event] Emit GameOver (cash out)
-            world.emit_event(@GameOver { pack_id, game_id, reason: 1, final_points });
+            store.game_over(@game, 1);
 
             // [Effect] Update pack earnings if exists
             if (earnings == 0) {
@@ -221,7 +186,7 @@ pub mod PlayableComponent {
 
         fn enter(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
         ) {
@@ -243,12 +208,12 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Event] Emit ShopEntered
-            world.emit_event(@ShopEntered { pack_id, game_id, shop: game.shop, chips: game.chips });
+            store.shop_entered(@game);
         }
 
         fn buy(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
             ref indices: Span<u8>,
@@ -280,12 +245,7 @@ pub mod PlayableComponent {
                 game.buy(ref single);
 
                 // [Event] Emit OrbPurchased
-                world
-                    .emit_event(
-                        @OrbPurchased {
-                            pack_id, game_id, orb_id, cost, chips_remaining: game.chips,
-                        },
-                    );
+                store.orb_purchased(@game, orb_id, cost);
             }
 
             store.set_game(@game);
@@ -293,7 +253,7 @@ pub mod PlayableComponent {
 
         fn exit(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
         ) {
@@ -312,23 +272,8 @@ pub mod PlayableComponent {
             let cost = game.exit();
             store.set_game(@game);
 
-            // [Event] Emit ShopExited
-            world
-                .emit_event(
-                    @ShopExited { pack_id, game_id, next_level: game.level, entry_cost: cost },
-                );
-
-            // [Event] Emit LevelStarted for the new level
-            world
-                .emit_event(
-                    @LevelStarted {
-                        pack_id,
-                        game_id,
-                        level: game.level,
-                        health: game.health,
-                        milestone: game.milestone,
-                    },
-                );
+            // [Event] Emit ShopExited (includes next level info)
+            store.shop_exited(@game, cost);
 
             // [Effect] Spend moonrocks for next level
             let mut pack = store.pack(pack_id);
@@ -338,7 +283,7 @@ pub mod PlayableComponent {
 
         fn refresh(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
         ) {
@@ -360,17 +305,12 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Event] Emit ShopRefreshed
-            world
-                .emit_event(
-                    @ShopRefreshed {
-                        pack_id, game_id, shop: game.shop, chips_remaining: game.chips,
-                    },
-                );
+            store.shop_refreshed(@game);
         }
 
         fn burn(
             ref self: ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             pack_id: u64,
             game_id: u8,
             bag_index: u8,
@@ -396,10 +336,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Event] Emit OrbBurned
-            world
-                .emit_event(
-                    @OrbBurned { pack_id, game_id, orb_id, bag_index, chips_remaining: game.chips },
-                );
+            store.orb_burned(@game, orb_id, bag_index);
         }
     }
 

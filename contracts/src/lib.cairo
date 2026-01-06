@@ -38,7 +38,6 @@ pub mod models {
 
 pub mod events {
     pub mod index;
-    pub mod orb_pulled;
 }
 
 pub mod types {
