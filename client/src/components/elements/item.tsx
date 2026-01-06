@@ -100,10 +100,8 @@ export const Item = ({
 const ItemCost = ({ cost }: { cost: number }) => {
   return (
     <div className="flex items-center border border-orange-100 text-orange-100 rounded pl-0.5 pr-[5px]">
-      <div className="relative h-4 w-4">
-        <ChipIcon className="size-2.5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-      </div>
-      <div className="flex items-center gap-0.5">
+      <ChipIcon size="xs" />
+      <div className="flex items-center gap-0.5 -translate-y-px">
         <span className="text-[8px] font-secondary px-px">x</span>
         <strong className="text-2xs font-secondary">{cost}</strong>
       </div>

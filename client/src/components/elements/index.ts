@@ -13,3 +13,4 @@ export * from "./profile";
 export * from "./puller";
 export * from "./recent-pulls";
 export * from "./score";
+export * from "./tag";

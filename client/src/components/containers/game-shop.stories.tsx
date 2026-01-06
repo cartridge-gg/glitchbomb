@@ -42,3 +42,23 @@ export const Default: Story = {
     onContinue: fn(),
   },
 };
+
+export const Reduced: Story = {
+  args: {
+    balance: 100,
+    orbs: [
+      new Orb(OrbType.Point5),
+      new Orb(OrbType.Multiplier50),
+      new Orb(OrbType.Health1),
+      new Orb(OrbType.Moonrock15),
+      new Orb(OrbType.Chips15),
+      new Orb(OrbType.Moonrock40),
+    ],
+    onSubmit: fn(),
+    onInventory: fn(),
+    onContinue: fn(),
+  },
+  render: (args) => {
+    return <GameShop {...args} className="max-h-96" />;
+  },
+};

@@ -2,9 +2,9 @@ import { forwardRef } from "react";
 import { iconVariants } from ".";
 import type { IconProps } from "./types";
 
-export type ArrowDownIconProps = IconProps;
+export type TickIconProps = IconProps;
 
-export const ArrowDownIcon = forwardRef<SVGSVGElement, ArrowDownIconProps>(
+export const TickIcon = forwardRef<SVGSVGElement, TickIconProps>(
   ({ className, size, ...props }, forwardedRef) => {
     return (
       <svg
@@ -13,38 +13,41 @@ export const ArrowDownIcon = forwardRef<SVGSVGElement, ArrowDownIconProps>(
         ref={forwardedRef}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        aria-label="Arrow down icon"
+        aria-label="Tick icon"
         aria-hidden="true"
         {...props}
       >
         <path
-          d="M8.55566 10.7783H9.66699V11.8896H8.55566V13H7.44531V11.8896H6.33398V10.7783H7.44531V3H8.55566V10.7783Z"
+          d="M3.3584 8.92853H5.21555V10.7856H3.3584V8.92853Z"
           fill="currentColor"
         />
         <path
-          d="M6.33398 10.7783H5.22266V9.66699H6.33398V10.7783Z"
+          d="M1.50049 7.07147H3.35764V8.92851H1.50049V7.07147Z"
           fill="currentColor"
         />
         <path
-          d="M10.7783 10.7783H9.66699V9.66699H10.7783V10.7783Z"
+          d="M10.7866 5.21445H12.6438V7.07149H10.7866V5.21445Z"
           fill="currentColor"
         />
         <path
-          d="M5.22266 9.66699H4.1123V8.55664H5.22266V9.66699Z"
+          d="M8.92871 7.07147H10.7859V8.92851H8.92871V7.07147Z"
           fill="currentColor"
         />
         <path
-          d="M11.8887 9.66699H10.7783V8.55664H11.8887V9.66699Z"
+          d="M7.07227 8.92853H8.92942V10.7856H7.07227V8.92853Z"
           fill="currentColor"
         />
         <path
-          d="M4.1123 8.55664H3V7.44434H4.11133L4.1123 8.55664Z"
+          d="M5.21436 10.7856H7.07151V12.6426H5.21436V10.7856Z"
           fill="currentColor"
         />
-        <path d="M13 8.55664H11.8887V7.44531H13V8.55664Z" fill="currentColor" />
+        <path
+          d="M12.6426 3.35739H14.4997V5.21443H12.6426V3.35739Z"
+          fill="currentColor"
+        />
       </svg>
     );
   },
 );
 
-ArrowDownIcon.displayName = "ArrowDownIcon";
+TickIcon.displayName = "TickIcon";

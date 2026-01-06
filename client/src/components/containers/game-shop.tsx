@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { Item } from "@/components/elements";
+import { Item, Tag } from "@/components/elements";
 import type { Orb } from "@/models";
-import { ChipIcon } from "../icons";
+import { BagIcon, ChipIcon } from "../icons";
 import { Button } from "../ui/button";
 
 export interface GameShopProps
@@ -17,7 +17,7 @@ export interface GameShopProps
 const gameShopVariants = cva("select-none relative flex flex-col gap-5", {
   variants: {
     variant: {
-      default: "max-h-96",
+      default: "max-w-[420px] mx-auto",
     },
   },
   defaultVariants: {
@@ -39,20 +39,22 @@ export const GameShop = ({
     <div className={gameShopVariants({ variant, className })} {...props}>
       <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl/[22px]">Orb Shop</h1>
-        <div className="px-2.5 pl-1.5 h-[22px] flex items-center gap-0.5 text-black bg-orange-100 rounded border border-orange-300">
-          <div className="relative min-h-4 min-w-4">
-            <ChipIcon
-              size="md"
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            />
-          </div>
-          <div className="flex items-center justify-center gap-0.5">
+        <div className="px-2.5 pl-2 h-[22px] flex items-center gap-0.5 text-black bg-orange-100 rounded border border-orange-300">
+          <ChipIcon size="xs" />
+          <div className="flex items-center justify-center gap-0.5 -translate-y-px">
             <span className="text-[8px] font-secondary opacity-50">x</span>
             <strong className="text-sm tracking-widest font-secondary">
               {balance}
             </strong>
           </div>
         </div>
+      </div>
+      <div className="flex gap-4 justify-center items-center">
+        <Tag count={0} variant="point" />
+        <Tag count={0} variant="multiplier" />
+        <Tag count={0} variant="health" />
+        <Tag count={0} variant="moonrock" />
+        <Tag count={0} variant="chip" />
       </div>
       <div
         className="flex flex-col gap-2 grow overflow-y-scroll"
@@ -98,7 +100,7 @@ export const GameShop = ({
           className="min-h-12 font-secondary text-sm tracking-widest"
           onClick={onInventory}
         >
-          Bag
+          <BagIcon size="lg" />
         </Button>
         <Button
           variant="secondary"

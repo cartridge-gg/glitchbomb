@@ -18,18 +18,24 @@ export const Default: Story = {
   render: () => (
     <div className="flex justify-center items-end gap-4 text-white">
       <Icons.ArrowDownIcon size="md" />
+      <Icons.ArrowRightIcon size="md" />
+      <Icons.BagIcon size="md" />
       <Icons.BombOrbIcon size="md" />
       <Icons.BombIcon size="md" />
       <Icons.ChipIcon size="md" />
       <Icons.ControllerIcon size="md" />
       <Icons.CrossIcon size="md" />
       <Icons.DotIcon size="md" />
+      <Icons.GearIcon size="md" />
       <Icons.HeartIcon size="md" />
       <Icons.ListIcon size="md" />
       <Icons.MoonrockIcon size="md" />
       <Icons.OrbIcon size="md" />
+      <Icons.RefreshIcon size="md" />
       <Icons.SparklesIcon size="md" />
+      <Icons.TickIcon size="md" />
       <Icons.TokenIcon size="md" />
+      <Icons.TrashIcon size="md" />
       <Icons.WarningIcon size="md" />
     </div>
   ),
@@ -54,6 +60,30 @@ export const ArrowDown: Story = {
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.ArrowDownIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const ArrowRight: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.ArrowRightIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Bag: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.BagIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -102,6 +132,18 @@ export const Dot: Story = {
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.DotIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Gear: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.GearIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -168,12 +210,36 @@ export const Orb: Story = {
   ),
 };
 
+export const Refresh: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.RefreshIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
 export const Sparkles: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.SparklesIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Tick: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.TickIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -246,6 +312,18 @@ export const Token: Story = {
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.TokenIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Trash: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.TrashIcon key={size} size={size} />
         ))}
       </div>
     </div>

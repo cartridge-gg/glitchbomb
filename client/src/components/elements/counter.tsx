@@ -35,7 +35,7 @@ export const Counter = ({
 
   return (
     <div className={counterVariants({ variant, size, className })} {...props}>
-      <CounterIcon className="absolute top-[-7.5px] left-1/2 -translate-x-1/2 min-h-9 min-w-9" />
+      <CounterIcon className="absolute top-1/6 left-1/2 -translate-x-1/2 min-h-[21px] min-w-[21px]" />
       <div className="absolute bottom-[-2px] left-1/2 -translate-x-1/2 text-base tracking-widest [&_span]:font-secondary pl-px">
         <SlotCounter
           value={balance}

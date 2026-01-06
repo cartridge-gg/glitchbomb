@@ -183,7 +183,7 @@ export const Distribution = ({
                 color: segment.config.iconColor,
               }}
             >
-              <IconComponent size="xl" />
+              <IconComponent size="lg" />
             </div>
           );
         })}
