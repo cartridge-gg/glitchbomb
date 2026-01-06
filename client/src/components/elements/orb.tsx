@@ -17,6 +17,7 @@ const orbVariants = cva(
         health: "",
       },
       size: {
+        xs: "w-12 h-12",
         md: "w-[235px] h-[235px]",
       },
     },
@@ -83,9 +84,6 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
   return (
     <motion.div
       className={cn(orbVariants({ variant, size, className }))}
-      style={{
-        boxShadow: "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
-      }}
       {...props}
     >
       <div

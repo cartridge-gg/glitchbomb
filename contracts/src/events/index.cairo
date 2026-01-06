@@ -19,10 +19,9 @@ pub struct OrbPulled {
     pub pack_id: u64,
     #[key]
     pub game_id: u8,
-    pub orb_id: u8,
-    pub points: u16,
-    pub health: u8,
-    pub is_game_over: bool,
+    #[key]
+    pub id: u8,
+    pub orb: u8,
 }
 
 #[derive(Copy, Drop, Serde)]

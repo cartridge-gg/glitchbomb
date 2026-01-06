@@ -13,6 +13,7 @@ export class Game {
   health: number;
   immunity: number;
   curses: number;
+  pull_count: number;
   points: number;
   milestone: number;
   multiplier: number;
@@ -30,6 +31,7 @@ export class Game {
     health: number,
     immunity: number,
     curses: number,
+    pull_count: number,
     points: number,
     milestone: number,
     multiplier: number,
@@ -46,6 +48,7 @@ export class Game {
     this.health = health;
     this.immunity = immunity;
     this.curses = curses;
+    this.pull_count = pull_count;
     this.points = points;
     this.milestone = milestone;
     this.multiplier = multiplier;
@@ -73,6 +76,7 @@ export class Game {
       health: Number(data.health.value),
       immunity: Number(data.immunity.value),
       curses: Number(data.curses.value),
+      pull_count: Number(data.pull_count.value),
       points: Number(data.points.value),
       milestone: Number(data.milestone.value),
       multiplier: Number(data.multiplier.value) / 100,
@@ -83,7 +87,7 @@ export class Game {
       bag: Packer.unpack(BigInt(data.bag.value), 5n).map((index) =>
         Orb.from(index),
       ),
-      shop: Packer.unpack(BigInt(data.shop.value), 5n).map((index) =>
+      shop: Packer.unpack(BigInt(data.shop.value), 5n, 6).map((index) =>
         Orb.from(index),
       ),
     };
@@ -99,6 +103,7 @@ export class Game {
       props.health,
       props.immunity,
       props.curses,
+      props.pull_count,
       props.points,
       props.milestone,
       props.multiplier,

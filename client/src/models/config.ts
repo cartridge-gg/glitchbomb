@@ -1,6 +1,8 @@
 import { getChecksumAddress } from "starknet";
 import type { RawConfig } from "@/models";
 
+export const CONFIG = "Config";
+
 export class Config {
   id: string;
   vrf: string;

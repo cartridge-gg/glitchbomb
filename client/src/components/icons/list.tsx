@@ -8,7 +8,7 @@ export const ListIcon = forwardRef<SVGSVGElement, ListIconProps>(
   ({ className, size, ...props }, forwardedRef) => {
     return (
       <svg
-        viewBox="0 0 24 24"
+        viewBox="0 0 16 16"
         className={iconVariants({ size, className })}
         ref={forwardedRef}
         fill="none"
@@ -18,15 +18,15 @@ export const ListIcon = forwardRef<SVGSVGElement, ListIconProps>(
         {...props}
       >
         <path
-          d="M7.49951 7.07153V8.35717H16.5003V7.07153H7.49951Z"
+          d="M3.49951 3.07153V4.35717H12.5003V3.07153H3.49951Z"
           fill="currentColor"
         />
         <path
-          d="M7.49951 11.3572V12.6428H16.5003V11.3572H7.49951Z"
+          d="M3.49951 7.35717V8.6428H12.5003V7.35717H3.49951Z"
           fill="currentColor"
         />
         <path
-          d="M7.49951 15.6428V16.9284H16.5003V15.6428H7.49951Z"
+          d="M3.49951 11.6428V12.9284H12.5003V11.6428H3.49951Z"
           fill="currentColor"
         />
       </svg>

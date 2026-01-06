@@ -1,66 +1,84 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Orb } from "./orb";
+import { Tag } from "./tag";
 
-const meta: Meta<typeof Orb> = {
-  title: "Elements/Orb",
-  component: Orb,
+const meta = {
+  title: "Elements/Tag",
+  component: Tag,
   parameters: {
     layout: "centered",
   },
-
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "bomb", "point", "multiplier", "chip", "moonrock"],
+      options: [
+        "default",
+        "bomb",
+        "point",
+        "multiplier",
+        "chip",
+        "moonrock",
+        "health",
+      ],
     },
-    size: {
-      control: "select",
-      options: ["md"],
-    },
+    count: { control: "number" },
   },
-};
+} satisfies Meta<typeof Tag>;
 
 export default meta;
-type Story = StoryObj<typeof Orb>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    count: 5,
     variant: "default",
-    size: "md",
   },
 };
 
 export const Bomb: Story = {
   args: {
+    count: 3,
     variant: "bomb",
-    size: "md",
   },
 };
 
 export const Point: Story = {
   args: {
+    count: 10,
     variant: "point",
-    size: "md",
   },
 };
 
 export const Multiplier: Story = {
   args: {
+    count: 2,
     variant: "multiplier",
-    size: "md",
   },
 };
 
 export const Chip: Story = {
   args: {
+    count: 15,
     variant: "chip",
-    size: "md",
   },
 };
 
 export const Moonrock: Story = {
   args: {
+    count: 7,
     variant: "moonrock",
-    size: "md",
+  },
+};
+
+export const Health: Story = {
+  args: {
+    count: 4,
+    variant: "health",
+  },
+};
+
+export const LargeCount: Story = {
+  args: {
+    count: 999,
+    variant: "point",
   },
 };

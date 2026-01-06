@@ -8,7 +8,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+
   args: {
     username: "John Doe",
     highlight: false,

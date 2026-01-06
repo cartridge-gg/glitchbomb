@@ -7,7 +7,7 @@ const meta: Meta<typeof Outcome> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+
   argTypes: {
     variant: {
       control: "select",

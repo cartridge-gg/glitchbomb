@@ -46,6 +46,7 @@ pub struct Game {
     pub health: u8,
     pub immunity: u8,
     pub curses: u8, // Bitmap: Each bit represents an active curse (DoubleDraw=bit0, etc.)
+    pub pull_count: u8,
     pub points: u16,
     pub milestone: u16,
     pub multiplier: u16,

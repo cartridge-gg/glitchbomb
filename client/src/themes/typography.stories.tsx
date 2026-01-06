@@ -31,7 +31,7 @@ function Title({
 const meta: Meta<typeof Typography> = {
   title: "Styles/Typography",
   component: Typography,
-  tags: ["autodocs"],
+
   parameters: {
     layout: "padded",
     backgrounds: {

@@ -1,6 +1,8 @@
 import { getChecksumAddress } from "starknet";
 import type { RawStarterpack } from "@/models";
 
+export const STARTERPACK = "Starterpack";
+
 export class Starterpack {
   id: string;
   reissuable: boolean;

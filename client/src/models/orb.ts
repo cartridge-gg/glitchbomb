@@ -159,11 +159,11 @@ export class Orb {
       case OrbType.Health3:
         return "Triple Health";
       case OrbType.Multiplier50:
-        return "Multiplier 50";
+        return "Multiplier 50%";
       case OrbType.Multiplier100:
-        return "Multiplier 100";
+        return "Multiplier 100%";
       case OrbType.Multiplier150:
-        return "Multiplier 150";
+        return "Multiplier 150%";
       case OrbType.Point5:
         return "Point 5";
       case OrbType.Point6:
@@ -188,6 +188,90 @@ export class Orb {
         return "Curse Score Decrease";
       default:
         return "";
+    }
+  }
+
+  public description(): string {
+    switch (this.value) {
+      case OrbType.Bomb1:
+        return "Lose 1 health point.";
+      case OrbType.Bomb2:
+        return "Lose 2 health points.";
+      case OrbType.Bomb3:
+        return "Lose 3 health points.";
+      case OrbType.Health1:
+        return "Restore 1 health point.";
+      case OrbType.Health2:
+        return "Restore 2 health points.";
+      case OrbType.Health3:
+        return "Restore 3 health points.";
+      case OrbType.Multiplier50:
+        return "Boost your score by 50%.";
+      case OrbType.Multiplier100:
+        return "Boost your score by 100%.";
+      case OrbType.Multiplier150:
+        return "Boost your score by 150%.";
+      case OrbType.Point5:
+        return "Earn 5 points.";
+      case OrbType.Point6:
+        return "Earn 6 points.";
+      case OrbType.Point7:
+        return "Earn 7 points.";
+      case OrbType.Point8:
+        return "Earn 8 points.";
+      case OrbType.Point9:
+        return "Earn 9 points.";
+      case OrbType.PointOrb1:
+        return "Earn 1 point for each orb previously pulled.";
+      case OrbType.PointBomb4:
+        return "Earn 4 points for each bomb previously pulled.";
+      case OrbType.Moonrock15:
+        return "Earn 15 Moonrocks.";
+      case OrbType.Moonrock40:
+        return "Earn 40 Moonrocks.";
+      case OrbType.Chips15:
+        return "Earn 15 Chips.";
+      case OrbType.CurseScoreDecrease:
+        return "Lose 20% of your score.";
+      default:
+        return "";
+    }
+  }
+
+  public cost(): number {
+    switch (this.value) {
+      case OrbType.Health1:
+        return 9;
+      case OrbType.Health3:
+        return 21;
+      case OrbType.Multiplier50:
+        return 9;
+      case OrbType.Multiplier100:
+        return 14;
+      case OrbType.Multiplier150:
+        return 16;
+      case OrbType.Point5:
+        return 5;
+      case OrbType.Point6:
+        return 6;
+      case OrbType.Point7:
+        return 7;
+      case OrbType.Point8:
+        return 8;
+      case OrbType.Point9:
+        return 9;
+      case OrbType.PointOrb1:
+        return 1;
+      case OrbType.PointBomb4:
+        return 6;
+      case OrbType.Moonrock15:
+        return 8;
+      case OrbType.Moonrock40:
+        return 23;
+      case OrbType.Chips15:
+        return 5;
+      default:
+        return 0;
     }
   }
 

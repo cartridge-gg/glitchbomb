@@ -8,7 +8,7 @@ const meta: Meta<typeof GameScene> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+
   argTypes: {
     lives: {
       control: "number",

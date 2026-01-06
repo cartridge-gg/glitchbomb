@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x132702ac1712a4f188bf319f8a95bc2e0189d5fa8a32c9c83ea1ecc4a6c0131",
-    "seed": "glitchbomb-v0.0.1",
+    "address": "0x26bd38ff7807837dfb7a9a519784cbd9a1c7ab5812f7f03b9baf1549d53a8ec",
+    "seed": "glitchbomb-v0.0.3",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,7 +33,7 @@
   },
   "contracts": [
     {
-      "address": "0xef233615a3b0afadf62cdbd9da668d0f6df96536379ff1cb456ee5604673f6",
+      "address": "0x6f1c98141c479e6f20497ce0dbbf2d9f347732fabfa5e0ab9c6729838f89883",
       "class_hash": "0x7024fc584f96b691a2304c243bb9cb1acd0e0ffd1a6a491d8671eb160bd192b",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "address": "0x57eba870af41f981ccd6791c0f05c62481dd75d5c5a35eb5a3074d38980dc52",
-      "class_hash": "0x383974ab6cd36c37757e9122e1e8877f2e896d45ca5e27488143474f17d77fe",
+      "address": "0x49b64bf30d5d2f897efd108870d27128e39887f6948d08c21fdbc2862a1e40e",
+      "class_hash": "0x14acadaac68a88c5bb74b09f0086fada267e7cdf7304e724f818a1d528daa44",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "address": "0x213c79df08de46ec2388922ced9f14bf30aad1a090fa7f4decf685b554b43b3",
+      "address": "0x3700b5c27757dc7a31b9659ede72198925c2799fbd53c10e9d3228d6d1abf8f",
       "class_hash": "0xcef487592d5e63a8af7649860d86b7f996d0707b110edc9941cebb4d9de3f8",
       "init_calldata": [
         "0x0",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "address": "0x3688a742fdddd830a63e3f4145576371927c26170137f8a8200ef406e312b81",
+      "address": "0x559c33fd48f279628752d8df935d7d518bf9d9e0d188e65f6d1d38656921518",
       "class_hash": "0x26fc3ce97e1d14e58e1f8ed5bd2a81a6be430186fede417f4db014372ecf53e",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Token",
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "address": "0x89bc7efc153ea6cfa83b2595bc7fcd7bd7d221f5e53bef46c34de22f4d85fa",
+      "address": "0x578792ba3ae93f6a1fb5b16115a3327e991f75432bd5cb4847bb2205ec7c860",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -190,6 +190,11 @@
           "key": true
         },
         {
+          "name": "seed",
+          "type": "core::felt252",
+          "key": false
+        },
+        {
           "name": "over",
           "type": "core::bool",
           "key": false
@@ -211,6 +216,11 @@
         },
         {
           "name": "curses",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "pull_count",
           "type": "core::integer::u8",
           "key": false
         },
@@ -250,7 +260,7 @@
           "key": false
         }
       ],
-      "class_hash": "0x62e6c546f33223455024564d546e7057b6d9bd04839471cee28174cc99a4fa2",
+      "class_hash": "0x50336ed9e7f4b87534f166ba1f9ac98f00cf7fb2a2cbb3f8cf93be1a5666653",
       "tag": "GLITCHBOMB-Game",
       "selector": "0xd48638ded3043e79d3c7617230f85cc9026c5fc30e8cb05f80b142373c8bd6"
     },
@@ -309,7 +319,303 @@
       "selector": "0x375fd842639db3c28296f8f7fa988b53a329e198d12e9391a54a77021da88b1"
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "reason",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "final_points",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x21daa63c552b7539c2255f44d7f2cf37cadd92af5c37ec8ba0a23be75feeebc",
+      "tag": "GLITCHBOMB-GameOver",
+      "selector": "0xb78732c579c28f15d7caff1ae8df4d924acb92ca16b787e90ce354afbf3e"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x39ad0f92ed384995aa3e4e5b7d30f64e49c95f142c6ac2d09ec8a3c5be75970",
+      "tag": "GLITCHBOMB-GameStarted",
+      "selector": "0x5fc90b88b9583e128352a5a44285ff4a132f84230ae1e976cc4707570614fe1"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x70ee881e5538833330feca0301cf8583eb56190666b26639727ff912c32b66a",
+      "tag": "GLITCHBOMB-LevelStarted",
+      "selector": "0x23134792741b7e7c6fc066996498e0e1189ed0f3f4b09cd733730850ddc403b"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16",
+          "key": false
+        },
+        {
+          "name": "points",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x4628bf60faae74e378bc5c8b6115fd5a451eb906aaffb94fa8ade0c60e1b188",
+      "tag": "GLITCHBOMB-MilestoneReached",
+      "selector": "0x3e1070e6d56657b21b58ce992f02fba7b8d4dba20198df21e691335c4b041aa"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "bag_index",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x2d308557b6d4263e40975911631bdfe8fa93498bff845254944e089d7aa4ffd",
+      "tag": "GLITCHBOMB-OrbBurned",
+      "selector": "0x7aa2590d39aa763e488837f67ded9abce1135a76cb2a7d19e0a449c6efc7124"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "orb",
+          "type": "core::integer::u8",
+          "key": false
+        }
+      ],
+      "class_hash": "0xefc214ea5397bd38b68b250124683a057fb984b763b7ee82ab97950a0562ad",
+      "tag": "GLITCHBOMB-OrbPulled",
+      "selector": "0x6cb2e0a7bbe5d1ffa648bf389768dca23a668e70f0312191d7b615064c1d829"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "cost",
+          "type": "core::integer::u16",
+          "key": false
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x48031a66fc1d11704c6a7992121d4c9411b5d3b620cec99b26fb156d1e84f24",
+      "tag": "GLITCHBOMB-OrbPurchased",
+      "selector": "0x67b80eede7005812caef8632a83d110a50b9cd5fc3bd5f9fef39f06435862a1"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "shop",
+          "type": "core::integer::u128",
+          "key": false
+        },
+        {
+          "name": "chips",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x3199d8548f719e3f8875b4f65610d9442db1ccd1c9d1f415d95ac20ddfa326b",
+      "tag": "GLITCHBOMB-ShopEntered",
+      "selector": "0xf41f393785a6354e38f9c9f24d3986bcccffc2002fa69748c4365f28bd4013"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "next_level",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "entry_cost",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x61f5ce7c8f88caa0201e228599d7c2f2066e855f5ed8424c51433ee81dea8da",
+      "tag": "GLITCHBOMB-ShopExited",
+      "selector": "0x429eab70ed8e5afc668fde4d5c822532755434b9d85281db413a1a1ef2ef55e"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "shop",
+          "type": "core::integer::u128",
+          "key": false
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16",
+          "key": false
+        }
+      ],
+      "class_hash": "0x6dcad82cb0bea26d3d436055435b7fead2e3290da7a1c879167cb0a79dec0d6",
+      "tag": "GLITCHBOMB-ShopRefreshed",
+      "selector": "0x757880648dbe33e8fa1fe69dafda243e7041755dd3f8ae12f4fe86d068257be"
+    }
+  ],
   "external_contracts": [],
   "abis": [
     {
@@ -657,6 +963,41 @@
       "type": "interface",
       "name": "dojo::contract::interface::IContract",
       "items": []
+    },
+    {
+      "type": "struct",
+      "name": "dojo::event::event::EventDef",
+      "members": [
+        {
+          "name": "name",
+          "type": "core::byte_array::ByteArray"
+        },
+        {
+          "name": "layout",
+          "type": "dojo::meta::layout::Layout"
+        },
+        {
+          "name": "schema",
+          "type": "dojo::meta::introspect::Struct"
+        }
+      ]
+    },
+    {
+      "type": "interface",
+      "name": "dojo::event::interface::IEvent",
+      "items": [
+        {
+          "type": "function",
+          "name": "definition",
+          "inputs": [],
+          "outputs": [
+            {
+              "type": "dojo::event::event::EventDef"
+            }
+          ],
+          "state_mutability": "view"
+        }
+      ]
     },
     {
       "type": "interface",
@@ -2232,8 +2573,8 @@
       "name": "ensure_abi",
       "inputs": [
         {
-          "name": "model",
-          "type": "glitchbomb::models::index::Starterpack"
+          "name": "event",
+          "type": "glitchbomb::events::index::ShopRefreshed"
         }
       ],
       "outputs": [],
@@ -2252,7 +2593,7 @@
       "inputs": [
         {
           "name": "value",
-          "type": "glitchbomb::models::index::StarterpackValue"
+          "type": "glitchbomb::events::index::ShopRefreshedValue"
         }
       ],
       "outputs": [],
@@ -2267,6 +2608,462 @@
     {
       "type": "event",
       "name": "glitchbomb::components::starterpack::StarterpackComponent::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::GameOver",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "reason",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "final_points",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::GameOverValue",
+      "members": [
+        {
+          "name": "reason",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "final_points",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::GameStarted",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::GameStartedValue",
+      "members": [
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::LevelStarted",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::LevelStartedValue",
+      "members": [
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::MilestoneReached",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "points",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::MilestoneReachedValue",
+      "members": [
+        {
+          "name": "level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "points",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbBurned",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "bag_index",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbBurnedValue",
+      "members": [
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "bag_index",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbPulled",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "orb",
+          "type": "core::integer::u8"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbPulledValue",
+      "members": [
+        {
+          "name": "orb",
+          "type": "core::integer::u8"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbPurchased",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "cost",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::OrbPurchasedValue",
+      "members": [
+        {
+          "name": "orb_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "cost",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopEntered",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "shop",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "chips",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopEnteredValue",
+      "members": [
+        {
+          "name": "shop",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "chips",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopExited",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "next_level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "entry_cost",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopExitedValue",
+      "members": [
+        {
+          "name": "next_level",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "entry_cost",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopRefreshed",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "shop",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::ShopRefreshedValue",
+      "members": [
+        {
+          "name": "shop",
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "chips_remaining",
+          "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_GameOver::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_GameStarted::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_LevelStarted::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_MilestoneReached::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_OrbBurned::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_OrbPulled::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_OrbPurchased::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_ShopEntered::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_ShopExited::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_ShopRefreshed::Event",
       "kind": "enum",
       "variants": []
     },
@@ -2449,6 +3246,10 @@
           "type": "core::integer::u8"
         },
         {
+          "name": "seed",
+          "type": "core::felt252"
+        },
+        {
           "name": "over",
           "type": "core::bool"
         },
@@ -2466,6 +3267,10 @@
         },
         {
           "name": "curses",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "pull_count",
           "type": "core::integer::u8"
         },
         {
@@ -2503,6 +3308,10 @@
       "name": "glitchbomb::models::index::GameValue",
       "members": [
         {
+          "name": "seed",
+          "type": "core::felt252"
+        },
+        {
           "name": "over",
           "type": "core::bool"
         },
@@ -2520,6 +3329,10 @@
         },
         {
           "name": "curses",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "pull_count",
           "type": "core::integer::u8"
         },
         {

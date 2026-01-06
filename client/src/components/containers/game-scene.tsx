@@ -120,7 +120,13 @@ export const GameScene = ({
           phase === 3 && "opacity-0",
         )}
       >
-        <Orb variant={orb?.variant ?? "default"} />
+        <Orb
+          variant={orb?.variant ?? "default"}
+          style={{
+            boxShadow:
+              "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
+          }}
+        />
       </div>
 
       {/* Outcome */}
