@@ -54,15 +54,6 @@ export const Game = () => {
     }
   }, [game]);
 
-  // Auto-redirect after game over (5 seconds)
-  useEffect(() => {
-    if (!gameOverDialogOpen) return;
-    const timeout = setTimeout(() => {
-      handleGoHome();
-    }, 5000);
-    return () => clearTimeout(timeout);
-  }, [gameOverDialogOpen, handleGoHome]);
-
   useEffect(() => {
     if (game && game.points >= game.milestone && !game.over) {
       setMilestoneDialogOpen(true);
@@ -181,9 +172,6 @@ export const Game = () => {
               Back to Home
             </Button>
           </DialogFooter>
-          <p className="text-white/40 text-xs font-secondary text-center">
-            Redirecting in 5 seconds...
-          </p>
         </DialogContent>
       </Dialog>
     </>
