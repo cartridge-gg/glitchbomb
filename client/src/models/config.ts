@@ -30,11 +30,24 @@ export class Config {
     this.entry_price = entry_price;
   }
 
-  static from(data: RawConfig): Config {
+  static from(data: RawConfig): Config | null {
     return Config.parse(data);
   }
 
-  static parse(data: RawConfig): Config {
+  static parse(data: RawConfig): Config | null {
+    // Validate all required fields exist
+    if (
+      !data?.id?.value ||
+      !data?.vrf?.value ||
+      !data?.token?.value ||
+      !data?.registry?.value ||
+      !data?.owner?.value ||
+      !data?.fee_receiver?.value ||
+      !data?.entry_price?.value
+    ) {
+      console.warn("Config.parse: Missing required fields", data);
+      return null;
+    }
     return new Config(
       data.id.value,
       getChecksumAddress(data.vrf.value),

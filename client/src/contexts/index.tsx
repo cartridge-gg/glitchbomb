@@ -120,7 +120,8 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
           const model = entity.models[
             `${NAMESPACE}-${CONFIG}`
           ] as unknown as RawConfig;
-          setConfig(Config.parse(model));
+          const parsed = Config.parse(model);
+          if (parsed) setConfig(parsed);
         }
         if (entity.models[`${NAMESPACE}-${STARTERPACK}`]) {
           const model = entity.models[
