@@ -9,6 +9,7 @@ export class Starterpack {
   referral_percentage: number;
   price: bigint;
   payment_token: string;
+  payment_receiver: string | null;
 
   constructor(
     id: string,
@@ -16,12 +17,14 @@ export class Starterpack {
     referral_percentage: number,
     price: bigint,
     payment_token: string,
+    payment_receiver: string | null,
   ) {
     this.id = id;
     this.reissuable = reissuable;
     this.referral_percentage = referral_percentage;
     this.price = price;
     this.payment_token = payment_token;
+    this.payment_receiver = payment_receiver;
   }
 
   static from(data: RawStarterpack): Starterpack | null {
@@ -40,19 +43,28 @@ export class Starterpack {
       console.warn("Starterpack.parse: Missing required fields", data);
       return null;
     }
-    const props = {
-      id: data.id.value,
-      reissuable: data.reissuable.value,
-      referral_percentage: Number(data.referral_percentage.value),
-      price: BigInt(data.price.value),
-      payment_token: getChecksumAddress(data.payment_token.value),
-    };
+
+    // Parse optional payment_receiver
+    let paymentReceiver: string | null = null;
+    if (data.payment_receiver?.value) {
+      const optionValue = data.payment_receiver.value;
+      if (
+        typeof optionValue === "object" &&
+        "option" in optionValue &&
+        optionValue.option === "Some" &&
+        "value" in optionValue
+      ) {
+        paymentReceiver = getChecksumAddress(optionValue.value as string);
+      }
+    }
+
     return new Starterpack(
-      props.id,
-      props.reissuable,
-      props.referral_percentage,
-      props.price,
-      props.payment_token,
+      data.id.value,
+      data.reissuable.value,
+      Number(data.referral_percentage.value),
+      BigInt(data.price.value),
+      getChecksumAddress(data.payment_token.value),
+      paymentReceiver,
     );
   }
 }
