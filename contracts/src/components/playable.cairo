@@ -287,6 +287,9 @@ pub mod PlayableComponent {
             pack_id: u64,
             game_id: u8,
         ) {
+            // [Check] Feature disabled
+            assert(false, 'Refresh is disabled');
+
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -315,6 +318,9 @@ pub mod PlayableComponent {
             game_id: u8,
             bag_index: u8,
         ) {
+            // [Check] Feature disabled
+            assert(false, 'Burn is disabled');
+
             // [Setup] Store
             let store = StoreTrait::new(world);
 
