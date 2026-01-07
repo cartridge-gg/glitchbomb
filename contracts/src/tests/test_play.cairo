@@ -28,12 +28,10 @@ fn test_play_start() {
     let store = StoreTrait::new(world);
     let game = store.game(pack_id, game_id);
     game.assert_is_completed();
-    // [Action] Enter shop
-    // [Orb::PointBomb4, Orb::Point9, Orb::PointBomb4, Orb::Point5, Orb::Moonrock40, Orb::Point8]
+    // [Action] Enter shop (shop now generates unique orbs per rarity)
     systems.play.enter(pack_id, game_id);
-    // [Action] Buy orbs from shop
-    // [Orb::PointBomb4, Orb::Point5, Orb::Point8]
-    systems.play.buy(pack_id, game_id, [0, 3, 5].span());
+    // [Action] Buy one orb from shop (index 0)
+    systems.play.buy(pack_id, game_id, [0].span());
     // [Action] Exit shop
     systems.play.exit(pack_id, game_id);
     // [Action] Pull orbs
