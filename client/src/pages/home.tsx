@@ -65,7 +65,11 @@ export const Home = () => {
   }, [tokenContracts, tokenBalances, tokenAddress, config?.token]);
 
   const purchase = useCallback(async () => {
-    if (!starterpack) return;
+    console.log("[Purchase Debug]", { starterpack, connector });
+    if (!starterpack) {
+      console.log("[Purchase Debug] No starterpack available");
+      return;
+    }
     (connector as ControllerConnector)?.controller.openStarterPack(
       starterpack.id.toString(),
     );

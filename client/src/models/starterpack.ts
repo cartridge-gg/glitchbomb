@@ -24,11 +24,22 @@ export class Starterpack {
     this.payment_token = payment_token;
   }
 
-  static from(data: RawStarterpack): Starterpack {
+  static from(data: RawStarterpack): Starterpack | null {
     return Starterpack.parse(data);
   }
 
-  static parse(data: RawStarterpack): Starterpack {
+  static parse(data: RawStarterpack): Starterpack | null {
+    // Validate required fields
+    if (
+      !data?.id?.value ||
+      data?.reissuable?.value === undefined ||
+      !data?.referral_percentage?.value ||
+      !data?.price?.value ||
+      !data?.payment_token?.value
+    ) {
+      console.warn("Starterpack.parse: Missing required fields", data);
+      return null;
+    }
     const props = {
       id: data.id.value,
       reissuable: data.reissuable.value,

@@ -127,7 +127,8 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
           const model = entity.models[
             `${NAMESPACE}-${STARTERPACK}`
           ] as unknown as RawStarterpack;
-          setStarterpack(Starterpack.parse(model));
+          const parsed = Starterpack.parse(model);
+          if (parsed) setStarterpack(parsed);
         }
         if (entity.models[`${NAMESPACE}-${PACK}`]) {
           const model = entity.models[
