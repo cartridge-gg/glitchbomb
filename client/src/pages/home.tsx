@@ -53,7 +53,15 @@ export const Home = () => {
       console.log("[Balance Debug] No token balance found");
       return 0;
     }
-    return Number(toDecimal(tokenContract, tokenBalance));
+    const calculatedBalance = toDecimal(tokenContract, tokenBalance);
+    console.log("[Balance Debug] Found balance:", {
+      tokenContract,
+      tokenBalance,
+      decimals: tokenContract.decimals,
+      rawBalance: tokenBalance.balance,
+      calculated: calculatedBalance,
+    });
+    return calculatedBalance;
   }, [tokenContracts, tokenBalances, tokenAddress, config?.token]);
 
   const purchase = useCallback(async () => {
