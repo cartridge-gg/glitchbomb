@@ -1,6 +1,5 @@
 use core::num::traits::Pow;
 use crate::helpers::deck::{Deck, DeckTrait};
-use crate::helpers::dice::{Dice, DiceTrait};
 use crate::helpers::packer::Packer;
 use crate::types::orb::Orb;
 
@@ -42,26 +41,26 @@ pub impl OrbsImpl of OrbsTrait {
     fn shop(seed: felt252) -> Orbs {
         // [Compute] Generate the shop
         let mut orbs: Orbs = array![];
-        // [Info] Draw 3 common orbs
+        // [Info] Draw 3 unique common orbs using Deck (draw without replacement)
         let commons: Orbs = Self::commons();
-        let mut dice: Dice = DiceTrait::new(commons.len(), seed);
-        let index = dice.roll() - 1;
+        let mut common_deck: Deck = DeckTrait::new(seed, commons.len());
+        let index = common_deck.draw() - 1;
         orbs.append(*commons.at(index.into()));
-        let index = dice.roll() - 1;
+        let index = common_deck.draw() - 1;
         orbs.append(*commons.at(index.into()));
-        let index = dice.roll() - 1;
+        let index = common_deck.draw() - 1;
         orbs.append(*commons.at(index.into()));
-        // [Info] Draw 2 rare orbs
+        // [Info] Draw 2 unique rare orbs using Deck
         let rares: Orbs = Self::rares();
-        dice.face_count = rares.len();
-        let index = dice.roll() - 1;
+        let mut rare_deck: Deck = DeckTrait::new(seed, rares.len());
+        let index = rare_deck.draw() - 1;
         orbs.append(*rares.at(index.into()));
-        let index = dice.roll() - 1;
+        let index = rare_deck.draw() - 1;
         orbs.append(*rares.at(index.into()));
         // [Info] Draw 1 cosmic orb
         let cosmics: Orbs = Self::cosmics();
-        dice.face_count = cosmics.len();
-        let index = dice.roll() - 1;
+        let mut cosmic_deck: Deck = DeckTrait::new(seed, cosmics.len());
+        let index = cosmic_deck.draw() - 1;
         orbs.append(*cosmics.at(index.into()));
         // [Compute] Shuffle the orbs
         let mut deck: Deck = DeckTrait::new(seed, orbs.len());
