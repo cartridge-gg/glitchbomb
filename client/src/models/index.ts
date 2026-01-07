@@ -14,37 +14,19 @@ export interface RawConfig {
   };
   vrf: {
     type: "primitive";
-    type_name: "contract_address";
+    type_name: "ContractAddress";
     value: string;
     key: boolean;
   };
   token: {
     type: "primitive";
-    type_name: "contract_address";
+    type_name: "ContractAddress";
     value: string;
     key: boolean;
   };
-  registry: {
+  collection: {
     type: "primitive";
-    type_name: "contract_address";
-    value: string;
-    key: boolean;
-  };
-  owner: {
-    type: "primitive";
-    type_name: "contract_address";
-    value: string;
-    key: boolean;
-  };
-  fee_receiver: {
-    type: "primitive";
-    type_name: "contract_address";
-    value: string;
-    key: boolean;
-  };
-  entry_price: {
-    type: "primitive";
-    type_name: "felt252";
+    type_name: "ContractAddress";
     value: string;
     key: boolean;
   };
