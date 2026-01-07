@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   GameFooter,
@@ -6,6 +6,7 @@ import {
   GameScene,
   GameShop,
 } from "@/components/containers";
+import { BombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,12 +26,18 @@ export const Game = () => {
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
+  const [gameOverDialogOpen, setGameOverDialogOpen] = useState(false);
   const { pulls } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
 
   console.log({ pulls });
+
+  const handleGoHome = useCallback(() => {
+    setGameOverDialogOpen(false);
+    navigate("/");
+  }, [navigate]);
 
   useEffect(() => {
     const packId = searchParams.get("pack");
@@ -40,8 +47,15 @@ export const Game = () => {
     setGameId(Number(gameId));
   }, [setPackId, setGameId, searchParams]);
 
+  // Detect game over state
   useEffect(() => {
-    if (game && game.points >= game.milestone) {
+    if (game && game.over) {
+      setGameOverDialogOpen(true);
+    }
+  }, [game]);
+
+  useEffect(() => {
+    if (game && game.points >= game.milestone && !game.over) {
       setMilestoneDialogOpen(true);
     }
   }, [game]);
@@ -131,6 +145,31 @@ export const Game = () => {
               }}
             >
               Enter Shop
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={gameOverDialogOpen} onOpenChange={setGameOverDialogOpen}>
+        <DialogContent className="bg-orange-gradient-100 border-orange-500 rounded-xl max-w-[300px]">
+          <DialogHeader className="items-center">
+            <BombIcon className="w-16 h-16 text-white mb-2" />
+            <DialogTitle className="text-white tracking-wide text-2xl font-glitch">
+              GAME OVER
+            </DialogTitle>
+            <DialogDescription className="text-white/70 text-sm font-secondary text-center">
+              You ran out of health! Your final score was{" "}
+              <span className="text-white font-bold">{game.points}</span> points
+              on level {game.level}.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3 mt-4">
+            <Button
+              variant="secondary"
+              className="flex-1 font-secondary text-sm tracking-widest"
+              onClick={handleGoHome}
+            >
+              Back to Home
             </Button>
           </DialogFooter>
         </DialogContent>
