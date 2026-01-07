@@ -7,42 +7,35 @@ export class Config {
   id: string;
   vrf: string;
   token: string;
-  registry: string;
-  owner: string;
-  fee_receiver: string;
-  entry_price: bigint;
+  collection: string;
 
-  constructor(
-    id: string,
-    vrf: string,
-    token: string,
-    registry: string,
-    owner: string,
-    fee_receiver: string,
-    entry_price: bigint,
-  ) {
+  constructor(id: string, vrf: string, token: string, collection: string) {
     this.id = id;
     this.vrf = vrf;
     this.token = token;
-    this.registry = registry;
-    this.owner = owner;
-    this.fee_receiver = fee_receiver;
-    this.entry_price = entry_price;
+    this.collection = collection;
   }
 
-  static from(data: RawConfig): Config {
+  static from(data: RawConfig): Config | null {
     return Config.parse(data);
   }
 
-  static parse(data: RawConfig): Config {
+  static parse(data: RawConfig): Config | null {
+    // Validate all required fields exist
+    if (
+      !data?.id?.value ||
+      !data?.vrf?.value ||
+      !data?.token?.value ||
+      !data?.collection?.value
+    ) {
+      console.warn("Config.parse: Missing required fields", data);
+      return null;
+    }
     return new Config(
       data.id.value,
       getChecksumAddress(data.vrf.value),
       getChecksumAddress(data.token.value),
-      getChecksumAddress(data.registry.value),
-      getChecksumAddress(data.owner.value),
-      getChecksumAddress(data.fee_receiver.value),
-      BigInt(data.entry_price.value),
+      getChecksumAddress(data.collection.value),
     );
   }
 }

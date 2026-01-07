@@ -18,31 +18,58 @@ export const Home = () => {
   const { mint, start } = useActions();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
+  const { starterpack, config } = useEntitiesContext();
+
+  // Use token address from Config (blockchain state) if available, fallback to manifest
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+
   const { tokenBalances, tokenContracts } = useTokens({
     accountAddresses: account?.address ? [account?.address] : [],
-    contractAddresses: [getTokenAddress(chain.id)],
+    contractAddresses: [tokenAddress],
   });
-  const { starterpack } = useEntitiesContext();
 
   const { packs } = usePacks();
   const [pack, setPack] = useState<Pack | null>(null);
 
   const balance = useMemo(() => {
-    const tokenAddress = getTokenAddress(chain.id);
+    console.log("[Balance Debug]", {
+      tokenAddress,
+      tokenContracts,
+      tokenBalances,
+      configToken: config?.token,
+    });
     if (!tokenAddress) return 0;
     const tokenContract = tokenContracts.find(
       (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
     );
-    if (!tokenContract) return 0;
+    if (!tokenContract) {
+      console.log("[Balance Debug] No token contract found for", tokenAddress);
+      return 0;
+    }
     const tokenBalance = tokenBalances.find(
       (balance) => BigInt(balance.contract_address) === BigInt(tokenAddress),
     );
-    if (!tokenBalance) return 0;
-    return Number(toDecimal(tokenContract, tokenBalance));
-  }, [tokenContracts, tokenBalances, chain.id]);
+    if (!tokenBalance) {
+      console.log("[Balance Debug] No token balance found");
+      return 0;
+    }
+    const calculatedBalance = toDecimal(tokenContract, tokenBalance);
+    console.log("[Balance Debug] Found balance:", {
+      tokenContract,
+      tokenBalance,
+      decimals: tokenContract.decimals,
+      rawBalance: tokenBalance.balance,
+      calculated: calculatedBalance,
+    });
+    return calculatedBalance;
+  }, [tokenContracts, tokenBalances, tokenAddress, config?.token]);
 
   const purchase = useCallback(async () => {
-    if (!starterpack) return;
+    console.log("[Purchase Debug]", { starterpack, connector });
+    if (!starterpack) {
+      console.log("[Purchase Debug] No starterpack available");
+      return;
+    }
     (connector as ControllerConnector)?.controller.openStarterPack(
       starterpack.id.toString(),
     );
@@ -108,7 +135,7 @@ export const Home = () => {
           <Balance
             highlight={!!account && !pack && balance < 10}
             balance={balance}
-            onClick={mint}
+            onClick={() => mint(tokenAddress)}
           />
         </div>
       </div>

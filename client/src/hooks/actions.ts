@@ -228,26 +228,29 @@ export const useActions = () => {
     [account, chain.id],
   );
 
-  const mint = useCallback(async () => {
-    try {
-      if (!account?.address) return false;
-      const tokenAddress = getTokenAddress(chain.id);
-      await account.execute([
-        {
-          contractAddress: tokenAddress,
-          entrypoint: "mint",
-          calldata: CallData.compile({
-            recipient: account?.address,
-            amount: uint256.bnToUint256(1_000n * 10n ** 6n),
-          }),
-        },
-      ]);
-      return true;
-    } catch (e) {
-      console.log({ e });
-      return false;
-    }
-  }, [account, chain.id]);
+  const mint = useCallback(
+    async (tokenAddress?: string) => {
+      try {
+        if (!account?.address) return false;
+        const address = tokenAddress || getTokenAddress(chain.id);
+        await account.execute([
+          {
+            contractAddress: address,
+            entrypoint: "mint",
+            calldata: CallData.compile({
+              recipient: account?.address,
+              amount: uint256.bnToUint256(1_000n * 10n ** 18n), // 1000 tokens with 18 decimals
+            }),
+          },
+        ]);
+        return true;
+      } catch (e) {
+        console.log({ e });
+        return false;
+      }
+    },
+    [account, chain.id],
+  );
 
   return {
     start,
