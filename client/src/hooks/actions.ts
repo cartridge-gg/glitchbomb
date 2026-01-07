@@ -239,7 +239,7 @@ export const useActions = () => {
             entrypoint: "mint",
             calldata: CallData.compile({
               recipient: account?.address,
-              amount: uint256.bnToUint256(1_000n * 10n ** 6n),
+              amount: uint256.bnToUint256(1_000n * 10n ** 18n), // 1000 tokens with 18 decimals
             }),
           },
         ]);

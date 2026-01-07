@@ -17,8 +17,11 @@ const BALANCE_LIMIT = 1_000;
 export function toDecimal(
   token: TokenContract,
   balance: TokenBalance | undefined,
-): bigint {
-  return BigInt(balance?.balance ?? "0") / 10n ** BigInt(token.decimals);
+): number {
+  const rawBalance = BigInt(balance?.balance ?? "0");
+  const divisor = 10n ** BigInt(token.decimals);
+  // Convert to number with decimal precision
+  return Number(rawBalance) / Number(divisor);
 }
 
 export function useTokenContracts(
