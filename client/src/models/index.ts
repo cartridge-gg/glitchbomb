@@ -59,8 +59,16 @@ export interface RawStarterpack {
   };
   payment_token: {
     type: "primitive";
-    type_name: "contract_address";
+    type_name: "ContractAddress";
     value: string;
+    key: boolean;
+  };
+  payment_receiver: {
+    type: "enum";
+    type_name: "Option<ContractAddress>";
+    value:
+      | { option: "None" }
+      | { option: "Some"; value: string };
     key: boolean;
   };
 }
