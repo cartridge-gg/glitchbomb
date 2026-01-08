@@ -71,7 +71,6 @@ export const Item = ({
   quantity = 0,
   canIncrement = true,
   disabled,
-  selected,
   onAdd,
   onRemove,
   variant,

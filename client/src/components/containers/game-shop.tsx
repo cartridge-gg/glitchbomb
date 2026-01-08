@@ -134,7 +134,8 @@ export const GameShop = ({
       if (currentQty <= 0) return prev;
       const newQty = currentQty - 1;
       if (newQty === 0) {
-        const { [index]: _, ...rest } = prev;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [index]: _removed, ...rest } = prev;
         return rest;
       }
       return { ...prev, [index]: newQty };
