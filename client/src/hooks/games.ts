@@ -6,7 +6,7 @@ import {
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
 import { Game, type RawGame } from "@/models";
@@ -48,6 +48,12 @@ export function useGames(keys: PackGameKey[]) {
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
 
+  // Create a stable key string for dependency comparison
+  const keysString = useMemo(
+    () => JSON.stringify(keys.map((k) => `${k.packId}-${k.gameId}`).sort()),
+    [keys],
+  );
+
   const onUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
@@ -57,6 +63,12 @@ export function useGames(keys: PackGameKey[]) {
             `${NAMESPACE}-${Game.getModelName()}`
           ] as unknown as RawGame;
           const newGame = Game.parse(model);
+          console.log("[useGames] Received game update:", {
+            pack_id: newGame.pack_id,
+            id: newGame.id,
+            over: newGame.over,
+            points: newGame.points,
+          });
           setGames((prev: Game[]) => {
             const deduped = prev.filter(
               (game) =>
@@ -74,20 +86,23 @@ export function useGames(keys: PackGameKey[]) {
   const refresh = useCallback(async () => {
     if (!client || !keys.length) return;
 
+    console.log("[useGames] Fetching games for keys:", keys);
+
     // Cancel existing subscriptions
     subscriptionRef.current = null;
 
     // Fetch initial data
     const query = getGamesQuery(keys).build();
-    await client
-      .getEntities(query)
-      .then((result) => onUpdate({ data: result.items, error: undefined }));
+    const result = await client.getEntities(query);
+    console.log("[useGames] Query result:", result);
+    onUpdate({ data: result.items, error: undefined });
 
     // Subscribe to entity and event updates
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, keys, onUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, keysString, onUpdate]);
 
   useEffect(() => {
     refresh();
@@ -102,9 +117,22 @@ export function useGames(keys: PackGameKey[]) {
   // Helper to get game by pack ID
   const getGameForPack = useCallback(
     (packId: number, gameId: number): Game | undefined => {
-      return games.find(
+      const found = games.find(
         (game) => game.pack_id === packId && game.id === gameId,
       );
+      console.log("[useGames] getGameForPack:", {
+        packId,
+        gameId,
+        found: found
+          ? { over: found.over, points: found.points }
+          : "not found",
+        allGames: games.map((g) => ({
+          pack_id: g.pack_id,
+          id: g.id,
+          over: g.over,
+        })),
+      });
+      return found;
     },
     [games],
   );
