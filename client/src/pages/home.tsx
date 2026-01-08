@@ -3,12 +3,13 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Balance } from "@/components/elements";
-import { GlitchBombIcon } from "@/components/icons";
+import { BombIcon, GlitchBombIcon } from "@/components/icons";
 import { Connection } from "@/components/modules";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
+import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,16 @@ export const Home = () => {
 
   const { packs } = usePacks();
   const [pack, setPack] = useState<Pack | null>(null);
+
+  // Build game keys from packs to fetch their current games
+  const gameKeys = useMemo(() => {
+    return packs.map((p) => ({
+      packId: p.id,
+      gameId: Math.max(p.game_count, 1),
+    }));
+  }, [packs]);
+
+  const { getGameForPack } = useGames(gameKeys);
 
   const balance = useMemo(() => {
     console.log("[Balance Debug]", {
@@ -105,29 +116,52 @@ export const Home = () => {
           >
             Buy Packs
           </Button>
-          {packs.slice(0, 3).map((pack) => {
+          {packs.slice(0, 3).map((p) => {
+            const gameId = Math.max(p.game_count, 1);
+            const game = getGameForPack(p.id, gameId);
+            const isGameOver = game?.over ?? false;
+            const hasNoGame = p.game_count === 0;
+
+            // Game over state - show score and disabled button
+            if (isGameOver) {
+              return (
+                <div key={p.id} className="w-full">
+                  <Button
+                    variant="secondary"
+                    className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal opacity-60"
+                    disabled
+                  >
+                    <BombIcon size="sm" className="mr-2" />
+                    Game Over
+                  </Button>
+                  <p className="text-center text-xs text-white/50 mt-1">
+                    Pack #{p.id} • Score: {game?.points ?? 0}
+                  </p>
+                </div>
+              );
+            }
+
+            // Active or new game - show continue/start button
             return (
               <Link
-                key={pack.id}
+                key={p.id}
                 to={
-                  account && pack
-                    ? `/play?pack=${pack.id}&game=${Math.max(pack.game_count, 1)}`
+                  account && p
+                    ? `/play?pack=${p.id}&game=${gameId}`
                     : "/"
                 }
                 className={cn(
                   "w-full",
-                  !account || !pack ? "cursor-default" : "",
+                  !account || !p ? "cursor-default" : "",
                 )}
               >
                 <Button
-                  variant={account && pack ? "default" : "secondary"}
+                  variant={account && p ? "default" : "secondary"}
                   className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
-                  disabled={!account || !pack}
-                  onClick={() =>
-                    pack.game_count === 0 ? start(pack.id) : undefined
-                  }
+                  disabled={!account || !p}
+                  onClick={() => (hasNoGame ? start(p.id) : undefined)}
                 >
-                  Continue {pack.id}
+                  {hasNoGame ? "Start" : "Continue"} #{p.id}
                 </Button>
               </Link>
             );
