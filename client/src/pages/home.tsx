@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
+import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,16 @@ export const Home = () => {
 
   const { packs } = usePacks();
   const [pack, setPack] = useState<Pack | null>(null);
+
+  // Build game keys from packs to fetch their current games
+  const gameKeys = useMemo(() => {
+    return packs.map((p) => ({
+      packId: p.id,
+      gameId: Math.max(p.game_count, 1),
+    }));
+  }, [packs]);
+
+  const { getGameForPack } = useGames(gameKeys);
 
   const balance = useMemo(() => {
     console.log("[Balance Debug]", {
@@ -105,33 +116,42 @@ export const Home = () => {
           >
             Buy Packs
           </Button>
-          {packs.slice(0, 3).map((pack) => {
-            return (
-              <Link
-                key={pack.id}
-                to={
-                  account && pack
-                    ? `/play?pack=${pack.id}&game=${Math.max(pack.game_count, 1)}`
-                    : "/"
-                }
-                className={cn(
-                  "w-full",
-                  !account || !pack ? "cursor-default" : "",
-                )}
-              >
-                <Button
-                  variant={account && pack ? "default" : "secondary"}
-                  className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
-                  disabled={!account || !pack}
-                  onClick={() =>
-                    pack.game_count === 0 ? start(pack.id) : undefined
+          {packs
+            .filter((p) => {
+              const gameId = Math.max(p.game_count, 1);
+              const game = getGameForPack(p.id, gameId);
+              // Only show packs with active games (not over)
+              return !(game?.over ?? false);
+            })
+            .slice(0, 3)
+            .map((p) => {
+              const gameId = Math.max(p.game_count, 1);
+              const hasNoGame = p.game_count === 0;
+
+              return (
+                <Link
+                  key={p.id}
+                  to={
+                    account && p
+                      ? `/play?pack=${p.id}&game=${gameId}`
+                      : "/"
                   }
+                  className={cn(
+                    "w-full",
+                    !account || !p ? "cursor-default" : "",
+                  )}
                 >
-                  Continue {pack.id}
-                </Button>
-              </Link>
-            );
-          })}
+                  <Button
+                    variant={account && p ? "default" : "secondary"}
+                    className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
+                    disabled={!account || !p}
+                    onClick={() => (hasNoGame ? start(p.id) : undefined)}
+                  >
+                    {hasNoGame ? "Start" : "Continue"} #{p.id}
+                  </Button>
+                </Link>
+              );
+            })}
           <Balance
             highlight={!!account && !pack && balance < 10}
             balance={balance}
