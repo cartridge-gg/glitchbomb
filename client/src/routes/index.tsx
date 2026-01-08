@@ -5,7 +5,7 @@ import { Game, Home } from "@/pages";
 
 function Router() {
   // const isRoot = useMemo(() => {
-  // 	return window.location.pathname === "/";
+  //   return window.location.pathname === "/";
   // }, []);
 
   return (

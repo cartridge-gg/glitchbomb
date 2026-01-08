@@ -42,6 +42,7 @@ pub mod StarterpackComponent {
                     reissuable: reissuable,
                     price: price,
                     payment_token: payment_token,
+                    payment_receiver: None,
                     metadata: StarterpackTrait::metadata(payment_token),
                 );
             // [Effect] Create default starterpack
