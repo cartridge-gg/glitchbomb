@@ -196,9 +196,9 @@ export const Multiplier = ({
       borderName: borderAnimationName,
       contentName: contentAnimationName,
       keyframes: `
-				@keyframes ${borderAnimationName} { ${borderFrames.join(" ")} }
-				@keyframes ${contentAnimationName} { ${contentFrames.join(" ")} }
-			`,
+        @keyframes ${borderAnimationName} { ${borderFrames.join(" ")} }
+        @keyframes ${contentAnimationName} { ${contentFrames.join(" ")} }
+      `,
     };
   }, [
     magnitude,
