@@ -1,7 +1,7 @@
 # Environment variables
 .env
 .env.*
-!.env.sample
+!.env.development
 
 # npm/pnpm config (local only, not for Vercel)
 **/.npmrc
