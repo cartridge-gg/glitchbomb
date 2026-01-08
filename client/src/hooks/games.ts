@@ -1,6 +1,5 @@
 import {
-  AndComposeClause,
-  MemberClause,
+  ClauseBuilder,
   OrComposeClause,
   type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
@@ -19,22 +18,14 @@ interface PackGameKey {
 }
 
 const getGamesQuery = (keys: PackGameKey[]) => {
+  const modelName: `${string}-${string}` = `${NAMESPACE}-${Game.getModelName()}`;
   const clauses = OrComposeClause(
     keys.map(({ packId, gameId }) =>
-      AndComposeClause([
-        MemberClause(
-          `${NAMESPACE}-${Game.getModelName()}`,
-          "pack_id",
-          "Eq",
-          `0x${packId.toString(16).padStart(16, "0")}`,
-        ),
-        MemberClause(
-          `${NAMESPACE}-${Game.getModelName()}`,
-          "id",
-          "Eq",
-          `0x${gameId.toString(16).padStart(2, "0")}`,
-        ),
-      ]),
+      new ClauseBuilder().keys(
+        [modelName],
+        [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+        "FixedLen",
+      ),
     ),
   );
   return new ToriiQueryBuilder()

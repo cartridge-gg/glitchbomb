@@ -40,7 +40,24 @@ export const Home = () => {
     }));
   }, [packs]);
 
-  const { getGameForPack } = useGames(gameKeys);
+  const { games, getGameForPack } = useGames(gameKeys);
+
+  // Debug logging for game status
+  useEffect(() => {
+    console.log("[Home] Game status debug:", {
+      packs: packs.map((p) => ({
+        id: p.id,
+        game_count: p.game_count,
+      })),
+      gameKeys,
+      games: games.map((g) => ({
+        pack_id: g.pack_id,
+        id: g.id,
+        over: g.over,
+        points: g.points,
+      })),
+    });
+  }, [packs, gameKeys, games]);
 
   const balance = useMemo(() => {
     console.log("[Balance Debug]", {
