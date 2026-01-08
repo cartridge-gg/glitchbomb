@@ -36,10 +36,8 @@ export const GameShop = ({
   onContinue,
   ...props
 }: GameShopProps) => {
-  // Store indices and prices of selected items
-  const [basketItems, setBasketItems] = useState<
-    { index: number; price: number }[]
-  >([]);
+  // Store quantities per orb index
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -50,92 +48,98 @@ export const GameShop = ({
   // Reset all states when orbs or balance change
   useEffect(() => {
     if (resetKey) {
-      setBasketItems([]);
+      setQuantities({});
     }
   }, [resetKey]);
 
-  // Get the actual orbs in the basket
-  const basket = basketItems.map((item) => orbs[item.index]);
-  const basketIndices = basketItems.map((item) => item.index);
-
-  // Calculate total spent using the stored prices
-  const totalSpent = basketItems.reduce((sum, item) => sum + item.price, 0);
-  const virtualBalance = balance - totalSpent;
-
-  // Count items by type in basket
-  const basketCounts = {
-    point: basket.filter((orb) => orb.isPoint()).length,
-    multiplier: basket.filter((orb) => orb.isMultiplier()).length,
-    health: basket.filter((orb) => orb.isHealth()).length,
-    moonrock: basket.filter((orb) => orb.isMoonrock()).length,
-    chip: basket.filter((orb) => orb.isChips()).length,
-  };
-
-  const isInBasket = (index: number) => {
-    return basketItems.some((item) => item.index === index);
-  };
-
-  // Get the stored price for an item in the basket, or calculate the adjusted price for a new purchase
-  const getDisplayPrice = (orb: Orb, index: number) => {
-    // If item is in basket, return the price it was purchased at
-    const basketItem = basketItems.find((item) => item.index === index);
-    if (basketItem) {
-      return basketItem.price;
-    }
-
-    // Calculate the adjusted price based on how many of the same type are already in basket
-    // Each +20% is calculated on the previous rounded price, not the base price
-    const countInBasket = basket.filter(
-      (item) => item.value === orb.value,
-    ).length;
-
+  // Calculate the price for a specific quantity of an orb (considering 20% escalation)
+  const calculatePriceForQuantity = (orb: Orb, quantity: number): number => {
+    let total = 0;
     let price = orb.cost();
-    for (let i = 0; i < countInBasket; i++) {
+    for (let i = 0; i < quantity; i++) {
+      total += price;
+      price = Math.ceil(price * 1.2);
+    }
+    return total;
+  };
+
+  // Get the next purchase price for an orb at a given index
+  const getNextPrice = (orb: Orb, index: number): number => {
+    const currentQty = quantities[index] || 0;
+    let price = orb.cost();
+    for (let i = 0; i < currentQty; i++) {
       price = Math.ceil(price * 1.2);
     }
     return price;
   };
 
-  const handleAddToBasket = (index: number) => {
-    // Don't add if already in basket
-    if (isInBasket(index)) {
-      return;
-    }
+  // Calculate total spent
+  const totalSpent = useMemo(() => {
+    return orbs.reduce((sum, orb, index) => {
+      const qty = quantities[index] || 0;
+      return sum + calculatePriceForQuantity(orb, qty);
+    }, 0);
+  }, [orbs, quantities]);
 
+  const virtualBalance = balance - totalSpent;
+
+  // Count items by type in basket
+  const basketCounts = useMemo(() => {
+    const counts = {
+      point: 0,
+      multiplier: 0,
+      health: 0,
+      moonrock: 0,
+      chip: 0,
+    };
+    orbs.forEach((orb, index) => {
+      const qty = quantities[index] || 0;
+      if (qty > 0) {
+        if (orb.isPoint()) counts.point += qty;
+        else if (orb.isMultiplier()) counts.multiplier += qty;
+        else if (orb.isHealth()) counts.health += qty;
+        else if (orb.isMoonrock()) counts.moonrock += qty;
+        else if (orb.isChips()) counts.chip += qty;
+      }
+    });
+    return counts;
+  }, [orbs, quantities]);
+
+  // Build basket indices array (with duplicates for quantity)
+  const basketIndices = useMemo(() => {
+    const indices: number[] = [];
+    Object.entries(quantities).forEach(([indexStr, qty]) => {
+      const index = parseInt(indexStr);
+      for (let i = 0; i < qty; i++) {
+        indices.push(index);
+      }
+    });
+    return indices.sort((a, b) => a - b);
+  }, [quantities]);
+
+  const handleIncrement = (index: number) => {
     const orb = orbs[index];
-    const adjustedPrice = getDisplayPrice(orb, index);
-    if (adjustedPrice <= virtualBalance) {
-      setBasketItems([...basketItems, { index, price: adjustedPrice }]);
+    const nextPrice = getNextPrice(orb, index);
+    if (nextPrice <= virtualBalance) {
+      setQuantities((prev) => ({
+        ...prev,
+        [index]: (prev[index] || 0) + 1,
+      }));
     }
   };
 
-  const handleRemoveFromBasket = (index: number) => {
-    const removedOrb = orbs[index];
-    const newBasketItems = basketItems.filter((item) => item.index !== index);
-
-    // Recalculate prices for items of the same type
-    const recalculatedItems = newBasketItems.map((item) => {
-      const orb = orbs[item.index];
-      // Only recalculate if it's the same type as the removed orb
-      if (orb.value !== removedOrb.value) {
-        return item;
+  const handleDecrement = (index: number) => {
+    setQuantities((prev) => {
+      const currentQty = prev[index] || 0;
+      if (currentQty <= 0) return prev;
+      const newQty = currentQty - 1;
+      if (newQty === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [index]: _removed, ...rest } = prev;
+        return rest;
       }
-
-      // Count how many of the same type come before this item in the basket
-      const countBefore = newBasketItems
-        .filter((i) => i.index < item.index)
-        .filter((i) => orbs[i.index].value === orb.value).length;
-
-      // Recalculate price based on position
-      let price = orb.cost();
-      for (let i = 0; i < countBefore; i++) {
-        price = Math.ceil(price * 1.2);
-      }
-
-      return { ...item, price };
+      return { ...prev, [index]: newQty };
     });
-
-    setBasketItems(recalculatedItems);
   };
 
   return (
@@ -170,23 +174,22 @@ export const GameShop = ({
                     : orb.isChips()
                       ? "chip"
                       : "default";
-          const inBasket = isInBasket(index);
-          const displayPrice = getDisplayPrice(orb, index);
-          const canAfford = inBasket || displayPrice <= virtualBalance;
+          const quantity = quantities[index] || 0;
+          const nextPrice = getNextPrice(orb, index);
+          const canAfford = nextPrice <= virtualBalance;
 
           return (
             <Item
               key={key}
               title={orb.name()}
               description={orb.description()}
-              cost={displayPrice}
+              cost={nextPrice}
+              quantity={quantity}
+              canIncrement={canAfford}
               variant={orbVariant}
-              disabled={!canAfford}
-              selected={inBasket}
-              onClick={
-                inBasket ? () => handleRemoveFromBasket(index) : undefined
-              }
-              onAdd={() => handleAddToBasket(index)}
+              disabled={!canAfford && quantity === 0}
+              onAdd={() => handleIncrement(index)}
+              onRemove={() => handleDecrement(index)}
             />
           );
         })}
