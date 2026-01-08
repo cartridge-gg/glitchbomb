@@ -3,7 +3,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Balance } from "@/components/elements";
-import { BombIcon, GlitchBombIcon } from "@/components/icons";
+import { GlitchBombIcon } from "@/components/icons";
 import { Connection } from "@/components/modules";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
@@ -116,52 +116,42 @@ export const Home = () => {
           >
             Buy Packs
           </Button>
-          {packs.slice(0, 3).map((p) => {
-            const gameId = Math.max(p.game_count, 1);
-            const game = getGameForPack(p.id, gameId);
-            const isGameOver = game?.over ?? false;
-            const hasNoGame = p.game_count === 0;
+          {packs
+            .filter((p) => {
+              const gameId = Math.max(p.game_count, 1);
+              const game = getGameForPack(p.id, gameId);
+              // Only show packs with active games (not over)
+              return !(game?.over ?? false);
+            })
+            .slice(0, 3)
+            .map((p) => {
+              const gameId = Math.max(p.game_count, 1);
+              const hasNoGame = p.game_count === 0;
 
-            // Game over state - show disabled button
-            if (isGameOver) {
               return (
-                <Button
+                <Link
                   key={p.id}
-                  variant="secondary"
-                  className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal opacity-60"
-                  disabled
+                  to={
+                    account && p
+                      ? `/play?pack=${p.id}&game=${gameId}`
+                      : "/"
+                  }
+                  className={cn(
+                    "w-full",
+                    !account || !p ? "cursor-default" : "",
+                  )}
                 >
-                  <BombIcon size="sm" className="mr-2" />
-                  Game Over #{p.id}
-                </Button>
+                  <Button
+                    variant={account && p ? "default" : "secondary"}
+                    className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
+                    disabled={!account || !p}
+                    onClick={() => (hasNoGame ? start(p.id) : undefined)}
+                  >
+                    {hasNoGame ? "Start" : "Continue"} #{p.id}
+                  </Button>
+                </Link>
               );
-            }
-
-            // Active or new game - show continue/start button
-            return (
-              <Link
-                key={p.id}
-                to={
-                  account && p
-                    ? `/play?pack=${p.id}&game=${gameId}`
-                    : "/"
-                }
-                className={cn(
-                  "w-full",
-                  !account || !p ? "cursor-default" : "",
-                )}
-              >
-                <Button
-                  variant={account && p ? "default" : "secondary"}
-                  className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
-                  disabled={!account || !p}
-                  onClick={() => (hasNoGame ? start(p.id) : undefined)}
-                >
-                  {hasNoGame ? "Start" : "Continue"} #{p.id}
-                </Button>
-              </Link>
-            );
-          })}
+            })}
           <Balance
             highlight={!!account && !pack && balance < 10}
             balance={balance}
