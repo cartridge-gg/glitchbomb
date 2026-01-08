@@ -54,12 +54,6 @@ export function useGames(keys: PackGameKey[]) {
             `${NAMESPACE}-${Game.getModelName()}`
           ] as unknown as RawGame;
           const newGame = Game.parse(model);
-          console.log("[useGames] Received game update:", {
-            pack_id: newGame.pack_id,
-            id: newGame.id,
-            over: newGame.over,
-            points: newGame.points,
-          });
           setGames((prev: Game[]) => {
             const deduped = prev.filter(
               (game) =>
@@ -77,15 +71,12 @@ export function useGames(keys: PackGameKey[]) {
   const refresh = useCallback(async () => {
     if (!client || !keys.length) return;
 
-    console.log("[useGames] Fetching games for keys:", keys);
-
     // Cancel existing subscriptions
     subscriptionRef.current = null;
 
     // Fetch initial data
     const query = getGamesQuery(keys).build();
     const result = await client.getEntities(query);
-    console.log("[useGames] Query result:", result);
     onUpdate({ data: result.items, error: undefined });
 
     // Subscribe to entity and event updates
@@ -108,22 +99,9 @@ export function useGames(keys: PackGameKey[]) {
   // Helper to get game by pack ID
   const getGameForPack = useCallback(
     (packId: number, gameId: number): Game | undefined => {
-      const found = games.find(
+      return games.find(
         (game) => game.pack_id === packId && game.id === gameId,
       );
-      console.log("[useGames] getGameForPack:", {
-        packId,
-        gameId,
-        found: found
-          ? { over: found.over, points: found.points }
-          : "not found",
-        allGames: games.map((g) => ({
-          pack_id: g.pack_id,
-          id: g.id,
-          over: g.over,
-        })),
-      });
-      return found;
     },
     [games],
   );

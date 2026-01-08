@@ -40,24 +40,7 @@ export const Home = () => {
     }));
   }, [packs]);
 
-  const { games, getGameForPack } = useGames(gameKeys);
-
-  // Debug logging for game status
-  useEffect(() => {
-    console.log("[Home] Game status debug:", {
-      packs: packs.map((p) => ({
-        id: p.id,
-        game_count: p.game_count,
-      })),
-      gameKeys,
-      games: games.map((g) => ({
-        pack_id: g.pack_id,
-        id: g.id,
-        over: g.over,
-        points: g.points,
-      })),
-    });
-  }, [packs, gameKeys, games]);
+  const { getGameForPack } = useGames(gameKeys);
 
   const balance = useMemo(() => {
     console.log("[Balance Debug]", {
@@ -139,22 +122,18 @@ export const Home = () => {
             const isGameOver = game?.over ?? false;
             const hasNoGame = p.game_count === 0;
 
-            // Game over state - show score and disabled button
+            // Game over state - show disabled button
             if (isGameOver) {
               return (
-                <div key={p.id} className="w-full">
-                  <Button
-                    variant="secondary"
-                    className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal opacity-60"
-                    disabled
-                  >
-                    <BombIcon size="sm" className="mr-2" />
-                    Game Over
-                  </Button>
-                  <p className="text-center text-xs text-white/50 mt-1">
-                    Pack #{p.id} • Score: {game?.points ?? 0}
-                  </p>
-                </div>
+                <Button
+                  key={p.id}
+                  variant="secondary"
+                  className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal opacity-60"
+                  disabled
+                >
+                  <BombIcon size="sm" className="mr-2" />
+                  Game Over #{p.id}
+                </Button>
               );
             }
 
