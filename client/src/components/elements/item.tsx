@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type HTMLMotionProps, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ChipIcon, TickIcon } from "../icons";
+import { ChipIcon } from "../icons";
 import { Button } from "../ui/button";
 import { Orb } from "./orb";
 
@@ -31,9 +31,12 @@ export interface ItemProps
   title: string;
   description: string;
   cost: number;
+  quantity?: number;
+  canIncrement?: boolean;
   disabled?: boolean;
   selected?: boolean;
   onAdd: () => void;
+  onRemove?: () => void;
 }
 
 // Color mapping for variants
@@ -65,22 +68,25 @@ export const Item = ({
   title,
   description,
   cost,
+  quantity = 0,
+  canIncrement = true,
   disabled,
   selected,
   onAdd,
+  onRemove,
   variant,
   className,
   onClick,
   ...props
 }: ItemProps) => {
   const isClickable = !!onClick;
+  const hasQuantity = quantity > 0;
 
   return (
     <motion.div
       className={cn(
         itemVariants({ variant, className }),
-        disabled && "opacity-40",
-        selected && "opacity-80",
+        disabled && !hasQuantity && "opacity-40",
         isClickable ? "cursor-pointer" : "",
       )}
       onClick={onClick}
@@ -108,21 +114,35 @@ export const Item = ({
           </p>
         </div>
       </div>
-      <Button
-        className="h-12 w-10"
-        variant="secondary"
-        disabled={disabled || selected}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAdd();
-        }}
-      >
-        {selected ? (
-          <TickIcon size="xs" />
-        ) : (
+      <div className="flex items-center gap-1">
+        <Button
+          className="h-10 w-8"
+          variant="secondary"
+          disabled={!hasQuantity}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove?.();
+          }}
+        >
+          <span className="text-base font-secondary">−</span>
+        </Button>
+        <div className="w-8 h-10 flex items-center justify-center bg-green-950/50 rounded border border-green-900">
+          <span className="text-sm font-bold font-secondary text-white">
+            {quantity}
+          </span>
+        </div>
+        <Button
+          className="h-10 w-8"
+          variant="secondary"
+          disabled={disabled || !canIncrement}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd();
+          }}
+        >
           <span className="text-base font-secondary">+</span>
-        )}
-      </Button>
+        </Button>
+      </div>
     </motion.div>
   );
 };
