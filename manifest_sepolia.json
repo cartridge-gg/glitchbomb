@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x26bd38ff7807837dfb7a9a519784cbd9a1c7ab5812f7f03b9baf1549d53a8ec",
-    "seed": "glitchbomb-v0.0.3",
+    "address": "0x201070f7dd25cb893d08b24a5cb6deeb9c636c123f9f19149cb66ac8a347dd7",
+    "seed": "glitchbomb-v0.0.4",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,7 +33,7 @@
   },
   "contracts": [
     {
-      "address": "0x6f1c98141c479e6f20497ce0dbbf2d9f347732fabfa5e0ab9c6729838f89883",
+      "address": "0x617e72392522326d4c7f7dc8b63ffb183c275ed92766585506ec501fb639e96",
       "class_hash": "0x7024fc584f96b691a2304c243bb9cb1acd0e0ffd1a6a491d8671eb160bd192b",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "address": "0x49b64bf30d5d2f897efd108870d27128e39887f6948d08c21fdbc2862a1e40e",
-      "class_hash": "0x14acadaac68a88c5bb74b09f0086fada267e7cdf7304e724f818a1d528daa44",
+      "address": "0x56838a031f39f8aca44c5718f86add003f3901a8caad5e8a88bc742d569c799",
+      "class_hash": "0x221c71d201fc5d7294ac8aafa2e49894ba6e057f5c1a27e57b1711955c52dda",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "address": "0x3700b5c27757dc7a31b9659ede72198925c2799fbd53c10e9d3228d6d1abf8f",
+      "address": "0xa1393ca0df4bd2174d2a5f67318f73141c65992c9c4ab23feeafe3523d6162",
       "class_hash": "0xcef487592d5e63a8af7649860d86b7f996d0707b110edc9941cebb4d9de3f8",
       "init_calldata": [
         "0x0",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "address": "0x559c33fd48f279628752d8df935d7d518bf9d9e0d188e65f6d1d38656921518",
+      "address": "0x13c0a25c0e905176ef5aba0ed2a289863c5e7386836e1b436b261291642da88",
       "class_hash": "0x26fc3ce97e1d14e58e1f8ed5bd2a81a6be430186fede417f4db014372ecf53e",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Token",
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "address": "0x578792ba3ae93f6a1fb5b16115a3327e991f75432bd5cb4847bb2205ec7c860",
+      "address": "0x4c8706e2ff500d19b5b0893e83664a4aeb2e522542ed315cc2a5a364cbbd80e",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -338,12 +338,12 @@
           "key": false
         },
         {
-          "name": "final_points",
+          "name": "points",
           "type": "core::integer::u16",
           "key": false
         }
       ],
-      "class_hash": "0x21daa63c552b7539c2255f44d7f2cf37cadd92af5c37ec8ba0a23be75feeebc",
+      "class_hash": "0x672ef7f395f16a1c6b5edd24023a2245274a02c8302c2615cbdf409343afedf",
       "tag": "GLITCHBOMB-GameOver",
       "selector": "0xb78732c579c28f15d7caff1ae8df4d924acb92ca16b787e90ce354afbf3e"
     },
@@ -392,70 +392,6 @@
           "key": true
         },
         {
-          "name": "level",
-          "type": "core::integer::u8",
-          "key": false
-        },
-        {
-          "name": "health",
-          "type": "core::integer::u8",
-          "key": false
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16",
-          "key": false
-        }
-      ],
-      "class_hash": "0x70ee881e5538833330feca0301cf8583eb56190666b26639727ff912c32b66a",
-      "tag": "GLITCHBOMB-LevelStarted",
-      "selector": "0x23134792741b7e7c6fc066996498e0e1189ed0f3f4b09cd733730850ddc403b"
-    },
-    {
-      "members": [
-        {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
-          "name": "game_id",
-          "type": "core::integer::u8",
-          "key": true
-        },
-        {
-          "name": "level",
-          "type": "core::integer::u8",
-          "key": false
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16",
-          "key": false
-        },
-        {
-          "name": "points",
-          "type": "core::integer::u16",
-          "key": false
-        }
-      ],
-      "class_hash": "0x4628bf60faae74e378bc5c8b6115fd5a451eb906aaffb94fa8ade0c60e1b188",
-      "tag": "GLITCHBOMB-MilestoneReached",
-      "selector": "0x3e1070e6d56657b21b58ce992f02fba7b8d4dba20198df21e691335c4b041aa"
-    },
-    {
-      "members": [
-        {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
-          "name": "game_id",
-          "type": "core::integer::u8",
-          "key": true
-        },
-        {
           "name": "orb_id",
           "type": "core::integer::u8",
           "key": false
@@ -466,12 +402,12 @@
           "key": false
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16",
           "key": false
         }
       ],
-      "class_hash": "0x2d308557b6d4263e40975911631bdfe8fa93498bff845254944e089d7aa4ffd",
+      "class_hash": "0x50c95daae35c4ffc411388aeaafabd27b6f9561d544edb48bfe1b102313dbc7",
       "tag": "GLITCHBOMB-OrbBurned",
       "selector": "0x7aa2590d39aa763e488837f67ded9abce1135a76cb2a7d19e0a449c6efc7124"
     },
@@ -525,12 +461,12 @@
           "key": false
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16",
           "key": false
         }
       ],
-      "class_hash": "0x48031a66fc1d11704c6a7992121d4c9411b5d3b620cec99b26fb156d1e84f24",
+      "class_hash": "0x2d83727c225b067718102a817ce82e0164fb2aa336b8c7fe7fae753f5600556",
       "tag": "GLITCHBOMB-OrbPurchased",
       "selector": "0x67b80eede7005812caef8632a83d110a50b9cd5fc3bd5f9fef39f06435862a1"
     },
@@ -574,17 +510,27 @@
           "key": true
         },
         {
-          "name": "next_level",
+          "name": "level",
           "type": "core::integer::u8",
           "key": false
         },
         {
-          "name": "entry_cost",
+          "name": "health",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16",
+          "key": false
+        },
+        {
+          "name": "cost",
           "type": "core::integer::u16",
           "key": false
         }
       ],
-      "class_hash": "0x61f5ce7c8f88caa0201e228599d7c2f2066e855f5ed8424c51433ee81dea8da",
+      "class_hash": "0x694fcd9b74d252506e6986fb6a1a3a3652be2ff99c8ba439e94061642162c21",
       "tag": "GLITCHBOMB-ShopExited",
       "selector": "0x429eab70ed8e5afc668fde4d5c822532755434b9d85281db413a1a1ef2ef55e"
     },
@@ -606,12 +552,12 @@
           "key": false
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16",
           "key": false
         }
       ],
-      "class_hash": "0x6dcad82cb0bea26d3d436055435b7fead2e3290da7a1c879167cb0a79dec0d6",
+      "class_hash": "0xd1f6998191dbd23498c9d1a1d31e139615ce6da7e010c937556dd044c24d83",
       "tag": "GLITCHBOMB-ShopRefreshed",
       "selector": "0x757880648dbe33e8fa1fe69dafda243e7041755dd3f8ae12f4fe86d068257be"
     }
@@ -2628,7 +2574,7 @@
           "type": "core::integer::u8"
         },
         {
-          "name": "final_points",
+          "name": "points",
           "type": "core::integer::u16"
         }
       ]
@@ -2642,7 +2588,7 @@
           "type": "core::integer::u8"
         },
         {
-          "name": "final_points",
+          "name": "points",
           "type": "core::integer::u16"
         }
       ]
@@ -2693,94 +2639,6 @@
     },
     {
       "type": "struct",
-      "name": "glitchbomb::events::index::LevelStarted",
-      "members": [
-        {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
-          "name": "game_id",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "level",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "health",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "glitchbomb::events::index::LevelStartedValue",
-      "members": [
-        {
-          "name": "level",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "health",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "glitchbomb::events::index::MilestoneReached",
-      "members": [
-        {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
-          "name": "game_id",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "level",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16"
-        },
-        {
-          "name": "points",
-          "type": "core::integer::u16"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "glitchbomb::events::index::MilestoneReachedValue",
-      "members": [
-        {
-          "name": "level",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "milestone",
-          "type": "core::integer::u16"
-        },
-        {
-          "name": "points",
-          "type": "core::integer::u16"
-        }
-      ]
-    },
-    {
-      "type": "struct",
       "name": "glitchbomb::events::index::OrbBurned",
       "members": [
         {
@@ -2800,7 +2658,7 @@
           "type": "core::integer::u8"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -2818,7 +2676,7 @@
           "type": "core::integer::u8"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -2876,7 +2734,7 @@
           "type": "core::integer::u16"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -2894,7 +2752,7 @@
           "type": "core::integer::u16"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -2948,11 +2806,19 @@
           "type": "core::integer::u8"
         },
         {
-          "name": "next_level",
+          "name": "level",
           "type": "core::integer::u8"
         },
         {
-          "name": "entry_cost",
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "cost",
           "type": "core::integer::u16"
         }
       ]
@@ -2962,11 +2828,19 @@
       "name": "glitchbomb::events::index::ShopExitedValue",
       "members": [
         {
-          "name": "next_level",
+          "name": "level",
           "type": "core::integer::u8"
         },
         {
-          "name": "entry_cost",
+          "name": "health",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "milestone",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "cost",
           "type": "core::integer::u16"
         }
       ]
@@ -2988,7 +2862,7 @@
           "type": "core::integer::u128"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -3002,7 +2876,7 @@
           "type": "core::integer::u128"
         },
         {
-          "name": "chips_remaining",
+          "name": "chips",
           "type": "core::integer::u16"
         }
       ]
@@ -3016,18 +2890,6 @@
     {
       "type": "event",
       "name": "glitchbomb::events::index::e_GameStarted::Event",
-      "kind": "enum",
-      "variants": []
-    },
-    {
-      "type": "event",
-      "name": "glitchbomb::events::index::e_LevelStarted::Event",
-      "kind": "enum",
-      "variants": []
-    },
-    {
-      "type": "event",
-      "name": "glitchbomb::events::index::e_MilestoneReached::Event",
       "kind": "enum",
       "variants": []
     },

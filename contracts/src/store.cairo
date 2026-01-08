@@ -77,13 +77,10 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn orb_pulled(mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8) {
-        match orb {
-            Option::Some(orb) => {
-                self
-                    .world
-                    .emit_event(@OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox()));
-            },
-            Option::None => {},
+        if let Some(orb) = orb {
+            self
+                .world
+                .emit_event(@OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox()));
         }
     }
 
