@@ -3,6 +3,9 @@
 .env.*
 !.env.sample
 
+# npm/pnpm config (local only, not for Vercel)
+**/.npmrc
+
 # Logs
 logs
 *.log
