@@ -3,16 +3,16 @@ import * as Icons from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const graphPointVariants = cva(
-  "select-none relative flex items-center justify-center rounded-full text-black w-8 h-8 border-[1px]",
+  "select-none relative flex items-center justify-center rounded-full text-black w-8 h-8",
   {
     variants: {
       icon: {
-        point: "bg-green-400 border-green-400",
-        bomb: "bg-red-100 border-red-100",
-        health: "bg-salmon-100 border-salmon-100",
-        multiplier: "bg-yellow-100 border-yellow-100",
-        chip: "bg-orange-100 border-orange-100",
-        moonrock: "bg-blue-100 border-blue-100",
+        point: "bg-green-400",
+        bomb: "bg-red-100",
+        health: "bg-salmon-100",
+        multiplier: "bg-yellow-100",
+        chip: "bg-orange-100",
+        moonrock: "bg-blue-100",
       },
     },
     defaultVariants: {
@@ -35,11 +35,11 @@ export interface GraphPointProps
     VariantProps<typeof graphPointVariants> {}
 
 export const GraphPoint = ({
-  icon,
+  icon = "point",
   className,
   ...props
 }: GraphPointProps) => {
-  const Icon = iconComponents[icon ?? "point"];
+  const Icon = iconComponents[icon];
 
   return (
     <div
