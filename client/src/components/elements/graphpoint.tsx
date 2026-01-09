@@ -3,7 +3,7 @@ import * as Icons from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const graphPointVariants = cva(
-  "select-none relative flex items-center justify-center rounded-full text-black w-8 h-8",
+  "select-none relative flex items-center justify-center rounded-full text-black",
   {
     variants: {
       icon: {
@@ -14,9 +14,14 @@ const graphPointVariants = cva(
         chip: "bg-orange-100",
         moonrock: "bg-blue-100",
       },
+      size: {
+        default: "w-8 h-8",
+        sm: "w-3 h-3",
+      },
     },
     defaultVariants: {
       icon: "point",
+      size: "default",
     },
   },
 );
@@ -36,6 +41,7 @@ export interface GraphPointProps
 
 export const GraphPoint = ({
   icon = "point",
+  size = "default",
   className,
   ...props
 }: GraphPointProps) => {
@@ -43,10 +49,10 @@ export const GraphPoint = ({
 
   return (
     <div
-      className={cn(graphPointVariants({ icon, className }))}
+      className={cn(graphPointVariants({ icon, size, className }))}
       {...props}
     >
-      <Icon className="h-5 w-5" />
+      <Icon className={size === "sm" ? "h-2 w-2" : "h-5 w-5"} />
     </div>
   );
 };

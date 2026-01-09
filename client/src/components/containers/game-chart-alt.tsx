@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { GraphPoint } from "@/components/elements/graphpoint";
 
 interface ChartDataPoint {
   pulls: number;
@@ -221,25 +222,18 @@ export function GameChartAlt({
                   const y =
                     170 -
                     ((pnl - chartData.minValue) / chartData.range) * 170;
-                  const pointColor = pnl >= 0 ? "#10b981" : "#ef4444";
                   const entry = chartPaths.points[index];
 
                   return (
-                    <circle
+                    <foreignObject
                       key={index}
-                      cx={x}
-                      cy={y}
-                      r="4"
-                      fill={pointColor}
-                      stroke="white"
-                      strokeWidth="1"
-                      className="hover:r-5 transition-all cursor-pointer"
+                      x={x - 8}
+                      y={y - 8}
+                      width={16}
+                      height={16}
                     >
-                      <title>
-                        {entry.pointType}: {pnl >= 0 ? "+" : ""}
-                        {pnl} P/L
-                      </title>
-                    </circle>
+                      <GraphPoint icon={entry.pointType as any} size="sm" />
+                    </foreignObject>
                   );
                 })}
               </g>
