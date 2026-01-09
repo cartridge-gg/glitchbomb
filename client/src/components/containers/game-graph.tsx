@@ -1,6 +1,6 @@
 "use client";
 
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ReferenceLine } from "recharts";
 import { GraphPoint } from "@/components/elements/graphpoint";
 
 const chartData = [
@@ -13,7 +13,11 @@ const chartData = [
   { pulls: 7, pnl: 20, pointType: "point" },
 ];
 
-export function GameGraph() {
+interface GameGraphProps {
+  breakevenPoint?: number;
+}
+
+export function GameGraph({ breakevenPoint = 0 }: GameGraphProps) {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <LineChart
@@ -27,12 +31,15 @@ export function GameGraph() {
           bottom: 5,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          dataKey="pulls"
-          label={{ value: "Pulls", position: "insideBottom", offset: -5 }}
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="rgba(255, 255, 255, 0.1)"
         />
-        <YAxis label={{ value: "PnL", angle: -90, position: "insideLeft" }} />
+        <ReferenceLine
+          y={breakevenPoint}
+          stroke="rgba(255, 255, 255, 0.3)"
+          strokeDasharray="5 5"
+        />
         <Line
           type="linear"
           dataKey="pnl"

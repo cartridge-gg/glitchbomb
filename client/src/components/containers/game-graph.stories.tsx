@@ -9,13 +9,14 @@ const meta = {
   },
 
   argTypes: {
-    variant: {
-      control: { type: "select" },
-      options: ["default"],
-      description: "Visual variant of the game graph",
+    breakevenPoint: {
+      control: { type: "number" },
+      description: "Breakeven point for the graph",
     },
   },
-  args: {},
+  args: {
+    breakevenPoint: 0,
+  },
 } satisfies Meta<typeof GameGraph>;
 
 export default meta;
