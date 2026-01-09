@@ -4,39 +4,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { CartesianGrid, Line, LineChart, ReferenceLine } from "recharts";
 import { GraphPoint } from "@/components/elements/graphpoint";
 
-const pointTypes = ["point", "bomb", "health", "multiplier", "chip", "moonrock"];
-
-const chartDataMap = {
-  onePull: [{ pulls: 1, pnl: -2, pointType: "point" }],
-  twoPulls: [
-    { pulls: 1, pnl: -2, pointType: "point" },
-    { pulls: 2, pnl: 2, pointType: "bomb" },
-  ],
-  threePulls: [
-    { pulls: 1, pnl: -2, pointType: "point" },
-    { pulls: 2, pnl: 1, pointType: "bomb" },
-    { pulls: 3, pnl: 5, pointType: "health" },
-  ],
-  fivePulls: [
-    { pulls: 1, pnl: -2, pointType: "point" },
-    { pulls: 2, pnl: 0, pointType: "bomb" },
-    { pulls: 3, pnl: 3, pointType: "health" },
-    { pulls: 4, pnl: 6, pointType: "multiplier" },
-    { pulls: 5, pnl: 11, pointType: "chip" },
-  ],
-  tenPulls: [
-    { pulls: 1, pnl: -3, pointType: "point" },
-    { pulls: 2, pnl: 2, pointType: "bomb" },
-    { pulls: 3, pnl: 2, pointType: "health" },
-    { pulls: 4, pnl: 2, pointType: "multiplier" },
-    { pulls: 5, pnl: 6, pointType: "chip" },
-    { pulls: 6, pnl: 6, pointType: "moonrock" },
-    { pulls: 7, pnl: 10, pointType: "point" },
-    { pulls: 8, pnl: 10, pointType: "bomb" },
-    { pulls: 9, pnl: 15, pointType: "health" },
-    { pulls: 10, pnl: 22, pointType: "multiplier" },
-  ],
-};
+interface ChartDataPoint {
+  pulls: number;
+  pnl: number;
+  pointType: string;
+}
 
 const gameGraphVariants = cva("flex items-center justify-center", {
   variants: {
@@ -56,23 +28,24 @@ const gameGraphVariants = cva("flex items-center justify-center", {
 interface GameGraphProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameGraphVariants> {
+  data: ChartDataPoint[];
   breakevenPoint?: number;
 }
 
 export function GameGraph({
+  data,
   breakevenPoint = 0,
   variant = "onePull",
   className,
   ...props
 }: GameGraphProps) {
-  const chartData = chartDataMap[variant as keyof typeof chartDataMap] || chartDataMap.onePull;
 
   return (
     <div className={gameGraphVariants({ variant, className })} {...props}>
       <LineChart
         width={500}
         height={300}
-        data={chartData}
+        data={data}
         margin={{
           top: 5,
           right: 30,
