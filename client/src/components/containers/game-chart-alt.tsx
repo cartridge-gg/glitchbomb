@@ -147,27 +147,14 @@ export function GameChartAlt({
 
   return (
     <div className={gameChartAltVariants({ variant, className })} {...props}>
-      <h2 className="text-sm font-bold mb-3 text-white">{title}</h2>
-
-      {/* Compact P/L Header */}
-      <div className="mb-2 flex justify-between items-center">
-        <div className="text-xs text-gray-400">
-          Current P/L
-        </div>
-        <div className={`text-sm font-bold ${pnlColorClass}`}>
-          {currentPnl >= 0 ? "+" : ""}
-          {currentPnl}
-        </div>
-      </div>
-
       {/* Profit/Loss Chart */}
       <div className="flex-1 flex flex-col min-h-0">
         {data.length > 0 ? (
-          <div className="flex-1 bg-black rounded border border-white p-2 overflow-hidden">
+          <div className="flex-1 bg-black rounded border border-white overflow-hidden">
             <svg
               width="100%"
               height="100%"
-              viewBox="0 0 300 220"
+              viewBox="0 0 250 170"
               className="w-full h-full min-h-0"
               preserveAspectRatio="xMidYMid meet"
             >
@@ -188,8 +175,8 @@ export function GameChartAlt({
                 </pattern>
               </defs>
               <rect
-                x="25"
-                y="5"
+                x="0"
+                y="0"
                 width="250"
                 height="170"
                 fill="url(#chart-grid)"
@@ -197,7 +184,7 @@ export function GameChartAlt({
               />
 
               {/* Chart area */}
-              <g transform="translate(25, 5)">
+              <g>
                 {/* Zero line (white dashed) */}
                 <line
                   x1="0"
@@ -256,69 +243,6 @@ export function GameChartAlt({
                   );
                 })}
               </g>
-
-              {/* Y-axis */}
-              <line
-                x1="25"
-                y1="5"
-                x2="25"
-                y2="175"
-                stroke="white"
-                strokeWidth="1"
-              />
-              {/* X-axis */}
-              <line
-                x1="25"
-                y1="175"
-                x2="275"
-                y2="175"
-                stroke="white"
-                strokeWidth="1"
-              />
-
-              {/* Y-axis labels */}
-              <text
-                x="20"
-                y="10"
-                fill="white"
-                fontSize="8"
-                textAnchor="end"
-              >
-                {Math.round(chartData.maxValue)}
-              </text>
-              <text
-                x="20"
-                y="180"
-                fill="white"
-                fontSize="8"
-                textAnchor="end"
-              >
-                {Math.round(chartData.minValue)}
-              </text>
-              <text
-                x="20"
-                y={zeroLineY + 5 + 3}
-                fill="white"
-                fontSize="8"
-                textAnchor="end"
-                fontWeight="bold"
-              >
-                0
-              </text>
-
-              {/* X-axis labels */}
-              <text x="30" y="190" fill="white" fontSize="8">
-                Start
-              </text>
-              <text
-                x="270"
-                y="190"
-                fill="white"
-                fontSize="8"
-                textAnchor="end"
-              >
-                {data.length > 1 ? `Pull ${data.length}` : "Current"}
-              </text>
             </svg>
           </div>
         ) : (
