@@ -11,7 +11,7 @@ interface ChartDataPoint {
 }
 
 const gameChartAltVariants = cva(
-  "bg-black p-3 rounded-lg shadow-sm border border-white h-full flex flex-col",
+  "bg-black p-3 rounded-lg shadow-sm h-full flex flex-col",
   {
     variants: {
       variant: {
@@ -151,7 +151,7 @@ export function GameChartAlt({
       {/* Profit/Loss Chart */}
       <div className="flex-1 flex flex-col min-h-0">
         {data.length > 0 ? (
-          <div className="flex-1 bg-black rounded border border-white overflow-hidden">
+          <div className="flex-1 bg-black rounded overflow-hidden">
             <svg
               width="100%"
               height="100%"
