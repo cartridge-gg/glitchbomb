@@ -44,7 +44,10 @@ export function GameGraph({ breakevenPoint = 0 }: GameGraphProps) {
           type="linear"
           dataKey="pnl"
           stroke="var(--green-400)"
-          strokeWidth={2}
+          strokeWidth={3}
+          style={{
+            filter: "drop-shadow(0 0 8px var(--green-400))",
+          }}
           dot={(props: any) => {
             const { cx, cy, payload } = props;
             return (
