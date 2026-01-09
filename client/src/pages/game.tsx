@@ -22,7 +22,7 @@ import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
-  const { cashOut, pull, enter, buy, exit } = useActions();
+  const { cashOut, pull, enter, buy, exit, isLoading } = useActions();
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
@@ -117,34 +117,24 @@ export const Game = () => {
             <Button
               variant="secondary"
               className="flex-1 font-secondary text-sm tracking-widest"
-              onClick={() => {
-                cashOut(pack.id, game.id)
-                  .then(() => {
-                    setMilestoneDialogOpen(false);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    setMilestoneDialogOpen(false);
-                  });
+              disabled={isLoading}
+              onClick={async () => {
+                await cashOut(pack.id, game.id);
+                setMilestoneDialogOpen(false);
               }}
             >
-              Cash Out
+              {isLoading ? "..." : "Cash Out"}
             </Button>
             <Button
               variant="secondary"
               className="flex-1 font-secondary text-sm tracking-widest"
-              onClick={() => {
-                enter(pack.id, game.id)
-                  .then(() => {
-                    setMilestoneDialogOpen(false);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    setMilestoneDialogOpen(false);
-                  });
+              disabled={isLoading}
+              onClick={async () => {
+                await enter(pack.id, game.id);
+                setMilestoneDialogOpen(false);
               }}
             >
-              Enter Shop
+              {isLoading ? "..." : "Enter Shop"}
             </Button>
           </DialogFooter>
         </DialogContent>
