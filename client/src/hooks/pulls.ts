@@ -43,6 +43,11 @@ export function usePulls({
   const { client } = useEntitiesContext();
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const lastFetchedRef = useRef<string | null>(null);
+
+  // Skip if invalid IDs (not yet loaded)
+  const isReady = packId > 0 && gameId > 0;
+  const fetchKey = isReady ? `${packId}-${gameId}` : null;
 
   const onUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
@@ -62,38 +67,43 @@ export function usePulls({
     [],
   );
 
-  // Refresh function to fetch and subscribe to data
-  const refresh = useCallback(async () => {
-    if (!client || !packId || !gameId) return;
+  useEffect(() => {
+    // Skip if not ready or already fetched for this key
+    if (!client || !fetchKey || lastFetchedRef.current === fetchKey) return;
 
-    // Cancel existing subscriptions
-    subscriptionRef.current = null;
+    // Cancel existing subscription
+    if (subscriptionRef.current) {
+      subscriptionRef.current.cancel();
+      subscriptionRef.current = null;
+    }
 
-    // Fetch initial data
+    // Reset pulls when switching to a new game
+    setPulls([]);
+    lastFetchedRef.current = fetchKey;
+
+    // Fetch and subscribe
     const query = getPullsQuery(packId, gameId).build();
-    await client
+
+    client
       .getEventMessages(query)
       .then((result) => onUpdate({ data: result.items, error: undefined }));
 
-    // Subscribe to entity and event updates
     client
       .onEventMessageUpdated(query.clause, [], onUpdate)
       .then((response) => {
         subscriptionRef.current = response;
       });
-  }, [client, packId, gameId, onUpdate]);
-
-  useEffect(() => {
-    refresh();
 
     return () => {
       if (subscriptionRef.current) {
         subscriptionRef.current.cancel();
+        subscriptionRef.current = null;
       }
     };
-  }, [refresh]);
+  }, [client, fetchKey, packId, gameId, onUpdate]);
 
   return {
     pulls,
+    isReady,
   };
 }

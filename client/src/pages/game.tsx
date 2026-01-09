@@ -27,12 +27,12 @@ export const Game = () => {
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [gameOverDialogOpen, setGameOverDialogOpen] = useState(false);
+  // Pulls data for future use (e.g., pull history display)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { pulls } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
-
-  console.log({ pulls });
 
   const handleGoHome = useCallback(() => {
     setGameOverDialogOpen(false);
@@ -49,7 +49,7 @@ export const Game = () => {
 
   // Detect game over state
   useEffect(() => {
-    if (game && game.over) {
+    if (game?.over) {
       setGameOverDialogOpen(true);
     }
   }, [game]);

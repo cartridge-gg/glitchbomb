@@ -131,11 +131,7 @@ export const Home = () => {
               return (
                 <Link
                   key={p.id}
-                  to={
-                    account && p
-                      ? `/play?pack=${p.id}&game=${gameId}`
-                      : "/"
-                  }
+                  to={account && p ? `/play?pack=${p.id}&game=${gameId}` : "/"}
                   className={cn(
                     "w-full",
                     !account || !p ? "cursor-default" : "",

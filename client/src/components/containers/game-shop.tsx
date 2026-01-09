@@ -109,7 +109,7 @@ export const GameShop = ({
   const basketIndices = useMemo(() => {
     const indices: number[] = [];
     Object.entries(quantities).forEach(([indexStr, qty]) => {
-      const index = parseInt(indexStr);
+      const index = parseInt(indexStr, 10);
       for (let i = 0; i < qty; i++) {
         indices.push(index);
       }
