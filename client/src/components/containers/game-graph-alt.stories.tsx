@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { GameChartAlt } from "./game-chart-alt";
+import { GameGraphAlt } from "./game-graph-alt";
 
 const chartDatasets = {
   onePull: [{ pulls: 1, pnl: -2, pointType: "point" }],
@@ -50,8 +50,8 @@ const chartDatasets = {
 };
 
 const meta = {
-  title: "Containers/Game Chart Alt",
-  component: GameChartAlt,
+  title: "Containers/Game Graph Alt",
+  component: GameGraphAlt,
   parameters: {
     layout: "padded",
   },
@@ -85,7 +85,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof GameChartAlt>;
+} satisfies Meta<typeof GameGraphAlt>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

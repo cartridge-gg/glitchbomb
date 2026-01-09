@@ -10,7 +10,7 @@ interface ChartDataPoint {
   pointType: string;
 }
 
-const gameChartAltVariants = cva(
+const gameGraphAltVariants = cva(
   "bg-black p-3 rounded-lg shadow-sm h-full flex flex-col",
   {
     variants: {
@@ -25,9 +25,9 @@ const gameChartAltVariants = cva(
   }
 );
 
-interface GameChartAltProps
+interface GameGraphAltProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof gameChartAltVariants> {
+    VariantProps<typeof gameGraphAltVariants> {
   data: ChartDataPoint[];
   title?: string;
   breakevenPoint?: number;
@@ -38,14 +38,14 @@ interface ChartSegment {
   color: string;
 }
 
-export function GameChartAlt({
+export function GameGraphAlt({
   data,
   title = "PROFIT/LOSS",
   breakevenPoint = 0,
   variant = "default",
   className,
   ...props
-}: GameChartAltProps) {
+}: GameGraphAltProps) {
   // Calculate chart dimensions and scaling
   const chartData = useMemo(() => {
     if (data.length === 0) {
@@ -149,7 +149,7 @@ export function GameChartAlt({
   }, [chartData]);
 
   return (
-    <div className={gameChartAltVariants({ variant, className })} {...props}>
+    <div className={gameGraphAltVariants({ variant, className })} {...props}>
       {/* Profit/Loss Chart */}
       <div className="flex-1 flex flex-col min-h-0">
         {data.length > 0 ? (
