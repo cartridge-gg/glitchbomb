@@ -87,6 +87,7 @@ export function GameChartAlt({
 
     const width = 250;
     const height = 170;
+    const padding = 10;
 
     const segments: ChartSegment[] = [];
     let currentPath = "";
@@ -95,9 +96,9 @@ export function GameChartAlt({
     pnlValues.forEach((pnl, index) => {
       const x =
         pnlValues.length === 1
-          ? width / 2
-          : (index / (pnlValues.length - 1)) * width;
-      const y = height - ((pnl - minValue) / range) * height;
+          ? width / 2 + padding
+          : padding + (index / (pnlValues.length - 1)) * width;
+      const y = padding + height - ((pnl - minValue) / range) * height;
       const isPositive = pnl >= 0;
       const color = isPositive ? "#10b981" : "#ef4444";
 
@@ -112,10 +113,10 @@ export function GameChartAlt({
           segments.push({ path: currentPath, color: currentColor });
           const prevX =
             pnlValues.length === 1
-              ? width / 2
-              : ((index - 1) / (pnlValues.length - 1)) * width;
+              ? width / 2 + padding
+              : padding + ((index - 1) / (pnlValues.length - 1)) * width;
           const prevY =
-            height - ((pnlValues[index - 1] - minValue) / range) * height;
+            padding + height - ((pnlValues[index - 1] - minValue) / range) * height;
           currentPath = `M ${prevX},${prevY} L ${x},${y}`;
           currentColor = color;
         }
@@ -143,7 +144,8 @@ export function GameChartAlt({
 
   const zeroLineY = useMemo(() => {
     const { minValue, range } = chartData;
-    return 170 - ((0 - minValue) / range) * 170;
+    const padding = 10;
+    return padding + 170 - ((0 - minValue) / range) * 170;
   }, [chartData]);
 
   return (
@@ -155,7 +157,7 @@ export function GameChartAlt({
             <svg
               width="100%"
               height="100%"
-              viewBox="0 0 250 170"
+              viewBox="0 0 270 190"
               className="w-full h-full min-h-0"
               preserveAspectRatio="none"
             >
@@ -178,8 +180,8 @@ export function GameChartAlt({
               <rect
                 x="0"
                 y="0"
-                width="250"
-                height="170"
+                width="270"
+                height="190"
                 fill="url(#chart-grid)"
                 opacity="0.3"
               />
@@ -188,9 +190,9 @@ export function GameChartAlt({
               <g>
                 {/* Zero line (white dashed) */}
                 <line
-                  x1="0"
+                  x1="10"
                   y1={zeroLineY}
-                  x2="250"
+                  x2="260"
                   y2={zeroLineY}
                   stroke="white"
                   strokeWidth="1"
@@ -215,12 +217,13 @@ export function GameChartAlt({
 
                 {/* Data points */}
                 {chartPaths.pnlValues.map((pnl, index) => {
+                  const padding = 10;
                   const x =
                     chartPaths.pnlValues.length === 1
-                      ? 125
-                      : (index / (chartPaths.pnlValues.length - 1)) * 250;
+                      ? padding + 125
+                      : padding + (index / (chartPaths.pnlValues.length - 1)) * 250;
                   const y =
-                    170 -
+                    padding + 170 -
                     ((pnl - chartData.minValue) / chartData.range) * 170;
                   const entry = chartPaths.points[index];
 
