@@ -157,7 +157,7 @@ export function GameChartAlt({
               height="100%"
               viewBox="0 0 250 170"
               className="w-full h-full min-h-0"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
             >
               {/* Grid pattern */}
               <defs>
@@ -227,10 +227,10 @@ export function GameChartAlt({
                   return (
                     <foreignObject
                       key={index}
-                      x={x - 8}
-                      y={y - 8}
-                      width={16}
-                      height={16}
+                      x={x - 6}
+                      y={y - 6}
+                      width={12}
+                      height={12}
                     >
                       <GraphPoint icon={entry.pointType as any} size="sm" />
                     </foreignObject>
