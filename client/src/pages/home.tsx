@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import type { Pack } from "@/models";
 
 export const Home = () => {
-  const { mint, start } = useActions();
+  const { mint, start, isLoading } = useActions();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { starterpack, config } = useEntitiesContext();
@@ -43,44 +43,20 @@ export const Home = () => {
   const { getGameForPack } = useGames(gameKeys);
 
   const balance = useMemo(() => {
-    console.log("[Balance Debug]", {
-      tokenAddress,
-      tokenContracts,
-      tokenBalances,
-      configToken: config?.token,
-    });
     if (!tokenAddress) return 0;
     const tokenContract = tokenContracts.find(
       (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
     );
-    if (!tokenContract) {
-      console.log("[Balance Debug] No token contract found for", tokenAddress);
-      return 0;
-    }
+    if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
       (balance) => BigInt(balance.contract_address) === BigInt(tokenAddress),
     );
-    if (!tokenBalance) {
-      console.log("[Balance Debug] No token balance found");
-      return 0;
-    }
-    const calculatedBalance = toDecimal(tokenContract, tokenBalance);
-    console.log("[Balance Debug] Found balance:", {
-      tokenContract,
-      tokenBalance,
-      decimals: tokenContract.decimals,
-      rawBalance: tokenBalance.balance,
-      calculated: calculatedBalance,
-    });
-    return calculatedBalance;
-  }, [tokenContracts, tokenBalances, tokenAddress, config?.token]);
+    if (!tokenBalance) return 0;
+    return toDecimal(tokenContract, tokenBalance);
+  }, [tokenContracts, tokenBalances, tokenAddress]);
 
   const purchase = useCallback(async () => {
-    console.log("[Purchase Debug]", { starterpack, connector });
-    if (!starterpack) {
-      console.log("[Purchase Debug] No starterpack available");
-      return;
-    }
+    if (!starterpack) return;
     (connector as ControllerConnector)?.controller.openStarterPack(
       starterpack.id.toString(),
     );
@@ -112,6 +88,7 @@ export const Home = () => {
           <Button
             variant={account && !pack ? "default" : "secondary"}
             className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
+            disabled={isLoading}
             onClick={purchase}
           >
             Buy Packs
@@ -140,10 +117,11 @@ export const Home = () => {
                   <Button
                     variant={account && p ? "default" : "secondary"}
                     className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
-                    disabled={!account || !p}
+                    disabled={!account || !p || isLoading}
                     onClick={() => (hasNoGame ? start(p.id) : undefined)}
                   >
-                    {hasNoGame ? "Start" : "Continue"} #{p.id}
+                    {isLoading ? "..." : hasNoGame ? "Start" : "Continue"} #
+                    {p.id}
                   </Button>
                 </Link>
               );
