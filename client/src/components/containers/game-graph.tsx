@@ -1,15 +1,16 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { GraphPoint } from "@/components/elements/graphpoint";
 
 const chartData = [
-  { pulls: 1, pnl: -5 },
-  { pulls: 2, pnl: -2 },
-  { pulls: 3, pnl: 3 },
-  { pulls: 4, pnl: 3 },
-  { pulls: 5, pnl: 8 },
-  { pulls: 6, pnl: 8 },
-  { pulls: 7, pnl: 20 },
+  { pulls: 1, pnl: -5, pointType: "point" },
+  { pulls: 2, pnl: -2, pointType: "bomb" },
+  { pulls: 3, pnl: 3, pointType: "health" },
+  { pulls: 4, pnl: 3, pointType: "multiplier" },
+  { pulls: 5, pnl: 8, pointType: "chip" },
+  { pulls: 6, pnl: 8, pointType: "moonrock" },
+  { pulls: 7, pnl: 20, pointType: "point" },
 ];
 
 export function GameGraph() {
@@ -35,9 +36,16 @@ export function GameGraph() {
         <Line
           type="linear"
           dataKey="pnl"
-          stroke="#8884d8"
+          stroke="var(--green-400)"
           strokeWidth={2}
-          dot={{ fill: "#8884d8" }}
+          dot={(props: any) => {
+            const { cx, cy, payload } = props;
+            return (
+              <foreignObject x={cx - 16} y={cy - 16} width={32} height={32}>
+                <GraphPoint icon={payload.pointType} />
+              </foreignObject>
+            );
+          }}
           activeDot={{ r: 6 }}
         />
       </LineChart>
