@@ -49,7 +49,7 @@ export const Game = () => {
 
   // Detect game over state
   useEffect(() => {
-    if (game && game.over) {
+    if (game?.over) {
       setGameOverDialogOpen(true);
     }
   }, [game]);
