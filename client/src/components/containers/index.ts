@@ -1,3 +1,4 @@
+export * from "./game-chart-alt";
 export * from "./game-footer";
 export * from "./game-graph";
 export * from "./game-header";
