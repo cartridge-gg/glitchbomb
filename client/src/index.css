@@ -30,3 +30,22 @@ body {
   touch-action: manipulation;
   height: 100%;
 }
+
+/* Puller orb rotation animation - CSS for Safari compatibility */
+@keyframes puller-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes puller-spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
