@@ -91,22 +91,22 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
       <div className="relative w-full h-32">
         {/* Extended grid background with fade */}
         <div
-          className="absolute -inset-6 pointer-events-none"
+          className="absolute -inset-12 pointer-events-none"
           style={{
             maskImage:
-              "radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 70%)",
+              "radial-gradient(ellipse 80% 80% at 50% 45%, black 30%, transparent 65%)",
             WebkitMaskImage:
-              "radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 70%)",
+              "radial-gradient(ellipse 80% 80% at 50% 45%, black 30%, transparent 65%)",
           }}
         >
           <svg className="absolute inset-0 w-full h-full">
             {/* Vertical grid lines - extended */}
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 16 }).map((_, i) => (
               <line
                 key={`v-${i}`}
-                x1={`${(i + 1) * 8.33}%`}
+                x1={`${(i + 1) * 6.25}%`}
                 y1="0"
-                x2={`${(i + 1) * 8.33}%`}
+                x2={`${(i + 1) * 6.25}%`}
                 y2="100%"
                 stroke="rgba(20, 83, 45, 0.5)"
                 strokeWidth="1"
@@ -114,13 +114,13 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
               />
             ))}
             {/* Horizontal grid lines - extended */}
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 10 }).map((_, i) => (
               <line
                 key={`h-${i}`}
                 x1="0"
-                y1={`${(i + 1) * 12.5}%`}
+                y1={`${(i + 1) * 10}%`}
                 x2="100%"
-                y2={`${(i + 1) * 12.5}%`}
+                y2={`${(i + 1) * 10}%`}
                 stroke="rgba(20, 83, 45, 0.5)"
                 strokeWidth="1"
                 strokeDasharray="4 4"
