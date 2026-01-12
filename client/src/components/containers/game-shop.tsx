@@ -132,7 +132,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         />
         {/* Icon */}
         <Icon
-          className="w-8 h-8 relative z-10"
+          className="w-12 h-12 relative z-10"
           style={{
             color,
             filter: `drop-shadow(0 0 8px ${color})`,
@@ -220,7 +220,7 @@ const BagOrb = ({ orb }: BagOrbProps) => {
       />
       {/* Icon */}
       <Icon
-        className="w-6 h-6 relative z-10"
+        className="w-9 h-9 relative z-10"
         style={{
           color,
           filter: `drop-shadow(0 0 4px ${color})`,
