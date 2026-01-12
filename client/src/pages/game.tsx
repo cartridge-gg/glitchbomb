@@ -162,7 +162,7 @@ export const Game = () => {
             style={{ backgroundColor: "rgba(100, 50, 0, 0.3)" }}
           >
             <ChipIcon size="sm" className="text-orange-100" />
-            <span className="text-orange-100 font-secondary text-lg">
+            <span className="text-orange-100 font-secondary text-sm">
               {game.chips}
             </span>
           </div>
