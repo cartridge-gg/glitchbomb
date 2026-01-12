@@ -186,7 +186,7 @@ export const Game = () => {
             style={{
               background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
               border: "2px solid rgba(138, 43, 226, 0.4)",
-              color: "#D070E0",
+              color: "#FF80FF",
             }}
             onClick={() => cashOut(pack.id, game.id)}
           >
