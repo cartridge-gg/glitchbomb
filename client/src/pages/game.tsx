@@ -172,42 +172,44 @@ export const Game = () => {
   return (
     <>
       {/* Full-width header */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-4">
+      <div className="absolute top-0 left-0 right-0 flex items-center px-4 py-4">
         {/* Home button (left) */}
         <Button
           variant="secondary"
-          className="h-12 w-12 p-0"
+          className="h-12 w-12 p-0 shrink-0"
           onClick={() => navigate("/")}
         >
           <HomeIcon size="sm" className="text-green-400" />
         </Button>
 
-        {/* Center: Moonrocks + Chips */}
-        <div className="flex items-stretch gap-3">
-          {/* Moonrocks (blue) */}
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 min-h-12 px-6 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
-          >
-            <MoonrockIcon className="w-5 h-5 text-blue-400" />
-            <span className="font-secondary text-sm tracking-widest text-blue-300">
-              {moonrocks.toLocaleString()}
-            </span>
-          </button>
-          {/* Chips (orange) */}
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 min-h-12 px-6 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
-          >
-            <ChipIcon className="w-5 h-5 text-orange-400" />
-            <span className="font-secondary text-sm tracking-widest text-orange-300">
-              {game.chips.toLocaleString()}
-            </span>
-          </button>
+        {/* Center: Moonrocks + Chips - matches game page width */}
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-stretch gap-3 w-full max-w-[420px] px-4">
+            {/* Moonrocks (blue) */}
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
+            >
+              <MoonrockIcon className="w-5 h-5 text-blue-400" />
+              <span className="font-secondary text-sm tracking-widest text-blue-300">
+                {moonrocks.toLocaleString()}
+              </span>
+            </button>
+            {/* Chips (orange) */}
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
+            >
+              <ChipIcon className="w-5 h-5 text-orange-400" />
+              <span className="font-secondary text-sm tracking-widest text-orange-300">
+                {game.chips.toLocaleString()}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Profile (right) */}
-        <Profile username={username || "..."} className="w-auto px-4" />
+        <Profile username={username || "..."} className="w-auto px-4 shrink-0" />
       </div>
 
       <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4 pt-24">
