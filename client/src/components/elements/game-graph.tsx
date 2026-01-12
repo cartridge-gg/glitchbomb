@@ -147,10 +147,10 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           >
             <defs>
               <linearGradient id="baselineFade" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgba(54, 248, 24, 0)" />
-                <stop offset="10%" stopColor="rgba(54, 248, 24, 1)" />
-                <stop offset="90%" stopColor="rgba(54, 248, 24, 1)" />
-                <stop offset="100%" stopColor="rgba(54, 248, 24, 0)" />
+                <stop offset="0%" stopColor="rgba(129, 244, 100, 0)" />
+                <stop offset="10%" stopColor="rgba(129, 244, 100, 1)" />
+                <stop offset="90%" stopColor="rgba(129, 244, 100, 1)" />
+                <stop offset="100%" stopColor="rgba(129, 244, 100, 0)" />
               </linearGradient>
             </defs>
             <line
@@ -159,7 +159,8 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
               x2="100%"
               y2="100%"
               stroke="url(#baselineFade)"
-              strokeWidth="2"
+              strokeWidth="1"
+              strokeDasharray="4 4"
             />
           </svg>
 
