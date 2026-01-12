@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GameScene, GameShop } from "@/components/containers";
-import { OrbDisplay } from "@/components/elements";
+import { Multiplier, OrbDisplay } from "@/components/elements";
 import { BagIcon, BombIcon, HeartIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -136,7 +136,17 @@ export const Game = () => {
   return (
     <>
       <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
-        {/* Top row: Hearts (left) | Multiplier (right) */}
+        {/* Game Scene */}
+        <GameScene
+          className="grow"
+          lives={game.health}
+          bombs={game.distribution().bombs}
+          orbs={game.pullables.length}
+          values={game.distribution()}
+          onPull={() => pull(pack.id, game.id)}
+        />
+
+        {/* Hearts (left) | Multiplier (right) */}
         <div className="flex items-center justify-between">
           {/* Hearts */}
           <div className="flex items-center gap-0.5 border border-green-900 rounded-lg px-2 py-1.5">
@@ -158,22 +168,8 @@ export const Game = () => {
             ))}
           </div>
           {/* Multiplier */}
-          <div className="border border-green-500 rounded-lg px-4 py-2">
-            <p className="text-green-400 font-glitch text-xl">
-              {game.multiplier}X
-            </p>
-          </div>
+          <Multiplier count={game.multiplier} className="h-12 w-20" />
         </div>
-
-        {/* Game Scene */}
-        <GameScene
-          className="grow"
-          lives={game.health}
-          bombs={game.distribution().bombs}
-          orbs={game.pullables.length}
-          values={game.distribution()}
-          onPull={() => pull(pack.id, game.id)}
-        />
 
         {/* Bottom row: Stash button | Cash Out button */}
         <div className="flex items-stretch gap-3">
