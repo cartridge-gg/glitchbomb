@@ -120,13 +120,13 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
               strokeDasharray="4 4"
             />
           ))}
-          {/* Bottom baseline - green-700 dotted */}
+          {/* Bottom baseline - green-600 dotted */}
           <line
             x1="0"
             y1="100%"
             x2="100%"
             y2="100%"
-            stroke="#2E6F19"
+            stroke="#348F1B"
             strokeWidth="1"
             strokeDasharray="4 4"
           />
