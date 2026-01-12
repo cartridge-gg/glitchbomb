@@ -90,7 +90,11 @@ export const OrbDisplay = ({
   const glowSize = glowSizeMap[size ?? "md"];
 
   return (
-    <div className="relative shrink-0" {...props}>
+    <div
+      className="relative shrink-0"
+      style={{ backfaceVisibility: "hidden" }}
+      {...props}
+    >
       {/* Orb circle */}
       <div
         className={cn(orbDisplayVariants({ size, className }), "overflow-hidden")}
@@ -98,6 +102,7 @@ export const OrbDisplay = ({
           borderWidth: "2px",
           borderStyle: "solid",
           borderColor: color,
+          transform: "translateZ(0)",
         }}
       >
         {/* Orb background */}
@@ -108,6 +113,7 @@ export const OrbDisplay = ({
             backgroundSize: "102%",
             backgroundPosition: "center",
             opacity: 0.4,
+            backfaceVisibility: "hidden",
           }}
         />
         {/* Color tint */}
@@ -117,6 +123,7 @@ export const OrbDisplay = ({
             backgroundColor: color,
             mixBlendMode: "multiply",
             opacity: 0.5,
+            backfaceVisibility: "hidden",
           }}
         />
         {/* Icon */}

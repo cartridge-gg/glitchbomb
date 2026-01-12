@@ -288,6 +288,11 @@ export const GameShop = ({
                   stiffness: 500,
                   damping: 25,
                 }}
+                style={{
+                  willChange: "transform, opacity",
+                  backfaceVisibility: "hidden",
+                  transform: "translateZ(0)",
+                }}
               >
                 <OrbDisplay orb={orb} size="sm" />
               </motion.div>
