@@ -32,7 +32,7 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
     return [...pulls].sort((a, b) => a.id - b.id);
   }, [pulls]);
 
-  const recentPulls = sortedPulls.slice(-4); // Last 4 for the header
+  const recentPulls = sortedPulls.slice(-8); // Last 8 for the header
   const graphPulls = sortedPulls.slice(-12); // Last 12 for the graph
 
   // Calculate positions for graph points
