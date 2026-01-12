@@ -215,8 +215,8 @@ export const Games = () => {
         <div className="flex flex-col gap-6 w-full max-w-[500px]">
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
-            <p className="text-white font-primary text-sm tracking-wider">
-              Purchase New Game
+            <p className="text-white font-secondary text-sm tracking-widest uppercase">
+              Play Now
             </p>
             <Button
               variant="default"
