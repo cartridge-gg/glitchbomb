@@ -92,21 +92,21 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
         {/* Extended grid background with fade */}
         <svg
           className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)]"
-          preserveAspectRatio="none"
+          style={{ overflow: "visible" }}
         >
           <defs>
             {/* Fade gradient for vertical lines */}
             <linearGradient id="verticalFade" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
-              <stop offset="20%" stopColor="rgba(20, 83, 45, 0.3)" />
-              <stop offset="80%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="15%" stopColor="rgba(20, 83, 45, 0.5)" />
+              <stop offset="85%" stopColor="rgba(20, 83, 45, 0.5)" />
               <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
             </linearGradient>
             {/* Fade gradient for horizontal lines */}
             <linearGradient id="horizontalFade" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
-              <stop offset="15%" stopColor="rgba(20, 83, 45, 0.3)" />
-              <stop offset="85%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="10%" stopColor="rgba(20, 83, 45, 0.5)" />
+              <stop offset="90%" stopColor="rgba(20, 83, 45, 0.5)" />
               <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
             </linearGradient>
           </defs>
