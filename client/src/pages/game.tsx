@@ -175,7 +175,7 @@ export const Game = () => {
 
         {/* Orbs grid */}
         <div
-          className="flex-1 overflow-y-auto"
+          className="flex-1 flex flex-col justify-center overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
           {displayOrbs.length > 0 ? (
@@ -190,7 +190,7 @@ export const Game = () => {
               ))}
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full">
               <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
                 No orbs in your bag yet
               </p>
