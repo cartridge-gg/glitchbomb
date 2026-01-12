@@ -66,10 +66,10 @@ export const Home = () => {
 
   return (
     <div className="absolute inset-0 flex flex-col items-center max-w-[420px] m-auto">
-      <GlitchBombIcon
-        size="xl"
-        className="absolute top-9 left-1/2 -translate-x-1/2 text-white"
-      />
+      {/* Header placeholder - same height as other pages */}
+      <div className="w-full py-4 flex justify-center">
+        <GlitchBombIcon size="xl" className="text-white" />
+      </div>
       <div className="w-[300px] flex flex-col gap-12 items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <h1 className="uppercase text-center">
           <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
