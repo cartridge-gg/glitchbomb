@@ -122,7 +122,7 @@ export const OrbDisplay = ({
           style={{
             backgroundColor: color,
             mixBlendMode: "multiply",
-            opacity: 0.5,
+            opacity: 0.1,
             backfaceVisibility: "hidden",
           }}
         />
