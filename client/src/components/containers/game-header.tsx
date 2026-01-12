@@ -1,63 +1,57 @@
-import { cva, type VariantProps } from "class-variance-authority";
-import {
-  Action,
-  Counter,
-  GoalTracker,
-  Multiplier,
-  Score,
-} from "@/components/elements";
+import { useNavigate } from "react-router-dom";
+import { Profile } from "@/components/elements";
+import { ChipIcon, HomeIcon, MoonrockIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 
-export interface GameHeaderProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof gameHeaderVariants> {
-  score: number;
-  multiplier: number;
+export interface GameHeaderProps {
   moonrocks: number;
   chips: number;
-  milestone: number;
-  onLeftClick: () => void;
+  username?: string;
 }
 
-const gameHeaderVariants = cva("flex gap-6 items-stretch justify-between", {
-  variants: {
-    variant: {
-      default: "h-[76px] max-w-[420px] mx-auto",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
+  const navigate = useNavigate();
 
-export const GameHeader = ({
-  score,
-  multiplier,
-  moonrocks,
-  chips,
-  milestone,
-  variant,
-  className,
-  onLeftClick,
-  ...props
-}: GameHeaderProps) => {
   return (
-    <div className={gameHeaderVariants({ variant, className })} {...props}>
-      <Action onClick={onLeftClick}>
-        <p>
-          Cash
-          <br />
-          Out
-        </p>
-      </Action>
-      <div className="flex flex-col justify-between min-w-[152px]">
-        <div className="flex justify-between items-center">
-          <Counter variant="moonrock" balance={moonrocks} />
-          <Score value={score} />
-          <Counter variant="chip" balance={chips} />
-        </div>
-        <GoalTracker value={score} total={milestone} />
+    <div className="absolute top-0 left-0 right-0 py-4 px-4">
+      {/* Home button (left) */}
+      <Button
+        variant="secondary"
+        className="h-12 w-12 p-0 absolute left-4 top-4"
+        onClick={() => navigate("/")}
+      >
+        <HomeIcon size="sm" className="text-green-400" />
+      </Button>
+
+      {/* Center: Moonrocks + Chips - aligned with game content */}
+      <div className="flex items-stretch gap-3 max-w-[420px] mx-auto px-4">
+        {/* Moonrocks (blue) */}
+        <button
+          type="button"
+          className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
+        >
+          <MoonrockIcon className="w-5 h-5 text-blue-400" />
+          <span className="font-secondary text-sm tracking-widest text-blue-400">
+            {Math.floor(moonrocks).toLocaleString()}
+          </span>
+        </button>
+        {/* Chips (orange) */}
+        <button
+          type="button"
+          className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
+        >
+          <ChipIcon className="w-5 h-5 text-orange-400" />
+          <span className="font-secondary text-sm tracking-widest text-orange-400">
+            {chips.toLocaleString()}
+          </span>
+        </button>
       </div>
-      <Multiplier className="flex-1 min-w-0 shrink" count={multiplier} />
+
+      {/* Profile (right) */}
+      <Profile
+        username={username || "..."}
+        className="w-auto px-4 absolute right-4 top-4"
+      />
     </div>
   );
 };
