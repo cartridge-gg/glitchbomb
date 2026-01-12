@@ -93,12 +93,12 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
       <div className="relative w-full h-32">
         {/* Extended grid background with fade */}
         <div
-          className="absolute -inset-12 pointer-events-none"
+          className="absolute -inset-20 pointer-events-none"
           style={{
             maskImage:
-              "radial-gradient(ellipse 80% 90% at 50% 35%, black 30%, transparent 65%)",
+              "radial-gradient(ellipse 90% 100% at 50% 40%, black 35%, transparent 70%)",
             WebkitMaskImage:
-              "radial-gradient(ellipse 80% 90% at 50% 35%, black 30%, transparent 65%)",
+              "radial-gradient(ellipse 90% 100% at 50% 40%, black 35%, transparent 70%)",
           }}
         >
           <svg className="absolute inset-0 w-full h-full">
