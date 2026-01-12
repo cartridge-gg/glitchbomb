@@ -77,7 +77,7 @@ export const GameScene = ({
       {/* Distribution */}
       <div
         className={cn(
-          "absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
           phase === 0 && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
           phase === 3 && "opacity-100",
@@ -89,7 +89,7 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
           phase === 3 && "opacity-100 z-20",
@@ -113,9 +113,9 @@ export const GameScene = ({
       </div>
 
       {/* Orb */}
-      {/* <div
+      <div
         className={cn(
-          "absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
           phase === 0 && "opacity-0",
           phase === 1 && "opacity-100",
           phase === 2 && "opacity-50",
@@ -129,12 +129,12 @@ export const GameScene = ({
               "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
           }}
         />
-      </div> */}
+      </div>
 
       {/* Outcome */}
       <div
         className={cn(
-          "absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
           (phase === 0 || phase === 1) && "opacity-0",
           phase === 2 && "opacity-100",
           phase === 3 && "opacity-0",
