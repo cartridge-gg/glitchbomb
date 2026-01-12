@@ -83,14 +83,14 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
             {price}
           </span>
         </div>
-        <Button
-          variant="default"
-          className="h-12 w-14 p-0 rounded-none rounded-r-lg"
+        <button
+          className="h-12 w-14 p-0 rounded-r-lg disabled:opacity-50"
+          style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
           onClick={onAdd}
         >
           <span className="text-3xl font-secondary text-green-400">+</span>
-        </Button>
+        </button>
       </div>
     </div>
   );
