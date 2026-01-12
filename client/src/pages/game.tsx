@@ -6,7 +6,7 @@ import {
   GameScene,
   GameShop,
 } from "@/components/containers";
-import { BombIcon } from "@/components/icons";
+import { BombIcon, HeartIcon, HeartOutlineIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -121,6 +121,27 @@ export const Game = () => {
           values={game.distribution()}
           onPull={() => pull(pack.id, game.id)}
         />
+        {/* Hearts display */}
+        <div className="flex items-center justify-center gap-1">
+          {Array.from({ length: 5 }).map((_, i) =>
+            i < game.health ? (
+              <HeartIcon
+                key={i}
+                className="w-10 h-10"
+                style={{
+                  color: "var(--red-100)",
+                  filter: "drop-shadow(0 0 8px var(--red-100))",
+                }}
+              />
+            ) : (
+              <HeartOutlineIcon
+                key={i}
+                className="w-10 h-10"
+                style={{ color: "rgba(20, 83, 45, 0.5)" }}
+              />
+            ),
+          )}
+        </div>
         <GameFooter
           className="w-full"
           details={game.bombs()}
