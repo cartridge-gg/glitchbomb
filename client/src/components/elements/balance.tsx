@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { TokenIcon } from "@/components/icons";
+import { CreditsIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 export interface BalanceProps
@@ -9,7 +9,7 @@ export interface BalanceProps
   highlight?: boolean;
 }
 
-const balanceVariants = cva("flex justify-center items-center", {
+const balanceVariants = cva("flex justify-center items-center gap-2", {
   variants: {
     variant: {
       default: "",
@@ -39,7 +39,7 @@ export const Balance = ({
       variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <TokenIcon size="xs" />
+      <CreditsIcon size="sm" />
       <span className="font-secondary uppercase text-sm tracking-widest font-normal">{`${balance.toLocaleString()}`}</span>
     </Button>
   );

@@ -33,6 +33,7 @@ export * from "./bomb";
 export * from "./bomb-orb";
 export * from "./chip";
 export * from "./controller";
+export * from "./credits";
 export * from "./cross";
 export * from "./dot";
 export * from "./gear";
