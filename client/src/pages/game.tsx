@@ -134,7 +134,7 @@ export const Game = () => {
                       filter: "drop-shadow(0 0 8px var(--red-100))",
                     }
                   : {
-                      color: "rgba(20, 83, 45, 0.3)",
+                      color: "rgba(255, 0, 128, 0.2)",
                     }
               }
             />
