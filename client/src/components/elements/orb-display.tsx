@@ -26,9 +26,9 @@ const orbDisplayVariants = cva(
 );
 
 const valueSizeMap = {
-  sm: "-bottom-2.5 text-xs px-2 py-px",
-  md: "-bottom-3 text-sm px-3 py-px",
-  lg: "-bottom-4 text-base px-4 py-0.5",
+  sm: "-bottom-1 text-xs px-2 py-px",
+  md: "-bottom-1.5 text-sm px-3 py-px",
+  lg: "-bottom-2 text-base px-4 py-0.5",
 };
 
 const glowSizeMap = {
