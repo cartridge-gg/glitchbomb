@@ -1,7 +1,7 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Balance, Connect, Profile } from "@/components/elements";
 import { GearIcon, GlitchBombIcon, ListIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ export const Home = () => {
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { config } = useEntitiesContext();
+  const { config, starterpack } = useEntitiesContext();
   const navigate = useNavigate();
   const [username, setUsername] = useState<string>();
 
@@ -81,14 +81,23 @@ export const Home = () => {
   }, [connector]);
 
   const onPlayClick = useCallback(async () => {
-    if (!activePack) return;
+    // If no active pack, open purchase flow
+    if (!activePack) {
+      if (starterpack) {
+        (connector as ControllerConnector)?.controller.openStarterPack(
+          starterpack.id.toString(),
+        );
+      }
+      return;
+    }
+    // Otherwise, start/continue the game
     const gameId = Math.max(activePack.game_count, 1);
     const hasNoGame = activePack.game_count === 0;
     if (hasNoGame) {
       await start(activePack.id);
     }
     navigate(`/play?pack=${activePack.id}&game=${gameId}`);
-  }, [activePack, navigate, start]);
+  }, [activePack, connector, navigate, start, starterpack]);
 
   // Fetch username
   useEffect(() => {
@@ -132,23 +141,13 @@ export const Home = () => {
                 onClick={onProfileClick}
                 className="flex-1"
               />
-              <Link
-                to={
-                  activePack
-                    ? `/play?pack=${activePack.id}&game=${Math.max(activePack.game_count, 1)}`
-                    : "/"
-                }
-                className="flex-1"
+              <Button
+                variant="default"
+                className="h-12 flex-1 font-secondary uppercase text-sm tracking-widest font-normal"
+                onClick={onPlayClick}
               >
-                <Button
-                  variant="default"
-                  className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
-                  disabled={!activePack}
-                  onClick={onPlayClick}
-                >
-                  Play
-                </Button>
-              </Link>
+                Play
+              </Button>
             </div>
 
             {/* Row 2: Games + Settings + Balance */}
