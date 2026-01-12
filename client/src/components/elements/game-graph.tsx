@@ -131,38 +131,11 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           </svg>
         </div>
 
-        {/* Main chart area grid */}
+        {/* Bottom baseline - green-200 dotted */}
         <svg
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="none"
         >
-          {/* Vertical grid lines */}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <line
-              key={`chart-v-${i}`}
-              x1={`${(i + 1) * 12.5}%`}
-              y1="0"
-              x2={`${(i + 1) * 12.5}%`}
-              y2="100%"
-              stroke="rgba(20, 83, 45, 0.4)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          ))}
-          {/* Horizontal grid lines */}
-          {Array.from({ length: 4 }).map((_, i) => (
-            <line
-              key={`chart-h-${i}`}
-              x1="0"
-              y1={`${(i + 1) * 25}%`}
-              x2="100%"
-              y2={`${(i + 1) * 25}%`}
-              stroke="rgba(20, 83, 45, 0.4)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          ))}
-          {/* Bottom baseline - green-200 dotted */}
           <line
             x1="0"
             y1="100%"
