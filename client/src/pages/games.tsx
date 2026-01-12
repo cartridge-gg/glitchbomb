@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Balance, Profile } from "@/components/elements";
 import {
   ArrowLeftIcon,
-  GearIcon,
   GlitchBombIcon,
+  MoonrockIcon,
   SparkleIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -223,7 +223,7 @@ export const Games = () => {
               className="h-10 px-6 font-secondary uppercase text-sm tracking-widest"
               onClick={handleNewGame}
             >
-              <GearIcon size="xs" className="mr-2" />
+              <MoonrockIcon size="xs" className="mr-2" />
               Purchase
             </Button>
           </div>
