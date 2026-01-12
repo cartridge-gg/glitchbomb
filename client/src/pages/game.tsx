@@ -211,6 +211,34 @@ export const Game = () => {
       </div>
 
       <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4 pt-24">
+        {/* Points & Goal Progress */}
+        <div className="flex items-center gap-4">
+          {/* Current Points */}
+          <span className="text-green-400 text-5xl font-glitch">
+            {game.points}
+          </span>
+          {/* Goal Progress */}
+          <div className="flex-1 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-green-500 font-secondary text-sm tracking-wider">
+                Goal:
+              </span>
+              <span className="text-green-400 font-secondary text-sm tracking-widest">
+                {game.milestone}
+              </span>
+            </div>
+            {/* Progress Bar */}
+            <div className="w-full h-3 bg-green-950 rounded-full overflow-hidden border border-green-800">
+              <div
+                className="h-full bg-green-500 rounded-full transition-all duration-300"
+                style={{
+                  width: `${Math.min((game.points / game.milestone) * 100, 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Game Scene */}
         <GameScene
           className="grow"
