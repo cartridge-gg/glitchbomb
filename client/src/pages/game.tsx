@@ -161,8 +161,9 @@ export const Game = () => {
             className="flex items-center gap-1 px-4 py-2 rounded"
             style={{ backgroundColor: "rgba(100, 50, 0, 0.3)" }}
           >
+            <ChipIcon size="sm" className="text-orange-100" />
             <span className="text-orange-100 font-secondary text-lg">
-              {displayOrbs.length}
+              {game.chips}
             </span>
           </div>
         </div>
