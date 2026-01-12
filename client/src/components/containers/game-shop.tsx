@@ -78,8 +78,8 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         }}
       >
         <div className="flex items-center gap-2 px-3 py-2">
-          <ChipIcon size="sm" className="text-orange-400" />
-          <span className="text-orange-400 font-secondary text-sm">
+          <ChipIcon size="sm" className="text-orange-100" />
+          <span className="text-orange-100 font-secondary text-sm">
             {price}
           </span>
         </div>
