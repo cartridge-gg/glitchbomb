@@ -71,24 +71,25 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       </div>
 
       {/* Price and add button */}
-      <div className="flex items-center gap-1">
-        <div
-          className="flex items-center gap-1 px-3 py-2 rounded border"
-          style={{
-            borderColor: "var(--green-900)",
-            backgroundColor: "rgba(0, 50, 0, 0.3)",
-          }}
-        >
-          <ChipIcon size="xs" className="text-green-400" />
-          <span className="text-green-400 font-secondary text-sm">{price}</span>
+      <div
+        className="flex items-center rounded-lg overflow-hidden"
+        style={{
+          backgroundColor: "rgba(0, 30, 0, 0.6)",
+        }}
+      >
+        <div className="flex items-center gap-2 px-3 py-2">
+          <ChipIcon size="sm" className="text-orange-400" />
+          <span className="text-orange-400 font-secondary text-xl italic">
+            {price}
+          </span>
         </div>
         <Button
           variant="default"
-          className="h-10 w-10 p-0"
+          className="h-12 w-14 p-0 rounded-none rounded-r-lg"
           disabled={disabled}
           onClick={onAdd}
         >
-          <span className="text-xl font-secondary">+</span>
+          <span className="text-3xl font-secondary text-green-400">+</span>
         </Button>
       </div>
     </div>
@@ -186,7 +187,6 @@ export const GameShop = ({
         <div
           className="flex items-center gap-1 px-4 py-2 rounded border"
           style={{
-            borderColor: "var(--orange-100)",
             backgroundColor: "rgba(100, 50, 0, 0.3)",
           }}
         >
