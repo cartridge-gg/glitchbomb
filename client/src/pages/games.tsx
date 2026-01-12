@@ -216,7 +216,7 @@ export const Games = () => {
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
             <p className="text-white font-secondary text-sm tracking-widest uppercase">
-              Purchase New Game
+              Play Now
             </p>
             <Button
               variant="default"
