@@ -26,9 +26,9 @@ const orbDisplayVariants = cva(
 );
 
 const valueSizeMap = {
-  sm: "text-xs -bottom-0.5",
-  md: "text-sm -bottom-1",
-  lg: "text-base -bottom-1",
+  sm: "-bottom-2 text-[10px]",
+  md: "-bottom-2.5 text-xs",
+  lg: "-bottom-3 text-sm",
 };
 
 const glowSizeMap = {
@@ -126,16 +126,20 @@ export const OrbDisplay = ({
           filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
         }}
       />
-      {/* Value */}
-      <span
-        className={cn(
-          "absolute left-1/2 -translate-x-1/2 font-bold font-secondary z-10",
-          valueSizeMap[size ?? "md"],
-        )}
-        style={{ color }}
-      >
-        {displayValue}
-      </span>
+      {/* Value pill */}
+      {displayValue && (
+        <div
+          className={cn(
+            "absolute left-1/2 -translate-x-1/2 z-20 rounded-full px-2 py-0.5 flex items-center justify-center",
+            valueSizeMap[size ?? "md"],
+          )}
+          style={{ backgroundColor: color }}
+        >
+          <span className="font-bold font-secondary text-black">
+            {displayValue}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
