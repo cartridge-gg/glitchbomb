@@ -6,23 +6,23 @@ export interface GameGraphProps {
   className?: string;
 }
 
-// Map orb variant to actual color
+// Map orb variant to actual color (using CSS variable values from theme)
 const getOrbColor = (variant: string): string => {
   switch (variant) {
     case "green":
-      return "#4ADE80"; // green-400
+      return "#36F818"; // --green-400
     case "red":
-      return "#EF4444"; // red-500
+      return "#FF1E00"; // --red-100
     case "blue":
-      return "#3B82F6"; // blue-500
+      return "#7487FF"; // --blue-100
     case "yellow":
-      return "#FACC15"; // yellow-400
+      return "#FFF121"; // --yellow-100
     case "salmon":
-      return "#FDA4AF"; // rose-300
+      return "#FE5578"; // --salmon-100
     case "orange":
-      return "#FB923C"; // orange-400
+      return "#F1721C"; // --orange-100
     default:
-      return "#9CA3AF"; // gray-400
+      return "#36F818"; // default to green
   }
 };
 
