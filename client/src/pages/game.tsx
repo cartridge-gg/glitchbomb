@@ -180,13 +180,18 @@ export const Game = () => {
           >
             <BagIcon className="w-6 h-6 text-green-400" />
           </Button>
-          <Button
-            variant="default"
-            className="flex-1 min-h-14 font-secondary text-sm tracking-widest bg-purple-600 hover:bg-purple-700"
+          <button
+            type="button"
+            className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg"
+            style={{
+              background: "linear-gradient(180deg, rgba(128, 0, 128, 0.4) 0%, rgba(80, 0, 80, 0.6) 100%)",
+              border: "2px solid rgba(180, 0, 180, 0.4)",
+              color: "#E040E0",
+            }}
             onClick={() => cashOut(pack.id, game.id)}
           >
             CASH OUT
-          </Button>
+          </button>
         </div>
       </div>
 
