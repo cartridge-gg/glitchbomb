@@ -2,8 +2,8 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Balance, Connect, Profile } from "@/components/elements";
-import { GearIcon, GlitchBombIcon } from "@/components/icons";
+import { Connect, Profile } from "@/components/elements";
+import { GearIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -98,7 +98,7 @@ export const Home = () => {
               </Button>
             </div>
 
-            {/* Row 2: Settings + Balance */}
+            {/* Row 2: Settings + Moonrocks */}
             <div className="flex gap-3">
               <Button
                 variant="secondary"
@@ -107,11 +107,17 @@ export const Home = () => {
               >
                 <GearIcon size="sm" />
               </Button>
-              <Balance
-                balance={balance}
+              {/* Moonrocks button - same style as game header */}
+              <button
+                type="button"
+                className="flex-1 flex items-center justify-center gap-2 h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
                 onClick={() => mint(tokenAddress)}
-                className="flex-1"
-              />
+              >
+                <MoonrockIcon className="w-5 h-5 text-blue-400" />
+                <span className="font-secondary text-sm tracking-widest text-blue-400">
+                  {Math.floor(balance).toLocaleString()}
+                </span>
+              </button>
             </div>
           </div>
         ) : (
