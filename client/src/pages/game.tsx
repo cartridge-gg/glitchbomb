@@ -149,34 +149,63 @@ export const Game = () => {
 
   // Stash view - shows player's orbs
   if (stashOpen) {
+    // Filter out bombs and empty orbs for display
+    const displayOrbs = game.bag.filter((orb) => !orb.isBomb() && !orb.isNone());
+    
     return (
-      <div className="absolute inset-0 flex flex-col gap-6 max-w-[420px] m-auto py-6 px-4">
+      <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
+        {/* Header - same style as ORB SHOP */}
         <div className="flex items-center justify-between">
-          <h2 className="text-white font-glitch text-2xl">YOUR ORBS</h2>
+          <h1 className="text-white uppercase text-3xl font-primary">YOUR ORBS</h1>
+          <div
+            className="flex items-center gap-1 px-4 py-2 rounded"
+            style={{ backgroundColor: "rgba(100, 50, 0, 0.3)" }}
+          >
+            <span className="text-orange-100 font-secondary text-lg">
+              {displayOrbs.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Subtitle - same style as shop */}
+        <p className="text-green-600 font-secondary text-sm tracking-wide">
+          Orbs in your bag that can be pulled
+        </p>
+
+        {/* Orbs grid */}
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {displayOrbs.length > 0 ? (
+            <div className="grid grid-cols-3 gap-4 py-2">
+              {displayOrbs.map((orb, index) => (
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <OrbDisplay orb={orb} size="lg" />
+                  <p className="text-green-500 text-xs font-secondary uppercase tracking-wide">
+                    {orb.name()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center h-full">
+              <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
+                No orbs in your bag yet
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Action button - same style as shop */}
+        <div className="flex items-stretch gap-3 w-full pt-2">
           <Button
             variant="secondary"
-            size="sm"
+            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
             onClick={() => setStashOpen(false)}
           >
             ← BACK
           </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-3 gap-4">
-            {game.bag.map((orb, index) => (
-              <div key={index} className="flex flex-col items-center gap-2">
-                <OrbDisplay orb={orb} size="lg" />
-                <p className="text-green-500 text-xs font-secondary uppercase">
-                  {orb.name()}
-                </p>
-              </div>
-            ))}
-          </div>
-          {game.bag.length === 0 && (
-            <p className="text-green-600 text-center font-secondary">
-              No orbs in your bag yet
-            </p>
-          )}
         </div>
       </div>
     );
