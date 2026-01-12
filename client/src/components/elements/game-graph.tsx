@@ -35,21 +35,27 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
   const recentPulls = sortedPulls.slice(-3); // Last 3 for the header
   const graphPulls = sortedPulls.slice(-12); // Last 12 for the graph
 
-  // Calculate positions for graph points
+  // Calculate positions for graph points - aligned to grid intersections
   const graphPoints = useMemo(() => {
     if (graphPulls.length === 0) return [];
 
-    const width = 100; // percentage
-    const height = 100;
-    const padding = 8;
+    // Grid has 16 vertical lines at 6.25% intervals (6.25, 12.5, 18.75, ...)
+    // Grid has 10 horizontal lines at 10% intervals (10, 20, 30, ...)
+    const verticalGridLines = Array.from({ length: 14 }, (_, i) => (i + 1) * 6.25 + 6.25);
+    const horizontalGridLines = Array.from({ length: 8 }, (_, i) => (i + 1) * 10 + 10);
 
     return graphPulls.map((pull, index) => {
-      const x = padding + (index / Math.max(graphPulls.length - 1, 1)) * (width - padding * 2);
-      // Y position based on some value - using the orb's cost as a proxy for "value"
+      // X: distribute points across available vertical grid lines
+      const xIndex = Math.floor((index / Math.max(graphPulls.length - 1, 1)) * (verticalGridLines.length - 1));
+      const x = verticalGridLines[Math.min(xIndex, verticalGridLines.length - 1)];
+
+      // Y: map orb cost to horizontal grid lines (higher cost = higher on chart = lower Y value)
       const cost = pull.orb.cost();
       const maxCost = 25;
-      const normalizedY = Math.min(cost / maxCost, 1);
-      const y = height - padding - normalizedY * (height - padding * 2);
+      const normalizedCost = Math.min(cost / maxCost, 1);
+      // Map to grid lines: 0 cost = bottom (90%), max cost = top (20%)
+      const yIndex = Math.round(normalizedCost * (horizontalGridLines.length - 1));
+      const y = horizontalGridLines[horizontalGridLines.length - 1 - yIndex];
 
       return {
         x,
@@ -94,9 +100,9 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           className="absolute -inset-12 pointer-events-none"
           style={{
             maskImage:
-              "radial-gradient(ellipse 80% 80% at 50% 45%, black 30%, transparent 65%)",
+              "radial-gradient(ellipse 80% 90% at 50% 35%, black 30%, transparent 65%)",
             WebkitMaskImage:
-              "radial-gradient(ellipse 80% 80% at 50% 45%, black 30%, transparent 65%)",
+              "radial-gradient(ellipse 80% 90% at 50% 35%, black 30%, transparent 65%)",
           }}
         >
           <svg className="absolute inset-0 w-full h-full">
