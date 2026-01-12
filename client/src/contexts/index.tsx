@@ -88,10 +88,32 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
   const packSubscriptionRef = useRef<torii.Subscription | null>(null);
   const gameSubscriptionRef = useRef<torii.Subscription | null>(null);
-  const [packId, setPackId] = useState<number>(0);
-  const [gameId, setGameId] = useState<number>(0);
+  const [packId, setPackIdState] = useState<number>(0);
+  const [gameId, setGameIdState] = useState<number>(0);
   const [pack, setPack] = useState<Pack>();
   const [game, setGame] = useState<Game>();
+
+  // Clear game state when IDs change to prevent stale data
+  const setPackId = useCallback(
+    (id: number) => {
+      if (id !== packId) {
+        setPack(undefined);
+        setGame(undefined);
+      }
+      setPackIdState(id);
+    },
+    [packId],
+  );
+
+  const setGameId = useCallback(
+    (id: number) => {
+      if (id !== gameId) {
+        setGame(undefined);
+      }
+      setGameIdState(id);
+    },
+    [gameId],
+  );
   const [config, setConfig] = useState<Config>();
   const [starterpack, setStarterpack] = useState<Starterpack>();
   const [status, setStatus] = useState<"loading" | "error" | "success">(
