@@ -168,7 +168,6 @@ export const Home = () => {
                 <GearIcon size="sm" />
               </Button>
               <Balance
-                highlight={balance < 10}
                 balance={balance}
                 onClick={() => mint(tokenAddress)}
                 className="flex-1"
