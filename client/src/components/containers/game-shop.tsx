@@ -101,10 +101,10 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
   const displayValue = getOrbDisplayValue(orb);
 
   return (
-    <div className="flex items-center gap-3 py-2">
+    <div className="flex items-center gap-4 py-2">
       {/* Orb icon with value */}
       <div
-        className="relative w-14 h-14 rounded-full flex items-center justify-center shrink-0"
+        className="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0"
         style={{
           borderWidth: "3px",
           borderStyle: "solid",
@@ -112,9 +112,9 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           backgroundColor: "rgba(0, 0, 0, 0.3)",
         }}
       >
-        <Icon className="w-7 h-7" style={{ color }} />
+        <Icon className="w-8 h-8" style={{ color }} />
         <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold font-secondary px-1"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-sm font-bold font-secondary px-1"
           style={{ color }}
         >
           {displayValue}
@@ -167,7 +167,7 @@ const BagOrb = ({ orb }: BagOrbProps) => {
 
   return (
     <div
-      className="relative w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+      className="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0"
       style={{
         borderWidth: "2px",
         borderStyle: "solid",
@@ -175,9 +175,9 @@ const BagOrb = ({ orb }: BagOrbProps) => {
         backgroundColor: "rgba(0, 0, 0, 0.3)",
       }}
     >
-      <Icon className="w-5 h-5" style={{ color }} />
+      <Icon className="w-6 h-6" style={{ color }} />
       <span
-        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-[10px] font-bold font-secondary"
+        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-xs font-bold font-secondary"
         style={{ color }}
       >
         {displayValue}
