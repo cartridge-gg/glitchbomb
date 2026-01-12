@@ -20,7 +20,7 @@ export const RarityPill = ({
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center rounded-md px-3 py-1 font-secondary text-xs tracking-wider uppercase border",
+        "inline-flex items-center justify-center rounded-md px-2 font-secondary text-2xs tracking-wider uppercase border-2",
         className,
       )}
       style={{

@@ -83,16 +83,16 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       </div>
 
       {/* Rarity pill */}
-      <RarityPill rarity={orb.rarity()} />
+      <RarityPill rarity={orb.rarity()} className="self-start mt-1" />
 
       {/* Price and add button */}
       <div
         className="flex items-center rounded-lg overflow-hidden"
         style={{
-          backgroundColor: "rgba(0, 30, 0, 0.6)",
+          backgroundColor: "rgba(0, 15, 0, 0.6)",
         }}
       >
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-center gap-2 px-3">
           <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
