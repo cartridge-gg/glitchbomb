@@ -12,8 +12,7 @@ export interface GameShopProps
   balance: number;
   orbs: Orb[];
   bag: Orb[];
-  onPurchase: (indices: number[]) => void;
-  onContinue: () => void;
+  onConfirm: (indices: number[]) => void;
 }
 
 const gameShopVariants = cva("select-none relative flex flex-col gap-4", {
@@ -121,8 +120,7 @@ export const GameShop = ({
   bag,
   variant,
   className,
-  onPurchase,
-  onContinue,
+  onConfirm,
   ...props
 }: GameShopProps) => {
   // Store quantities per orb index
@@ -216,8 +214,6 @@ export const GameShop = ({
       };
     });
   };
-
-  const hasSelections = basketIndices.length > 0;
 
   // Combine existing bag with pending purchases for display
   const displayBag = useMemo(() => {
@@ -314,13 +310,7 @@ export const GameShop = ({
         <Button
           variant="default"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
-          onClick={() => {
-            if (hasSelections) {
-              onPurchase(basketIndices);
-            } else {
-              onContinue();
-            }
-          }}
+          onClick={() => onConfirm(basketIndices)}
         >
           CONTINUE
         </Button>

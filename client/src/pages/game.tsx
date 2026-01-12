@@ -22,7 +22,7 @@ import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
-  const { cashOut, pull, enter, buy, exit } = useActions();
+  const { cashOut, pull, enter, buyAndExit } = useActions();
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
@@ -69,8 +69,7 @@ export const Game = () => {
           balance={game.chips}
           orbs={game.shop}
           bag={game.bag}
-          onPurchase={(indices: number[]) => buy(pack.id, game.id, indices)}
-          onContinue={() => exit(pack.id, game.id)}
+          onConfirm={(indices: number[]) => buyAndExit(pack.id, game.id, indices)}
         />
       </div>
     );
