@@ -130,8 +130,8 @@ export const Game = () => {
               style={
                 i < game.health
                   ? {
-                      color: "var(--red-100)",
-                      filter: "drop-shadow(0 0 8px var(--red-100))",
+                      color: "#FF0080",
+                      filter: "drop-shadow(0 0 8px #FF0080)",
                     }
                   : {
                       color: "rgba(20, 83, 45, 0.3)",
