@@ -1,7 +1,7 @@
 import type ControllerConnector from "@cartridge/connector/controller";
+import { useAccount } from "@starknet-react/core";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAccount } from "@starknet-react/core";
 import { GameScene, GameShop } from "@/components/containers";
 import { Multiplier, OrbDisplay, Profile } from "@/components/elements";
 import {
@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useEntitiesContext } from "@/contexts";
-import { usePulls, useTokens, toDecimal } from "@/hooks";
+import { toDecimal, usePulls, useTokens } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
@@ -207,7 +207,10 @@ export const Game = () => {
         </div>
 
         {/* Profile (right) */}
-        <Profile username={username || "..."} className="w-auto px-4 absolute right-4 top-4" />
+        <Profile
+          username={username || "..."}
+          className="w-auto px-4 absolute right-4 top-4"
+        />
       </div>
 
       <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4 pt-24">
