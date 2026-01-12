@@ -17,15 +17,24 @@ import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 
 interface GameCardProps {
-  packId: number;
   gameId: number;
+  pullCount: number;
+  bagSize: number;
+  level: number;
   isOver?: boolean;
   onPlay: () => void;
 }
 
-const GameCard = ({ packId, gameId, isOver, onPlay }: GameCardProps) => {
+const GameCard = ({
+  gameId,
+  pullCount,
+  bagSize,
+  level,
+  isOver,
+  onPlay,
+}: GameCardProps) => {
   return (
-    <div className="flex items-center gap-4 p-3 rounded-xl bg-green-950/30">
+    <div className="flex items-center gap-4 p-3 rounded-xl border border-green-900 bg-green-950/30">
       {/* Orb Icon */}
       <div className="relative w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-950/50">
         <div
@@ -44,7 +53,7 @@ const GameCard = ({ packId, gameId, isOver, onPlay }: GameCardProps) => {
           GAME {gameId}
         </h3>
         <p className="text-green-600 font-secondary text-xs tracking-wider uppercase">
-          Pack #{packId} • {isOver ? "ENDED" : "ACTIVE"}
+          {pullCount}/{bagSize} • {isOver ? "ENDED" : `LEVEL ${level}`}
         </p>
       </div>
 
@@ -113,6 +122,9 @@ export const Games = () => {
     const games: Array<{
       packId: number;
       gameId: number;
+      pullCount: number;
+      bagSize: number;
+      level: number;
       isOver: boolean;
       hasNoGame: boolean;
     }> = [];
@@ -123,6 +135,9 @@ export const Games = () => {
       games.push({
         packId: pack.id,
         gameId,
+        pullCount: game?.pull_count ?? 0,
+        bagSize: game?.bag.length ?? 0,
+        level: game?.level ?? 1,
         isOver: game?.over ?? false,
         hasNoGame: pack.game_count === 0,
       });
@@ -209,17 +224,19 @@ export const Games = () => {
               </Button>
             </div>
           ) : (
-            gameList.map((game) => (
-              <GameCard
-                key={`${game.packId}-${game.gameId}`}
-                packId={game.packId}
-                gameId={game.gameId}
-                isOver={game.isOver}
-                onPlay={() =>
-                  handlePlay(game.packId, game.gameId, game.hasNoGame)
-                }
-              />
-            ))
+          gameList.map((game) => (
+            <GameCard
+              key={`${game.packId}-${game.gameId}`}
+              gameId={game.gameId}
+              pullCount={game.pullCount}
+              bagSize={game.bagSize}
+              level={game.level}
+              isOver={game.isOver}
+              onPlay={() =>
+                handlePlay(game.packId, game.gameId, game.hasNoGame)
+              }
+            />
+          ))
           )}
         </div>
       </div>
