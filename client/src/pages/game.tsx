@@ -163,7 +163,6 @@ export const Game = () => {
             className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
             style={{
               background: "linear-gradient(180deg, #1A3A4A 0%, #0D2530 100%)",
-              border: "2px solid rgba(59, 130, 246, 0.3)",
             }}
           >
             <MoonrockIcon className="w-5 h-5 text-blue-400" />
@@ -177,7 +176,6 @@ export const Game = () => {
             className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
             style={{
               background: "linear-gradient(180deg, #4A3A1A 0%, #302510 100%)",
-              border: "2px solid rgba(234, 179, 8, 0.3)",
             }}
           >
             <ChipIcon className="w-5 h-5 text-orange-400" />
