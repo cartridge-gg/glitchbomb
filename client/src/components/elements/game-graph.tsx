@@ -88,86 +88,119 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
       </div>
 
       {/* Graph */}
-      <div className="relative w-full h-32 bg-green-950/30 rounded-lg overflow-hidden">
-        {/* Grid background */}
+      <div className="relative w-full h-32">
+        {/* Extended grid background with fade */}
         <svg
-          className="absolute inset-0 w-full h-full"
+          className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)]"
           preserveAspectRatio="none"
         >
+          <defs>
+            {/* Fade gradient for vertical lines */}
+            <linearGradient id="verticalFade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
+              <stop offset="20%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="80%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
+            </linearGradient>
+            {/* Fade gradient for horizontal lines */}
+            <linearGradient id="horizontalFade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
+              <stop offset="15%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="85%" stopColor="rgba(20, 83, 45, 0.3)" />
+              <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
+            </linearGradient>
+          </defs>
           {/* Vertical grid lines */}
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <line
               key={`v-${i}`}
-              x1={`${(i + 1) * 12.5}%`}
+              x1={`${(i + 1) * 10}%`}
               y1="0"
-              x2={`${(i + 1) * 12.5}%`}
+              x2={`${(i + 1) * 10}%`}
               y2="100%"
-              stroke="rgba(20, 83, 45, 0.3)"
+              stroke="url(#verticalFade)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
           ))}
           {/* Horizontal grid lines */}
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <line
               key={`h-${i}`}
               x1="0"
-              y1={`${(i + 1) * 25}%`}
+              y1={`${(i + 1) * 16.6}%`}
               x2="100%"
-              y2={`${(i + 1) * 25}%`}
-              stroke="rgba(20, 83, 45, 0.3)"
+              y2={`${(i + 1) * 16.6}%`}
+              stroke="url(#horizontalFade)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
           ))}
+        </svg>
+
+        {/* Chart area */}
+        <div className="absolute inset-0 rounded-lg overflow-hidden">
           {/* Bottom baseline */}
-          <line
-            x1="0"
-            y1="100%"
-            x2="100%"
-            y2="100%"
-            stroke="#36F818"
-            strokeWidth="2"
-          />
-        </svg>
+          <svg
+            className="absolute inset-0 w-full h-full"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="baselineFade" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgba(54, 248, 24, 0)" />
+                <stop offset="10%" stopColor="rgba(54, 248, 24, 1)" />
+                <stop offset="90%" stopColor="rgba(54, 248, 24, 1)" />
+                <stop offset="100%" stopColor="rgba(54, 248, 24, 0)" />
+              </linearGradient>
+            </defs>
+            <line
+              x1="0"
+              y1="100%"
+              x2="100%"
+              y2="100%"
+              stroke="url(#baselineFade)"
+              strokeWidth="2"
+            />
+          </svg>
 
-        {/* Graph lines and points */}
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          {/* Lines connecting points */}
-          {graphPoints.map((point, index) => {
-            if (index === 0) return null;
-            const prevPoint = graphPoints[index - 1];
-            return (
-              <line
-                key={`line-${point.pull.id}`}
-                x1={prevPoint.x}
-                y1={prevPoint.y}
-                x2={point.x}
-                y2={point.y}
-                stroke="rgba(74, 222, 128, 0.4)"
-                strokeWidth="0.5"
-              />
-            );
-          })}
-        </svg>
+          {/* Graph lines and points */}
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            {/* Lines connecting points */}
+            {graphPoints.map((point, index) => {
+              if (index === 0) return null;
+              const prevPoint = graphPoints[index - 1];
+              return (
+                <line
+                  key={`line-${point.pull.id}`}
+                  x1={prevPoint.x}
+                  y1={prevPoint.y}
+                  x2={point.x}
+                  y2={point.y}
+                  stroke="rgba(74, 222, 128, 0.4)"
+                  strokeWidth="0.5"
+                />
+              );
+            })}
+          </svg>
 
-        {/* Points (rendered as absolute positioned divs for proper glow) */}
-        {graphPoints.map((point) => (
-          <div
-            key={`point-${point.pull.id}`}
-            className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: `${point.x}%`,
-              top: `${point.y}%`,
-              backgroundColor: point.color,
-              boxShadow: `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
-            }}
-          />
-        ))}
+          {/* Points (rendered as absolute positioned divs for proper glow) */}
+          {graphPoints.map((point) => (
+            <div
+              key={`point-${point.pull.id}`}
+              className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                backgroundColor: point.color,
+                boxShadow: `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
