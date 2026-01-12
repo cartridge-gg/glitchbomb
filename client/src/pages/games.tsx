@@ -3,7 +3,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Balance, Profile } from "@/components/elements";
-import { ArrowLeftIcon, BombIcon, SparklesIcon } from "@/components/icons";
+import { ArrowLeftIcon, GlitchBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -165,11 +165,8 @@ export const Games = () => {
           <ArrowLeftIcon size="sm" />
         </Button>
 
-        {/* Center: Bomb icon */}
-        <div className="flex items-center">
-          <BombIcon size="lg" className="text-white" />
-          <SparklesIcon size="xs" className="text-white -ml-1 -mt-3" />
-        </div>
+        {/* Center: GlitchBomb icon */}
+        <GlitchBombIcon size="xl" className="text-white" />
 
         {/* Right: Balance + Profile */}
         <div className="flex gap-2">
