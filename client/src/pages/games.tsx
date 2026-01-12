@@ -2,7 +2,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Balance, Profile } from "@/components/elements";
+import { Profile } from "@/components/elements";
 import {
   ArrowLeftIcon,
   GlitchBombIcon,
@@ -193,13 +193,19 @@ export const Games = () => {
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
         />
 
-        {/* Right: Balance + Profile */}
+        {/* Right: Moonrocks + Profile */}
         <div className="flex gap-2">
-          <Balance
-            balance={balance}
+          {/* Moonrocks button - same style as game header */}
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 h-12 px-4 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
             onClick={() => mint(tokenAddress)}
-            className="w-auto px-4"
-          />
+          >
+            <MoonrockIcon className="w-5 h-5 text-blue-400" />
+            <span className="font-secondary text-sm tracking-widest text-blue-400">
+              {Math.floor(balance).toLocaleString()}
+            </span>
+          </button>
           {username && (
             <Profile
               username={username}
