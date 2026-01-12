@@ -181,9 +181,9 @@ export const Game = () => {
           {displayOrbs.length > 0 ? (
             <div className="grid grid-cols-3 gap-6 py-4 justify-items-center">
               {displayOrbs.map((orb, index) => (
-                <div key={index} className="flex flex-col items-center gap-3">
+                <div key={index} className="flex flex-col items-center gap-2">
                   <OrbDisplay orb={orb} size="lg" />
-                  <p className="text-green-500 text-xs font-secondary uppercase tracking-wide">
+                  <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide">
                     {orb.name()}
                   </p>
                 </div>
