@@ -211,7 +211,7 @@ export const Games = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-4 pt-40 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center px-4 pt-40 pb-16 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full max-w-[500px]">
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
@@ -253,7 +253,47 @@ export const Games = () => {
               hasStarted={true}
               isOver={false}
               onPlay={() => {}}
-            />
+            /><GameCard
+            gameId={2}
+            pullCount={8}
+            bagSize={25}
+            level={2}
+            hasStarted={true}
+            isOver={false}
+            onPlay={() => {}}
+          /><GameCard
+          gameId={2}
+          pullCount={8}
+          bagSize={25}
+          level={2}
+          hasStarted={true}
+          isOver={false}
+          onPlay={() => {}}
+        /><GameCard
+        gameId={2}
+        pullCount={8}
+        bagSize={25}
+        level={2}
+        hasStarted={true}
+        isOver={false}
+        onPlay={() => {}}
+      /><GameCard
+      gameId={2}
+      pullCount={8}
+      bagSize={25}
+      level={2}
+      hasStarted={true}
+      isOver={false}
+      onPlay={() => {}}
+    /><GameCard
+    gameId={2}
+    pullCount={8}
+    bagSize={25}
+    level={2}
+    hasStarted={true}
+    isOver={false}
+    onPlay={() => {}}
+  />
             <GameCard
               gameId={3}
               pullCount={25}
