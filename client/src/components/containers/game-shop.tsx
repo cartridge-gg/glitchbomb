@@ -1,13 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ChipIcon,
-  OrbChipIcon,
-  OrbHealthIcon,
-  OrbMoonrockIcon,
-  OrbMultiplierIcon,
-  OrbPointIcon,
-} from "@/components/icons";
+import { OrbDisplay } from "@/components/elements";
+import { ChipIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
 
@@ -32,41 +26,6 @@ const gameShopVariants = cva("select-none relative flex flex-col gap-4", {
     variant: "default",
   },
 });
-
-// Get the icon component for an orb type
-const getOrbIcon = (orb: Orb) => {
-  if (orb.isPoint()) return OrbPointIcon;
-  if (orb.isMultiplier()) return OrbMultiplierIcon;
-  if (orb.isHealth()) return OrbHealthIcon;
-  if (orb.isChips()) return OrbChipIcon;
-  if (orb.isMoonrock()) return OrbMoonrockIcon;
-  return OrbPointIcon;
-};
-
-// Get color for orb type
-const getOrbColor = (orb: Orb) => {
-  if (orb.isPoint()) return "var(--green-400)";
-  if (orb.isMultiplier()) return "var(--yellow-100)";
-  if (orb.isHealth()) return "var(--salmon-100)";
-  if (orb.isChips()) return "var(--orange-100)";
-  if (orb.isMoonrock()) return "var(--blue-100)";
-  return "var(--green-400)";
-};
-
-// Get display value for orb (the number shown in the icon)
-const getOrbDisplayValue = (orb: Orb): string => {
-  const name = orb.name();
-  // Extract number from name like "Point 5", "Multiplier 50%", etc.
-  const match = name.match(/(\d+)/);
-  if (orb.isMultiplier()) {
-    // For multipliers, show as X3, X2, etc.
-    const percent = match ? parseInt(match[1], 10) : 0;
-    if (percent === 50) return "X2";
-    if (percent === 100) return "X3";
-    if (percent === 150) return "X4";
-  }
-  return match ? match[1] : "";
-};
 
 // Get short name for orb type
 const getOrbTypeName = (orb: Orb): string => {
@@ -96,55 +55,10 @@ interface ShopItemProps {
 }
 
 const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
-  const Icon = getOrbIcon(orb);
-  const color = getOrbColor(orb);
-  const displayValue = getOrbDisplayValue(orb);
-
   return (
     <div className="flex items-center gap-4 py-2">
       {/* Orb icon with value */}
-      <div
-        className="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
-        style={{
-          borderWidth: "2px",
-          borderStyle: "solid",
-          borderColor: color,
-        }}
-      >
-        {/* Orb background */}
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            backgroundImage: "url(/assets/orb.png)",
-            backgroundSize: "102%",
-            backgroundPosition: "center",
-            opacity: 0.4,
-          }}
-        />
-        {/* Color tint */}
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            backgroundColor: color,
-            mixBlendMode: "multiply",
-            opacity: 0.5,
-          }}
-        />
-        {/* Icon */}
-        <Icon
-          className="w-12 h-12 relative z-10"
-          style={{
-            color,
-            filter: `drop-shadow(0 0 8px ${color})`,
-          }}
-        />
-        <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-sm font-bold font-secondary px-1 z-10"
-          style={{ color }}
-        >
-          {displayValue}
-        </span>
-      </div>
+      <OrbDisplay orb={orb} size="md" />
 
       {/* Title and description */}
       <div className="flex-1 min-w-0">
@@ -177,61 +91,6 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           <span className="text-xl font-secondary">+</span>
         </Button>
       </div>
-    </div>
-  );
-};
-
-interface BagOrbProps {
-  orb: Orb;
-}
-
-const BagOrb = ({ orb }: BagOrbProps) => {
-  const Icon = getOrbIcon(orb);
-  const color = getOrbColor(orb);
-  const displayValue = getOrbDisplayValue(orb);
-
-  return (
-    <div
-      className="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
-      style={{
-        borderWidth: "2px",
-        borderStyle: "solid",
-        borderColor: color,
-      }}
-    >
-      {/* Orb background */}
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          backgroundImage: "url(/assets/orb.png)",
-          backgroundSize: "102%",
-          backgroundPosition: "center",
-          opacity: 0.4,
-        }}
-      />
-      {/* Color tint */}
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          backgroundColor: color,
-          mixBlendMode: "multiply",
-          opacity: 0.5,
-        }}
-      />
-      {/* Icon */}
-      <Icon
-        className="w-9 h-9 relative z-10"
-        style={{
-          color,
-          filter: `drop-shadow(0 0 4px ${color})`,
-        }}
-      />
-      <span
-        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-xs font-bold font-secondary z-10"
-        style={{ color }}
-      >
-        {displayValue}
-      </span>
     </div>
   );
 };
@@ -373,7 +232,11 @@ export const GameShop = ({
           {bag
             .filter((orb) => !orb.isBomb() && !orb.isNone())
             .map((orb, index) => (
-              <BagOrb key={`bag-${orb.value}-${index}`} orb={orb} />
+              <OrbDisplay
+                key={`bag-${orb.value}-${index}`}
+                orb={orb}
+                size="sm"
+              />
             ))}
         </div>
       </div>
