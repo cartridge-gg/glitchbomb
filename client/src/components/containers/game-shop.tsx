@@ -5,6 +5,14 @@ import { OrbDisplay, RarityPill } from "@/components/elements";
 import { ChipIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -136,6 +144,8 @@ export const GameShop = ({
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   // History of actions for undo (stores the index of each add)
   const [history, setHistory] = useState<number[]>([]);
+  // Confirmation dialog for leaving without buying
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -231,6 +241,21 @@ export const GameShop = ({
     return [...existingOrbs, ...pendingOrbs];
   }, [bag, basketIndices, orbs]);
 
+  const hasSelections = basketIndices.length > 0;
+
+  const handleContinue = () => {
+    if (hasSelections) {
+      onConfirm(basketIndices);
+    } else {
+      setShowExitConfirmation(true);
+    }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitConfirmation(false);
+    onConfirm([]);
+  };
+
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
@@ -320,11 +345,38 @@ export const GameShop = ({
         <Button
           variant="default"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
-          onClick={() => onConfirm(basketIndices)}
+          onClick={handleContinue}
         >
           CONTINUE
         </Button>
       </div>
+
+      {/* Exit confirmation dialog */}
+      <Dialog
+        open={showExitConfirmation}
+        onOpenChange={setShowExitConfirmation}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave Shop?</DialogTitle>
+            <DialogDescription>
+              You haven't selected any orbs to buy. Are you sure you want to
+              leave the shop without purchasing anything?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setShowExitConfirmation(false)}
+            >
+              Stay
+            </Button>
+            <Button variant="default" onClick={handleConfirmExit}>
+              Leave Shop
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
