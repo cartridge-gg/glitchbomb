@@ -119,21 +119,15 @@ export const Puller = ({
       {...props}
     >
       <div className="absolute inset-0 rounded-full overflow-hidden">
-        {/* 1. Orb image with zoom to crop edges */}
-        <motion.div
+        {/* 1. Orb image with zoom to crop edges - using CSS animation for Safari compatibility */}
+        <div
           className="absolute inset-0 rounded-full bg-center"
           style={{
             backgroundImage: "url(/assets/orb.png)",
             backgroundSize: "102%",
             backgroundPosition: "center",
-          }}
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            duration: 60,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
+            animation: "puller-spin 60s linear infinite",
+            WebkitAnimation: "puller-spin 60s linear infinite",
           }}
         />
 
