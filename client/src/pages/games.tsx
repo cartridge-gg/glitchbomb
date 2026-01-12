@@ -1,13 +1,16 @@
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount } from "@starknet-react/core";
-import { useCallback, useMemo } from "react";
+import { useAccount, useNetwork } from "@starknet-react/core";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SparklesIcon } from "@/components/icons";
+import { Balance, Profile } from "@/components/elements";
+import { ArrowLeftIcon, BombIcon, SparklesIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
+import { toDecimal, useTokens } from "@/hooks/tokens";
 
 interface GameCardProps {
   packId: number;
@@ -56,10 +59,40 @@ const GameCard = ({ packId, gameId, isOver, onPlay }: GameCardProps) => {
 
 export const Games = () => {
   const navigate = useNavigate();
-  const { connector } = useAccount();
-  const { starterpack } = useEntitiesContext();
-  const { start } = useActions();
+  const { chain } = useNetwork();
+  const { account, connector } = useAccount();
+  const { starterpack, config } = useEntitiesContext();
+  const { start, mint } = useActions();
   const { packs } = usePacks();
+  const [username, setUsername] = useState<string>();
+
+  // Token balance
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+  const { tokenBalances, tokenContracts } = useTokens({
+    accountAddresses: account?.address ? [account?.address] : [],
+    contractAddresses: [tokenAddress],
+  });
+
+  const balance = useMemo(() => {
+    if (!tokenAddress) return 0;
+    const tokenContract = tokenContracts.find(
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
+    );
+    if (!tokenContract) return 0;
+    const tokenBalance = tokenBalances.find(
+      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
+    );
+    if (!tokenBalance) return 0;
+    return toDecimal(tokenContract, tokenBalance);
+  }, [tokenContracts, tokenBalances, tokenAddress]);
+
+  // Fetch username
+  useEffect(() => {
+    if (!connector) return;
+    (connector as never as ControllerConnector).controller
+      .username()
+      ?.then((name) => setUsername(name));
+  }, [connector]);
 
   // Build game keys from packs
   const gameKeys = useMemo(() => {
@@ -113,30 +146,49 @@ export const Games = () => {
     }
   }, [connector, starterpack]);
 
+  const onProfileClick = useCallback(() => {
+    (connector as never as ControllerConnector)?.controller.openProfile(
+      "inventory",
+    );
+  }, [connector]);
+
   return (
-    <div className="absolute inset-0 flex flex-col max-w-[420px] m-auto p-6">
+    <div className="absolute inset-0 flex flex-col max-w-[500px] m-auto p-4">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-white text-2xl font-primary tracking-wide">
-          MY GAMES
-        </h1>
+        {/* Left: Back button */}
+        <Button
+          variant="secondary"
+          className="h-12 w-12 p-0"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeftIcon size="sm" />
+        </Button>
+
+        {/* Center: Bomb icon */}
+        <div className="flex items-center">
+          <BombIcon size="lg" className="text-white" />
+          <SparklesIcon size="xs" className="text-white -ml-1 -mt-3" />
+        </div>
+
+        {/* Right: Balance + Profile */}
         <div className="flex gap-2">
-          <Button
-            variant="default"
-            className="h-10 px-4 font-secondary uppercase text-xs tracking-widest"
-            onClick={handleNewGame}
-          >
-            New Game
-          </Button>
-          <Button
-            variant="secondary"
-            className="h-10 px-4 font-secondary uppercase text-xs tracking-widest"
-            onClick={() => navigate("/")}
-          >
-            Back
-          </Button>
+          <Balance
+            balance={balance}
+            onClick={() => mint(tokenAddress)}
+            className="w-auto px-4"
+          />
+          {username && (
+            <Profile
+              username={username}
+              onClick={onProfileClick}
+              className="w-auto px-4"
+            />
+          )}
         </div>
       </div>
 
+      {/* Game list */}
       <div className="flex flex-col gap-3 overflow-y-auto flex-1">
         {gameList.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 text-green-600">
