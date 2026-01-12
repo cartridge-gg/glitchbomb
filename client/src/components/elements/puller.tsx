@@ -5,7 +5,7 @@ import {
   useAnimationControls,
 } from "framer-motion";
 import { useEffect, useState } from "react";
-import { DotIcon, HeartIcon, OrbIcon } from "@/components/icons";
+import { BombIcon, DotIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
@@ -72,7 +72,7 @@ export interface PullerProps
   extends Omit<HTMLMotionProps<"button">, "ref">,
     VariantProps<typeof pullerVariants> {
   orbs?: number;
-  lives?: number;
+  bombs?: number;
 }
 
 export const Puller = ({
@@ -80,7 +80,7 @@ export const Puller = ({
   size,
   className,
   orbs = 0,
-  lives = 0,
+  bombs = 0,
   ...props
 }: PullerProps) => {
   // Get color based on variant
@@ -207,17 +207,17 @@ export const Puller = ({
             size="3xs"
             className={cn(
               "opacity-25",
-              (orbs === 0 || lives === 0) && "hidden",
+              (orbs === 0 || bombs === 0) && "hidden",
             )}
           />
           <div
             className={cn(
               "flex items-center justify-center translate-x-[-4px]",
-              lives === 0 && "hidden",
+              bombs === 0 && "hidden",
             )}
           >
-            <HeartIcon size="md" />
-            <p className="text-xs font-secondary uppercase whitespace-nowrap">{`x ${lives}`}</p>
+            <BombIcon size="md" />
+            <p className="text-xs font-secondary uppercase whitespace-nowrap">{`x ${bombs}`}</p>
           </div>
         </div>
       </div>

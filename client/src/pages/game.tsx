@@ -116,6 +116,7 @@ export const Game = () => {
         <GameScene
           className="grow"
           lives={game.health}
+          bombs={game.distribution().bombs}
           orbs={game.pullables.length}
           values={game.distribution()}
           onPull={() => pull(pack.id, game.id)}

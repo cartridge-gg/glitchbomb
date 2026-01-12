@@ -7,12 +7,14 @@ import {
   Outcome,
   Puller,
 } from "@/components/elements";
+import { HeartIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameSceneVariants> {
   lives: number;
+  bombs: number;
   orbs: number;
   values: DistributionValues;
   orb?: {
@@ -35,6 +37,7 @@ const gameSceneVariants = cva("relative", {
 
 export const GameScene = ({
   lives,
+  bombs,
   orbs,
   values,
   orb,
@@ -93,21 +96,37 @@ export const GameScene = ({
           phase === 3 && "opacity-100 z-20",
         )}
       >
-        <Puller
-          onClick={onPull}
-          variant={
-            lives < 2
-              ? "bomb"
-              : lives < 4
-                ? "multiplier"
-                : lives < 5
-                  ? "default"
-                  : "point"
-          }
-          size="md"
-          orbs={orbs}
-          lives={lives}
-        />
+        <div className="flex flex-col items-center gap-6">
+          <Puller
+            onClick={onPull}
+            variant={
+              lives < 2
+                ? "bomb"
+                : lives < 4
+                  ? "multiplier"
+                  : lives < 5
+                    ? "default"
+                    : "point"
+            }
+            size="md"
+            orbs={orbs}
+            bombs={bombs}
+          />
+          {/* Hearts display */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <HeartIcon
+                key={i}
+                className={cn(
+                  "w-10 h-10 transition-all duration-300",
+                  i < lives
+                    ? "text-[var(--red-100)] drop-shadow-[0_0_8px_var(--red-100)]"
+                    : "text-green-900/50",
+                )}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Orb */}
