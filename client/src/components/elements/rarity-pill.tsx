@@ -1,25 +1,12 @@
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const rarityPillVariants = cva(
-  "inline-flex items-center justify-center rounded-md px-3 py-1 font-secondary text-xs tracking-wider uppercase border",
-  {
-    variants: {
-      rarity: {
-        common: "border-green-500/30 text-green-400",
-        rare: "border-blue-400/30 text-blue-300",
-        cosmic: "border-purple-400/30 text-purple-300",
-      },
-    },
-    defaultVariants: {
-      rarity: "common",
-    },
-  },
-);
+const rarityColors = {
+  common: { border: "rgba(34, 197, 94, 0.3)", text: "#4ade80" },
+  rare: { border: "rgba(96, 165, 250, 0.3)", text: "#93c5fd" },
+  cosmic: { border: "rgba(192, 132, 252, 0.3)", text: "#d8b4fe" },
+};
 
-export interface RarityPillProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof rarityPillVariants> {
+export interface RarityPillProps extends React.HTMLAttributes<HTMLDivElement> {
   rarity: "common" | "rare" | "cosmic";
 }
 
@@ -28,8 +15,20 @@ export const RarityPill = ({
   className,
   ...props
 }: RarityPillProps) => {
+  const colors = rarityColors[rarity];
+
   return (
-    <div className={cn(rarityPillVariants({ rarity, className }))} {...props}>
+    <div
+      className={cn(
+        "inline-flex items-center justify-center rounded-md px-3 py-1 font-secondary text-xs tracking-wider uppercase border",
+        className,
+      )}
+      style={{
+        borderColor: colors.border,
+        color: colors.text,
+      }}
+      {...props}
+    >
       {rarity}
     </div>
   );
