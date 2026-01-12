@@ -56,8 +56,21 @@ interface ShopItemProps {
 }
 
 const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleAdd = () => {
+    if (disabled) return;
+    setIsAnimating(true);
+    onAdd();
+    setTimeout(() => setIsAnimating(false), 300);
+  };
+
   return (
-    <div className="flex items-center gap-4 py-2">
+    <motion.div
+      className="flex items-center gap-4 py-2"
+      animate={isAnimating ? { scale: [1, 1.02, 1] } : {}}
+      transition={{ duration: 0.2 }}
+    >
       {/* Orb icon with value */}
       <OrbDisplay orb={orb} size="md" />
 
@@ -80,20 +93,26 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       >
         <div className="flex items-center gap-2 px-3 py-2">
           <ChipIcon size="sm" className="text-orange-100" />
-          <span className="text-orange-100 font-secondary text-sm">
+          <motion.span
+            key={price}
+            initial={{ scale: 1.3, color: "#4ade80" }}
+            animate={{ scale: 1, color: "#ffedd5" }}
+            transition={{ duration: 0.3 }}
+            className="font-secondary text-sm"
+          >
             {price}
-          </span>
+          </motion.span>
         </div>
         <button
           className="h-12 w-14 p-0 rounded-r-lg disabled:opacity-50"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
-          onClick={onAdd}
+          onClick={handleAdd}
         >
           <span className="text-3xl font-secondary text-green-400" style={{ fontWeight: 100 }}>+</span>
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
