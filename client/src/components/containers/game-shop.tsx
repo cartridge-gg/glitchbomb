@@ -83,7 +83,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       </div>
 
       {/* Rarity pill */}
-      <RarityPill rarity={orb.rarity()} className="self-start mt-1" />
+      <RarityPill rarity={orb.rarity()} className="self-start mt-3" />
 
       {/* Price and add button */}
       <div
@@ -106,7 +106,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         </div>
         <button
           type="button"
-          className="h-12 w-14 p-0 rounded-r-lg disabled:opacity-50"
+          className="h-10 w-14 p-0 rounded-r-lg disabled:opacity-50"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
           onClick={handleAdd}
