@@ -13,6 +13,7 @@ export interface GameSceneProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameSceneVariants> {
   lives: number;
+  bombs: number;
   orbs: number;
   values: DistributionValues;
   orb?: {
@@ -35,6 +36,7 @@ const gameSceneVariants = cva("relative", {
 
 export const GameScene = ({
   lives,
+  bombs,
   orbs,
   values,
   orb,
@@ -106,7 +108,7 @@ export const GameScene = ({
           }
           size="md"
           orbs={orbs}
-          lives={lives}
+          bombs={bombs}
         />
       </div>
 

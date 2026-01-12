@@ -39,9 +39,9 @@ const meta = {
       control: "number",
       description: "Number of orbs",
     },
-    lives: {
+    bombs: {
       control: "number",
-      description: "Number of lives",
+      description: "Number of bombs",
     },
     disabled: {
       control: "boolean",
@@ -50,7 +50,7 @@ const meta = {
   },
   args: {
     orbs: 5,
-    lives: 5,
+    bombs: 3,
     onClick: fn(),
   },
 } satisfies Meta<typeof Puller>;
@@ -70,7 +70,7 @@ export const Bomb: Story = {
     variant: "bomb",
     size: "md",
     orbs: 3,
-    lives: 2,
+    bombs: 2,
   },
 };
 
@@ -79,7 +79,7 @@ export const Point: Story = {
     variant: "point",
     size: "md",
     orbs: 8,
-    lives: 1,
+    bombs: 1,
   },
 };
 
@@ -88,7 +88,7 @@ export const Multiplier: Story = {
     variant: "multiplier",
     size: "md",
     orbs: 4,
-    lives: 3,
+    bombs: 3,
   },
 };
 
@@ -97,7 +97,7 @@ export const Chip: Story = {
     variant: "chip",
     size: "md",
     orbs: 6,
-    lives: 4,
+    bombs: 4,
   },
 };
 
@@ -106,7 +106,7 @@ export const Moonrock: Story = {
     variant: "moonrock",
     size: "md",
     orbs: 2,
-    lives: 5,
+    bombs: 5,
   },
 };
 
@@ -115,7 +115,7 @@ export const Rainbow: Story = {
     variant: "rainbow",
     size: "md",
     orbs: 10,
-    lives: 3,
+    bombs: 3,
   },
 };
 
@@ -124,7 +124,7 @@ export const NoStats: Story = {
     variant: "default",
     size: "md",
     orbs: 0,
-    lives: 0,
+    bombs: 0,
   },
 };
 

@@ -14,6 +14,10 @@ const meta: Meta<typeof GameScene> = {
       control: "number",
       description: "Number of lives",
     },
+    bombs: {
+      control: "number",
+      description: "Number of bombs in the bag",
+    },
     orbs: {
       control: "number",
       description: "Number of orbs",
@@ -78,6 +82,7 @@ export const Default: Story = {
   },
   args: {
     lives: 5,
+    bombs: 3,
     orbs: 5,
     values: {
       bombs: 20,
