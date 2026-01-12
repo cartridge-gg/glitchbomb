@@ -128,7 +128,7 @@ export const GameScene = ({
                 <HeartOutlineIcon
                   key={i}
                   className="w-10 h-10"
-                  style={{ color: "#14532d80" }}
+                  style={{ color: "rgba(20, 83, 45, 0.5)" }}
                 />
               ),
             )}
