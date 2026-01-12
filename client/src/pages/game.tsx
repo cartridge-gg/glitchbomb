@@ -246,7 +246,7 @@ export const Game = () => {
         </div>
 
         {/* Pull History Graph */}
-        <GameGraph pulls={pulls} />
+        <GameGraph pulls={pulls} className="mt-8" />
 
         {/* Game Scene */}
         <GameScene
