@@ -174,7 +174,7 @@ export const Puller = ({
       </div>
 
       {/* 5. Content */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0">
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0 -mt-2">
         <p
           className="text-center text-[35px]/[30px] font-[900]"
           style={{
