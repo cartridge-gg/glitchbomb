@@ -1,9 +1,17 @@
+import type ControllerConnector from "@cartridge/connector/controller";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "@starknet-react/core";
 import { GameScene, GameShop } from "@/components/containers";
-import { Multiplier, OrbDisplay } from "@/components/elements";
-import { BagIcon, BombIcon, ChipIcon, HeartIcon, MoonrockIcon } from "@/components/icons";
+import { Multiplier, OrbDisplay, Profile } from "@/components/elements";
+import {
+  BagIcon,
+  BombIcon,
+  ChipIcon,
+  HeartIcon,
+  HomeIcon,
+  MoonrockIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,12 +27,21 @@ import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
-  const { account } = useAccount();
+  const { account, connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const navigate = useNavigate();
   const { pack, game, config, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [stashOpen, setStashOpen] = useState(false);
+  const [username, setUsername] = useState<string>();
+
+  // Fetch username
+  useEffect(() => {
+    if (!connector) return;
+    (connector as never as ControllerConnector).controller
+      .username()
+      ?.then((name) => setUsername(name));
+  }, [connector]);
 
   // Token balance for moonrocks
   const { tokenContracts, tokenBalances } = useTokens({
@@ -154,16 +171,23 @@ export const Game = () => {
 
   return (
     <>
-      <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
-        {/* Header with balance buttons */}
+      {/* Full-width header */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-4">
+        {/* Home button (left) */}
+        <Button
+          variant="secondary"
+          className="h-12 w-12 p-0"
+          onClick={() => navigate("/")}
+        >
+          <HomeIcon size="sm" className="text-green-400" />
+        </Button>
+
+        {/* Center: Moonrocks + Chips */}
         <div className="flex items-stretch gap-3">
           {/* Moonrocks (blue) */}
           <button
             type="button"
-            className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
-            style={{
-              background: "linear-gradient(180deg, #1A3A4A 0%, #0D2530 100%)",
-            }}
+            className="flex items-center justify-center gap-2 min-h-12 px-6 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
           >
             <MoonrockIcon className="w-5 h-5 text-blue-400" />
             <span className="font-secondary text-sm tracking-widest text-blue-300">
@@ -173,10 +197,7 @@ export const Game = () => {
           {/* Chips (orange) */}
           <button
             type="button"
-            className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
-            style={{
-              background: "linear-gradient(180deg, #4A3A1A 0%, #302510 100%)",
-            }}
+            className="flex items-center justify-center gap-2 min-h-12 px-6 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
           >
             <ChipIcon className="w-5 h-5 text-orange-400" />
             <span className="font-secondary text-sm tracking-widest text-orange-300">
@@ -185,6 +206,11 @@ export const Game = () => {
           </button>
         </div>
 
+        {/* Profile (right) */}
+        <Profile username={username || "..."} className="w-auto px-4" />
+      </div>
+
+      <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4 pt-24">
         {/* Game Scene */}
         <GameScene
           className="grow"
