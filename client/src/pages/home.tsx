@@ -3,22 +3,19 @@ import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Balance, Connect, Profile } from "@/components/elements";
-import { GearIcon, GlitchBombIcon, ListIcon } from "@/components/icons";
+import { GearIcon, GlitchBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
-import { useGames } from "@/hooks/games";
-import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import type { Pack } from "@/models";
 
 export const Home = () => {
-  const { mint, start } = useActions();
+  const { mint } = useActions();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { config, starterpack } = useEntitiesContext();
+  const { config } = useEntitiesContext();
   const navigate = useNavigate();
   const [username, setUsername] = useState<string>();
 
@@ -29,19 +26,6 @@ export const Home = () => {
     accountAddresses: account?.address ? [account?.address] : [],
     contractAddresses: [tokenAddress],
   });
-
-  const { packs } = usePacks();
-  const [pack, setPack] = useState<Pack | null>(null);
-
-  // Build game keys from packs to fetch their current games
-  const gameKeys = useMemo(() => {
-    return packs.map((p) => ({
-      packId: p.id,
-      gameId: Math.max(p.game_count, 1),
-    }));
-  }, [packs]);
-
-  const { getGameForPack } = useGames(gameKeys);
 
   const balance = useMemo(() => {
     if (!tokenAddress) return 0;
@@ -55,16 +39,6 @@ export const Home = () => {
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContracts, tokenBalances, tokenAddress]);
-
-  // Get the active pack to play
-  const activePack = useMemo(() => {
-    const active = packs.find((p) => {
-      const gameId = Math.max(p.game_count, 1);
-      const game = getGameForPack(p.id, gameId);
-      return !(game?.over ?? false);
-    });
-    return active;
-  }, [packs, getGameForPack]);
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
@@ -80,25 +54,6 @@ export const Home = () => {
     (connector as never as ControllerConnector)?.controller.openSettings();
   }, [connector]);
 
-  const onPlayClick = useCallback(async () => {
-    // If no active pack, open purchase flow
-    if (!activePack) {
-      if (starterpack) {
-        (connector as ControllerConnector)?.controller.openStarterPack(
-          starterpack.id.toString(),
-        );
-      }
-      return;
-    }
-    // Otherwise, start/continue the game
-    const gameId = Math.max(activePack.game_count, 1);
-    const hasNoGame = activePack.game_count === 0;
-    if (hasNoGame) {
-      await start(activePack.id);
-    }
-    navigate(`/play?pack=${activePack.id}&game=${gameId}`);
-  }, [activePack, connector, navigate, start, starterpack]);
-
   // Fetch username
   useEffect(() => {
     if (!connector) return;
@@ -106,13 +61,6 @@ export const Home = () => {
       .username()
       ?.then((name) => setUsername(name));
   }, [connector]);
-
-  // Set initial selected pack
-  useEffect(() => {
-    if (packs.length > 0 && pack === null) {
-      setPack(packs[0]);
-    }
-  }, [packs, pack]);
 
   const isLoggedIn = !!account && !!username;
 
@@ -144,22 +92,14 @@ export const Home = () => {
               <Button
                 variant="default"
                 className="h-12 flex-1 font-secondary uppercase text-sm tracking-widest font-normal"
-                onClick={onPlayClick}
+                onClick={() => navigate("/games")}
               >
                 Play
               </Button>
             </div>
 
-            {/* Row 2: Games + Settings + Balance */}
+            {/* Row 2: Settings + Balance */}
             <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                className="flex-1 h-12 gap-2 font-secondary uppercase text-sm tracking-widest font-normal"
-                onClick={() => navigate("/games")}
-              >
-                <ListIcon size="sm" />
-                Games
-              </Button>
               <Button
                 variant="secondary"
                 className="h-12 w-12 p-0"

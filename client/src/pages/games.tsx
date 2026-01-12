@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { useAccount } from "@starknet-react/core";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { SparklesIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
@@ -53,6 +56,8 @@ const GameCard = ({ packId, gameId, isOver, onPlay }: GameCardProps) => {
 
 export const Games = () => {
   const navigate = useNavigate();
+  const { connector } = useAccount();
+  const { starterpack } = useEntitiesContext();
   const { start } = useActions();
   const { packs } = usePacks();
 
@@ -100,19 +105,36 @@ export const Games = () => {
     navigate(`/play?pack=${packId}&game=${gameId}`);
   };
 
+  const handleNewGame = useCallback(() => {
+    if (starterpack) {
+      (connector as ControllerConnector)?.controller.openStarterPack(
+        starterpack.id.toString(),
+      );
+    }
+  }, [connector, starterpack]);
+
   return (
     <div className="absolute inset-0 flex flex-col max-w-[420px] m-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-white text-2xl font-primary tracking-wide">
           MY GAMES
         </h1>
-        <Button
-          variant="secondary"
-          className="h-10 px-4 font-secondary uppercase text-xs tracking-widest"
-          onClick={() => navigate("/")}
-        >
-          Back
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="default"
+            className="h-10 px-4 font-secondary uppercase text-xs tracking-widest"
+            onClick={handleNewGame}
+          >
+            New Game
+          </Button>
+          <Button
+            variant="secondary"
+            className="h-10 px-4 font-secondary uppercase text-xs tracking-widest"
+            onClick={() => navigate("/")}
+          >
+            Back
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 overflow-y-auto flex-1">
@@ -121,9 +143,13 @@ export const Games = () => {
             <p className="font-secondary text-sm tracking-wider">
               No games yet
             </p>
-            <p className="font-secondary text-xs tracking-wider mt-1">
-              Purchase a pack to start playing
-            </p>
+            <Button
+              variant="default"
+              className="mt-4 h-10 px-6 font-secondary uppercase text-sm tracking-widest"
+              onClick={handleNewGame}
+            >
+              Buy a Pack
+            </Button>
           </div>
         ) : (
           gameList.map((game) => (
