@@ -155,6 +155,7 @@ export const Home = () => {
               <Button
                 variant="secondary"
                 className="flex-1 h-12 gap-2 font-secondary uppercase text-sm tracking-widest font-normal"
+                onClick={() => navigate("/games")}
               >
                 <ListIcon size="sm" />
                 Games

@@ -1,7 +1,7 @@
 // import { useMemo } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Game, Home } from "@/pages";
+import { Game, Games, Home } from "@/pages";
 
 function Router() {
   // const isRoot = useMemo(() => {
@@ -20,6 +20,7 @@ function Router() {
         />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/games" element={<Games />} />
           <Route path="/play" element={<Game />} />
         </Routes>
       </div>
