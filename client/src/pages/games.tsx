@@ -3,7 +3,12 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Balance, Profile } from "@/components/elements";
-import { ArrowLeftIcon, GlitchBombIcon, SparkleIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  GearIcon,
+  GlitchBombIcon,
+  SparkleIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -205,38 +210,41 @@ export const Games = () => {
         </div>
       </div>
 
-      {/* Game list - centered with max width */}
-      <div className="flex-1 overflow-y-auto px-4">
-        <div className="flex flex-col gap-3 max-w-[500px] mx-auto">
-          {gameList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] text-green-600">
-              <p className="font-secondary text-sm tracking-wider">
-                No games yet
-              </p>
-              <Button
-                variant="default"
-                className="mt-4 h-10 px-6 font-secondary uppercase text-sm tracking-widest"
-                onClick={handleNewGame}
-              >
-                Buy a Pack
-              </Button>
-            </div>
-          ) : (
-          gameList.map((game) => (
-            <GameCard
-              key={`${game.packId}-${game.gameId}`}
-              gameId={game.gameId}
-              pullCount={game.pullCount}
-              bagSize={game.bagSize}
-              level={game.level}
-              hasStarted={!game.hasNoGame}
-              isOver={game.isOver}
-              onPlay={() =>
-                handlePlay(game.packId, game.gameId, game.hasNoGame)
-              }
-            />
-          ))
-          )}
+      {/* Content - centered vertically and horizontally */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 overflow-y-auto">
+        <div className="flex flex-col gap-6 w-full max-w-[500px]">
+          {/* Purchase New Game Card */}
+          <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
+            <p className="text-white font-primary text-sm tracking-wider">
+              Purchase New Game
+            </p>
+            <Button
+              variant="default"
+              className="h-10 px-6 font-secondary uppercase text-sm tracking-widest"
+              onClick={handleNewGame}
+            >
+              <GearIcon size="xs" className="mr-2" />
+              Purchase
+            </Button>
+          </div>
+
+          {/* Game list */}
+          <div className="flex flex-col gap-3">
+            {gameList.map((game) => (
+              <GameCard
+                key={`${game.packId}-${game.gameId}`}
+                gameId={game.gameId}
+                pullCount={game.pullCount}
+                bagSize={game.bagSize}
+                level={game.level}
+                hasStarted={!game.hasNoGame}
+                isOver={game.isOver}
+                onPlay={() =>
+                  handlePlay(game.packId, game.gameId, game.hasNoGame)
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
