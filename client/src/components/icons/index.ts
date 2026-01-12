@@ -50,6 +50,7 @@ export * from "./orb-moonrock";
 export * from "./orb-multiplier";
 export * from "./orb-point";
 export * from "./refresh";
+export * from "./sparkle";
 export * from "./sparkles";
 export * from "./tick";
 export * from "./token";

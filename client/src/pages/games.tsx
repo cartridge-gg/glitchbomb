@@ -3,11 +3,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Balance, Profile } from "@/components/elements";
-import {
-  ArrowLeftIcon,
-  GlitchBombIcon,
-  SparklesIcon,
-} from "@/components/icons";
+import { ArrowLeftIcon, GlitchBombIcon, SparkleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -46,7 +42,7 @@ const GameCard = ({
             backgroundSize: "cover",
           }}
         />
-        <SparklesIcon size="lg" className="text-green-400 relative z-10" />
+        <SparkleIcon size="lg" className="text-green-400 relative z-10" />
       </div>
 
       {/* Game Info */}
