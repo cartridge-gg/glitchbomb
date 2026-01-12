@@ -153,9 +153,9 @@ export const Games = () => {
   }, [connector]);
 
   return (
-    <div className="absolute inset-0 flex flex-col max-w-[500px] m-auto p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="absolute inset-0 flex flex-col">
+      {/* Header - full width */}
+      <div className="flex items-center justify-between px-4 py-4">
         {/* Left: Back button */}
         <Button
           variant="secondary"
@@ -188,34 +188,36 @@ export const Games = () => {
         </div>
       </div>
 
-      {/* Game list */}
-      <div className="flex flex-col gap-3 overflow-y-auto flex-1">
-        {gameList.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 text-green-600">
-            <p className="font-secondary text-sm tracking-wider">
-              No games yet
-            </p>
-            <Button
-              variant="default"
-              className="mt-4 h-10 px-6 font-secondary uppercase text-sm tracking-widest"
-              onClick={handleNewGame}
-            >
-              Buy a Pack
-            </Button>
-          </div>
-        ) : (
-          gameList.map((game) => (
-            <GameCard
-              key={`${game.packId}-${game.gameId}`}
-              packId={game.packId}
-              gameId={game.gameId}
-              isOver={game.isOver}
-              onPlay={() =>
-                handlePlay(game.packId, game.gameId, game.hasNoGame)
-              }
-            />
-          ))
-        )}
+      {/* Game list - centered with max width */}
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="flex flex-col gap-3 max-w-[500px] mx-auto">
+          {gameList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] text-green-600">
+              <p className="font-secondary text-sm tracking-wider">
+                No games yet
+              </p>
+              <Button
+                variant="default"
+                className="mt-4 h-10 px-6 font-secondary uppercase text-sm tracking-widest"
+                onClick={handleNewGame}
+              >
+                Buy a Pack
+              </Button>
+            </div>
+          ) : (
+            gameList.map((game) => (
+              <GameCard
+                key={`${game.packId}-${game.gameId}`}
+                packId={game.packId}
+                gameId={game.gameId}
+                isOver={game.isOver}
+                onPlay={() =>
+                  handlePlay(game.packId, game.gameId, game.hasNoGame)
+                }
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
