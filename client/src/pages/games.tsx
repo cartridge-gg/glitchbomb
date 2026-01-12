@@ -159,7 +159,7 @@ export const Games = () => {
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Header - full width */}
-      <div className="flex items-center justify-between px-4 py-4">
+      <div className="relative flex items-center justify-between px-4 py-4">
         {/* Left: Back button */}
         <Button
           variant="secondary"
@@ -169,8 +169,11 @@ export const Games = () => {
           <ArrowLeftIcon size="sm" />
         </Button>
 
-        {/* Center: GlitchBomb icon */}
-        <GlitchBombIcon size="xl" className="text-white" />
+        {/* Center: GlitchBomb icon - absolutely positioned for perfect centering */}
+        <GlitchBombIcon
+          size="xl"
+          className="absolute left-1/2 -translate-x-1/2 text-white"
+        />
 
         {/* Right: Balance + Profile */}
         <div className="flex gap-2">
