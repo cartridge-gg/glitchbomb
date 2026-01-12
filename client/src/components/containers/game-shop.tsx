@@ -79,7 +79,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       >
         <div className="flex items-center gap-2 px-3 py-2">
           <ChipIcon size="sm" className="text-orange-400" />
-          <span className="text-orange-400 font-secondary text-xl italic">
+          <span className="text-orange-400 font-secondary text-sm">
             {price}
           </span>
         </div>
@@ -185,7 +185,7 @@ export const GameShop = ({
       <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl font-primary">ORB SHOP</h1>
         <div
-          className="flex items-center gap-1 px-4 py-2 rounded border"
+          className="flex items-center gap-1 px-4 py-2 rounded"
           style={{
             backgroundColor: "rgba(100, 50, 0, 0.3)",
           }}
