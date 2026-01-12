@@ -7,7 +7,7 @@ import {
   Outcome,
   Puller,
 } from "@/components/elements";
-import { HeartIcon } from "@/components/icons";
+import { HeartIcon, HeartOutlineIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
@@ -114,17 +114,19 @@ export const GameScene = ({
           />
           {/* Hearts display */}
           <div className="flex items-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <HeartIcon
-                key={i}
-                className={cn(
-                  "w-10 h-10 transition-all duration-300",
-                  i < lives
-                    ? "text-[var(--red-100)] drop-shadow-[0_0_8px_var(--red-100)]"
-                    : "text-green-900/50",
-                )}
-              />
-            ))}
+            {Array.from({ length: 5 }).map((_, i) =>
+              i < lives ? (
+                <HeartIcon
+                  key={i}
+                  className="w-10 h-10 text-[var(--red-100)] drop-shadow-[0_0_8px_var(--red-100)]"
+                />
+              ) : (
+                <HeartOutlineIcon
+                  key={i}
+                  className="w-10 h-10 text-green-900/50"
+                />
+              ),
+            )}
           </div>
         </div>
       </div>

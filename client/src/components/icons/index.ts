@@ -40,6 +40,7 @@ export * from "./dot";
 export * from "./gear";
 export * from "./glitch-bomb";
 export * from "./heart";
+export * from "./heart-outline";
 export * from "./list";
 export * from "./moonrock";
 export * from "./orb";
