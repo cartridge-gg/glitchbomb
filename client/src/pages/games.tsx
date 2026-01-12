@@ -211,7 +211,7 @@ export const Games = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-4 pt-16 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center px-4 pt-40 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full max-w-[500px]">
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
@@ -244,6 +244,61 @@ export const Games = () => {
                 }
               />
             ))}
+            {/* Fake games for testing scroll */}
+            <GameCard
+              gameId={2}
+              pullCount={8}
+              bagSize={25}
+              level={2}
+              hasStarted={true}
+              isOver={false}
+              onPlay={() => {}}
+            />
+            <GameCard
+              gameId={3}
+              pullCount={25}
+              bagSize={25}
+              level={5}
+              hasStarted={true}
+              isOver={true}
+              onPlay={() => {}}
+            />
+            <GameCard
+              gameId={4}
+              pullCount={3}
+              bagSize={25}
+              level={1}
+              hasStarted={true}
+              isOver={false}
+              onPlay={() => {}}
+            />
+            <GameCard
+              gameId={5}
+              pullCount={15}
+              bagSize={25}
+              level={3}
+              hasStarted={true}
+              isOver={false}
+              onPlay={() => {}}
+            />
+            <GameCard
+              gameId={6}
+              pullCount={20}
+              bagSize={25}
+              level={4}
+              hasStarted={true}
+              isOver={true}
+              onPlay={() => {}}
+            />
+            <GameCard
+              gameId={7}
+              pullCount={0}
+              bagSize={25}
+              level={1}
+              hasStarted={false}
+              isOver={false}
+              onPlay={() => {}}
+            />
           </div>
         </div>
       </div>
