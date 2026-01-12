@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { OrbDisplay } from "@/components/elements";
+import { OrbDisplay, RarityPill } from "@/components/elements";
 import { ChipIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
@@ -81,6 +81,9 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           {getOrbShortDescription(orb)}
         </p>
       </div>
+
+      {/* Rarity pill */}
+      <RarityPill rarity={orb.rarity()} />
 
       {/* Price and add button */}
       <div

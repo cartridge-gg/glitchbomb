@@ -12,6 +12,7 @@ export * from "./orb-display";
 export * from "./outcome";
 export * from "./profile";
 export * from "./puller";
+export * from "./rarity-pill";
 export * from "./recent-pulls";
 export * from "./score";
 export * from "./tag";
