@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { OrbDisplay } from "@/components/elements";
 import { ChipIcon } from "@/components/icons";
@@ -236,13 +237,23 @@ export const GameShop = ({
           Your Orbs
         </h2>
         <div className="flex flex-wrap gap-2">
-          {displayBag.map((orb, index) => (
-            <OrbDisplay
-              key={`bag-${orb.value}-${index}`}
-              orb={orb}
-              size="sm"
-            />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {displayBag.map((orb, index) => (
+              <motion.div
+                key={`bag-${orb.value}-${index}`}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 25,
+                }}
+              >
+                <OrbDisplay orb={orb} size="sm" />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
 
