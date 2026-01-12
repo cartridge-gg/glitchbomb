@@ -26,9 +26,9 @@ const orbDisplayVariants = cva(
 );
 
 const iconSizeMap = {
-  sm: "w-10 h-10",
-  md: "w-14 h-14",
-  lg: "w-[72px] h-[72px]",
+  sm: "w-full h-full",
+  md: "w-full h-full",
+  lg: "w-full h-full",
 };
 
 const valueSizeMap = {
