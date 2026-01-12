@@ -170,6 +170,46 @@ export const useActions = () => {
     [account, chain.id],
   );
 
+  const buyAndExit = useCallback(
+    async (packId: number, gameId: number, indices: number[]) => {
+      try {
+        if (!account?.address) return false;
+        const gameAddress = getGameAddress(chain.id);
+        const calls = [];
+
+        // Add buy calls if there are items to purchase
+        if (indices.length > 0) {
+          calls.push({
+            contractAddress: gameAddress,
+            entrypoint: "buy",
+            calldata: CallData.compile({
+              packId: packId,
+              gameId: gameId,
+              indices: indices,
+            }),
+          });
+        }
+
+        // Always add exit call
+        calls.push({
+          contractAddress: gameAddress,
+          entrypoint: "exit",
+          calldata: CallData.compile({
+            packId: packId,
+            gameId: gameId,
+          }),
+        });
+
+        await account.execute(calls);
+        return true;
+      } catch (e) {
+        console.log({ e });
+        return false;
+      }
+    },
+    [account, chain.id],
+  );
+
   const refresh = useCallback(
     async (packId: number, gameId: number) => {
       try {
@@ -259,6 +299,7 @@ export const useActions = () => {
     enter,
     buy,
     exit,
+    buyAndExit,
     refresh,
     burn,
     mint,

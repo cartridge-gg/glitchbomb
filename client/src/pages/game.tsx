@@ -22,14 +22,13 @@ import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
-  const { cashOut, pull, enter, buy, exit } = useActions();
+  const { cashOut, pull, enter, buyAndExit } = useActions();
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [gameOverDialogOpen, setGameOverDialogOpen] = useState(false);
   // Pulls data for future use (e.g., pull history display)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { pulls } = usePulls({
+  usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -68,9 +67,10 @@ export const Game = () => {
         <GameShop
           balance={game.chips}
           orbs={game.shop}
-          onPurchase={(indices: number[]) => buy(pack.id, game.id, indices)}
-          onInventory={() => {}}
-          onContinue={() => exit(pack.id, game.id)}
+          bag={game.bag}
+          onConfirm={(indices: number[]) =>
+            buyAndExit(pack.id, game.id, indices)
+          }
         />
       </div>
     );

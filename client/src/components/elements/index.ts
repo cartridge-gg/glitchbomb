@@ -8,6 +8,7 @@ export * from "./goal-tracker";
 export * from "./item";
 export * from "./multiplier";
 export * from "./orb";
+export * from "./orb-display";
 export * from "./outcome";
 export * from "./profile";
 export * from "./puller";
