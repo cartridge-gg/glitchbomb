@@ -89,7 +89,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           disabled={disabled}
           onClick={onAdd}
         >
-          <span className="text-3xl font-secondary text-green-400">+</span>
+          <span className="text-2xl text-green-400" style={{ fontWeight: 300 }}>+</span>
         </button>
       </div>
     </div>
