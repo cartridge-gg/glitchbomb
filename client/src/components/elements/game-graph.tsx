@@ -89,37 +89,51 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
 
       {/* Graph */}
       <div className="relative w-full h-32">
-        {/* Grid background */}
+        {/* Extended grid background with fade */}
+        <div
+          className="absolute -inset-6 pointer-events-none"
+          style={{
+            maskImage:
+              "radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 70%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 70%)",
+          }}
+        >
+          <svg className="absolute inset-0 w-full h-full">
+            {/* Vertical grid lines - extended */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <line
+                key={`v-${i}`}
+                x1={`${(i + 1) * 8.33}%`}
+                y1="0"
+                x2={`${(i + 1) * 8.33}%`}
+                y2="100%"
+                stroke="rgba(20, 83, 45, 0.5)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+            ))}
+            {/* Horizontal grid lines - extended */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <line
+                key={`h-${i}`}
+                x1="0"
+                y1={`${(i + 1) * 12.5}%`}
+                x2="100%"
+                y2={`${(i + 1) * 12.5}%`}
+                stroke="rgba(20, 83, 45, 0.5)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+            ))}
+          </svg>
+        </div>
+
+        {/* Main chart area grid */}
         <svg
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="none"
         >
-          {/* Vertical grid lines */}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <line
-              key={`v-${i}`}
-              x1={`${(i + 1) * 12.5}%`}
-              y1="0"
-              x2={`${(i + 1) * 12.5}%`}
-              y2="100%"
-              stroke="rgba(20, 83, 45, 0.4)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          ))}
-          {/* Horizontal grid lines */}
-          {Array.from({ length: 4 }).map((_, i) => (
-            <line
-              key={`h-${i}`}
-              x1="0"
-              y1={`${(i + 1) * 25}%`}
-              x2="100%"
-              y2={`${(i + 1) * 25}%`}
-              stroke="rgba(20, 83, 45, 0.4)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          ))}
           {/* Bottom baseline - green-200 dotted */}
           <line
             x1="0"
