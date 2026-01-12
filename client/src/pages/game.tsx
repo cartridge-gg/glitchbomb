@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   GameFooter,
@@ -26,17 +26,11 @@ export const Game = () => {
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [gameOverDialogOpen, setGameOverDialogOpen] = useState(false);
   // Pulls data for future use (e.g., pull history display)
   usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
-
-  const handleGoHome = useCallback(() => {
-    setGameOverDialogOpen(false);
-    navigate("/");
-  }, [navigate]);
 
   useEffect(() => {
     const packId = searchParams.get("pack");
@@ -46,13 +40,6 @@ export const Game = () => {
     setGameId(Number(gameId));
   }, [setPackId, setGameId, searchParams]);
 
-  // Detect game over state
-  useEffect(() => {
-    if (game?.over) {
-      setGameOverDialogOpen(true);
-    }
-  }, [game]);
-
   useEffect(() => {
     if (game && game.points >= game.milestone && !game.over) {
       setMilestoneDialogOpen(true);
@@ -60,6 +47,44 @@ export const Game = () => {
   }, [game]);
 
   if (!pack || !game) return null;
+
+  // Game over screen
+  if (game.over) {
+    return (
+      <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6 px-4">
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
+          <BombIcon className="w-24 h-24 text-red-400" />
+          <div className="flex flex-col gap-3">
+            <h1 className="text-white uppercase text-3xl font-glitch">
+              GAME OVER
+            </h1>
+            <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
+              You ran out of health! Your final score was{" "}
+              <span className="text-white font-bold">{game.points}</span> points
+              on level {game.level}.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-stretch gap-3 w-full pt-2">
+          <Button
+            variant="secondary"
+            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            onClick={() => navigate("/games")}
+          >
+            ← GAMES
+          </Button>
+          <Button
+            variant="default"
+            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            onClick={() => navigate("/")}
+          >
+            HOME
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (game.shop.length !== 0) {
     return (
@@ -146,31 +171,6 @@ export const Game = () => {
               }}
             >
               Enter Shop
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={gameOverDialogOpen} onOpenChange={setGameOverDialogOpen}>
-        <DialogContent className="bg-orange-gradient-100 border-orange-500 rounded-xl max-w-[300px]">
-          <DialogHeader className="items-center">
-            <BombIcon className="w-16 h-16 text-white mb-2" />
-            <DialogTitle className="text-white tracking-wide text-2xl font-glitch">
-              GAME OVER
-            </DialogTitle>
-            <DialogDescription className="text-white/70 text-sm font-secondary text-center">
-              You ran out of health! Your final score was{" "}
-              <span className="text-white font-bold">{game.points}</span> points
-              on level {game.level}.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex gap-3 mt-4">
-            <Button
-              variant="secondary"
-              className="flex-1 font-secondary text-sm tracking-widest"
-              onClick={handleGoHome}
-            >
-              Back to Home
             </Button>
           </DialogFooter>
         </DialogContent>
