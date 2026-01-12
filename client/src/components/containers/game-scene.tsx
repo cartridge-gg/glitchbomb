@@ -118,12 +118,17 @@ export const GameScene = ({
               i < lives ? (
                 <HeartIcon
                   key={i}
-                  className="w-10 h-10 text-[var(--red-100)] drop-shadow-[0_0_8px_var(--red-100)]"
+                  className="w-10 h-10"
+                  style={{
+                    color: "var(--red-100)",
+                    filter: "drop-shadow(0 0 8px var(--red-100))",
+                  }}
                 />
               ) : (
                 <HeartOutlineIcon
                   key={i}
-                  className="w-10 h-10 text-green-900/50"
+                  className="w-10 h-10"
+                  style={{ color: "#14532d80" }}
                 />
               ),
             )}
