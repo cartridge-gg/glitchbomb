@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 
 const orbDisplayVariants = cva(
-  "relative rounded-full flex items-center justify-center shrink-0 overflow-hidden",
+  "relative rounded-full flex items-center justify-center shrink-0",
   {
     variants: {
       size: {
@@ -26,9 +26,9 @@ const orbDisplayVariants = cva(
 );
 
 const valueSizeMap = {
-  sm: "-bottom-2 text-[10px]",
-  md: "-bottom-2.5 text-xs",
-  lg: "-bottom-3 text-sm",
+  sm: "-bottom-3 text-xs px-2 py-0.5",
+  md: "-bottom-4 text-sm px-3 py-1",
+  lg: "-bottom-5 text-base px-4 py-1",
 };
 
 const glowSizeMap = {
@@ -90,47 +90,49 @@ export const OrbDisplay = ({
   const glowSize = glowSizeMap[size ?? "md"];
 
   return (
-    <div
-      className={cn(orbDisplayVariants({ size, className }))}
-      style={{
-        borderWidth: "2px",
-        borderStyle: "solid",
-        borderColor: color,
-      }}
-      {...props}
-    >
-      {/* Orb background */}
+    <div className="relative shrink-0" {...props}>
+      {/* Orb circle */}
       <div
-        className="absolute inset-0 rounded-full"
+        className={cn(orbDisplayVariants({ size, className }), "overflow-hidden")}
         style={{
-          backgroundImage: "url(/assets/orb.png)",
-          backgroundSize: "102%",
-          backgroundPosition: "center",
-          opacity: 0.4,
+          borderWidth: "2px",
+          borderStyle: "solid",
+          borderColor: color,
         }}
-      />
-      {/* Color tint */}
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          backgroundColor: color,
-          mixBlendMode: "multiply",
-          opacity: 0.5,
-        }}
-      />
-      {/* Icon */}
-      <Icon
-        className="w-full h-full relative z-10"
-        style={{
-          color,
-          filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
-        }}
-      />
-      {/* Value pill */}
+      >
+        {/* Orb background */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            backgroundImage: "url(/assets/orb.png)",
+            backgroundSize: "102%",
+            backgroundPosition: "center",
+            opacity: 0.4,
+          }}
+        />
+        {/* Color tint */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            backgroundColor: color,
+            mixBlendMode: "multiply",
+            opacity: 0.5,
+          }}
+        />
+        {/* Icon */}
+        <Icon
+          className="w-full h-full relative z-10"
+          style={{
+            color,
+            filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
+          }}
+        />
+      </div>
+      {/* Value pill - outside the clipped area */}
       {displayValue && (
         <div
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-20 rounded-full px-2 py-0.5 flex items-center justify-center",
+            "absolute left-1/2 -translate-x-1/2 z-30 rounded-full flex items-center justify-center",
             valueSizeMap[size ?? "md"],
           )}
           style={{ backgroundColor: color }}
