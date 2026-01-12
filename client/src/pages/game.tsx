@@ -1,9 +1,14 @@
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount } from "@starknet-react/core";
-import { useEffect, useState } from "react";
+import { useAccount, useNetwork } from "@starknet-react/core";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GameScene, GameShop } from "@/components/containers";
-import { GameGraph, Multiplier, OrbDisplay, Profile } from "@/components/elements";
+import {
+  GameGraph,
+  Multiplier,
+  OrbDisplay,
+  Profile,
+} from "@/components/elements";
 import {
   BagIcon,
   BombIcon,
@@ -21,12 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { toDecimal, usePulls, useTokens } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
+  const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const navigate = useNavigate();
@@ -43,21 +50,27 @@ export const Game = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
+  // Use token address from Config (blockchain state) if available, fallback to manifest
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+
   // Token balance for moonrocks
   const { tokenContracts, tokenBalances } = useTokens({
-    contractAddresses: config?.token ? [config.token] : [],
+    contractAddresses: tokenAddress ? [tokenAddress] : [],
     accountAddresses: account?.address ? [account.address] : [],
   });
 
-  const tokenContract = tokenContracts?.[0];
-  const tokenBalance = tokenBalances?.find(
-    (b) =>
-      tokenContract &&
-      BigInt(b.contract_address) === BigInt(tokenContract.contract_address),
-  );
-  const moonrocks = tokenContract
-    ? Math.floor(toDecimal(tokenContract, tokenBalance))
-    : 0;
+  const moonrocks = useMemo(() => {
+    if (!tokenAddress) return 0;
+    const tokenContract = tokenContracts.find(
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
+    );
+    if (!tokenContract) return 0;
+    const tokenBalance = tokenBalances.find(
+      (balance) => BigInt(balance.contract_address) === BigInt(tokenAddress),
+    );
+    if (!tokenBalance) return 0;
+    return toDecimal(tokenContract, tokenBalance);
+  }, [tokenContracts, tokenBalances, tokenAddress]);
 
   // Pulls data for graph display
   const { pulls } = usePulls({
@@ -191,7 +204,7 @@ export const Game = () => {
           >
             <MoonrockIcon className="w-5 h-5 text-blue-400" />
             <span className="font-secondary text-sm tracking-widest text-blue-400">
-              {moonrocks.toLocaleString()}
+              {Math.floor(moonrocks).toLocaleString()}
             </span>
           </button>
           {/* Chips (orange) */}
