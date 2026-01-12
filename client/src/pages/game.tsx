@@ -98,6 +98,7 @@ export const Game = () => {
         <GameFooter
           className="w-full"
           details={game.bombs()}
+          onLeftClick={() => navigate("/games")}
           onRightClick={() => navigate("/")}
         />
       </div>

@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { ControllerIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 export interface ProfileProps
@@ -8,7 +9,7 @@ export interface ProfileProps
   highlight?: boolean;
 }
 
-const profileVariants = cva("", {
+const profileVariants = cva("gap-2", {
   variants: {
     variant: {
       default: "",
@@ -38,7 +39,8 @@ export const Profile = ({
       variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <span className="truncate block w-full font-secondary uppercase text-sm tracking-widest font-normal">
+      <ControllerIcon size="sm" />
+      <span className="truncate font-secondary uppercase text-sm tracking-widest font-normal">
         {username}
       </span>
     </Button>
