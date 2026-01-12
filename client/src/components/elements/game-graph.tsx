@@ -39,23 +39,27 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
   const graphPoints = useMemo(() => {
     if (graphPulls.length === 0) return [];
 
-    // Grid has 16 vertical lines at 6.25% intervals (6.25, 12.5, 18.75, ...)
-    // Grid has 10 horizontal lines at 10% intervals (10, 20, 30, ...)
-    const verticalGridLines = Array.from({ length: 14 }, (_, i) => (i + 1) * 6.25 + 6.25);
-    const horizontalGridLines = Array.from({ length: 8 }, (_, i) => (i + 1) * 10 + 10);
+    // Grid lines in chart area: vertical at 12.5% intervals, horizontal at 20% intervals
+    const verticalGridPositions = [12.5, 25, 37.5, 50, 62.5, 75, 87.5];
+    const horizontalGridPositions = [20, 40, 60, 80, 100]; // 100 is baseline
 
     return graphPulls.map((pull, index) => {
-      // X: distribute points across available vertical grid lines
-      const xIndex = Math.floor((index / Math.max(graphPulls.length - 1, 1)) * (verticalGridLines.length - 1));
-      const x = verticalGridLines[Math.min(xIndex, verticalGridLines.length - 1)];
+      // X: distribute points across vertical grid lines
+      const xIndex = Math.round(
+        (index / Math.max(graphPulls.length - 1, 1)) *
+          (verticalGridPositions.length - 1)
+      );
+      const x = verticalGridPositions[xIndex];
 
-      // Y: map orb cost to horizontal grid lines (higher cost = higher on chart = lower Y value)
+      // Y: map orb cost to horizontal grid lines (higher cost = higher on chart)
       const cost = pull.orb.cost();
       const maxCost = 25;
       const normalizedCost = Math.min(cost / maxCost, 1);
-      // Map to grid lines: 0 cost = bottom (90%), max cost = top (20%)
-      const yIndex = Math.round(normalizedCost * (horizontalGridLines.length - 1));
-      const y = horizontalGridLines[horizontalGridLines.length - 1 - yIndex];
+      // Map: 0 cost = baseline (100%), max cost = top line (20%)
+      const yIndex = Math.round(
+        normalizedCost * (horizontalGridPositions.length - 2)
+      );
+      const y = horizontalGridPositions[horizontalGridPositions.length - 1 - yIndex - 1];
 
       return {
         x,
@@ -135,11 +139,37 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           </svg>
         </div>
 
-        {/* Main chart area grid */}
+        {/* Main chart area grid - points align to these */}
         <svg
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="none"
         >
+          {/* Vertical grid lines at 12.5% intervals */}
+          {[12.5, 25, 37.5, 50, 62.5, 75, 87.5].map((x) => (
+            <line
+              key={`chart-v-${x}`}
+              x1={`${x}%`}
+              y1="0"
+              x2={`${x}%`}
+              y2="100%"
+              stroke="rgba(20, 83, 45, 0.3)"
+              strokeWidth="1"
+              strokeDasharray="4 4"
+            />
+          ))}
+          {/* Horizontal grid lines at 20% intervals */}
+          {[20, 40, 60, 80].map((y) => (
+            <line
+              key={`chart-h-${y}`}
+              x1="0"
+              y1={`${y}%`}
+              x2="100%"
+              y2={`${y}%`}
+              stroke="rgba(20, 83, 45, 0.3)"
+              strokeWidth="1"
+              strokeDasharray="4 4"
+            />
+          ))}
           {/* Bottom baseline - green-200 dotted */}
           <line
             x1="0"
