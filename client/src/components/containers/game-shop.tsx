@@ -224,7 +224,7 @@ export const GameShop = ({
       </div>
 
       {/* Your Orbs section */}
-      <div className="flex flex-col gap-3 pt-4 border-t border-green-900/50">
+      <div className="flex flex-col gap-3 pt-4">
         <h2 className="text-green-600 font-secondary text-sm tracking-wider uppercase">
           Your Orbs
         </h2>
