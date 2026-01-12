@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn } from "storybook/test";
+import { BrowserRouter } from "react-router-dom";
 import { GameHeader } from "./game-header";
 
 const meta = {
@@ -8,21 +8,31 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-
+  decorators: [
+    (Story) => (
+      <BrowserRouter>
+        <Story />
+      </BrowserRouter>
+    ),
+  ],
   argTypes: {
-    variant: {
-      control: { type: "select" },
-      options: ["default"],
-      description: "Visual variant of the game header",
+    moonrocks: {
+      control: { type: "number" },
+      description: "Token balance (moonrocks)",
+    },
+    chips: {
+      control: { type: "number" },
+      description: "In-game chips balance",
+    },
+    username: {
+      control: { type: "text" },
+      description: "Player username",
     },
   },
   args: {
-    score: 11,
-    multiplier: 1,
-    moonrocks: 80,
+    moonrocks: 1500,
     chips: 36,
-    milestone: 18,
-    onLeftClick: fn(),
+    username: "Player1",
   },
 } satisfies Meta<typeof GameHeader>;
 
@@ -30,7 +40,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    variant: "default",
-  },
+  args: {},
 };
