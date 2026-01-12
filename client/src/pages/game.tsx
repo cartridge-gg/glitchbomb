@@ -3,7 +3,7 @@ import { useAccount } from "@starknet-react/core";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GameScene, GameShop } from "@/components/containers";
-import { Multiplier, OrbDisplay, Profile } from "@/components/elements";
+import { GameGraph, Multiplier, OrbDisplay, Profile } from "@/components/elements";
 import {
   BagIcon,
   BombIcon,
@@ -59,8 +59,8 @@ export const Game = () => {
     ? Math.floor(toDecimal(tokenContract, tokenBalance))
     : 0;
 
-  // Pulls data for future use (e.g., pull history display)
-  usePulls({
+  // Pulls data for graph display
+  const { pulls } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -244,6 +244,9 @@ export const Game = () => {
             </div>
           </div>
         </div>
+
+        {/* Pull History Graph */}
+        <GameGraph pulls={pulls} />
 
         {/* Game Scene */}
         <GameScene

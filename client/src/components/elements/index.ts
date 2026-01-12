@@ -4,6 +4,7 @@ export * from "./bomb-tracker";
 export * from "./connect";
 export * from "./counter";
 export * from "./distribution";
+export * from "./game-graph";
 export * from "./goal-tracker";
 export * from "./item";
 export * from "./multiplier";
