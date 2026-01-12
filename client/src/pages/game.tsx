@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAccount } from "@starknet-react/core";
 import { GameScene, GameShop } from "@/components/containers";
 import { Multiplier, OrbDisplay } from "@/components/elements";
-import { BagIcon, BombIcon, HeartIcon } from "@/components/icons";
+import { BagIcon, BombIcon, ChipIcon, HeartIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,16 +14,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useEntitiesContext } from "@/contexts";
-import { usePulls } from "@/hooks";
+import { usePulls, useTokens, toDecimal } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
+  const { account } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const navigate = useNavigate();
-  const { pack, game, setPackId, setGameId } = useEntitiesContext();
+  const { pack, game, config, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [stashOpen, setStashOpen] = useState(false);
+
+  // Token balance for moonrocks
+  const { tokenContracts, tokenBalances } = useTokens({
+    contractAddresses: config?.token ? [config.token] : [],
+    accountAddresses: account?.address ? [account.address] : [],
+  });
+
+  const tokenContract = tokenContracts?.[0];
+  const tokenBalance = tokenBalances?.find(
+    (b) =>
+      tokenContract &&
+      BigInt(b.contract_address) === BigInt(tokenContract.contract_address),
+  );
+  const moonrocks = tokenContract
+    ? Math.floor(toDecimal(tokenContract, tokenBalance))
+    : 0;
+
   // Pulls data for future use (e.g., pull history display)
   usePulls({
     packId: pack?.id ?? 0,
@@ -136,6 +155,38 @@ export const Game = () => {
   return (
     <>
       <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
+        {/* Header with balance buttons */}
+        <div className="flex items-stretch gap-3">
+          {/* Moonrocks (blue) */}
+          <button
+            type="button"
+            className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
+            style={{
+              background: "linear-gradient(180deg, #1A3A4A 0%, #0D2530 100%)",
+              border: "2px solid rgba(59, 130, 246, 0.3)",
+            }}
+          >
+            <MoonrockIcon className="w-5 h-5 text-blue-400" />
+            <span className="font-secondary text-sm tracking-widest text-blue-300">
+              {moonrocks.toLocaleString()}
+            </span>
+          </button>
+          {/* Chips (orange) */}
+          <button
+            type="button"
+            className="flex-1 flex items-center justify-center gap-2 min-h-12 rounded-lg transition-all duration-200 hover:brightness-110"
+            style={{
+              background: "linear-gradient(180deg, #4A3A1A 0%, #302510 100%)",
+              border: "2px solid rgba(234, 179, 8, 0.3)",
+            }}
+          >
+            <ChipIcon className="w-5 h-5 text-orange-400" />
+            <span className="font-secondary text-sm tracking-widest text-orange-300">
+              {game.chips.toLocaleString()}
+            </span>
+          </button>
+        </div>
+
         {/* Game Scene */}
         <GameScene
           className="grow"
