@@ -68,8 +68,9 @@ export const Game = () => {
         <GameShop
           balance={game.chips}
           orbs={game.shop}
+          bag={game.bag}
           onPurchase={(indices: number[]) => buy(pack.id, game.id, indices)}
-          onInventory={() => {}}
+          onUndo={() => {}}
           onContinue={() => exit(pack.id, game.id)}
         />
       </div>
