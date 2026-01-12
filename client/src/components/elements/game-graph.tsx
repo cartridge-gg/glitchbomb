@@ -89,80 +89,51 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
 
       {/* Graph */}
       <div className="relative w-full h-32">
-        {/* Extended grid background with fade */}
+        {/* Grid background */}
         <svg
-          className="absolute -inset-4 w-[calc(100%+32px)] h-[calc(100%+32px)]"
-          style={{ overflow: "visible" }}
+          className="absolute inset-0 w-full h-full"
+          preserveAspectRatio="none"
         >
-          <defs>
-            {/* Fade gradient for vertical lines */}
-            <linearGradient id="verticalFade" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
-              <stop offset="15%" stopColor="rgba(20, 83, 45, 0.5)" />
-              <stop offset="85%" stopColor="rgba(20, 83, 45, 0.5)" />
-              <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
-            </linearGradient>
-            {/* Fade gradient for horizontal lines */}
-            <linearGradient id="horizontalFade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="rgba(20, 83, 45, 0)" />
-              <stop offset="10%" stopColor="rgba(20, 83, 45, 0.5)" />
-              <stop offset="90%" stopColor="rgba(20, 83, 45, 0.5)" />
-              <stop offset="100%" stopColor="rgba(20, 83, 45, 0)" />
-            </linearGradient>
-          </defs>
           {/* Vertical grid lines */}
-          {Array.from({ length: 10 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <line
               key={`v-${i}`}
-              x1={`${(i + 1) * 10}%`}
+              x1={`${(i + 1) * 12.5}%`}
               y1="0"
-              x2={`${(i + 1) * 10}%`}
+              x2={`${(i + 1) * 12.5}%`}
               y2="100%"
-              stroke="url(#verticalFade)"
+              stroke="rgba(20, 83, 45, 0.4)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
           ))}
           {/* Horizontal grid lines */}
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <line
               key={`h-${i}`}
               x1="0"
-              y1={`${(i + 1) * 16.6}%`}
+              y1={`${(i + 1) * 25}%`}
               x2="100%"
-              y2={`${(i + 1) * 16.6}%`}
-              stroke="url(#horizontalFade)"
+              y2={`${(i + 1) * 25}%`}
+              stroke="rgba(20, 83, 45, 0.4)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
           ))}
+          {/* Bottom baseline - green-300 dotted */}
+          <line
+            x1="0"
+            y1="100%"
+            x2="100%"
+            y2="100%"
+            stroke="#81F464"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
         </svg>
 
-        {/* Chart area */}
-        <div className="absolute inset-0 rounded-lg overflow-hidden">
-          {/* Bottom baseline */}
-          <svg
-            className="absolute inset-0 w-full h-full"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient id="baselineFade" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgba(129, 244, 100, 0)" />
-                <stop offset="10%" stopColor="rgba(129, 244, 100, 1)" />
-                <stop offset="90%" stopColor="rgba(129, 244, 100, 1)" />
-                <stop offset="100%" stopColor="rgba(129, 244, 100, 0)" />
-              </linearGradient>
-            </defs>
-            <line
-              x1="0"
-              y1="100%"
-              x2="100%"
-              y2="100%"
-              stroke="url(#baselineFade)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          </svg>
+        {/* Chart area for points */}
+        <div className="absolute inset-0">
 
           {/* Graph lines and points */}
           <svg
