@@ -25,12 +25,6 @@ const orbDisplayVariants = cva(
   },
 );
 
-const iconSizeMap = {
-  sm: "w-full h-full",
-  md: "w-full h-full",
-  lg: "w-full h-full",
-};
-
 const valueSizeMap = {
   sm: "text-xs -bottom-0.5",
   md: "text-sm -bottom-1",
@@ -126,7 +120,7 @@ export const OrbDisplay = ({
       />
       {/* Icon */}
       <Icon
-        className={cn(iconSizeMap[size ?? "md"], "relative z-10")}
+        className="w-full h-full relative z-10"
         style={{
           color,
           filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
