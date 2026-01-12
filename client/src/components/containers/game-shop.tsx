@@ -102,12 +102,18 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           </motion.span>
         </div>
         <button
+          type="button"
           className="h-12 w-14 p-0 rounded-r-lg disabled:opacity-50"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
           onClick={handleAdd}
         >
-          <span className="text-3xl font-secondary text-green-400" style={{ fontWeight: 100 }}>+</span>
+          <span
+            className="text-3xl font-secondary text-green-400"
+            style={{ fontWeight: 100 }}
+          >
+            +
+          </span>
         </button>
       </div>
     </motion.div>

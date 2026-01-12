@@ -97,7 +97,10 @@ export const OrbDisplay = ({
     >
       {/* Orb circle */}
       <div
-        className={cn(orbDisplayVariants({ size, className }), "overflow-hidden")}
+        className={cn(
+          orbDisplayVariants({ size, className }),
+          "overflow-hidden",
+        )}
         style={{
           borderWidth: "2px",
           borderStyle: "solid",

@@ -28,8 +28,7 @@ export const Game = () => {
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [gameOverDialogOpen, setGameOverDialogOpen] = useState(false);
   // Pulls data for future use (e.g., pull history display)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { pulls } = usePulls({
+  usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -69,7 +68,9 @@ export const Game = () => {
           balance={game.chips}
           orbs={game.shop}
           bag={game.bag}
-          onConfirm={(indices: number[]) => buyAndExit(pack.id, game.id, indices)}
+          onConfirm={(indices: number[]) =>
+            buyAndExit(pack.id, game.id, indices)
+          }
         />
       </div>
     );
