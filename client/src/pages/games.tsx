@@ -3,7 +3,11 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Balance, Profile } from "@/components/elements";
-import { ArrowLeftIcon, GlitchBombIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  GlitchBombIcon,
+  SparklesIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
