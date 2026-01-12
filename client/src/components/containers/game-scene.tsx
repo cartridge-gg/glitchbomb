@@ -89,7 +89,7 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-1000",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
           phase === 3 && "opacity-100 z-20",
