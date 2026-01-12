@@ -175,18 +175,18 @@ export const Game = () => {
         <div className="flex items-stretch gap-3">
           <Button
             variant="secondary"
-            className="min-h-14 px-4"
+            className="min-h-14 min-w-16"
             onClick={() => setStashOpen(true)}
           >
             <BagIcon className="w-6 h-6 text-green-400" />
           </Button>
           <button
             type="button"
-            className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg"
+            className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
             style={{
-              background: "linear-gradient(180deg, rgba(128, 0, 128, 0.4) 0%, rgba(80, 0, 80, 0.6) 100%)",
-              border: "2px solid rgba(180, 0, 180, 0.4)",
-              color: "#E040E0",
+              background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+              border: "2px solid rgba(138, 43, 226, 0.4)",
+              color: "#D070E0",
             }}
             onClick={() => cashOut(pack.id, game.id)}
           >
