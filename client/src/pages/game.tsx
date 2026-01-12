@@ -175,7 +175,7 @@ export const Game = () => {
         <div className="flex items-stretch gap-3">
           <Button
             variant="secondary"
-            className="p-3"
+            className="min-h-14 px-4"
             onClick={() => setStashOpen(true)}
           >
             <BagIcon className="w-6 h-6 text-green-400" />
