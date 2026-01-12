@@ -21,6 +21,7 @@ interface GameCardProps {
   pullCount: number;
   bagSize: number;
   level: number;
+  hasStarted: boolean;
   isOver?: boolean;
   onPlay: () => void;
 }
@@ -30,6 +31,7 @@ const GameCard = ({
   pullCount,
   bagSize,
   level,
+  hasStarted,
   isOver,
   onPlay,
 }: GameCardProps) => {
@@ -64,7 +66,7 @@ const GameCard = ({
         onClick={onPlay}
         disabled={isOver}
       >
-        Play
+        {hasStarted ? "Continue" : "Play"}
       </Button>
     </div>
   );
@@ -231,6 +233,7 @@ export const Games = () => {
               pullCount={game.pullCount}
               bagSize={game.bagSize}
               level={game.level}
+              hasStarted={!game.hasNoGame}
               isOver={game.isOver}
               onPlay={() =>
                 handlePlay(game.packId, game.gameId, game.hasNoGame)
