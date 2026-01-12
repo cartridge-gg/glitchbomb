@@ -35,31 +35,23 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
   const recentPulls = sortedPulls.slice(-3); // Last 3 for the header
   const graphPulls = sortedPulls.slice(-12); // Last 12 for the graph
 
-  // Calculate positions for graph points - aligned to grid intersections
+  // Calculate positions for graph points
   const graphPoints = useMemo(() => {
     if (graphPulls.length === 0) return [];
 
-    // Grid lines in chart area: vertical at 12.5% intervals, horizontal at 20% intervals
-    const verticalGridPositions = [12.5, 25, 37.5, 50, 62.5, 75, 87.5];
-    const horizontalGridPositions = [20, 40, 60, 80, 100]; // 100 is baseline
+    const width = 100;
+    const height = 100;
+    const padding = 8;
 
     return graphPulls.map((pull, index) => {
-      // X: distribute points across vertical grid lines
-      const xIndex = Math.round(
-        (index / Math.max(graphPulls.length - 1, 1)) *
-          (verticalGridPositions.length - 1)
-      );
-      const x = verticalGridPositions[xIndex];
-
-      // Y: map orb cost to horizontal grid lines (higher cost = higher on chart)
+      const x =
+        padding +
+        (index / Math.max(graphPulls.length - 1, 1)) * (width - padding * 2);
+      // Y position based on orb's cost
       const cost = pull.orb.cost();
       const maxCost = 25;
-      const normalizedCost = Math.min(cost / maxCost, 1);
-      // Map: 0 cost = baseline (100%), max cost = top line (20%)
-      const yIndex = Math.round(
-        normalizedCost * (horizontalGridPositions.length - 2)
-      );
-      const y = horizontalGridPositions[horizontalGridPositions.length - 1 - yIndex - 1];
+      const normalizedY = Math.min(cost / maxCost, 1);
+      const y = height - padding - normalizedY * (height - padding * 2);
 
       return {
         x,
@@ -139,33 +131,33 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           </svg>
         </div>
 
-        {/* Main chart area grid - points align to these */}
+        {/* Main chart area grid */}
         <svg
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="none"
         >
-          {/* Vertical grid lines at 12.5% intervals */}
-          {[12.5, 25, 37.5, 50, 62.5, 75, 87.5].map((x) => (
+          {/* Vertical grid lines */}
+          {Array.from({ length: 8 }).map((_, i) => (
             <line
-              key={`chart-v-${x}`}
-              x1={`${x}%`}
+              key={`chart-v-${i}`}
+              x1={`${(i + 1) * 12.5}%`}
               y1="0"
-              x2={`${x}%`}
+              x2={`${(i + 1) * 12.5}%`}
               y2="100%"
-              stroke="rgba(20, 83, 45, 0.3)"
+              stroke="rgba(20, 83, 45, 0.4)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
           ))}
-          {/* Horizontal grid lines at 20% intervals */}
-          {[20, 40, 60, 80].map((y) => (
+          {/* Horizontal grid lines */}
+          {Array.from({ length: 4 }).map((_, i) => (
             <line
-              key={`chart-h-${y}`}
+              key={`chart-h-${i}`}
               x1="0"
-              y1={`${y}%`}
+              y1={`${(i + 1) * 25}%`}
               x2="100%"
-              y2={`${y}%`}
-              stroke="rgba(20, 83, 45, 0.3)"
+              y2={`${(i + 1) * 25}%`}
+              stroke="rgba(20, 83, 45, 0.4)"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
@@ -184,14 +176,13 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
 
         {/* Chart area for points */}
         <div className="absolute inset-0">
-
           {/* Graph lines and points */}
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
-            {/* Lines connecting points */}
+            {/* Lines connecting points - green-600 */}
             {graphPoints.map((point, index) => {
               if (index === 0) return null;
               const prevPoint = graphPoints[index - 1];
@@ -202,7 +193,7 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
                   y1={prevPoint.y}
                   x2={point.x}
                   y2={point.y}
-                  stroke="rgba(74, 222, 128, 0.4)"
+                  stroke="#348F1B"
                   strokeWidth="0.5"
                 />
               );
