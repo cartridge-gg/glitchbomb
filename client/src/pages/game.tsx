@@ -175,13 +175,13 @@ export const Game = () => {
 
         {/* Orbs grid */}
         <div
-          className="flex-1 flex flex-col justify-center overflow-y-auto"
+          className="flex-1 flex flex-col overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
           {displayOrbs.length > 0 ? (
             <div className="grid grid-cols-3 gap-6 py-4 justify-items-center">
               {displayOrbs.map((orb, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
+                <div key={index} className="flex flex-col items-center gap-4">
                   <OrbDisplay orb={orb} size="lg" />
                   <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide">
                     {orb.name()}
