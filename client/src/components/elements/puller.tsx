@@ -174,9 +174,9 @@ export const Puller = ({
       </div>
 
       {/* 5. Content */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0 pt-4">
         <p
-          className="text-center text-[35px]/[30px] font-[900] -mt-1"
+          className="text-center text-[35px]/[30px] font-[900]"
           style={{
             color: currentColor.cssVar,
             filter: `drop-shadow(0 0 20px color-mix(in srgb, ${currentColor.cssVar} 80%, transparent))`,
