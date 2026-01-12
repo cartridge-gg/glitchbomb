@@ -96,43 +96,51 @@ export const GameScene = ({
           phase === 3 && "opacity-100 z-20",
         )}
       >
-        <div className="flex flex-col items-center gap-6">
-          <Puller
-            onClick={onPull}
-            variant={
-              lives < 2
-                ? "bomb"
-                : lives < 4
-                  ? "multiplier"
-                  : lives < 5
-                    ? "default"
-                    : "point"
-            }
-            size="md"
-            orbs={orbs}
-            bombs={bombs}
-          />
-          {/* Hearts display */}
-          <div className="flex items-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) =>
-              i < lives ? (
-                <HeartIcon
-                  key={i}
-                  className="w-10 h-10"
-                  style={{
-                    color: "var(--red-100)",
-                    filter: "drop-shadow(0 0 8px var(--red-100))",
-                  }}
-                />
-              ) : (
-                <HeartOutlineIcon
-                  key={i}
-                  className="w-10 h-10"
-                  style={{ color: "rgba(20, 83, 45, 0.5)" }}
-                />
-              ),
-            )}
-          </div>
+        <Puller
+          onClick={onPull}
+          variant={
+            lives < 2
+              ? "bomb"
+              : lives < 4
+                ? "multiplier"
+                : lives < 5
+                  ? "default"
+                  : "point"
+          }
+          size="md"
+          orbs={orbs}
+          bombs={bombs}
+        />
+      </div>
+
+      {/* Hearts display - positioned below the Puller */}
+      <div
+        className={cn(
+          "absolute top-1/2 left-1/2 -translate-x-1/2 mt-28 transition-opacity duration-1000",
+          phase === 0 && "opacity-100 z-20",
+          (phase === 1 || phase === 2) && "opacity-0 z-0",
+          phase === 3 && "opacity-100 z-20",
+        )}
+      >
+        <div className="flex items-center gap-1">
+          {Array.from({ length: 5 }).map((_, i) =>
+            i < lives ? (
+              <HeartIcon
+                key={i}
+                className="w-10 h-10"
+                style={{
+                  color: "var(--red-100)",
+                  filter: "drop-shadow(0 0 8px var(--red-100))",
+                }}
+              />
+            ) : (
+              <HeartOutlineIcon
+                key={i}
+                className="w-10 h-10"
+                style={{ color: "rgba(20, 83, 45, 0.5)" }}
+              />
+            ),
+          )}
         </div>
       </div>
 
