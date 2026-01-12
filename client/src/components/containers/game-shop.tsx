@@ -89,7 +89,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           disabled={disabled}
           onClick={onAdd}
         >
-          <span className="text-2xl text-green-400" style={{ fontWeight: 300 }}>+</span>
+          <span className="text-3xl font-secondary text-green-400" style={{ fontWeight: 100 }}>+</span>
         </button>
       </div>
     </div>
@@ -179,6 +179,13 @@ export const GameShop = ({
 
   const hasSelections = basketIndices.length > 0;
 
+  // Combine existing bag with pending purchases for display
+  const displayBag = useMemo(() => {
+    const existingOrbs = bag.filter((orb) => !orb.isBomb() && !orb.isNone());
+    const pendingOrbs = basketIndices.map((index) => orbs[index]);
+    return [...existingOrbs, ...pendingOrbs];
+  }, [bag, basketIndices, orbs]);
+
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
@@ -229,15 +236,13 @@ export const GameShop = ({
           Your Orbs
         </h2>
         <div className="flex flex-wrap gap-2">
-          {bag
-            .filter((orb) => !orb.isBomb() && !orb.isNone())
-            .map((orb, index) => (
-              <OrbDisplay
-                key={`bag-${orb.value}-${index}`}
-                orb={orb}
-                size="sm"
-              />
-            ))}
+          {displayBag.map((orb, index) => (
+            <OrbDisplay
+              key={`bag-${orb.value}-${index}`}
+              orb={orb}
+              size="sm"
+            />
+          ))}
         </div>
       </div>
 
