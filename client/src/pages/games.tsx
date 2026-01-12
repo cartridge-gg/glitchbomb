@@ -25,7 +25,7 @@ interface GameCardProps {
 
 const GameCard = ({ packId, gameId, isOver, onPlay }: GameCardProps) => {
   return (
-    <div className="flex items-center gap-4 p-3 rounded-xl border border-green-900/50 bg-green-950/30">
+    <div className="flex items-center gap-4 p-3 rounded-xl bg-green-950/30">
       {/* Orb Icon */}
       <div className="relative w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-950/50">
         <div
