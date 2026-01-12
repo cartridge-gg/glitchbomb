@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { OrbDisplay } from "@/components/elements";
+import { OrbDisplay, RarityPill } from "@/components/elements";
 import { ChipIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
@@ -82,14 +82,17 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         </p>
       </div>
 
+      {/* Rarity pill */}
+      <RarityPill rarity={orb.rarity()} className="self-start mt-3" />
+
       {/* Price and add button */}
       <div
         className="flex items-center rounded-lg overflow-hidden"
         style={{
-          backgroundColor: "rgba(0, 30, 0, 0.6)",
+          backgroundColor: "rgba(0, 15, 0, 0.6)",
         }}
       >
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-center gap-2 px-3">
           <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
@@ -103,7 +106,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         </div>
         <button
           type="button"
-          className="h-12 w-14 p-0 rounded-r-lg disabled:opacity-50"
+          className="h-10 w-14 p-0 rounded-r-lg disabled:opacity-50"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
           onClick={handleAdd}
@@ -307,11 +310,12 @@ export const GameShop = ({
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          className="min-h-14 flex-1 font-secondary text-sm tracking-widest flex items-center justify-center gap-2"
           disabled={history.length === 0}
           onClick={handleUndo}
         >
-          ↻ UNDO
+          <span className="text-lg leading-none">↻</span>
+          <span>UNDO</span>
         </Button>
         <Button
           variant="default"

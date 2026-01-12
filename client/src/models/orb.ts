@@ -327,6 +327,13 @@ export class Orb {
     }
   }
 
+  public rarity(): "common" | "rare" | "cosmic" {
+    const cost = this.cost();
+    if (cost >= 21) return "cosmic";
+    if (cost >= 14) return "rare";
+    return "common";
+  }
+
   public color(): string {
     switch (this.value) {
       case OrbType.Bomb1:
