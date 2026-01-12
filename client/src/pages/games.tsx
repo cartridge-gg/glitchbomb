@@ -60,15 +60,15 @@ const GameCard = ({
         </p>
       </div>
 
-      {/* Play Button */}
-      <Button
-        variant="default"
-        className="h-10 px-6 font-secondary uppercase text-sm tracking-widest"
+      {/* Play Button - same style as header buttons */}
+      <button
+        type="button"
+        className="flex items-center justify-center h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed bg-[#0A2518] text-green-400"
         onClick={onPlay}
         disabled={isOver}
       >
         {hasStarted ? "Continue" : "Play"}
-      </Button>
+      </button>
     </div>
   );
 };
@@ -224,14 +224,14 @@ export const Games = () => {
             <p className="text-white font-secondary text-sm tracking-widest uppercase">
               Play Now
             </p>
-            <Button
-              variant="default"
-              className="h-10 px-6 font-secondary uppercase text-sm tracking-widest"
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400"
               onClick={handleNewGame}
             >
               <MoonrockIcon size="sm" />
               Purchase
-            </Button>
+            </button>
           </div>
 
           {/* Game list */}
