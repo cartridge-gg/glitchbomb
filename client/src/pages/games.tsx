@@ -223,7 +223,7 @@ export const Games = () => {
               className="h-10 px-6 font-secondary uppercase text-sm tracking-widest"
               onClick={handleNewGame}
             >
-              <MoonrockIcon size="xs" className="mr-2" />
+              <MoonrockIcon size="sm" />
               Purchase
             </Button>
           </div>
