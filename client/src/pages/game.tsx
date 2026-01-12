@@ -70,7 +70,6 @@ export const Game = () => {
           orbs={game.shop}
           bag={game.bag}
           onPurchase={(indices: number[]) => buy(pack.id, game.id, indices)}
-          onUndo={() => {}}
           onContinue={() => exit(pack.id, game.id)}
         />
       </div>

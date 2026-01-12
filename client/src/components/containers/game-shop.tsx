@@ -13,7 +13,6 @@ export interface GameShopProps
   orbs: Orb[];
   bag: Orb[];
   onPurchase: (indices: number[]) => void;
-  onUndo: () => void;
   onContinue: () => void;
 }
 
@@ -123,12 +122,13 @@ export const GameShop = ({
   variant,
   className,
   onPurchase,
-  onUndo,
   onContinue,
   ...props
 }: GameShopProps) => {
   // Store quantities per orb index
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  // History of actions for undo (stores the index of each add)
+  const [history, setHistory] = useState<number[]>([]);
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -140,6 +140,7 @@ export const GameShop = ({
   useEffect(() => {
     if (resetKey) {
       setQuantities({});
+      setHistory([]);
     }
   }, [resetKey]);
 
@@ -194,7 +195,26 @@ export const GameShop = ({
         ...prev,
         [index]: (prev[index] || 0) + 1,
       }));
+      setHistory((prev) => [...prev, index]);
     }
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    const lastIndex = history[history.length - 1];
+    setHistory((prev) => prev.slice(0, -1));
+    setQuantities((prev) => {
+      const currentQty = prev[lastIndex] || 0;
+      if (currentQty <= 1) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [lastIndex]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [lastIndex]: currentQty - 1,
+      };
+    });
   };
 
   const hasSelections = basketIndices.length > 0;
@@ -219,7 +239,7 @@ export const GameShop = ({
         >
           <ChipIcon size="sm" className="text-orange-100" />
           <span className="text-orange-100 font-secondary text-lg">
-            x{virtualBalance}
+            {virtualBalance}
           </span>
         </div>
       </div>
@@ -281,7 +301,8 @@ export const GameShop = ({
         <Button
           variant="secondary"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
-          onClick={onUndo}
+          disabled={history.length === 0}
+          onClick={handleUndo}
         >
           ↻ UNDO
         </Button>
