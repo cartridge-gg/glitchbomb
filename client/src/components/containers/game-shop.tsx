@@ -2,17 +2,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { OrbDisplay, RarityPill } from "@/components/elements";
-import { ChipIcon } from "@/components/icons";
+import { ChipIcon, WarningIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -256,6 +248,44 @@ export const GameShop = ({
     onConfirm([]);
   };
 
+  // Show exit confirmation screen
+  if (showExitConfirmation) {
+    return (
+      <div className={gameShopVariants({ variant, className })} {...props}>
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
+          <WarningIcon size="xl" className="text-yellow-400" />
+          <div className="flex flex-col gap-3">
+            <h1 className="text-white uppercase text-2xl font-primary">
+              Leave Shop?
+            </h1>
+            <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
+              You haven't selected any orbs. Are you sure you want to leave
+              without buying anything?
+            </p>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-stretch gap-3 w-full pt-2">
+          <Button
+            variant="secondary"
+            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            onClick={() => setShowExitConfirmation(false)}
+          >
+            ← BACK
+          </Button>
+          <Button
+            variant="default"
+            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            onClick={handleConfirmExit}
+          >
+            LEAVE SHOP
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
@@ -350,33 +380,6 @@ export const GameShop = ({
           CONTINUE
         </Button>
       </div>
-
-      {/* Exit confirmation dialog */}
-      <Dialog
-        open={showExitConfirmation}
-        onOpenChange={setShowExitConfirmation}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Leave Shop?</DialogTitle>
-            <DialogDescription>
-              You haven't selected any orbs to buy. Are you sure you want to
-              leave the shop without purchasing anything?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setShowExitConfirmation(false)}
-            >
-              Stay
-            </Button>
-            <Button variant="default" onClick={handleConfirmExit}>
-              Leave Shop
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
