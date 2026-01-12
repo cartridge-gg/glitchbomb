@@ -183,7 +183,7 @@ export const Game = () => {
         </Button>
 
         {/* Center: Moonrocks + Chips - aligned with game content */}
-        <div className="flex items-stretch gap-3 max-w-[420px] mx-auto">
+        <div className="flex items-stretch gap-3 max-w-[420px] mx-auto px-4">
           {/* Moonrocks (blue) */}
           <button
             type="button"
