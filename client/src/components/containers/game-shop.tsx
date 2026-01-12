@@ -104,17 +104,42 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
     <div className="flex items-center gap-4 py-2">
       {/* Orb icon with value */}
       <div
-        className="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+        className="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
         style={{
-          borderWidth: "3px",
+          borderWidth: "2px",
           borderStyle: "solid",
           borderColor: color,
-          backgroundColor: "rgba(0, 0, 0, 0.3)",
         }}
       >
-        <Icon className="w-8 h-8" style={{ color }} />
+        {/* Orb background */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            backgroundImage: "url(/assets/orb.png)",
+            backgroundSize: "102%",
+            backgroundPosition: "center",
+            opacity: 0.4,
+          }}
+        />
+        {/* Color tint */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            backgroundColor: color,
+            mixBlendMode: "multiply",
+            opacity: 0.5,
+          }}
+        />
+        {/* Icon */}
+        <Icon
+          className="w-8 h-8 relative z-10"
+          style={{
+            color,
+            filter: `drop-shadow(0 0 8px ${color})`,
+          }}
+        />
         <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-sm font-bold font-secondary px-1"
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-sm font-bold font-secondary px-1 z-10"
           style={{ color }}
         >
           {displayValue}
@@ -167,17 +192,42 @@ const BagOrb = ({ orb }: BagOrbProps) => {
 
   return (
     <div
-      className="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+      className="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
       style={{
         borderWidth: "2px",
         borderStyle: "solid",
         borderColor: color,
-        backgroundColor: "rgba(0, 0, 0, 0.3)",
       }}
     >
-      <Icon className="w-6 h-6" style={{ color }} />
+      {/* Orb background */}
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          backgroundImage: "url(/assets/orb.png)",
+          backgroundSize: "102%",
+          backgroundPosition: "center",
+          opacity: 0.4,
+        }}
+      />
+      {/* Color tint */}
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          backgroundColor: color,
+          mixBlendMode: "multiply",
+          opacity: 0.5,
+        }}
+      />
+      {/* Icon */}
+      <Icon
+        className="w-6 h-6 relative z-10"
+        style={{
+          color,
+          filter: `drop-shadow(0 0 4px ${color})`,
+        }}
+      />
       <span
-        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-xs font-bold font-secondary"
+        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 text-xs font-bold font-secondary z-10"
         style={{ color }}
       >
         {displayValue}
