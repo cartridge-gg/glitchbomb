@@ -310,11 +310,12 @@ export const GameShop = ({
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          className="min-h-14 flex-1 font-secondary text-sm tracking-widest flex items-center justify-center gap-2"
           disabled={history.length === 0}
           onClick={handleUndo}
         >
-          ↻ UNDO
+          <span className="text-lg leading-none">↻</span>
+          <span>UNDO</span>
         </Button>
         <Button
           variant="default"
