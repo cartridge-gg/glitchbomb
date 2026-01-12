@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  GameFooter,
-  GameHeader,
-  GameScene,
-  GameShop,
-} from "@/components/containers";
-import { BombIcon, HeartIcon } from "@/components/icons";
+import { GameScene, GameShop } from "@/components/containers";
+import { OrbDisplay } from "@/components/elements";
+import { BagIcon, BombIcon, HeartIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +22,7 @@ export const Game = () => {
   const navigate = useNavigate();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
+  const [stashOpen, setStashOpen] = useState(false);
   // Pulls data for future use (e.g., pull history display)
   usePulls({
     packId: pack?.id ?? 0,
@@ -101,18 +98,74 @@ export const Game = () => {
     );
   }
 
+  // Stash view - shows player's orbs
+  if (stashOpen) {
+    return (
+      <div className="absolute inset-0 flex flex-col gap-6 max-w-[420px] m-auto py-6 px-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-white font-glitch text-2xl">YOUR ORBS</h2>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setStashOpen(false)}
+          >
+            ← BACK
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-3 gap-4">
+            {game.bag.map((orb, index) => (
+              <div key={index} className="flex flex-col items-center gap-2">
+                <OrbDisplay orb={orb} size="lg" />
+                <p className="text-green-500 text-xs font-secondary uppercase">
+                  {orb.name()}
+                </p>
+              </div>
+            ))}
+          </div>
+          {game.bag.length === 0 && (
+            <p className="text-green-600 text-center font-secondary">
+              No orbs in your bag yet
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6">
-        <GameHeader
-          score={game.points}
-          multiplier={game.multiplier}
-          moonrocks={pack.moonrocks}
-          chips={game.chips}
-          milestone={game.milestone}
-          className="w-full"
-          onLeftClick={() => cashOut(pack.id, game.id)}
-        />
+      <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
+        {/* Top row: Hearts (left) | Multiplier (right) */}
+        <div className="flex items-center justify-between">
+          {/* Hearts */}
+          <div className="flex items-center gap-0.5 border border-green-900 rounded-lg px-2 py-1.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <HeartIcon
+                key={i}
+                className="w-6 h-6"
+                style={
+                  i < game.health
+                    ? {
+                        color: "#FF0080",
+                        filter: "drop-shadow(0 0 4px #FF0080)",
+                      }
+                    : {
+                        color: "rgba(20, 83, 45, 0.3)",
+                      }
+                }
+              />
+            ))}
+          </div>
+          {/* Multiplier */}
+          <div className="border border-green-500 rounded-lg px-4 py-2">
+            <p className="text-green-400 font-glitch text-xl">
+              {game.multiplier}X
+            </p>
+          </div>
+        </div>
+
+        {/* Game Scene */}
         <GameScene
           className="grow"
           lives={game.health}
@@ -121,31 +174,24 @@ export const Game = () => {
           values={game.distribution()}
           onPull={() => pull(pack.id, game.id)}
         />
-        {/* Hearts display */}
-        <div className="flex items-center justify-center gap-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <HeartIcon
-              key={i}
-              className="w-10 h-10"
-              style={
-                i < game.health
-                  ? {
-                      color: "#FF0080",
-                      filter: "drop-shadow(0 0 8px #FF0080)",
-                    }
-                  : {
-                      color: "rgba(20, 83, 45, 0.3)",
-                    }
-              }
-            />
-          ))}
+
+        {/* Bottom row: Stash button | Cash Out button */}
+        <div className="flex items-stretch gap-3">
+          <Button
+            variant="secondary"
+            className="p-3"
+            onClick={() => setStashOpen(true)}
+          >
+            <BagIcon className="w-6 h-6 text-green-400" />
+          </Button>
+          <Button
+            variant="default"
+            className="flex-1 min-h-14 font-secondary text-sm tracking-widest bg-purple-600 hover:bg-purple-700"
+            onClick={() => cashOut(pack.id, game.id)}
+          >
+            CASH OUT
+          </Button>
         </div>
-        <GameFooter
-          className="w-full"
-          details={game.bombs()}
-          onLeftClick={() => navigate("/games")}
-          onRightClick={() => navigate("/")}
-        />
       </div>
 
       <Dialog open={milestoneDialogOpen} onOpenChange={setMilestoneDialogOpen}>
