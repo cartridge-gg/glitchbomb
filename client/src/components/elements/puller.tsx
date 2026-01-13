@@ -53,6 +53,9 @@ const VARIANT_COLORS = {
   moonrock: {
     cssVar: "var(--blue-100)",
   },
+  health: {
+    cssVar: "var(--salmon-100)",
+  },
   rainbow: {
     cssVar: "#ffffff",
   },
@@ -73,6 +76,15 @@ export interface PullerProps
     VariantProps<typeof pullerVariants> {
   orbs?: number;
   bombs?: number;
+  /** When set, triggers a reveal animation with the specified orb variant color */
+  revealVariant?:
+    | "point"
+    | "bomb"
+    | "multiplier"
+    | "chip"
+    | "moonrock"
+    | "health"
+    | null;
 }
 
 export const Puller = ({
@@ -81,12 +93,15 @@ export const Puller = ({
   className,
   orbs = 0,
   bombs = 0,
+  revealVariant,
   ...props
 }: PullerProps) => {
   // Get color based on variant
   const color = VARIANT_COLORS[variant || "default"];
   const controls = useAnimationControls();
+  const pulseControls = useAnimationControls();
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
+  const [isRevealing, setIsRevealing] = useState(false);
 
   // Rainbow animation effect
   useEffect(() => {
@@ -104,17 +119,38 @@ export const Puller = ({
     }
   }, [variant, controls]);
 
-  // Get current color for rainbow variant
-  const currentColor =
-    variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
+  // Reveal animation effect
+  useEffect(() => {
+    if (revealVariant) {
+      setIsRevealing(true);
+      // Pulse animation
+      pulseControls.start({
+        scale: [1, 1.15, 1],
+        transition: { duration: 0.4, ease: "easeOut" },
+      });
+    } else {
+      setIsRevealing(false);
+    }
+  }, [revealVariant, pulseControls]);
+
+  // Get the active color - prioritize reveal variant, then rainbow, then default
+  const revealColor = revealVariant ? VARIANT_COLORS[revealVariant] : undefined;
+  const currentColor = revealColor
+    ? revealColor
+    : variant === "rainbow"
+      ? RAINBOW_SEQUENCE[currentColorIndex]
+      : color;
 
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}
       whileTap={{ scale: 0.9 }}
+      animate={pulseControls}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
       style={{
-        boxShadow: "0px 0px 50px 30px #000000",
+        boxShadow: isRevealing
+          ? `0px 0px 80px 50px ${currentColor.cssVar}40`
+          : "0px 0px 50px 30px #000000",
       }}
       {...props}
     >
@@ -131,18 +167,19 @@ export const Puller = ({
           }}
         />
 
-        {/* 2. Color tint overlay */}
-        {variant !== "default" && (
+        {/* 2. Color tint overlay - show when variant is set OR when revealing */}
+        {(variant !== "default" || isRevealing) && (
           <motion.div
             className="absolute inset-0 rounded-full pointer-events-none"
             style={{
-              backgroundColor: color.cssVar,
+              backgroundColor: currentColor.cssVar,
               mixBlendMode: "multiply",
-              opacity: 0.7,
             }}
-            animate={variant === "rainbow" ? controls : undefined}
+            animate={{
+              opacity: isRevealing ? [0.3, 0.9, 0.7] : 0.7,
+            }}
             transition={{
-              duration: 0.5,
+              duration: isRevealing ? 0.4 : 0.5,
               ease: "easeInOut",
             }}
           />

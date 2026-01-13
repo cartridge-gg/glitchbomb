@@ -45,30 +45,42 @@ export const GameScene = ({
   onPull,
   ...props
 }: GameSceneProps) => {
-  // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
+  // 0: initial, 0.5: reveal animation on puller, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
+  const [revealVariant, setRevealVariant] = useState<
+    "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health" | null
+  >(null);
 
   useEffect(() => {
     if (orb) {
-      // Phase 1: Show Orb
-      setPhase(1);
+      // Phase 0.5: Reveal animation on Puller
+      setRevealVariant(orb.variant);
+      setPhase(0.5);
 
-      // Phase 2: After 1s, show Outcome and reduce Orb opacity
+      // Phase 1: After 500ms reveal, show actual Orb
+      const phase1Timer = setTimeout(() => {
+        setRevealVariant(null);
+        setPhase(1);
+      }, 500);
+
+      // Phase 2: After 1.5s total, show Outcome and reduce Orb opacity
       const phase2Timer = setTimeout(() => {
         setPhase(2);
-      }, 1000);
+      }, 1500);
 
-      // Phase 3: After 3s total (1s + 2s), fade everything out
+      // Phase 3: After 3.5s total, fade everything out
       const phase3Timer = setTimeout(() => {
         setPhase(3);
-      }, 3000);
+      }, 3500);
 
       return () => {
+        clearTimeout(phase1Timer);
         clearTimeout(phase2Timer);
         clearTimeout(phase3Timer);
       };
     } else {
       setPhase(0);
+      setRevealVariant(null);
     }
   }, [orb]);
 
@@ -78,7 +90,7 @@ export const GameScene = ({
       <div
         className={cn(
           "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
-          phase === 0 && "opacity-100",
+          (phase === 0 || phase === 0.5) && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
           phase === 3 && "opacity-100",
         )}
@@ -89,10 +101,11 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-1000",
-          phase === 0 && "opacity-100 z-20",
-          (phase === 1 || phase === 2) && "opacity-0 z-0",
-          phase === 3 && "opacity-100 z-20",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity",
+          phase === 0 && "opacity-100 z-20 duration-1000",
+          phase === 0.5 && "opacity-100 z-20 duration-300",
+          (phase === 1 || phase === 2) && "opacity-0 z-0 duration-300",
+          phase === 3 && "opacity-100 z-20 duration-1000",
         )}
       >
         <Puller
@@ -109,6 +122,7 @@ export const GameScene = ({
           size="md"
           orbs={orbs}
           bombs={bombs}
+          revealVariant={revealVariant}
         />
       </div>
 
@@ -116,7 +130,7 @@ export const GameScene = ({
       <div
         className={cn(
           "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
-          phase === 0 && "opacity-0",
+          (phase === 0 || phase === 0.5) && "opacity-0",
           phase === 1 && "opacity-100",
           phase === 2 && "opacity-50",
           phase === 3 && "opacity-0",
@@ -135,7 +149,7 @@ export const GameScene = ({
       <div
         className={cn(
           "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
-          (phase === 0 || phase === 1) && "opacity-0",
+          (phase === 0 || phase === 0.5 || phase === 1) && "opacity-0",
           phase === 2 && "opacity-100",
           phase === 3 && "opacity-0",
         )}

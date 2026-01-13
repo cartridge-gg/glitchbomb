@@ -47,6 +47,20 @@ const meta = {
       control: "boolean",
       description: "Disable the button",
     },
+    revealVariant: {
+      control: "select",
+      options: [
+        null,
+        "point",
+        "bomb",
+        "multiplier",
+        "chip",
+        "moonrock",
+        "health",
+      ],
+      description:
+        "Triggers reveal animation with the specified orb variant color",
+    },
   },
   args: {
     orbs: 5,
@@ -133,5 +147,54 @@ export const Disabled: Story = {
     variant: "default",
     size: "md",
     disabled: true,
+  },
+};
+
+// Reveal Animation Stories
+export const RevealPoint: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "point",
+  },
+};
+
+export const RevealBomb: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "bomb",
+  },
+};
+
+export const RevealMultiplier: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "multiplier",
+  },
+};
+
+export const RevealHealth: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "health",
+  },
+};
+
+export const RevealMoonrock: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "moonrock",
+  },
+};
+
+export const RevealChip: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    revealVariant: "chip",
   },
 };
