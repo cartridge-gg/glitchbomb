@@ -3,17 +3,32 @@ import { Button } from "@/components/ui/button";
 
 export interface CashOutConfirmationProps {
   points: number;
+  moonrocks: number;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export const CashOutConfirmation = ({
   points,
+  moonrocks,
   onConfirm,
   onCancel,
 }: CashOutConfirmationProps) => {
   return (
     <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6 px-4">
+      {/* Moonrocks balance button - same style as game header */}
+      <div className="flex justify-center pt-4">
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-[#0D2530]"
+        >
+          <MoonrockIcon className="w-5 h-5 text-blue-400" />
+          <span className="font-secondary text-sm tracking-widest text-blue-400">
+            {Math.floor(moonrocks).toLocaleString()}
+          </span>
+        </button>
+      </div>
+
       <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
         <div className="relative">
           <MoonrockIcon className="w-24 h-24 text-blue-400" />
