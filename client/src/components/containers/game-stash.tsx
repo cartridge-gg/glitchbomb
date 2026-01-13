@@ -17,13 +17,17 @@ export const GameStash = ({ orbs, chips, onClose }: GameStashProps) => {
     <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
       {/* Header - same style as ORB SHOP */}
       <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase text-3xl font-primary">YOUR ORBS</h1>
+        <h1 className="text-white uppercase text-3xl font-primary">
+          YOUR ORBS
+        </h1>
         <div
           className="flex items-center gap-1 px-4 py-2 rounded"
           style={{ backgroundColor: "rgba(100, 50, 0, 0.3)" }}
         >
           <ChipIcon size="sm" className="text-orange-100" />
-          <span className="text-orange-100 font-secondary text-sm">{chips}</span>
+          <span className="text-orange-100 font-secondary text-sm">
+            {chips}
+          </span>
         </div>
       </div>
 
