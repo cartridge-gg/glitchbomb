@@ -140,7 +140,7 @@ export const Game = () => {
 
     // Default game view
     return (
-      <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 pt-4">
+      <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
         {/* Points & Goal Progress */}
         <PointsProgress points={game.points} milestone={game.milestone} />
 
@@ -199,7 +199,7 @@ export const Game = () => {
       />
 
       {/* Content area */}
-      <div className="flex-1 pt-20 pb-6">{renderContent()}</div>
+      <div className="flex-1 overflow-hidden pb-6">{renderContent()}</div>
     </div>
   );
 };
