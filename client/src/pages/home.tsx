@@ -74,35 +74,37 @@ export const Home = () => {
       )}
 
       {/* Main content - centered */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-12 px-4">
-        <h1 className="uppercase text-center">
-          <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
-            Glitch
-          </strong>
-          <br />
-          <span className="text-white text-6xl md:text-8xl">Bomb</span>
-        </h1>
+      <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
+        <div className="flex flex-col items-center gap-6">
+          <h1 className="uppercase text-center">
+            <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
+              Glitch
+            </strong>
+            <br />
+            <span className="text-white text-6xl md:text-8xl">Bomb</span>
+          </h1>
 
-        {isLoggedIn ? (
-          <Button
-            variant="default"
-            className="h-16 px-12 text-xl font-secondary uppercase tracking-widest"
-            onClick={() => navigate("/games")}
-          >
-            PLAY
-          </Button>
-        ) : (
-          <div className="flex flex-col items-center gap-4">
-            <Connect highlight onClick={onConnectClick} />
+          {isLoggedIn ? (
             <Button
-              variant="secondary"
-              className="h-12 px-8 font-secondary uppercase text-sm tracking-widest"
-              disabled
+              variant="default"
+              className="h-12 w-full font-secondary uppercase text-sm tracking-widest"
+              onClick={() => navigate("/games")}
             >
-              Play
+              PLAY
             </Button>
-          </div>
-        )}
+          ) : (
+            <div className="flex flex-col items-center gap-4 w-full">
+              <Connect highlight onClick={onConnectClick} />
+              <Button
+                variant="secondary"
+                className="h-10 w-full font-secondary uppercase text-sm tracking-widest"
+                disabled
+              >
+                Play
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
