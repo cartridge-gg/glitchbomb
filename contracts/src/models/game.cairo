@@ -362,7 +362,6 @@ pub impl GameImpl of GameTrait {
         self.seed = seed;
         // [Effect] If all orbs have been pulled, regenerate the bag
         if self.pullable_orbs_count() == 0 {
-            self.bag = OrbsTrait::initial();
             self.discards = 0;
         }
         // [Effect] Pull orb(s) from the remaining orbs in the bag
