@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount, useNetwork } from "@starknet-react/core";
-import { useEffect, useMemo, useState } from "react";
+import { useAccount } from "@starknet-react/core";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
@@ -19,17 +19,15 @@ import {
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
-import { toDecimal, usePulls, useTokens } from "@/hooks";
+import { usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
-  const { chain } = useNetwork();
-  const { account, connector } = useAccount();
+  const { connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
-  const { pack, game, config, setPackId, setGameId } = useEntitiesContext();
+  const { pack, game, setPackId, setGameId } = useEntitiesContext();
   const [milestoneOpen, setMilestoneOpen] = useState(false);
   const [stashOpen, setStashOpen] = useState(false);
   const [cashOutOpen, setCashOutOpen] = useState(false);
@@ -42,28 +40,6 @@ export const Game = () => {
       .username()
       ?.then((name) => setUsername(name));
   }, [connector]);
-
-  // Use token address from Config (blockchain state) if available, fallback to manifest
-  const tokenAddress = config?.token || getTokenAddress(chain.id);
-
-  // Token balance for moonrocks
-  const { tokenContracts, tokenBalances } = useTokens({
-    contractAddresses: tokenAddress ? [tokenAddress] : [],
-    accountAddresses: account?.address ? [account.address] : [],
-  });
-
-  const moonrocks = useMemo(() => {
-    if (!tokenAddress) return 0;
-    const tokenContract = tokenContracts.find(
-      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
-    );
-    if (!tokenContract) return 0;
-    const tokenBalance = tokenBalances.find(
-      (balance) => BigInt(balance.contract_address) === BigInt(tokenAddress),
-    );
-    if (!tokenBalance) return 0;
-    return toDecimal(tokenContract, tokenBalance);
-  }, [tokenContracts, tokenBalances, tokenAddress]);
 
   // Pulls data for graph display
   const { pulls } = usePulls({
@@ -166,7 +142,7 @@ export const Game = () => {
     <>
       {/* Full-width header */}
       <GameHeader
-        moonrocks={moonrocks}
+        moonrocks={pack.moonrocks}
         chips={game.chips}
         username={username}
       />
