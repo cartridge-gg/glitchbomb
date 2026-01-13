@@ -149,7 +149,6 @@ export const Game = () => {
     return (
       <CashOutConfirmation
         points={game.points}
-        moonrocks={moonrocks}
         onConfirm={() => {
           cashOut(pack.id, game.id)
             .then(() => setCashOutOpen(false))
