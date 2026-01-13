@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
@@ -22,8 +22,31 @@ import { Button } from "@/components/ui/button";
 import { useEntitiesContext } from "@/contexts";
 import { usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
+import type { OrbPulled } from "@/models";
 
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
+
+// Map orb model variant to GameScene orb variant
+const getOrbVariant = (
+  orb: OrbPulled["orb"],
+): "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health" => {
+  if (orb.isBomb()) return "bomb";
+  if (orb.isMultiplier()) return "multiplier";
+  if (orb.isHealth()) return "health";
+  if (orb.isChips()) return "chip";
+  if (orb.isMoonrock()) return "moonrock";
+  return "point";
+};
+
+// Get display content for orb
+const getOrbContent = (orb: OrbPulled["orb"]): string => {
+  if (orb.isBomb()) return "-1 HP";
+  if (orb.isHealth()) return "+1 HP";
+  if (orb.isMultiplier()) return orb.name();
+  if (orb.isChips()) return `+${orb.cost()} Chips`;
+  if (orb.isMoonrock()) return `+${orb.cost()} Moonrocks`;
+  return `+${orb.cost()} pts`;
+};
 
 export const Game = () => {
   const [searchParams] = useSearchParams();
@@ -33,11 +56,46 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
+  const [currentOrb, setCurrentOrb] = useState<{
+    variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
+    content: string;
+  } | null>(null);
 
   const { pulls } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
+
+  // Track the last seen pull to detect new ones
+  const lastPullIdRef = useRef<number>(0);
+
+  // Get the latest pull
+  const latestPull = useMemo(() => {
+    if (pulls.length === 0) return null;
+    return pulls.reduce(
+      (latest, p) => (p.id > latest.id ? p : latest),
+      pulls[0],
+    );
+  }, [pulls]);
+
+  // Detect new pulls and trigger animation
+  useEffect(() => {
+    if (latestPull && latestPull.id > lastPullIdRef.current) {
+      lastPullIdRef.current = latestPull.id;
+      // Set the orb to trigger animation
+      setCurrentOrb({
+        variant: getOrbVariant(latestPull.orb),
+        content: getOrbContent(latestPull.orb),
+      });
+
+      // Clear the orb after animation completes (4s total)
+      const timer = setTimeout(() => {
+        setCurrentOrb(null);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [latestPull]);
 
   // Fetch username from controller
   useEffect(() => {
@@ -153,6 +211,7 @@ export const Game = () => {
         bombs={game.distribution().bombs}
         orbs={game.pullables.length}
         values={game.distribution()}
+        orb={currentOrb ?? undefined}
         onPull={() => pull(pack.id, game.id)}
       />
 
