@@ -14,7 +14,7 @@ export const GameStash = ({ orbs, chips, onClose }: GameStashProps) => {
   const displayOrbs = orbs.filter((orb) => !orb.isBomb() && !orb.isNone());
 
   return (
-    <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4">
+    <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
       {/* Header - same style as ORB SHOP */}
       <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl font-primary">

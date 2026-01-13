@@ -63,15 +63,16 @@ export const Game = () => {
 
   if (!pack || !game) return null;
 
-  // Game over screen
-  if (game.over) {
-    return <GameOver points={game.points} level={game.level} />;
-  }
+  // Render current content based on state
+  const renderContent = () => {
+    // Game over screen
+    if (game.over) {
+      return <GameOver points={game.points} level={game.level} />;
+    }
 
-  // Shop view
-  if (game.shop.length !== 0) {
-    return (
-      <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6">
+    // Shop view
+    if (game.shop.length !== 0) {
+      return (
         <GameShop
           balance={game.chips}
           orbs={game.shop}
@@ -80,74 +81,66 @@ export const Game = () => {
             buyAndExit(pack.id, game.id, indices)
           }
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  // Milestone reached screen
-  if (milestoneOpen) {
+    // Milestone reached screen
+    if (milestoneOpen) {
+      return (
+        <MilestoneReached
+          milestone={game.milestone}
+          onCashOut={() => {
+            cashOut(pack.id, game.id)
+              .then(() => setMilestoneOpen(false))
+              .catch((error) => {
+                console.error(error);
+                setMilestoneOpen(false);
+              });
+          }}
+          onEnterShop={() => {
+            enter(pack.id, game.id)
+              .then(() => setMilestoneOpen(false))
+              .catch((error) => {
+                console.error(error);
+                setMilestoneOpen(false);
+              });
+          }}
+        />
+      );
+    }
+
+    // Stash view
+    if (stashOpen) {
+      return (
+        <GameStash
+          orbs={game.bag}
+          chips={game.chips}
+          onClose={() => setStashOpen(false)}
+        />
+      );
+    }
+
+    // Cash out confirmation
+    if (cashOutOpen) {
+      return (
+        <CashOutConfirmation
+          points={game.points}
+          onConfirm={() => {
+            cashOut(pack.id, game.id)
+              .then(() => setCashOutOpen(false))
+              .catch((error) => {
+                console.error(error);
+                setCashOutOpen(false);
+              });
+          }}
+          onCancel={() => setCashOutOpen(false)}
+        />
+      );
+    }
+
+    // Default game view
     return (
-      <MilestoneReached
-        milestone={game.milestone}
-        onCashOut={() => {
-          cashOut(pack.id, game.id)
-            .then(() => setMilestoneOpen(false))
-            .catch((error) => {
-              console.error(error);
-              setMilestoneOpen(false);
-            });
-        }}
-        onEnterShop={() => {
-          enter(pack.id, game.id)
-            .then(() => setMilestoneOpen(false))
-            .catch((error) => {
-              console.error(error);
-              setMilestoneOpen(false);
-            });
-        }}
-      />
-    );
-  }
-
-  // Stash view
-  if (stashOpen) {
-    return (
-      <GameStash
-        orbs={game.bag}
-        chips={game.chips}
-        onClose={() => setStashOpen(false)}
-      />
-    );
-  }
-
-  // Cash out confirmation
-  if (cashOutOpen) {
-    return (
-      <CashOutConfirmation
-        points={game.points}
-        onConfirm={() => {
-          cashOut(pack.id, game.id)
-            .then(() => setCashOutOpen(false))
-            .catch((error) => {
-              console.error(error);
-              setCashOutOpen(false);
-            });
-        }}
-        onCancel={() => setCashOutOpen(false)}
-      />
-    );
-  }
-
-  return (
-    <>
-      {/* Full-width header */}
-      <GameHeader
-        moonrocks={pack.moonrocks}
-        chips={game.chips}
-        username={username}
-      />
-
-      <div className="absolute inset-0 flex flex-col gap-4 max-w-[420px] m-auto py-6 px-4 pt-24">
+      <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 pt-4">
         {/* Points & Goal Progress */}
         <PointsProgress points={game.points} milestone={game.milestone} />
 
@@ -193,6 +186,20 @@ export const Game = () => {
           </button>
         </div>
       </div>
-    </>
+    );
+  };
+
+  return (
+    <div className="absolute inset-0 flex flex-col">
+      {/* Persistent header */}
+      <GameHeader
+        moonrocks={pack.moonrocks}
+        chips={game.chips}
+        username={username}
+      />
+
+      {/* Content area */}
+      <div className="flex-1 pt-20 pb-6">{renderContent()}</div>
+    </div>
   );
 };
