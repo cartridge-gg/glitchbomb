@@ -8,6 +8,7 @@ import {
   GameScene,
   GameShop,
   GameStash,
+  MilestoneReached,
 } from "@/components/containers";
 import {
   GameGraph,
@@ -17,14 +18,6 @@ import {
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { toDecimal, usePulls, useTokens } from "@/hooks";
@@ -36,7 +29,7 @@ export const Game = () => {
   const { account, connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { pack, game, config, setPackId, setGameId } = useEntitiesContext();
-  const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
+  const [milestoneOpen, setMilestoneOpen] = useState(false);
   const [stashOpen, setStashOpen] = useState(false);
   const [username, setUsername] = useState<string>();
 
@@ -86,7 +79,7 @@ export const Game = () => {
 
   useEffect(() => {
     if (game && game.points >= game.milestone && !game.over) {
-      setMilestoneDialogOpen(true);
+      setMilestoneOpen(true);
     }
   }, [game]);
 
@@ -110,6 +103,31 @@ export const Game = () => {
           }
         />
       </div>
+    );
+  }
+
+  // Milestone reached screen
+  if (milestoneOpen) {
+    return (
+      <MilestoneReached
+        milestone={game.milestone}
+        onCashOut={() => {
+          cashOut(pack.id, game.id)
+            .then(() => setMilestoneOpen(false))
+            .catch((error) => {
+              console.error(error);
+              setMilestoneOpen(false);
+            });
+        }}
+        onEnterShop={() => {
+          enter(pack.id, game.id)
+            .then(() => setMilestoneOpen(false))
+            .catch((error) => {
+              console.error(error);
+              setMilestoneOpen(false);
+            });
+        }}
+      />
     );
   }
 
@@ -179,54 +197,6 @@ export const Game = () => {
           </button>
         </div>
       </div>
-
-      <Dialog open={milestoneDialogOpen} onOpenChange={setMilestoneDialogOpen}>
-        <DialogContent className="bg-green-gradient-100 border-green-700 rounded-xl max-w-[300px]">
-          <DialogHeader>
-            <DialogTitle className="text-white tracking-wide">
-              Milestone Reached!
-            </DialogTitle>
-            <DialogDescription className="text-white/50 text-sm font-secondary">
-              Congratulations! You've reached {game.milestone} points. Do you
-              want to cash out or continue playing?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex gap-3">
-            <Button
-              variant="secondary"
-              className="flex-1 font-secondary text-sm tracking-widest"
-              onClick={() => {
-                cashOut(pack.id, game.id)
-                  .then(() => {
-                    setMilestoneDialogOpen(false);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    setMilestoneDialogOpen(false);
-                  });
-              }}
-            >
-              Cash Out
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1 font-secondary text-sm tracking-widest"
-              onClick={() => {
-                enter(pack.id, game.id)
-                  .then(() => {
-                    setMilestoneDialogOpen(false);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    setMilestoneDialogOpen(false);
-                  });
-              }}
-            >
-              Enter Shop
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
