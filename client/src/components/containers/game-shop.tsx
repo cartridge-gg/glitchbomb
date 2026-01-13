@@ -289,9 +289,9 @@ export const GameShop = ({
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
-      {/* <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl font-primary">ORB SHOP</h1>
-      </div> */}
+      </div>
 
       {/* Subtitle */}
       <p className="text-green-600 font-secondary text-sm tracking-wide">

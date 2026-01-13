@@ -192,7 +192,7 @@ export const Game = () => {
         chips={game.chips}
         username={username}
       />
-      <div className="flex-1 overflow-hidden pb-6">{renderScreen()}</div>
+      <div className="flex-1 overflow-hidden py-6">{renderScreen()}</div>
     </div>
   );
 };
