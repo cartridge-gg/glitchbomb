@@ -1034,43 +1034,62 @@ mod tests {
     // ==================== Bag Regeneration Tests ====================
 
     #[test]
-    fn test_game_bag_regenerates_when_empty() {
+    fn test_game_bag_reshuffles_when_empty() {
         let mut game = GameTrait::new(PACK_ID, GAME_ID);
         game.start();
-        // [Info] Initial bag has 11 orbs
-        let initial_bag = game.bag;
         let bag: Orbs = OrbsTrait::unpack(game.bag);
-        let bag_size = bag.len();
-        // [Effect] Add an orb to make bag different from initial
-        game.add(Orb::Point5);
-        let modified_bag = game.bag;
-        assert!(modified_bag != initial_bag);
+        let bag_size: u8 = bag.len().try_into().unwrap();
         // [Effect] Pull all orbs (without dying)
-        let new_bag: Orbs = OrbsTrait::unpack(game.bag);
-        let new_bag_size: u8 = new_bag.len().try_into().unwrap();
         let mut i: u8 = 0;
-        while i < new_bag_size && !game.over {
+        while i < bag_size && !game.over {
             game.pull(SEED + i.into());
             game.points = 0; // Reset points to avoid milestone
             i += 1;
         }
-        // [Check] If not dead, bag should regenerate on next pull
+        // [Check] If not dead, all orbs should be discarded
         if !game.over {
             assert_eq!(game.pullable_orbs_count(), 0);
-            // [Effect] Pull again - should regenerate bag to initial
-            game.pull('REGEN');
-            // [Check] Bag was regenerated to initial (not the modified one)
-            // After regen, bag should be initial + 1 pull made
-            let regen_bag: Orbs = OrbsTrait::unpack(game.bag);
-            assert_eq!(regen_bag.len(), bag_size); // Back to original size
+            // [Effect] Pull again - should reshuffle (reset discards)
+            game.pull('RESHUFFLE');
+            // [Check] Discards was reset, now bag_size - 1 orbs available
+            assert_eq!(game.pullable_orbs_count(), bag_size - 1);
         }
     }
 
     #[test]
-    fn test_game_bag_regenerates_resets_both_bag_and_discards() {
+    fn test_game_bag_keeps_added_orbs_after_reshuffle() {
         let mut game = GameTrait::new(PACK_ID, GAME_ID);
         game.start();
-        let initial_bag = game.bag;
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let initial_bag_size: u8 = bag.len().try_into().unwrap();
+        // [Effect] Add an orb (simulating shop purchase)
+        game.add(Orb::Point5);
+        let new_bag: Orbs = OrbsTrait::unpack(game.bag);
+        let new_bag_size: u8 = new_bag.len().try_into().unwrap();
+        assert_eq!(new_bag_size, initial_bag_size + 1);
+        // [Effect] Pull all orbs (without dying)
+        let mut i: u8 = 0;
+        while i < new_bag_size && !game.over {
+            game.pull(SEED + i.into());
+            game.points = 0;
+            i += 1;
+        }
+        // [Check] If not dead, reshuffle should keep the added orb
+        if !game.over {
+            assert_eq!(game.pullable_orbs_count(), 0);
+            game.pull('RESHUFFLE');
+            // [Check] Bag still has the added orb (new_bag_size - 1 pullable after 1 pull)
+            assert_eq!(game.pullable_orbs_count(), new_bag_size - 1);
+            // [Check] Bag contents unchanged
+            let reshuffled_bag: Orbs = OrbsTrait::unpack(game.bag);
+            assert_eq!(reshuffled_bag.len(), new_bag_size.into());
+        }
+    }
+
+    #[test]
+    fn test_game_reshuffle_resets_discards() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
         let bag: Orbs = OrbsTrait::unpack(game.bag);
         let bag_size: u8 = bag.len().try_into().unwrap();
         // [Effect] Pull all orbs
@@ -1082,16 +1101,12 @@ mod tests {
         }
         // [Check] If survived, discards should be full
         if !game.over {
-            let discards_before_regen = game.discards;
-            assert!(discards_before_regen > 0);
-            // [Effect] Pull to trigger regeneration
-            game.pull('TRIGGER_REGEN');
-            // [Check] After regen + pull, discards should be much smaller (only 1 orb pulled)
-            assert!(game.discards < discards_before_regen);
-            // [Check] Bag should be back to initial
-            let regen_bag: Orbs = OrbsTrait::unpack(game.bag);
-            let initial_bag_orbs: Orbs = OrbsTrait::unpack(initial_bag);
-            assert_eq!(regen_bag.len(), initial_bag_orbs.len());
+            let discards_before = game.discards;
+            assert!(discards_before > 0);
+            // [Effect] Pull to trigger reshuffle
+            game.pull('TRIGGER');
+            // [Check] After reshuffle + 1 pull, discards should be much smaller
+            assert!(game.discards < discards_before);
         }
     }
 }
