@@ -289,20 +289,9 @@ export const GameShop = ({
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <h1 className="text-white uppercase text-3xl font-primary">ORB SHOP</h1>
-        <div
-          className="flex items-center gap-1 px-4 py-2 rounded"
-          style={{
-            backgroundColor: "rgba(100, 50, 0, 0.3)",
-          }}
-        >
-          <ChipIcon size="sm" className="text-orange-100" />
-          <span className="text-orange-100 font-secondary text-lg">
-            {virtualBalance}
-          </span>
-        </div>
-      </div>
+      </div> */}
 
       {/* Subtitle */}
       <p className="text-green-600 font-secondary text-sm tracking-wide">
