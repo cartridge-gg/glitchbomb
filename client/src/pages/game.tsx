@@ -3,6 +3,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+  CashOutConfirmation,
   GameHeader,
   GameOver,
   GameScene,
@@ -31,6 +32,7 @@ export const Game = () => {
   const { pack, game, config, setPackId, setGameId } = useEntitiesContext();
   const [milestoneOpen, setMilestoneOpen] = useState(false);
   const [stashOpen, setStashOpen] = useState(false);
+  const [cashOutOpen, setCashOutOpen] = useState(false);
   const [username, setUsername] = useState<string>();
 
   // Fetch username
@@ -142,6 +144,24 @@ export const Game = () => {
     );
   }
 
+  // Cash out confirmation
+  if (cashOutOpen) {
+    return (
+      <CashOutConfirmation
+        points={game.points}
+        onConfirm={() => {
+          cashOut(pack.id, game.id)
+            .then(() => setCashOutOpen(false))
+            .catch((error) => {
+              console.error(error);
+              setCashOutOpen(false);
+            });
+        }}
+        onCancel={() => setCashOutOpen(false)}
+      />
+    );
+  }
+
   return (
     <>
       {/* Full-width header */}
@@ -191,7 +211,7 @@ export const Game = () => {
               border: "2px solid rgba(138, 43, 226, 0.4)",
               color: "#FF80FF",
             }}
-            onClick={() => cashOut(pack.id, game.id)}
+            onClick={() => setCashOutOpen(true)}
           >
             CASH OUT
           </button>

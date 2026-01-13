@@ -1,4 +1,5 @@
 export * from "./app-header";
+export * from "./cash-out-confirmation";
 export * from "./game-footer";
 export * from "./game-header";
 export * from "./game-over";

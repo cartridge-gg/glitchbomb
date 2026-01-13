@@ -1,0 +1,60 @@
+import { MoonrockIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+
+export interface CashOutConfirmationProps {
+  points: number;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export const CashOutConfirmation = ({
+  points,
+  onConfirm,
+  onCancel,
+}: CashOutConfirmationProps) => {
+  return (
+    <div className="absolute inset-0 flex flex-col gap-8 max-w-[420px] m-auto py-6 px-4">
+      <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
+        <div className="relative">
+          <MoonrockIcon className="w-24 h-24 text-blue-400" />
+          <div
+            className="absolute inset-0 blur-xl opacity-50"
+            style={{ backgroundColor: "#3B82F6" }}
+          />
+        </div>
+        <div className="flex flex-col gap-3">
+          <h1 className="text-white uppercase text-3xl font-primary">
+            Cash Out?
+          </h1>
+          <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
+            You will receive{" "}
+            <span className="text-green-400 font-bold">{points}</span> moonrocks
+            and end the current game. This action cannot be undone.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-stretch gap-3 w-full pt-2">
+        <Button
+          variant="secondary"
+          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          onClick={onCancel}
+        >
+          ← BACK
+        </Button>
+        <button
+          type="button"
+          className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+          style={{
+            background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+            border: "2px solid rgba(138, 43, 226, 0.4)",
+            color: "#FF80FF",
+          }}
+          onClick={onConfirm}
+        >
+          CASH OUT
+        </button>
+      </div>
+    </div>
+  );
+};
