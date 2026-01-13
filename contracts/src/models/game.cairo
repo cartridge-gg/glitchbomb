@@ -360,6 +360,11 @@ pub impl GameImpl of GameTrait {
         self.assert_not_completed();
         // [Effect] Store seed for effects that need randomness
         self.seed = seed;
+        // [Effect] If all orbs have been pulled, regenerate the bag
+        if self.pullable_orbs_count() == 0 {
+            self.bag = OrbsTrait::initial();
+            self.discards = 0;
+        }
         // [Effect] Pull orb(s) from the remaining orbs in the bag
         let bag: Orbs = OrbsTrait::unpack(self.bag);
         let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());
@@ -1025,6 +1030,70 @@ mod tests {
         let multiplier_before = game.multiplier;
         game.boost(100);
         assert_eq!(game.multiplier, multiplier_before + 50);
+    }
+
+    // ==================== Bag Regeneration Tests ====================
+
+    #[test]
+    fn test_game_bag_regenerates_when_empty() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Info] Initial bag has 11 orbs
+        let initial_bag = game.bag;
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let bag_size = bag.len();
+        // [Effect] Add an orb to make bag different from initial
+        game.add(Orb::Point5);
+        let modified_bag = game.bag;
+        assert!(modified_bag != initial_bag);
+        // [Effect] Pull all orbs (without dying)
+        let new_bag: Orbs = OrbsTrait::unpack(game.bag);
+        let new_bag_size: u8 = new_bag.len().try_into().unwrap();
+        let mut i: u8 = 0;
+        while i < new_bag_size && !game.over {
+            game.pull(SEED + i.into());
+            game.points = 0; // Reset points to avoid milestone
+            i += 1;
+        }
+        // [Check] If not dead, bag should regenerate on next pull
+        if !game.over {
+            assert_eq!(game.pullable_orbs_count(), 0);
+            // [Effect] Pull again - should regenerate bag to initial
+            game.pull('REGEN');
+            // [Check] Bag was regenerated to initial (not the modified one)
+            // After regen, bag should be initial + 1 pull made
+            let regen_bag: Orbs = OrbsTrait::unpack(game.bag);
+            assert_eq!(regen_bag.len(), bag_size); // Back to original size
+        }
+    }
+
+    #[test]
+    fn test_game_bag_regenerates_resets_both_bag_and_discards() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let initial_bag = game.bag;
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let bag_size: u8 = bag.len().try_into().unwrap();
+        // [Effect] Pull all orbs
+        let mut i: u8 = 0;
+        while i < bag_size && !game.over {
+            game.pull(SEED + i.into());
+            game.points = 0;
+            i += 1;
+        }
+        // [Check] If survived, discards should be full
+        if !game.over {
+            let discards_before_regen = game.discards;
+            assert!(discards_before_regen > 0);
+            // [Effect] Pull to trigger regeneration
+            game.pull('TRIGGER_REGEN');
+            // [Check] After regen + pull, discards should be much smaller (only 1 orb pulled)
+            assert!(game.discards < discards_before_regen);
+            // [Check] Bag should be back to initial
+            let regen_bag: Orbs = OrbsTrait::unpack(game.bag);
+            let initial_bag_orbs: Orbs = OrbsTrait::unpack(initial_bag);
+            assert_eq!(regen_bag.len(), initial_bag_orbs.len());
+        }
     }
 }
 
