@@ -7,19 +7,17 @@ const meta = {
   title: "Containers/GameShop",
   component: GameShop,
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
   },
   decorators: [
     (Story) => (
-      <div style={{ width: "600px", padding: "20px" }}>
+      <div className="h-screen bg-green-950">
         <Story />
       </div>
     ),
   ],
   argTypes: {
     balance: { control: "number" },
-    onPurchase: { action: "submitted" },
-    onContinue: { action: "continued" },
   },
   args: {
     balance: 30,
@@ -31,9 +29,8 @@ const meta = {
       new Orb(OrbType.Chips15),
       new Orb(OrbType.Moonrock40),
     ],
-    onPurchase: (indices: number[]) => console.log(indices),
-    onInventory: fn(),
-    onContinue: fn(),
+    bag: [new Orb(OrbType.Point8), new Orb(OrbType.Health2)],
+    onConfirm: fn(),
   },
 } satisfies Meta<typeof GameShop>;
 
@@ -42,36 +39,32 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const Reduced: Story = {
+export const EmptyBag: Story = {
   args: {
-    balance: 20,
-    orbs: [
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Multiplier50),
-      new Orb(OrbType.Health1),
-      new Orb(OrbType.Moonrock15),
-      new Orb(OrbType.Chips15),
-      new Orb(OrbType.Moonrock40),
-    ],
-    onPurchase: fn(),
-    onInventory: fn(),
-    onContinue: fn(),
-  },
-  render: (args) => {
-    return <GameShop {...args} className="max-h-96" />;
+    bag: [],
   },
 };
 
-export const ProgressivePricing: Story = {
+export const LowBalance: Story = {
   args: {
-    balance: 30,
-    orbs: [
+    balance: 5,
+  },
+};
+
+export const HighBalance: Story = {
+  args: {
+    balance: 100,
+  },
+};
+
+export const ManyOrbsInBag: Story = {
+  args: {
+    bag: [
       new Orb(OrbType.Point5),
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Point5),
-      new Orb(OrbType.Point5),
+      new Orb(OrbType.Point8),
+      new Orb(OrbType.Health1),
+      new Orb(OrbType.Multiplier50),
+      new Orb(OrbType.Chips15),
     ],
   },
 };
