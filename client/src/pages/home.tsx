@@ -2,8 +2,8 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Connect, Profile } from "@/components/elements";
-import { GearIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { AppHeader } from "@/components/containers";
+import { Connect } from "@/components/elements";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -50,10 +50,6 @@ export const Home = () => {
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
 
-  const onSettingsClick = useCallback(() => {
-    (connector as never as ControllerConnector)?.controller.openSettings();
-  }, [connector]);
-
   // Fetch username
   useEffect(() => {
     if (!connector) return;
@@ -65,12 +61,20 @@ export const Home = () => {
   const isLoggedIn = !!account && !!username;
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center max-w-[420px] m-auto">
-      {/* Header placeholder - same height as other pages */}
-      <div className="w-full py-4 flex justify-center">
-        <GlitchBombIcon size="xl" className="text-white" />
-      </div>
-      <div className="w-[300px] flex flex-col gap-12 items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div className="absolute inset-0 flex flex-col">
+      {/* Header */}
+      {isLoggedIn && (
+        <AppHeader
+          moonrocks={balance}
+          username={username}
+          showBack={false}
+          onMint={() => mint(tokenAddress)}
+          onProfileClick={onProfileClick}
+        />
+      )}
+
+      {/* Main content - centered */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-12 px-4">
         <h1 className="uppercase text-center">
           <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
             Glitch
@@ -80,53 +84,19 @@ export const Home = () => {
         </h1>
 
         {isLoggedIn ? (
-          // Logged in layout
-          <div className="flex flex-col gap-3 w-full">
-            {/* Row 1: Profile + Play */}
-            <div className="flex gap-3">
-              <Profile
-                username={username}
-                onClick={onProfileClick}
-                className="flex-1"
-              />
-              <Button
-                variant="default"
-                className="h-12 flex-1 font-secondary uppercase text-sm tracking-widest font-normal"
-                onClick={() => navigate("/games")}
-              >
-                Play
-              </Button>
-            </div>
-
-            {/* Row 2: Settings + Moonrocks */}
-            <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                className="h-12 w-12 p-0"
-                onClick={onSettingsClick}
-              >
-                <GearIcon size="sm" />
-              </Button>
-              {/* Moonrocks button - same style as game header */}
-              <button
-                type="button"
-                className="flex-1 flex items-center justify-center gap-2 h-12 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
-                onClick={() => mint(tokenAddress)}
-              >
-                <MoonrockIcon className="w-5 h-5 text-blue-400" />
-                <span className="font-secondary text-sm tracking-widest text-blue-400">
-                  {Math.floor(balance).toLocaleString()}
-                </span>
-              </button>
-            </div>
-          </div>
+          <Button
+            variant="default"
+            className="h-16 px-12 text-xl font-secondary uppercase tracking-widest"
+            onClick={() => navigate("/games")}
+          >
+            PLAY
+          </Button>
         ) : (
-          // Not logged in layout
-          <div className="flex flex-col items-center justify-center gap-3 w-[124px]">
+          <div className="flex flex-col items-center gap-4">
             <Connect highlight onClick={onConnectClick} />
             <Button
               variant="secondary"
-              className="h-12 w-full font-secondary uppercase text-sm tracking-widest font-normal"
+              className="h-12 px-8 font-secondary uppercase text-sm tracking-widest"
               disabled
             >
               Play

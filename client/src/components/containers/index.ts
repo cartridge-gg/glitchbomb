@@ -1,3 +1,4 @@
+export * from "./app-header";
 export * from "./game-footer";
 export * from "./game-header";
 export * from "./game-over";

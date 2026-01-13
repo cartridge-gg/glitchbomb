@@ -2,14 +2,8 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Profile } from "@/components/elements";
-import {
-  ArrowLeftIcon,
-  GlitchBombIcon,
-  MoonrockIcon,
-  SparkleIcon,
-} from "@/components/icons";
-import { Button } from "@/components/ui/button";
+import { AppHeader } from "@/components/containers";
+import { MoonrockIcon, SparkleIcon } from "@/components/icons";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
@@ -176,48 +170,18 @@ export const Games = () => {
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Header - full width */}
-      <div className="relative flex items-center justify-between px-4 py-4">
-        {/* Left: Back button */}
-        <Button
-          variant="secondary"
-          className="h-12 w-12 p-0"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeftIcon size="sm" />
-        </Button>
-
-        {/* Center: GlitchBomb icon - absolutely positioned for perfect centering */}
-        <GlitchBombIcon
-          size="xl"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
-        />
-
-        {/* Right: Moonrocks + Profile */}
-        <div className="flex gap-2">
-          {/* Moonrocks button - same style as game header */}
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 h-12 px-4 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
-            onClick={() => mint(tokenAddress)}
-          >
-            <MoonrockIcon className="w-5 h-5 text-blue-400" />
-            <span className="font-secondary text-sm tracking-widest text-blue-400">
-              {Math.floor(balance).toLocaleString()}
-            </span>
-          </button>
-          {username && (
-            <Profile
-              username={username}
-              onClick={onProfileClick}
-              className="w-auto px-4"
-            />
-          )}
-        </div>
-      </div>
+      {/* Header */}
+      <AppHeader
+        moonrocks={balance}
+        username={username}
+        showBack={true}
+        backPath="/"
+        onMint={() => mint(tokenAddress)}
+        onProfileClick={onProfileClick}
+      />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-4 pt-40 pb-16 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center px-4 pt-24 pb-16 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full max-w-[500px]">
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">

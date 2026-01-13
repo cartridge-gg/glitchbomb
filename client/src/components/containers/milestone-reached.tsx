@@ -28,8 +28,8 @@ export const MilestoneReached = ({
           </h1>
           <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
             Congratulations! You've reached{" "}
-            <span className="text-green-400 font-bold">{milestone}</span> points.
-            Do you want to cash out or continue playing?
+            <span className="text-green-400 font-bold">{milestone}</span>{" "}
+            points. Do you want to cash out or continue playing?
           </p>
         </div>
       </div>

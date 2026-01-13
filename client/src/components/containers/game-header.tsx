@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
-import { ChipIcon, HomeIcon, MoonrockIcon } from "@/components/icons";
+import { ArrowLeftIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
 export interface GameHeaderProps {
@@ -14,13 +14,13 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
 
   return (
     <div className="absolute top-0 left-0 right-0 py-4 px-4">
-      {/* Home button (left) */}
+      {/* Back button (left) */}
       <Button
         variant="secondary"
         className="h-12 w-12 p-0 absolute left-4 top-4"
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/games")}
       >
-        <HomeIcon size="sm" className="text-green-400" />
+        <ArrowLeftIcon size="sm" />
       </Button>
 
       {/* Center: Moonrocks + Chips - aligned with game content */}
