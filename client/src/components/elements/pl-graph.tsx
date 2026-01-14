@@ -196,34 +196,33 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
 
           {/* Chart area for points */}
           <div className="absolute inset-0">
-            {/* Lines connecting points - rendered as individual divs for proper animation */}
-            {graphPoints.map((point, index) => {
-              if (index === 0) return null;
-              const prevPoint = graphPoints[index - 1];
-              const isLastLine = index === graphPoints.length - 1;
-
-              // Calculate line properties
-              const dx = point.x - prevPoint.x;
-              const dy = point.y - prevPoint.y;
-              const length = Math.sqrt(dx * dx + dy * dy);
-              const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-              return (
-                <motion.div
-                  key={`line-${point.id}`}
-                  className="absolute h-[1.5px] bg-[#348F1B] origin-left"
-                  style={{
-                    left: `${prevPoint.x}%`,
-                    top: `${prevPoint.y}%`,
-                    width: `${length}%`,
-                    transform: `rotate(${angle}deg)`,
-                  }}
-                  initial={isLastLine ? { scaleX: 0, opacity: 0 } : false}
-                  animate={{ scaleX: 1, opacity: 1 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                />
-              );
-            })}
+            {/* Lines connecting points */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              {graphPoints.map((point, index) => {
+                if (index === 0) return null;
+                const prevPoint = graphPoints[index - 1];
+                const isLastLine = index === graphPoints.length - 1;
+                return (
+                  <motion.line
+                    key={`line-${point.id}`}
+                    x1={prevPoint.x}
+                    y1={prevPoint.y}
+                    x2={point.x}
+                    y2={point.y}
+                    stroke="#348F1B"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                    initial={isLastLine ? { opacity: 0 } : false}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  />
+                );
+              })}
+            </svg>
 
             {/* Points */}
             {graphPoints.map((point, index) => {
