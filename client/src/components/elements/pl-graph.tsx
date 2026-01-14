@@ -61,8 +61,17 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
 
     // Add padding to both ends
     const padding = Math.max(Math.abs(maxVal), Math.abs(minVal)) * 0.2 || 20;
-    const max = Math.ceil((maxVal + padding) / 10) * 10;
-    const min = Math.floor((minVal - padding) / 10) * 10;
+    let max = Math.ceil((maxVal + padding) / 10) * 10;
+    let min = Math.floor((minVal - padding) / 10) * 10;
+
+    // Enforce minimum range of 100 to prevent pills from overlapping
+    const minRange = 100;
+    const currentRange = max - min;
+    if (currentRange < minRange) {
+      const expandBy = (minRange - currentRange) / 2;
+      max = Math.ceil((max + expandBy) / 10) * 10;
+      min = Math.floor((min - expandBy) / 10) * 10;
+    }
 
     // Calculate zero position as percentage from top
     const range = max - min;
