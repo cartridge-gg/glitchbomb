@@ -234,19 +234,16 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
               const prevPoint = graphPoints[index - 1];
               const isLastLine = index === graphPoints.length - 1;
               return (
-                <motion.path
+                <motion.line
                   key={`line-${point.id}`}
-                  d={`M ${prevPoint.x}% ${prevPoint.y}% L ${point.x}% ${point.y}%`}
+                  x1={`${prevPoint.x}%`}
+                  y1={`${prevPoint.y}%`}
+                  x2={`${point.x}%`}
+                  y2={`${point.y}%`}
                   stroke="#348F1B"
                   strokeWidth="1.5"
-                  fill="none"
-                  pathLength={1}
-                  initial={
-                    isLastLine
-                      ? { strokeDasharray: 1, strokeDashoffset: 1 }
-                      : false
-                  }
-                  animate={{ strokeDashoffset: 0 }}
+                  initial={isLastLine ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               );
