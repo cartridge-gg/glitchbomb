@@ -135,12 +135,15 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
           <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
             {yRange.max}
           </span>
-          <span
-            className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full -translate-y-1/2"
-            style={{ position: "absolute", top: `${yRange.zero}%` }}
-          >
-            0
-          </span>
+          {/* Only show 0 pill if it's not too close to top or bottom (15-85% range) */}
+          {yRange.zero > 15 && yRange.zero < 85 && (
+            <span
+              className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full -translate-y-1/2"
+              style={{ position: "absolute", top: `${yRange.zero}%` }}
+            >
+              0
+            </span>
+          )}
           <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
             {yRange.min}
           </span>
