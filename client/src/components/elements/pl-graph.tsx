@@ -230,7 +230,7 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
               return (
                 <motion.div
                   key={`point-${point.id}`}
-                  className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
+                  className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border border-white/80"
                   style={{
                     left: `${point.x}%`,
                     top: `${point.y}%`,
