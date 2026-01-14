@@ -198,28 +198,52 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
           <svg className="absolute inset-0 w-full h-full overflow-visible">
             <defs>
               {/* Glow filters for each color */}
-              <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+              <filter
+                id="glow-green"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
                 <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+              <filter
+                id="glow-red"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
                 <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+              <filter
+                id="glow-blue"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
                 <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="glow-yellow" x="-50%" y="-50%" width="200%" height="200%">
+              <filter
+                id="glow-yellow"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
                 <feGaussianBlur stdDeviation="3" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
