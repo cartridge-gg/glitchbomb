@@ -257,13 +257,7 @@ export const GameShop = ({
 
   // Show stash screen
   if (showStash) {
-    return (
-      <GameStash
-        orbs={displayBag}
-        chips={virtualBalance}
-        onClose={() => setShowStash(false)}
-      />
-    );
+    return <GameStash orbs={displayBag} onClose={() => setShowStash(false)} />;
   }
 
   // Show exit confirmation screen

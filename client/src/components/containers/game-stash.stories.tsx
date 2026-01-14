@@ -27,15 +27,9 @@ const meta = {
       </BrowserRouter>
     ),
   ],
-  argTypes: {
-    chips: {
-      control: { type: "number" },
-      description: "Current chips balance",
-    },
-  },
+  argTypes: {},
   args: {
     orbs: mockOrbs,
-    chips: 45,
     onClose: () => console.log("Closed stash"),
   },
 } satisfies Meta<typeof GameStash>;

@@ -1,15 +1,13 @@
 import { OrbDisplay } from "@/components/elements";
-import { ChipIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { Orb } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
-  chips: number;
   onClose: () => void;
 }
 
-export const GameStash = ({ orbs, chips, onClose }: GameStashProps) => {
+export const GameStash = ({ orbs, onClose }: GameStashProps) => {
   // Filter out bombs and empty orbs for display
   const displayOrbs = orbs.filter((orb) => !orb.isBomb() && !orb.isNone());
 
