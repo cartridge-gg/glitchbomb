@@ -49,26 +49,23 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
     return { wins, losses, netPL };
   }, [data]);
 
-  // Calculate Y-axis range
+  // Calculate Y-axis range - always centered on zero
   const yRange = useMemo(() => {
     if (cumulativeData.length === 0) {
-      return { min: -30, max: 150, zero: 50 };
+      return { min: -100, max: 100, zero: 50 };
     }
 
     const values = cumulativeData.map((d) => d.cumulative);
     const maxVal = Math.max(...values, 0);
     const minVal = Math.min(...values, 0);
 
-    // Add padding
-    const padding = Math.max(Math.abs(maxVal), Math.abs(minVal)) * 0.2 || 30;
-    const max = Math.ceil((maxVal + padding) / 10) * 10;
-    const min = Math.floor((minVal - padding) / 10) * 10;
+    // Find the largest absolute value and make range symmetric
+    const maxAbs = Math.max(Math.abs(maxVal), Math.abs(minVal));
+    const padding = maxAbs * 0.2 || 30;
+    const extent = Math.ceil((maxAbs + padding) / 10) * 10;
 
-    // Calculate zero position as percentage from top
-    const range = max - min;
-    const zero = ((max - 0) / range) * 100;
-
-    return { min, max, zero };
+    // Symmetric range: -extent to +extent, zero always at 50%
+    return { min: -extent, max: extent, zero: 50 };
   }, [cumulativeData]);
 
   // Calculate graph points
