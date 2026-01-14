@@ -12,6 +12,7 @@ export * from "./multiplier";
 export * from "./orb";
 export * from "./orb-display";
 export * from "./outcome";
+export * from "./pl-graph";
 export * from "./points-progress";
 export * from "./profile";
 export * from "./puller";
