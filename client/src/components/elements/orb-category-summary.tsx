@@ -44,8 +44,8 @@ const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   },
   multiplier: {
     icon: OrbMultiplierIcon,
-    color: "#36F818",
-    bgColor: "rgba(54, 248, 24, 0.2)",
+    color: "#FFF121",
+    bgColor: "rgba(255, 241, 33, 0.2)",
   },
   health: {
     icon: OrbHealthIcon,
@@ -107,21 +107,30 @@ export const OrbCategorySummary = ({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-3 w-full p-3 rounded-lg border border-green-700 hover:brightness-110 transition-all"
-      style={{
-        background:
-          "linear-gradient(to right, #052e16 0%, #14532d 50%, #166534 100%)",
-      }}
+      className="flex items-stretch w-full hover:brightness-110"
     >
-      {/* Bag icon */}
-      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-950/80">
-        <BagIcon className="w-6 h-6 text-green-500" />
+      {/* Bag icon container with 40% black overlay */}
+      <div
+        className="flex items-center justify-center w-16 border border-[#071304] shrink-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0, 0, 0, 0.20), rgba(0, 0, 0, 0.40)), linear-gradient(180deg, #071304 0%, rgba(7, 19, 4, 0.00) 100%)",
+          borderRadius: "8px 0 0 8px",
+          borderRight: "none",
+        }}
+      >
+        <BagIcon className="w-7 h-7 text-green-700" />
       </div>
 
-      {/* Category orbs */}
+      {/* Category orbs container with base gradient */}
       <div
-        className="flex items-center gap-2 flex-1"
-        style={{ scrollbarWidth: "none" }}
+        className="flex items-center gap-3 flex-1 px-4 pt-2 pb-3 border border-[#071304]"
+        style={{
+          background:
+            "linear-gradient(180deg, #071304 0%, rgba(7, 19, 4, 0.00) 100%)",
+          borderRadius: "0 8px 8px 0",
+          borderLeft: "none",
+        }}
       >
         {categoriesToShow.length > 0 ? (
           categoriesToShow.map((category) => {
@@ -140,7 +149,7 @@ export const OrbCategorySummary = ({
                   }}
                 >
                   <Icon
-                    className="w-6 h-6"
+                    className="w-9 h-9"
                     style={{
                       color: config.color,
                       filter: `drop-shadow(0 0 4px ${config.color})`,
