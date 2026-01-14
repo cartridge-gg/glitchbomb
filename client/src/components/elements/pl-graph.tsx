@@ -130,18 +130,18 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
 
       {/* Graph container */}
       <div className="relative w-full h-40">
-        {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between py-2 z-10">
-          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none">
+        {/* Y-axis labels as pills */}
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between py-1 z-10">
+          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
             {yRange.max}
           </span>
           <span
-            className="font-secondary text-green-400 text-sm tracking-widest leading-none"
+            className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full -translate-y-1/2"
             style={{ position: "absolute", top: `${yRange.zero}%` }}
           >
             0
           </span>
-          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none">
+          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
             {yRange.min}
           </span>
         </div>
