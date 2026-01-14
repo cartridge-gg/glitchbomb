@@ -109,14 +109,14 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Header: P/L stats and net value */}
       <div className="flex items-center justify-between">
-        <div className="font-mono text-green-400 text-lg tracking-wide">
+        <div className="font-secondary text-green-400 text-lg tracking-widest uppercase">
           P/L:{" "}
           <span className="text-green-300">
             {stats.wins}/{stats.losses}
           </span>
         </div>
         <div
-          className={`font-mono text-lg tracking-wide ${
+          className={`font-secondary text-lg tracking-widest ${
             stats.netPL >= 0 ? "text-green-400" : "text-red-400"
           }`}
         >
@@ -129,16 +129,16 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
       <div className="relative w-full h-40">
         {/* Y-axis labels */}
         <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between py-2 z-10">
-          <span className="font-mono text-green-400 text-sm leading-none">
+          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none">
             {yRange.max}
           </span>
           <span
-            className="font-mono text-green-400 text-sm leading-none"
+            className="font-secondary text-green-400 text-sm tracking-widest leading-none"
             style={{ position: "absolute", top: `${yRange.zero}%` }}
           >
             0
           </span>
-          <span className="font-mono text-green-400 text-sm leading-none">
+          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none">
             {yRange.min}
           </span>
         </div>
