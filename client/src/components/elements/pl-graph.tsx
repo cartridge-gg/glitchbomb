@@ -206,15 +206,14 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
                 if (index === 0) return null;
                 const prevPoint = graphPoints[index - 1];
                 const isLastLine = index === graphPoints.length - 1;
+                const d = `M ${prevPoint.x} ${prevPoint.y} L ${point.x} ${point.y}`;
                 return (
-                  <motion.line
+                  <motion.path
                     key={`line-${point.id}`}
-                    x1={prevPoint.x}
-                    y1={prevPoint.y}
-                    x2={point.x}
-                    y2={point.y}
+                    d={d}
                     stroke="#348F1B"
                     strokeWidth="0.8"
+                    fill="none"
                     vectorEffect="non-scaling-stroke"
                     initial={isLastLine ? { pathLength: 0, opacity: 0 } : false}
                     animate={{ pathLength: 1, opacity: 1 }}
