@@ -1,8 +1,10 @@
+import { motion } from "framer-motion";
 import { useMemo } from "react";
 
 export interface PLDataPoint {
   value: number; // The P/L value at this point
   variant: "green" | "red" | "yellow" | "blue"; // Color of the dot
+  id?: number; // Optional unique ID for animation keys
 }
 
 export interface PLGraphProps {
@@ -97,6 +99,7 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
         color: getVariantColor(point.variant),
         cumulative: point.cumulative,
         index,
+        id: point.id ?? index,
       };
     });
   }, [cumulativeData, yRange]);
@@ -109,15 +112,15 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Header: P/L stats and net value */}
       <div className="flex items-center justify-between">
-        <div className="font-secondary text-green-400 text-lg tracking-widest uppercase">
+        <div className="font-secondary text-green-700 text-lg tracking-widest uppercase">
           P/L:{" "}
-          <span className="text-green-300">
+          <span className="font-secondary text-green-700">
             {stats.wins}/{stats.losses}
           </span>
         </div>
         <div
           className={`font-secondary text-lg tracking-widest ${
-            stats.netPL >= 0 ? "text-green-400" : "text-red-400"
+            stats.netPL >= 0 ? "text-green-700" : "text-red-400"
           }`}
         >
           {stats.netPL >= 0 ? "+" : ""}
@@ -202,9 +205,10 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
               {graphPoints.map((point, index) => {
                 if (index === 0) return null;
                 const prevPoint = graphPoints[index - 1];
+                const isLastLine = index === graphPoints.length - 1;
                 return (
-                  <line
-                    key={`line-${index}`}
+                  <motion.line
+                    key={`line-${point.id}`}
                     x1={prevPoint.x}
                     y1={prevPoint.y}
                     x2={point.x}
@@ -212,24 +216,57 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
                     stroke="#348F1B"
                     strokeWidth="0.8"
                     vectorEffect="non-scaling-stroke"
+                    initial={isLastLine ? { pathLength: 0, opacity: 0 } : false}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                   />
                 );
               })}
             </svg>
 
             {/* Points */}
-            {graphPoints.map((point) => (
-              <div
-                key={`point-${point.index}`}
-                className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                  backgroundColor: point.color,
-                  boxShadow: `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
-                }}
-              />
-            ))}
+            {graphPoints.map((point, index) => {
+              const isLastPoint = index === graphPoints.length - 1;
+              return (
+                <motion.div
+                  key={`point-${point.id}`}
+                  className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    left: `${point.x}%`,
+                    top: `${point.y}%`,
+                    backgroundColor: point.color,
+                  }}
+                  initial={isLastPoint ? { scale: 0, opacity: 0 } : false}
+                  animate={{
+                    scale: 1,
+                    opacity: 1,
+                    boxShadow: `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut",
+                    delay: isLastPoint ? 0.2 : 0,
+                  }}
+                  {...(isLastPoint && {
+                    initial: { scale: 0, opacity: 0 },
+                    animate: {
+                      scale: [0, 1.5, 1],
+                      opacity: 1,
+                      boxShadow: [
+                        `0 0 0px ${point.color}, 0 0 0px ${point.color}50`,
+                        `0 0 20px ${point.color}, 0 0 40px ${point.color}`,
+                        `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
+                      ],
+                    },
+                    transition: {
+                      duration: 0.5,
+                      ease: "easeOut",
+                      delay: 0.2,
+                    },
+                  })}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
