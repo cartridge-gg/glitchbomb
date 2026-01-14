@@ -1,10 +1,15 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { OrbDisplay, RarityPill } from "@/components/elements";
+import {
+  OrbCategorySummary,
+  OrbDisplay,
+  RarityPill,
+} from "@/components/elements";
 import { ChipIcon, WarningIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
+import { GameStash } from "./game-stash";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -138,6 +143,8 @@ export const GameShop = ({
   const [history, setHistory] = useState<number[]>([]);
   // Confirmation dialog for leaving without buying
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+  // Show stash overlay
+  const [showStash, setShowStash] = useState(false);
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -248,6 +255,17 @@ export const GameShop = ({
     onConfirm([]);
   };
 
+  // Show stash screen
+  if (showStash) {
+    return (
+      <GameStash
+        orbs={displayBag}
+        chips={virtualBalance}
+        onClose={() => setShowStash(false)}
+      />
+    );
+  }
+
   // Show exit confirmation screen
   if (showExitConfirmation) {
     return (
@@ -319,35 +337,15 @@ export const GameShop = ({
         })}
       </div>
 
-      {/* Your Orbs section */}
+      {/* Your Orbs section - clickable category summary */}
       <div className="flex flex-col gap-3 pt-4">
         <h2 className="text-green-600 font-secondary text-sm tracking-wider uppercase">
           Your Orbs
         </h2>
-        <div className="flex flex-wrap gap-2">
-          <AnimatePresence mode="popLayout">
-            {displayBag.map((orb, index) => (
-              <motion.div
-                key={`bag-${orb.value}-${index}`}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 25,
-                }}
-                style={{
-                  willChange: "transform, opacity",
-                  backfaceVisibility: "hidden",
-                  transform: "translateZ(0)",
-                }}
-              >
-                <OrbDisplay orb={orb} size="sm" />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        <OrbCategorySummary
+          orbs={displayBag}
+          onClick={() => setShowStash(true)}
+        />
       </div>
 
       {/* Action buttons */}
