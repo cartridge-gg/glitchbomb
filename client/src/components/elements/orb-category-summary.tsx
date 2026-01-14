@@ -93,6 +93,7 @@ export const OrbCategorySummary = ({
   // Get categories with counts > 0, in display order
   const displayOrder: OrbCategory[] = [
     "bomb",
+    "point",
     "multiplier",
     "health",
     "chip",
