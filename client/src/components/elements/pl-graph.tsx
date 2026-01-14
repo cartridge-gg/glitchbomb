@@ -194,80 +194,86 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
             style={{ top: `${yRange.zero}%` }}
           />
 
-          {/* Chart area for points */}
-          <div className="absolute inset-0">
-            {/* Lines connecting points */}
-            <svg
-              className="absolute inset-0 w-full h-full"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-            >
-              {graphPoints.map((point, index) => {
-                if (index === 0) return null;
-                const prevPoint = graphPoints[index - 1];
-                const isLastLine = index === graphPoints.length - 1;
-                return (
-                  <motion.line
-                    key={`line-${point.id}`}
-                    x1={prevPoint.x}
-                    y1={prevPoint.y}
-                    x2={point.x}
-                    y2={point.y}
-                    stroke="#348F1B"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    initial={isLastLine ? { opacity: 0 } : false}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  />
-                );
-              })}
-            </svg>
+          {/* Chart area for points and lines */}
+          <svg className="absolute inset-0 w-full h-full overflow-visible">
+            <defs>
+              {/* Glow filters for each color */}
+              <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glow-yellow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-            {/* Points */}
+            {/* Lines connecting points */}
             {graphPoints.map((point, index) => {
-              const isLastPoint = index === graphPoints.length - 1;
+              if (index === 0) return null;
+              const prevPoint = graphPoints[index - 1];
+              const isLastLine = index === graphPoints.length - 1;
               return (
-                <motion.div
-                  key={`point-${point.id}`}
-                  className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border border-white/80"
-                  style={{
-                    left: `${point.x}%`,
-                    top: `${point.y}%`,
-                    backgroundColor: point.color,
-                  }}
-                  initial={isLastPoint ? { scale: 0, opacity: 0 } : false}
-                  animate={{
-                    scale: 1,
-                    opacity: 1,
-                    boxShadow: `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    ease: "easeOut",
-                    delay: isLastPoint ? 0.2 : 0,
-                  }}
-                  {...(isLastPoint && {
-                    initial: { scale: 0, opacity: 0 },
-                    animate: {
-                      scale: [0, 1.5, 1],
-                      opacity: 1,
-                      boxShadow: [
-                        `0 0 0px ${point.color}, 0 0 0px ${point.color}50`,
-                        `0 0 20px ${point.color}, 0 0 40px ${point.color}`,
-                        `0 0 8px ${point.color}, 0 0 16px ${point.color}50`,
-                      ],
-                    },
-                    transition: {
-                      duration: 0.5,
-                      ease: "easeOut",
-                      delay: 0.2,
-                    },
-                  })}
+                <motion.line
+                  key={`line-${point.id}`}
+                  x1={`${prevPoint.x}%`}
+                  y1={`${prevPoint.y}%`}
+                  x2={`${point.x}%`}
+                  y2={`${point.y}%`}
+                  stroke="#348F1B"
+                  strokeWidth="1.5"
+                  initial={isLastLine ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               );
             })}
-          </div>
+
+            {/* Points as SVG circles */}
+            {graphPoints.map((point, index) => {
+              const isLastPoint = index === graphPoints.length - 1;
+              const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
+              return (
+                <motion.circle
+                  key={`point-${point.id}`}
+                  cx={`${point.x}%`}
+                  cy={`${point.y}%`}
+                  r="6"
+                  fill={point.color}
+                  stroke="rgba(255,255,255,0.8)"
+                  strokeWidth="1"
+                  filter={`url(#${filterName})`}
+                  initial={isLastPoint ? { scale: 0, opacity: 0 } : false}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    duration: isLastPoint ? 0.5 : 0.3,
+                    ease: "easeOut",
+                    delay: isLastPoint ? 0.2 : 0,
+                  }}
+                />
+              );
+            })}
+          </svg>
         </div>
       </div>
     </div>
