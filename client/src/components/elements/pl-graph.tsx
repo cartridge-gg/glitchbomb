@@ -244,7 +244,7 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
                   strokeWidth="1.5"
                   initial={isLastLine ? { opacity: 0 } : false}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                 />
               );
             })}
