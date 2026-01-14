@@ -20,15 +20,6 @@ export const GameStash = ({ orbs, chips, onClose }: GameStashProps) => {
         <h1 className="text-white uppercase text-3xl font-primary">
           YOUR ORBS
         </h1>
-        <div
-          className="flex items-center gap-1 px-4 py-2 rounded"
-          style={{ backgroundColor: "rgba(100, 50, 0, 0.3)" }}
-        >
-          <ChipIcon size="sm" className="text-orange-100" />
-          <span className="text-orange-100 font-secondary text-sm">
-            {chips}
-          </span>
-        </div>
       </div>
 
       {/* Subtitle - same style as shop */}
