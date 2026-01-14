@@ -107,16 +107,20 @@ export const OrbCategorySummary = ({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-3 w-full p-3 rounded-lg border border-green-900/50 bg-green-950/30 hover:bg-green-950/50 transition-colors"
+      className="flex items-center gap-3 w-full p-3 rounded-lg border border-green-700 hover:brightness-110 transition-all"
+      style={{
+        background:
+          "linear-gradient(to right, rgba(5, 46, 22, 0.8) 0%, rgba(21, 128, 61, 0.3) 100%)",
+      }}
     >
       {/* Bag icon */}
-      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-950/50">
-        <BagIcon className="w-6 h-6 text-green-600" />
+      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-950/80">
+        <BagIcon className="w-6 h-6 text-green-500" />
       </div>
 
       {/* Category orbs */}
       <div
-        className="flex items-center gap-2 flex-1 overflow-x-auto"
+        className="flex items-center gap-2 flex-1"
         style={{ scrollbarWidth: "none" }}
       >
         {categoriesToShow.length > 0 ? (
