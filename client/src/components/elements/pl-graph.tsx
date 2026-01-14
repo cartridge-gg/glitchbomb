@@ -49,23 +49,26 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
     return { wins, losses, netPL };
   }, [data]);
 
-  // Calculate Y-axis range - always centered on zero
+  // Calculate Y-axis range - zero position moves based on data
   const yRange = useMemo(() => {
     if (cumulativeData.length === 0) {
-      return { min: -100, max: 100, zero: 50 };
+      return { min: -50, max: 50, zero: 50 };
     }
 
     const values = cumulativeData.map((d) => d.cumulative);
     const maxVal = Math.max(...values, 0);
     const minVal = Math.min(...values, 0);
 
-    // Find the largest absolute value and make range symmetric
-    const maxAbs = Math.max(Math.abs(maxVal), Math.abs(minVal));
-    const padding = maxAbs * 0.2 || 30;
-    const extent = Math.ceil((maxAbs + padding) / 10) * 10;
+    // Add padding to both ends
+    const padding = Math.max(Math.abs(maxVal), Math.abs(minVal)) * 0.2 || 20;
+    const max = Math.ceil((maxVal + padding) / 10) * 10;
+    const min = Math.floor((minVal - padding) / 10) * 10;
 
-    // Symmetric range: -extent to +extent, zero always at 50%
-    return { min: -extent, max: extent, zero: 50 };
+    // Calculate zero position as percentage from top
+    const range = max - min;
+    const zero = ((max - 0) / range) * 100;
+
+    return { min, max, zero };
   }, [cumulativeData]);
 
   // Calculate graph points
@@ -187,7 +190,7 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
 
           {/* Zero line - dashed white/green */}
           <div
-            className="absolute left-0 right-0 border-t border-dashed border-green-200/50"
+            className="absolute left-0 right-0 border-t border-dashed border-green-700"
             style={{ top: `${yRange.zero}%` }}
           />
 
