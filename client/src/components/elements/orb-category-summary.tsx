@@ -110,7 +110,7 @@ export const OrbCategorySummary = ({
       className="flex items-center gap-3 w-full p-3 rounded-lg border border-green-700 hover:brightness-110 transition-all"
       style={{
         background:
-          "linear-gradient(to right, rgba(5, 46, 22, 0.8) 0%, rgba(21, 128, 61, 0.3) 100%)",
+          "linear-gradient(to right, #052e16 0%, #14532d 50%, #166534 100%)",
       }}
     >
       {/* Bag icon */}
