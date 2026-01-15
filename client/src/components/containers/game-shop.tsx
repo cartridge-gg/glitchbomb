@@ -356,7 +356,8 @@ export const GameShop = ({
           disabled={history.length === 0}
           onClick={handleUndo}
         >
-          ↻ UNDO
+          <span className="text-lg font-primary">↻</span>
+          <span>UNDO</span>
         </Button>
         <Button
           variant="default"
