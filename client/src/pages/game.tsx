@@ -43,7 +43,13 @@ export const Game = () => {
 
   // Convert pulls to PLDataPoint[] for the potential moonrocks graph
   const plData: PLDataPoint[] = useMemo(() => {
-    if (pulls.length === 0) return [];
+    // Initial points: start at 100, then drop to 90 (entry cost)
+    const initialPoints: PLDataPoint[] = [
+      { value: 100, variant: "green", id: -2 },
+      { value: 90, variant: "green", id: -1 },
+    ];
+
+    if (pulls.length === 0) return initialPoints;
 
     // Sort pulls by id and map to PLDataPoint
     const sorted = [...pulls].sort((a, b) => a.id - b.id);
@@ -64,15 +70,15 @@ export const Game = () => {
       }
     };
 
-    const data = sorted.map((pull) => ({
+    const pullData = sorted.map((pull) => ({
       value: pull.potential_moonrocks,
       variant: mapVariant(pull.orb.variant()),
       id: pull.id,
     }));
 
-    // Filter out if all values are 0 (old events without potential_moonrocks)
-    const hasValidData = data.some((d) => d.value > 0);
-    return hasValidData ? data : [];
+    // If pulls don't have valid potential_moonrocks data yet, just show initial points
+    const hasValidData = pullData.some((d) => d.value > 0);
+    return hasValidData ? [...initialPoints, ...pullData] : initialPoints;
   }, [pulls]);
 
   // Fetch username from controller
