@@ -281,14 +281,18 @@ export const GameShop = ({
         <div className="flex items-stretch gap-3 w-full pt-2">
           <Button
             variant="secondary"
-            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            gradient="green"
+            className="min-h-14 w-full font-secondary text-sm tracking-widest"
+            wrapperClassName="flex-1"
             onClick={() => setShowExitConfirmation(false)}
           >
             ← BACK
           </Button>
           <Button
             variant="default"
-            className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+            gradient="green"
+            className="min-h-14 w-full font-secondary text-sm tracking-widest"
+            wrapperClassName="flex-1"
             onClick={handleConfirmExit}
           >
             LEAVE SHOP
@@ -346,7 +350,9 @@ export const GameShop = ({
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest flex items-center justify-center gap-2"
+          gradient="green"
+          className="min-h-14 w-full font-secondary text-sm tracking-widest flex items-center justify-center gap-2"
+          wrapperClassName="flex-1"
           disabled={history.length === 0}
           onClick={handleUndo}
         >
@@ -355,7 +361,9 @@ export const GameShop = ({
         </Button>
         <Button
           variant="default"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          gradient="green"
+          className="min-h-14 w-full font-secondary text-sm tracking-widest"
+          wrapperClassName="flex-1"
           onClick={handleContinue}
         >
           CONTINUE
