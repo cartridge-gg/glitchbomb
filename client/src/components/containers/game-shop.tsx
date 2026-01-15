@@ -160,34 +160,52 @@ export const GameShop = ({
     }
   }, [resetKey]);
 
-  // Calculate the price for a specific quantity of an orb (considering 20% escalation)
-  const calculatePriceForQuantity = (orb: Orb, quantity: number): number => {
-    let total = 0;
-    let price = orb.cost();
-    for (let i = 0; i < quantity; i++) {
-      total += price;
-      price = Math.ceil(price * 1.2);
-    }
-    return total;
+  // Get total quantity purchased for an orb type (across all shop positions)
+  const getOrbTypeQuantity = (orbId: number): number => {
+    return orbs.reduce((count, orb, index) => {
+      if (orb.into() === orbId) {
+        return count + (quantities[index] || 0);
+      }
+      return count;
+    }, 0);
   };
 
-  // Get the next purchase price for an orb at a given index
-  const getNextPrice = (orb: Orb, index: number): number => {
-    const currentQty = quantities[index] || 0;
+  // Get the next purchase price for an orb (based on orb TYPE purchase count, not index)
+  const getNextPrice = (orb: Orb): number => {
+    const orbId = orb.into();
+    const totalQtyForType = getOrbTypeQuantity(orbId);
     let price = orb.cost();
-    for (let i = 0; i < currentQty; i++) {
+    for (let i = 0; i < totalQtyForType; i++) {
       price = Math.ceil(price * 1.2);
     }
     return price;
   };
 
-  // Calculate total spent
+  // Calculate total spent - need to process purchases in order by orb type
   const totalSpent = useMemo(() => {
-    return orbs.reduce((sum, orb, index) => {
-      const qty = quantities[index] || 0;
-      return sum + calculatePriceForQuantity(orb, qty);
-    }, 0);
-  }, [orbs, quantities]);
+    // Group purchases by orb type and calculate escalating costs
+    const purchaseCountByType: Record<number, number> = {};
+    let total = 0;
+
+    // Process history in order to get correct escalating prices
+    for (const index of history) {
+      const orb = orbs[index];
+      const orbId = orb.into();
+      const currentCount = purchaseCountByType[orbId] || 0;
+
+      // Calculate price at this purchase count
+      let price = orb.cost();
+      for (let i = 0; i < currentCount; i++) {
+        price = Math.ceil(price * 1.2);
+      }
+      total += price;
+
+      // Increment count for this orb type
+      purchaseCountByType[orbId] = currentCount + 1;
+    }
+
+    return total;
+  }, [orbs, history]);
 
   const virtualBalance = balance - totalSpent;
 
@@ -205,7 +223,7 @@ export const GameShop = ({
 
   const handleIncrement = (index: number) => {
     const orb = orbs[index];
-    const nextPrice = getNextPrice(orb, index);
+    const nextPrice = getNextPrice(orb);
     if (nextPrice <= virtualBalance) {
       setQuantities((prev) => ({
         ...prev,
@@ -320,7 +338,7 @@ export const GameShop = ({
         style={{ scrollbarWidth: "none" }}
       >
         {orbs.map((orb, index) => {
-          const nextPrice = getNextPrice(orb, index);
+          const nextPrice = getNextPrice(orb);
           const canAfford = nextPrice <= virtualBalance;
 
           return (
