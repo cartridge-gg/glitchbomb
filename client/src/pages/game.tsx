@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
@@ -12,9 +12,10 @@ import {
   MilestoneReached,
 } from "@/components/containers";
 import {
-  GameGraph,
   HeartsDisplay,
   Multiplier,
+  type PLDataPoint,
+  PLGraph,
   PointsProgress,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
@@ -39,6 +40,36 @@ export const Game = () => {
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
+
+  // Convert pulls to PLDataPoint[] for the potential moonrocks graph
+  const plData: PLDataPoint[] = useMemo(() => {
+    if (pulls.length === 0) return [];
+
+    // Sort pulls by id and map to PLDataPoint
+    const sorted = [...pulls].sort((a, b) => a.id - b.id);
+
+    // Map orb variant to PLGraph variant
+    const mapVariant = (
+      orbVariant: string,
+    ): "green" | "red" | "yellow" | "blue" => {
+      switch (orbVariant) {
+        case "red":
+          return "red"; // Bombs
+        case "yellow":
+          return "yellow"; // Multiplier orbs
+        case "blue":
+          return "blue"; // Moonrock orbs
+        default:
+          return "green"; // Point orbs, health, chips, etc.
+      }
+    };
+
+    return sorted.map((pull) => ({
+      value: pull.potential_moonrocks,
+      variant: mapVariant(pull.orb.variant()),
+      id: pull.id,
+    }));
+  }, [pulls]);
 
   // Fetch username from controller
   useEffect(() => {
@@ -140,7 +171,7 @@ export const Game = () => {
   const GamePlayView = () => (
     <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
       <PointsProgress points={game.points} milestone={game.milestone} />
-      <GameGraph pulls={pulls} className="mt-8" />
+      <PLGraph data={plData} mode="absolute" title="POTENTIAL" />
 
       <GameScene
         className="grow"
