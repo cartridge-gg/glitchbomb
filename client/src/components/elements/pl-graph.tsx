@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 
 export interface PLDataPoint {
-  value: number; // The P/L value at this point
+  value: number; // The P/L value at this point (delta or absolute based on mode)
   variant: "green" | "red" | "yellow" | "blue"; // Color of the dot
   id?: number; // Optional unique ID for animation keys
 }
@@ -10,6 +10,8 @@ export interface PLDataPoint {
 export interface PLGraphProps {
   data: PLDataPoint[];
   className?: string;
+  mode?: "delta" | "absolute"; // delta = value is change per point, absolute = value is total at each point
+  title?: string; // Custom title (default: "P/L")
 }
 
 // Map variant to actual color
@@ -28,9 +30,22 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
   }
 };
 
-export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
-  // Calculate cumulative P/L at each point
+export const PLGraph = ({
+  data,
+  className = "",
+  mode = "delta",
+  title = "P/L",
+}: PLGraphProps) => {
+  // Calculate cumulative values at each point
   const cumulativeData = useMemo(() => {
+    if (mode === "absolute") {
+      // Values are already absolute (like potential_moonrocks)
+      return data.map((point) => ({
+        ...point,
+        cumulative: point.value,
+      }));
+    }
+    // Delta mode: accumulate values
     let cumulative = 0;
     return data.map((point) => {
       cumulative += point.value;
@@ -39,15 +54,28 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
         cumulative,
       };
     });
-  }, [data]);
+  }, [data, mode]);
 
-  // Calculate wins and losses
+  // Calculate wins and losses (based on deltas or value changes)
   const stats = useMemo(() => {
+    if (mode === "absolute") {
+      // For absolute mode, calculate deltas between consecutive points
+      let wins = 0;
+      let losses = 0;
+      for (let i = 1; i < data.length; i++) {
+        const delta = data[i].value - data[i - 1].value;
+        if (delta > 0) wins++;
+        else if (delta < 0) losses++;
+      }
+      const netPL = data.length > 0 ? data[data.length - 1].value : 0;
+      return { wins, losses, netPL };
+    }
+    // Delta mode: original logic
     const wins = data.filter((d) => d.value > 0).length;
     const losses = data.filter((d) => d.value < 0).length;
     const netPL = data.reduce((sum, d) => sum + d.value, 0);
     return { wins, losses, netPL };
-  }, [data]);
+  }, [data, mode]);
 
   // Calculate Y-axis range - zero position moves based on data
   const yRange = useMemo(() => {
@@ -119,10 +147,10 @@ export const PLGraph = ({ data, className = "" }: PLGraphProps) => {
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      {/* Header: P/L stats and net value */}
+      {/* Header: stats and net value */}
       <div className="flex items-center justify-between">
         <div className="font-secondary text-green-700 text-lg tracking-widest uppercase">
-          P/L:{" "}
+          {title}:{" "}
           <span className="font-secondary text-green-700">
             {stats.wins}/{stats.losses}
           </span>

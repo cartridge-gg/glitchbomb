@@ -204,4 +204,16 @@ export interface RawOrbPulled {
     value: string;
     key: boolean;
   };
+  potential_moonrocks?: {
+    type: "primitive";
+    type_name: "u16";
+    value: string;
+    key: boolean;
+  };
+  delta?: {
+    type: "primitive";
+    type_name: "u16";
+    value: string;
+    key: boolean;
+  };
 }

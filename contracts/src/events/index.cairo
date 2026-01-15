@@ -39,13 +39,22 @@ pub struct OrbPulled {
     #[key]
     pub id: u8,
     pub orb: u8,
+    pub potential_moonrocks: u16, // Total points after this pull (what you'd cash out)
+    pub delta: u16 // Points earned from this pull
 }
 
 #[generate_trait]
 pub impl OrbPulledImpl of OrbPulledTrait {
     #[inline]
-    fn new(id: u8, game: @Game, orb: @Orb) -> OrbPulled {
-        OrbPulled { pack_id: *game.pack_id, game_id: *game.id, id: id, orb: (*orb).into() }
+    fn new(id: u8, game: @Game, orb: @Orb, delta: u16) -> OrbPulled {
+        OrbPulled {
+            pack_id: *game.pack_id,
+            game_id: *game.id,
+            id: id,
+            orb: (*orb).into(),
+            potential_moonrocks: *game.points,
+            delta: delta,
+        }
     }
 }
 

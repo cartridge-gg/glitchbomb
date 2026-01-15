@@ -128,14 +128,17 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
+            let points_before = game.points;
             let config = store.config();
             let mut rng = RandomTrait::new_vrf(config.vrf());
             let (orbs, earnings) = game.pull(rng.next_seed());
+            let points_delta = game.points - points_before;
             store.set_game(@game);
 
             // [Event] Emit OrbPulled for each orb (max 2 with DoubleDraw)
-            store.orb_pulled(@game, orbs.get(0), 0);
-            store.orb_pulled(@game, orbs.get(1), 1);
+            // First orb gets the full points delta, second orb (if any) gets 0
+            store.orb_pulled(@game, orbs.get(0), 0, points_delta);
+            store.orb_pulled(@game, orbs.get(1), 1, 0);
 
             // [Event] Emit GameOver if dead
             if game.over {
