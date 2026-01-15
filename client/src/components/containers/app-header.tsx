@@ -6,6 +6,7 @@ import {
   MoonrockIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GradientBorder } from "@/components/ui/gradient-border";
 
 export interface AppHeaderProps {
   moonrocks: number;
@@ -33,6 +34,7 @@ export const AppHeader = ({
         {showBack && (
           <Button
             variant="secondary"
+            gradient="green"
             className="hidden md:flex h-12 w-12 p-0"
             onClick={() => navigate(backPath)}
           >
@@ -61,12 +63,7 @@ export const AppHeader = ({
       {/* Right: Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
         {/* Moonrocks button with blue gradient border */}
-        <div
-          className="rounded-lg p-[1px]"
-          style={{
-            background: "linear-gradient(180deg, #60A5FA40 0%, #60A5FA00 100%)",
-          }}
-        >
+        <GradientBorder color="blue">
           <button
             type="button"
             className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
@@ -77,21 +74,15 @@ export const AppHeader = ({
               {Math.floor(moonrocks).toLocaleString()}
             </span>
           </button>
-        </div>
+        </GradientBorder>
         {username && (
-          <div
-            className="rounded-lg p-[1px]"
-            style={{
-              background:
-                "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
-            }}
-          >
+          <GradientBorder color="green">
             <Profile
               username={username}
               onClick={onProfileClick}
               className="w-auto px-3 md:px-4"
             />
-          </div>
+          </GradientBorder>
         )}
       </div>
     </div>

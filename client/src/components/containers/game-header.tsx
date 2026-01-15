@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
 import { ArrowLeftIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GradientBorder } from "@/components/ui/gradient-border";
 
 export interface GameHeaderProps {
   moonrocks: number;
@@ -17,7 +18,9 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
       {/* Back button (full left) */}
       <Button
         variant="secondary"
-        className="h-12 w-12 p-0 shrink-0"
+        gradient="green"
+        className="h-12 w-12 p-0"
+        wrapperClassName="shrink-0"
         onClick={() => navigate("/games")}
       >
         <ArrowLeftIcon size="sm" />
@@ -26,12 +29,7 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
       {/* Center: Moonrocks + Chips - flexible width */}
       <div className="flex-1 flex items-stretch gap-2 min-w-0 max-w-[420px] mx-auto">
         {/* Moonrocks (blue) with gradient border */}
-        <div
-          className="flex-1 rounded-lg p-[1px] min-w-0"
-          style={{
-            background: "linear-gradient(180deg, #60A5FA40 0%, #60A5FA00 100%)",
-          }}
-        >
+        <GradientBorder color="blue" className="flex-1 min-w-0">
           <button
             type="button"
             className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-3 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
@@ -41,14 +39,9 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
               {Math.floor(moonrocks).toLocaleString()}
             </span>
           </button>
-        </div>
+        </GradientBorder>
         {/* Chips (orange) with gradient border */}
-        <div
-          className="flex-1 rounded-lg p-[1px] min-w-0"
-          style={{
-            background: "linear-gradient(180deg, #FB923C40 0%, #FB923C00 100%)",
-          }}
-        >
+        <GradientBorder color="orange" className="flex-1 min-w-0">
           <button
             type="button"
             className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-3 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
@@ -58,18 +51,13 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
               {chips.toLocaleString()}
             </span>
           </button>
-        </div>
+        </GradientBorder>
       </div>
 
       {/* Profile (full right) with green gradient border */}
-      <div
-        className="rounded-lg p-[1px] shrink-0"
-        style={{
-          background: "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
-        }}
-      >
+      <GradientBorder color="green" className="shrink-0">
         <Profile username={username || "..."} className="w-auto px-4" />
-      </div>
+      </GradientBorder>
     </div>
   );
 };

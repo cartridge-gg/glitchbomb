@@ -1,6 +1,10 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
+import {
+  GradientBorder,
+  type GradientColor,
+} from "@/components/ui/gradient-border";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -32,23 +36,48 @@ const buttonVariants = cva(
   },
 );
 
-export const Button = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> &
-    VariantProps<typeof buttonVariants> & {
-      asChild?: boolean;
-    }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button";
+export interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  gradient?: GradientColor;
+  wrapperClassName?: string;
+}
 
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      gradient,
+      wrapperClassName,
+      ...props
+    },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : "button";
+
+    const button = (
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+
+    if (gradient && gradient !== "none") {
+      return (
+        <GradientBorder color={gradient} className={wrapperClassName}>
+          {button}
+        </GradientBorder>
+      );
+    }
+
+    return button;
+  },
+);
 
 Button.displayName = "Button";
