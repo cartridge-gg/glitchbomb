@@ -38,7 +38,7 @@ export const MilestoneReached = ({
         <Button
           variant="secondary"
           gradient="green"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           onClick={onCashOut}
         >
@@ -47,7 +47,7 @@ export const MilestoneReached = ({
         <Button
           variant="default"
           gradient="green"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           onClick={onEnterShop}
         >
