@@ -28,19 +28,25 @@ export const AppHeader = ({
 
   return (
     <div className="relative flex items-center gap-2 px-4 py-4">
-      {/* Left: Back button or Logo on mobile */}
+      {/* Left: Back button (desktop only) + Logo on mobile */}
       <div className="flex items-center gap-2 shrink-0">
-        {showBack ? (
+        {showBack && (
           <Button
             variant="secondary"
-            className="h-12 w-12 p-0"
+            className="hidden md:flex h-12 w-12 p-0"
             onClick={() => navigate(backPath)}
           >
             <ArrowLeftIcon size="sm" />
           </Button>
-        ) : null}
-        {/* Logo - visible on left for mobile, hidden on md+ */}
-        <GlitchBombIcon size="xl" className="text-white md:hidden" />
+        )}
+        {/* Logo on mobile - clickable to go back if showBack is true */}
+        <button
+          type="button"
+          className="md:hidden"
+          onClick={showBack ? () => navigate(backPath) : undefined}
+        >
+          <GlitchBombIcon size="xl" className="text-white" />
+        </button>
       </div>
 
       {/* Center: GlitchBomb icon - only on md+ screens */}
