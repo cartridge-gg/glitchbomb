@@ -60,11 +60,11 @@ export const AppHeader = ({
 
       {/* Right: Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
-        {/* Moonrocks button with gradient border */}
+        {/* Moonrocks button with blue gradient border */}
         <div
           className="rounded-lg p-[1px]"
           style={{
-            background: "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
+            background: "linear-gradient(180deg, #60A5FA40 0%, #60A5FA00 100%)",
           }}
         >
           <button
