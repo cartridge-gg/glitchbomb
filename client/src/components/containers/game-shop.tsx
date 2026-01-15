@@ -351,13 +351,12 @@ export const GameShop = ({
         <Button
           variant="secondary"
           gradient="green"
-          className="min-h-14 w-full font-secondary text-sm tracking-widest flex items-center justify-center gap-2"
+          className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           disabled={history.length === 0}
           onClick={handleUndo}
         >
-          <span className="text-lg leading-none">↻</span>
-          <span>UNDO</span>
+          ↻ UNDO
         </Button>
         <Button
           variant="default"
