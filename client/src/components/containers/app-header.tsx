@@ -64,7 +64,7 @@ export const AppHeader = ({
         <div
           className="rounded-lg p-[1px]"
           style={{
-            background: "linear-gradient(180deg, #36F81800 0%, #35F81840 100%)",
+            background: "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
           }}
         >
           <button
@@ -83,7 +83,7 @@ export const AppHeader = ({
             className="rounded-lg p-[1px]"
             style={{
               background:
-                "linear-gradient(180deg, #36F81800 0%, #35F81840 100%)",
+                "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
             }}
           >
             <Profile
