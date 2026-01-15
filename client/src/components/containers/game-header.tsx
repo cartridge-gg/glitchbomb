@@ -14,20 +14,28 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center gap-2 py-4 px-4">
-      {/* Back button (full left) */}
-      <Button
-        variant="secondary"
-        gradient="green"
-        className="h-12 w-12 p-0"
-        wrapperClassName="shrink-0"
-        onClick={() => navigate("/games")}
-      >
-        <ArrowLeftIcon size="sm" />
-      </Button>
+    <div className="relative py-4 px-4">
+      {/* Back button - absolute left */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+        <Button
+          variant="secondary"
+          gradient="green"
+          className="h-12 w-12 p-0"
+          onClick={() => navigate("/games")}
+        >
+          <ArrowLeftIcon size="sm" />
+        </Button>
+      </div>
 
-      {/* Center: Moonrocks + Chips - flexible width */}
-      <div className="flex-1 flex items-stretch gap-2 min-w-0 max-w-[420px] mx-auto">
+      {/* Profile - absolute right */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+        <GradientBorder color="green">
+          <Profile username={username || "..."} className="w-auto px-4" />
+        </GradientBorder>
+      </div>
+
+      {/* Center: Moonrocks + Chips - matches game container width */}
+      <div className="flex items-stretch gap-2 max-w-[420px] mx-auto px-4">
         {/* Moonrocks (blue) with gradient border */}
         <GradientBorder color="blue" className="flex-1 min-w-0">
           <button
@@ -53,11 +61,6 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
           </button>
         </GradientBorder>
       </div>
-
-      {/* Profile (full right) with green gradient border */}
-      <GradientBorder color="green" className="shrink-0">
-        <Profile username={username || "..."} className="w-auto px-4" />
-      </GradientBorder>
     </div>
   );
 };
