@@ -1,5 +1,6 @@
 import { SparkleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GradientBorder } from "@/components/ui/gradient-border";
 
 export interface MilestoneReachedProps {
   milestone: number;
@@ -35,15 +36,19 @@ export const MilestoneReached = ({
       </div>
 
       <div className="flex items-stretch gap-3 w-full pt-2">
-        <Button
-          variant="secondary"
-          gradient="green"
-          className="min-h-14 w-full font-secondary text-sm tracking-widest"
-          wrapperClassName="flex-1"
-          onClick={onCashOut}
-        >
-          CASH OUT
-        </Button>
+        <GradientBorder color="purple" className="flex-1">
+          <button
+            type="button"
+            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+            style={{
+              background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+              color: "#FF80FF",
+            }}
+            onClick={onCashOut}
+          >
+            CASH OUT
+          </button>
+        </GradientBorder>
         <Button
           variant="default"
           gradient="green"
