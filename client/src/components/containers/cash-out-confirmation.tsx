@@ -1,5 +1,6 @@
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GradientBorder } from "@/components/ui/gradient-border";
 
 export interface CashOutConfirmationProps {
   points: number;
@@ -37,23 +38,25 @@ export const CashOutConfirmation = ({
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
+          gradient="green"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
           onClick={onCancel}
         >
           ← BACK
         </Button>
-        <button
-          type="button"
-          className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
-          style={{
-            background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-            border: "2px solid rgba(138, 43, 226, 0.4)",
-            color: "#FF80FF",
-          }}
-          onClick={onConfirm}
-        >
-          CASH OUT
-        </button>
+        <GradientBorder color="purple" className="flex-1">
+          <button
+            type="button"
+            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+            style={{
+              background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+              color: "#FF80FF",
+            }}
+            onClick={onConfirm}
+          >
+            CASH OUT
+          </button>
+        </GradientBorder>
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import {
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
 import { usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
@@ -158,23 +159,25 @@ export const Game = () => {
       <div className="flex items-stretch gap-3">
         <Button
           variant="secondary"
+          gradient="green"
           className="min-h-14 min-w-16"
           onClick={() => setOverlay("stash")}
         >
           <BagIcon className="w-6 h-6 text-green-400" />
         </Button>
-        <button
-          type="button"
-          className="flex-1 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
-          style={{
-            background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-            border: "2px solid rgba(138, 43, 226, 0.4)",
-            color: "#FF80FF",
-          }}
-          onClick={() => setOverlay("cashout")}
-        >
-          CASH OUT
-        </button>
+        <GradientBorder color="purple" className="flex-1">
+          <button
+            type="button"
+            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+            style={{
+              background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+              color: "#FF80FF",
+            }}
+            onClick={() => setOverlay("cashout")}
+          >
+            CASH OUT
+          </button>
+        </GradientBorder>
       </div>
     </div>
   );

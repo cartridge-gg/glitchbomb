@@ -7,7 +7,7 @@ const gradientColors: Record<GradientColor, string> = {
   green: "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
   blue: "linear-gradient(180deg, #60A5FA40 0%, #60A5FA00 100%)",
   orange: "linear-gradient(180deg, #FB923C40 0%, #FB923C00 100%)",
-  purple: "linear-gradient(180deg, #A855F740 0%, #A855F700 100%)",
+  purple: "linear-gradient(180deg, #FF80FF60 0%, #FF80FF00 100%)",
   none: "transparent",
 };
 

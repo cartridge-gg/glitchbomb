@@ -37,14 +37,18 @@ export const MilestoneReached = ({
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
+          gradient="green"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          wrapperClassName="flex-1"
           onClick={onCashOut}
         >
           CASH OUT
         </Button>
         <Button
           variant="default"
+          gradient="green"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          wrapperClassName="flex-1"
           onClick={onEnterShop}
         >
           ENTER SHOP
