@@ -64,11 +64,15 @@ export const Game = () => {
       }
     };
 
-    return sorted.map((pull) => ({
+    const data = sorted.map((pull) => ({
       value: pull.potential_moonrocks,
       variant: mapVariant(pull.orb.variant()),
       id: pull.id,
     }));
+
+    // Filter out if all values are 0 (old events without potential_moonrocks)
+    const hasValidData = data.some((d) => d.value > 0);
+    return hasValidData ? data : [];
   }, [pulls]);
 
   // Fetch username from controller
