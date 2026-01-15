@@ -171,17 +171,18 @@ export const GameShop = ({
   };
 
   // Get the next purchase price for an orb (based on orb TYPE purchase count, not index)
+  // Contract formula: cost = ceil(baseCost * (1 + count * 0.2))
+  // NOT compounding! Each 20% is added to base, not to previous price
   const getNextPrice = (orb: Orb): number => {
     const orbId = orb.into();
     const totalQtyForType = getOrbTypeQuantity(orbId);
-    let price = orb.cost();
-    for (let i = 0; i < totalQtyForType; i++) {
-      price = Math.ceil(price * 1.2);
-    }
-    return price;
+    const baseCost = orb.cost();
+    const multiplier = 1 + totalQtyForType * 0.2;
+    return Math.ceil(baseCost * multiplier);
   };
 
   // Calculate total spent - need to process purchases in order by orb type
+  // Contract formula: cost = ceil(baseCost * (1 + count * 0.2))
   const totalSpent = useMemo(() => {
     // Group purchases by orb type and calculate escalating costs
     const purchaseCountByType: Record<number, number> = {};
@@ -193,11 +194,10 @@ export const GameShop = ({
       const orbId = orb.into();
       const currentCount = purchaseCountByType[orbId] || 0;
 
-      // Calculate price at this purchase count
-      let price = orb.cost();
-      for (let i = 0; i < currentCount; i++) {
-        price = Math.ceil(price * 1.2);
-      }
+      // Calculate price at this purchase count (linear, not compounding)
+      const baseCost = orb.cost();
+      const multiplier = 1 + currentCount * 0.2;
+      const price = Math.ceil(baseCost * multiplier);
       total += price;
 
       // Increment count for this orb type

@@ -239,6 +239,7 @@ export class Orb {
   }
 
   public cost(): number {
+    // Costs must match contracts/src/types/orb.cairo
     switch (this.value) {
       case OrbType.Health1:
         return 9;
@@ -252,16 +253,12 @@ export class Orb {
         return 16;
       case OrbType.Point5:
         return 5;
-      case OrbType.Point6:
-        return 6;
       case OrbType.Point7:
-        return 7;
+        return 8; // Contract: Point7 => 8
       case OrbType.Point8:
-        return 8;
+        return 11; // Contract: Point8 => 11
       case OrbType.Point9:
-        return 9;
-      case OrbType.PointOrb1:
-        return 1;
+        return 13; // Contract: Point9 => 13
       case OrbType.PointBomb4:
         return 6;
       case OrbType.Moonrock15:
