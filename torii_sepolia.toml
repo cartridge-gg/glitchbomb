@@ -15,5 +15,8 @@ pre_confirmed = true
 polling_interval = 250
 contracts = []
 
+[http]
+cors_origins = ["*"]
+
 [erc]
 metadata_updates = true
