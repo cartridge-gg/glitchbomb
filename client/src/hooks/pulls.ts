@@ -1,6 +1,5 @@
 import {
-  MemberClause,
-  OrComposeClause,
+  ClauseBuilder,
   type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
@@ -13,20 +12,13 @@ import { OrbPulled, type RawOrbPulled } from "@/models";
 const ENTITIES_LIMIT = 10_000;
 
 const getPullsQuery = (packId: number, gameId: number) => {
-  const clauses = OrComposeClause([
-    MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
-      "pack_id",
-      "Eq",
-      `0x${packId.toString(16).padStart(16, "0")}`,
-    ),
-    MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
-      "game_id",
-      "Eq",
-      `${gameId.toString()}`,
-    ),
-  ]);
+  const modelName: `${string}-${string}` = `${NAMESPACE}-${OrbPulled.getModelName()}`;
+  // Use keys() to match BOTH pack_id AND game_id (composite key)
+  const clauses = new ClauseBuilder().keys(
+    [modelName],
+    [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+    "VariableLen",
+  );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
     .includeHashedKeys()
