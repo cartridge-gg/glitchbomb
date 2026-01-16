@@ -11,6 +11,7 @@ export interface PLGraphProps {
   className?: string;
   mode?: "delta" | "absolute"; // delta = value is change per point, absolute = value is total at each point
   title?: string; // Custom title (default: "P/L")
+  baseline?: number; // The baseline value (default: 0 for delta, 100 for absolute)
 }
 
 // Map variant to actual color
@@ -34,7 +35,10 @@ export const PLGraph = ({
   className = "",
   mode = "delta",
   title = "P/L",
+  baseline: baselineProp,
 }: PLGraphProps) => {
+  // Default baseline: 0 for delta mode, 100 for absolute mode
+  const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
   // Calculate cumulative values at each point
   const cumulativeData = useMemo(() => {
     if (mode === "absolute") {
@@ -66,7 +70,10 @@ export const PLGraph = ({
         if (delta > 0) wins++;
         else if (delta < 0) losses++;
       }
-      const netPL = data.length > 0 ? data[data.length - 1].value : 0;
+      // Net P/L is relative to baseline (e.g., 100)
+      const currentValue =
+        data.length > 0 ? data[data.length - 1].value : baseline;
+      const netPL = currentValue - baseline;
       return { wins, losses, netPL };
     }
     // Delta mode: original logic
@@ -74,38 +81,111 @@ export const PLGraph = ({
     const losses = data.filter((d) => d.value < 0).length;
     const netPL = data.reduce((sum, d) => sum + d.value, 0);
     return { wins, losses, netPL };
-  }, [data, mode]);
+  }, [data, mode, baseline]);
 
-  // Calculate Y-axis range - zero position moves based on data
+  // Calculate Y-axis range - baseline position moves based on data
   const yRange = useMemo(() => {
     if (cumulativeData.length === 0) {
-      return { min: -50, max: 50, zero: 50 };
+      return {
+        min: baseline - 20,
+        max: baseline + 20,
+        baselinePos: 50,
+        hasBelowBaseline: false,
+      };
     }
 
     const values = cumulativeData.map((d) => d.cumulative);
-    const maxVal = Math.max(...values, 0);
-    const minVal = Math.min(...values, 0);
+    const maxVal = Math.max(...values, baseline);
+    const minVal = Math.min(...values, baseline);
+    const hasBelowBaseline = minVal < baseline;
 
-    // Add padding to both ends
-    const padding = Math.max(Math.abs(maxVal), Math.abs(minVal)) * 0.2 || 20;
-    let max = Math.ceil((maxVal + padding) / 10) * 10;
-    let min = Math.floor((minVal - padding) / 10) * 10;
+    // Add padding to the top
+    const topPadding = Math.max((maxVal - baseline) * 0.2, 10);
+    let max = Math.ceil((maxVal + topPadding) / 10) * 10;
+    let min: number;
 
-    // Enforce minimum range of 100 to prevent pills from overlapping
-    const minRange = 100;
-    const currentRange = max - min;
-    if (currentRange < minRange) {
-      const expandBy = (minRange - currentRange) / 2;
-      max = Math.ceil((max + expandBy) / 10) * 10;
-      min = Math.floor((min - expandBy) / 10) * 10;
+    if (hasBelowBaseline) {
+      // If there are values below baseline, include them
+      const bottomPadding = Math.max((baseline - minVal) * 0.2, 10);
+      min = Math.floor((minVal - bottomPadding) / 10) * 10;
+    } else {
+      // No values below baseline - min is baseline
+      min = baseline;
     }
 
-    // Calculate zero position as percentage from top
-    const range = max - min;
-    const zero = ((max - 0) / range) * 100;
+    // Enforce minimum range to prevent cramped graph
+    const minRange = 50;
+    const currentRange = max - min;
+    if (currentRange < minRange) {
+      max = Math.ceil((max + (minRange - currentRange)) / 10) * 10;
+    }
 
-    return { min, max, zero };
-  }, [cumulativeData]);
+    // Calculate baseline position as percentage from top
+    const range = max - min;
+    const baselinePos = ((max - baseline) / range) * 100;
+
+    return { min, max, baselinePos, hasBelowBaseline };
+  }, [cumulativeData, baseline]);
+
+  // Calculate intermediate Y-axis labels between baseline and max
+  const yAxisLabels = useMemo(() => {
+    const { min, max, hasBelowBaseline } = yRange;
+    const labels: { value: number; position: number }[] = [];
+    const range = max - min;
+
+    // Always show max at top
+    labels.push({ value: max, position: 0 });
+
+    // Add intermediate labels between max and baseline (or max and min if below baseline)
+    const topValue = max;
+    const bottomValue = hasBelowBaseline ? baseline : min;
+    const labelRange = topValue - bottomValue;
+
+    // Calculate nice step size for 2-3 intermediate labels
+    const idealSteps = 3;
+    const rawStep = labelRange / idealSteps;
+    // Round to nice numbers (10, 20, 25, 50, etc.)
+    const niceSteps = [5, 10, 20, 25, 50, 100];
+    const step =
+      niceSteps.find((s) => s >= rawStep) || Math.ceil(rawStep / 10) * 10;
+
+    // Add labels from max down to baseline (or min)
+    for (let v = max - step; v > bottomValue; v -= step) {
+      const roundedV = Math.round(v / step) * step;
+      if (roundedV > bottomValue && roundedV < max) {
+        const position = ((max - roundedV) / range) * 100;
+        // Only add if not too close to other labels (at least 12% apart)
+        const tooClose = labels.some(
+          (l) => Math.abs(l.position - position) < 12,
+        );
+        if (!tooClose) {
+          labels.push({ value: roundedV, position });
+        }
+      }
+    }
+
+    // Add baseline label if it's in range (not at top or bottom edges)
+    const baselinePosition = ((max - baseline) / range) * 100;
+    if (baselinePosition > 10 && baselinePosition < 90) {
+      const tooClose = labels.some(
+        (l) => Math.abs(l.position - baselinePosition) < 12,
+      );
+      if (!tooClose) {
+        labels.push({ value: baseline, position: baselinePosition });
+      }
+    }
+
+    // Add min at bottom only if there are values below baseline
+    if (hasBelowBaseline) {
+      labels.push({ value: min, position: 100 });
+    } else {
+      // Show baseline at bottom when no values below baseline
+      labels.push({ value: baseline, position: 100 });
+    }
+
+    // Sort by position (top to bottom)
+    return labels.sort((a, b) => a.position - b.position);
+  }, [yRange, baseline]);
 
   // Calculate graph points
   const graphPoints = useMemo(() => {
@@ -167,22 +247,24 @@ export const PLGraph = ({
       {/* Graph container */}
       <div className="relative w-full h-40">
         {/* Y-axis labels as pills */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between py-1 z-10">
-          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
-            {yRange.max}
-          </span>
-          {/* Only show 0 pill if it's not too close to top or bottom (15-85% range) */}
-          {yRange.zero > 15 && yRange.zero < 85 && (
+        <div className="absolute left-0 top-0 bottom-0 z-10">
+          {yAxisLabels.map((label, index) => (
             <span
-              className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full -translate-y-1/2"
-              style={{ position: "absolute", top: `${yRange.zero}%` }}
+              key={`label-${label.value}-${index}`}
+              className="absolute font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full"
+              style={{
+                top: `${label.position}%`,
+                transform:
+                  label.position === 0
+                    ? "translateY(0)"
+                    : label.position === 100
+                      ? "translateY(-100%)"
+                      : "translateY(-50%)",
+              }}
             >
-              0
+              {label.value}
             </span>
-          )}
-          <span className="font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full">
-            {yRange.min}
-          </span>
+          ))}
         </div>
 
         {/* Graph area */}
@@ -227,10 +309,10 @@ export const PLGraph = ({
             </svg>
           </div>
 
-          {/* Zero line - dashed white/green */}
+          {/* Baseline line - dashed white/green */}
           <div
             className="absolute left-0 right-0 border-t border-dashed border-green-700"
-            style={{ top: `${yRange.zero}%` }}
+            style={{ top: `${yRange.baselinePos}%` }}
           />
 
           {/* Chart area for points and lines */}

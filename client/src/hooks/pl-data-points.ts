@@ -25,6 +25,16 @@ const getPLDataPointsQuery = (packId: number, gameId: number) => {
     .withLimit(ENTITIES_LIMIT);
 };
 
+// Subscription query - broader to catch all events, filter client-side
+const getSubscriptionQuery = () => {
+  const modelName: `${string}-${string}` = `${NAMESPACE}-${PLDataPoint.getModelName()}`;
+  const clauses = new ClauseBuilder().keys([modelName], [], "VariableLen");
+  return new ToriiQueryBuilder()
+    .withClause(clauses.build())
+    .includeHashedKeys()
+    .withLimit(ENTITIES_LIMIT);
+};
+
 export function usePLDataPoints({
   packId,
   gameId,
@@ -41,17 +51,51 @@ export function usePLDataPoints({
   const isReady = packId > 0 && gameId > 0;
   const fetchKey = isReady ? `${packId}-${gameId}` : null;
 
+  // Create onUpdate that filters by packId/gameId
   const onUpdate = useCallback(
-    (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
+    (
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+      filterPackId?: number,
+      filterGameId?: number,
+    ) => {
+      console.log("[usePLDataPoints] onUpdate called:", data);
       if (!data || data.error) {
+        console.log("[usePLDataPoints] No data or error:", data?.error);
         return;
       }
-      (data.data || [data] || []).forEach((entity) => {
+      const entities = data.data || [data] || [];
+      console.log("[usePLDataPoints] Processing entities:", entities.length);
+      entities.forEach((entity) => {
+        console.log(
+          "[usePLDataPoints] Entity models:",
+          Object.keys(entity.models || {}),
+        );
         if (entity.models[`${NAMESPACE}-${PLDataPoint.getModelName()}`]) {
           const model = entity.models[
             `${NAMESPACE}-${PLDataPoint.getModelName()}`
           ] as unknown as RawPLDataPoint;
+          console.log("[usePLDataPoints] Raw PLDataPoint:", model);
           const newPoint = PLDataPoint.parse(model);
+          console.log("[usePLDataPoints] Parsed PLDataPoint:", newPoint);
+
+          // Filter by packId/gameId if provided
+          if (filterPackId !== undefined && filterGameId !== undefined) {
+            if (
+              Number(newPoint.packId) !== filterPackId ||
+              newPoint.gameId !== filterGameId
+            ) {
+              console.log(
+                "[usePLDataPoints] Skipping - wrong pack/game:",
+                newPoint.packId,
+                newPoint.gameId,
+                "expected:",
+                filterPackId,
+                filterGameId,
+              );
+              return;
+            }
+          }
+
           setDataPoints((prev: PLDataPoint[]) =>
             PLDataPoint.deduplicate([...prev, newPoint]),
           );
@@ -75,19 +119,43 @@ export function usePLDataPoints({
     setDataPoints([]);
     lastFetchedRef.current = fetchKey;
 
-    // Fetch and subscribe
-    const query = getPLDataPointsQuery(packId, gameId).build();
+    // Fetch with specific pack/game filter
+    const fetchQuery = getPLDataPointsQuery(packId, gameId).build();
+    console.log(
+      "[usePLDataPoints] Fetch query clause:",
+      JSON.stringify(fetchQuery.clause, null, 2),
+    );
 
     client
-      .getEventMessages(query)
+      .getEventMessages(fetchQuery)
       .then((result) => {
+        console.log(
+          "[usePLDataPoints] Initial fetch result:",
+          result.items.length,
+          "items",
+        );
         onUpdate({ data: result.items, error: undefined });
       })
       .catch((err) => console.error("[usePLDataPoints] Fetch error:", err));
 
+    // Subscribe with broader query, filter client-side
+    const subscribeQuery = getSubscriptionQuery().build();
+    console.log(
+      "[usePLDataPoints] Subscribe query clause:",
+      JSON.stringify(subscribeQuery.clause, null, 2),
+    );
+
+    // Create a wrapped callback that includes the filter
+    const filteredOnUpdate = (
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+    ) => {
+      onUpdate(data, packId, gameId);
+    };
+
     client
-      .onEventMessageUpdated(query.clause, [], onUpdate)
+      .onEventMessageUpdated(subscribeQuery.clause, [], filteredOnUpdate)
       .then((response) => {
+        console.log("[usePLDataPoints] Subscription established");
         subscriptionRef.current = response;
       })
       .catch((err) => console.error("[usePLDataPoints] Subscribe error:", err));

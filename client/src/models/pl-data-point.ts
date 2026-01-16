@@ -24,45 +24,61 @@ export class PLDataPoint {
   }
 
   /**
-   * Map orb type to graph color variant
-   * orb: 0 = non-orb events (level cost), otherwise orb type
+   * Map orb type to graph color variant based on contracts/src/types/orb.cairo
+   * Orb type mappings:
+   *   0 = non-orb (level cost)
+   *   1-3 = Bomb1-3 (red)
+   *   4-6 = Health1-3 (green)
+   *   7-9 = Multiplier50/100/150 (yellow)
+   *   10-16 = Point orbs (green)
+   *   17-18 = Moonrock15/40 (blue)
+   *   19 = Chips15 (yellow)
+   *   20 = CurseScoreDecrease (red)
    */
   variant(): "green" | "red" | "yellow" | "blue" {
-    // Orb types from contracts/src/types/orb.cairo
-    // 0 = non-orb (level cost), use green
-    // Bomb types are typically in ranges that indicate damage
-    // We'll need to check the actual orb type ranges
-
-    if (this.orb === 0) {
-      return "green"; // Level cost / baseline events
-    }
-
-    // Based on orb.cairo enum values:
-    // Bombs are typically variant 1-5 range (red)
-    // Points are typically lower numbered (green)
-    // Multipliers are higher numbered (yellow)
-    // Moonrocks are specific types (blue)
-
-    // Simplified mapping based on orb.variant() logic from Orb class
-    // This should match the Orb class variant method
     const orbType = this.orb;
 
-    // Bomb1-5 are orb types 1-5
-    if (orbType >= 1 && orbType <= 5) {
-      return "red"; // Bombs
+    // Non-orb events (level cost, game start)
+    if (orbType === 0) {
+      return "green";
     }
 
-    // Moonrock orbs (check specific type)
-    if (orbType >= 26 && orbType <= 30) {
-      return "blue"; // Moonrock orbs
+    // Bombs (1-3) - red
+    if (orbType >= 1 && orbType <= 3) {
+      return "red";
     }
 
-    // Multiplier orbs
-    if (orbType >= 21 && orbType <= 25) {
-      return "yellow"; // Multiplier orbs
+    // Health (4-6) - green
+    if (orbType >= 4 && orbType <= 6) {
+      return "green";
     }
 
-    // Default to green for point orbs, health, chips, etc.
+    // Multipliers (7-9) - yellow
+    if (orbType >= 7 && orbType <= 9) {
+      return "yellow";
+    }
+
+    // Points (10-16) - green
+    if (orbType >= 10 && orbType <= 16) {
+      return "green";
+    }
+
+    // Moonrocks (17-18) - blue
+    if (orbType >= 17 && orbType <= 18) {
+      return "blue";
+    }
+
+    // Chips (19) - yellow
+    if (orbType === 19) {
+      return "yellow";
+    }
+
+    // CurseScoreDecrease (20) - red
+    if (orbType === 20) {
+      return "red";
+    }
+
+    // Default fallback
     return "green";
   }
 

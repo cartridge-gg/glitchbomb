@@ -47,11 +47,24 @@ export const Game = () => {
 
     // Sort by id and convert to graph format
     const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
-    return sorted.map((point) => ({
-      value: point.potentialMoonrocks,
-      variant: point.variant(),
-      id: point.id,
-    }));
+    return sorted.map((point, index) => {
+      // Get the orb-based color
+      let variant = point.variant();
+
+      // If value decreased from previous point, override to red
+      if (index > 0) {
+        const prevValue = sorted[index - 1].potentialMoonrocks;
+        if (point.potentialMoonrocks < prevValue) {
+          variant = "red";
+        }
+      }
+
+      return {
+        value: point.potentialMoonrocks,
+        variant,
+        id: point.id,
+      };
+    });
   }, [dataPoints]);
 
   // Fetch username from controller
