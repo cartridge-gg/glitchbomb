@@ -3,6 +3,7 @@ export { GAME, Game } from "./game";
 export { Orb } from "./orb";
 export { ORB_PULLED, OrbPulled } from "./orb-pulled";
 export { PACK, Pack } from "./pack";
+export { PL_DATA_POINT, PLDataPoint } from "./pl-data-point";
 export { STARTERPACK, Starterpack } from "./starterpack";
 
 export interface RawConfig {
@@ -199,6 +200,45 @@ export interface RawOrbPulled {
     key: boolean;
   };
   orb: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  potential_moonrocks?: {
+    type: "primitive";
+    type_name: "u16";
+    value: string;
+    key: boolean;
+  };
+}
+
+export interface RawPLDataPoint {
+  pack_id?: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  game_id?: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  id?: {
+    type: "primitive";
+    type_name: "u32";
+    value: string;
+    key: boolean;
+  };
+  potential_moonrocks?: {
+    type: "primitive";
+    type_name: "u16";
+    value: string;
+    key: boolean;
+  };
+  orb?: {
     type: "primitive";
     type_name: "u8";
     value: string;

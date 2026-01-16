@@ -1,6 +1,5 @@
 import {
-  MemberClause,
-  OrComposeClause,
+  ClauseBuilder,
   type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
@@ -13,20 +12,13 @@ import { OrbPulled, type RawOrbPulled } from "@/models";
 const ENTITIES_LIMIT = 10_000;
 
 const getPullsQuery = (packId: number, gameId: number) => {
-  const clauses = OrComposeClause([
-    MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
-      "pack_id",
-      "Eq",
-      `0x${packId.toString(16).padStart(16, "0")}`,
-    ),
-    MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
-      "game_id",
-      "Eq",
-      `${gameId.toString()}`,
-    ),
-  ]);
+  const modelName: `${string}-${string}` = `${NAMESPACE}-${OrbPulled.getModelName()}`;
+  // Use keys() to match BOTH pack_id AND game_id (composite key)
+  const clauses = new ClauseBuilder().keys(
+    [modelName],
+    [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+    "VariableLen",
+  );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
     .includeHashedKeys()
@@ -51,7 +43,9 @@ export function usePulls({
 
   const onUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
-      if (!data || data.error) return;
+      if (!data || data.error) {
+        return;
+      }
       (data.data || [data] || []).forEach((entity) => {
         if (entity.models[`${NAMESPACE}-${OrbPulled.getModelName()}`]) {
           const model = entity.models[
@@ -86,13 +80,17 @@ export function usePulls({
 
     client
       .getEventMessages(query)
-      .then((result) => onUpdate({ data: result.items, error: undefined }));
+      .then((result) => {
+        onUpdate({ data: result.items, error: undefined });
+      })
+      .catch((err) => console.error("[usePulls] Fetch error:", err));
 
     client
       .onEventMessageUpdated(query.clause, [], onUpdate)
       .then((response) => {
         subscriptionRef.current = response;
-      });
+      })
+      .catch((err) => console.error("[usePulls] Subscribe error:", err));
 
     return () => {
       if (subscriptionRef.current) {

@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
@@ -12,16 +12,17 @@ import {
   MilestoneReached,
 } from "@/components/containers";
 import {
-  GameGraph,
   HeartsDisplay,
   Multiplier,
+  type PLDataPoint as PLDataPointComponent,
+  PLGraph,
   PointsProgress,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
-import { usePulls } from "@/hooks";
+import { usePLDataPoints } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
@@ -35,10 +36,36 @@ export const Game = () => {
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
 
-  const { pulls } = usePulls({
+  const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
+
+  // Convert PLDataPoint events to graph format
+  const plData: PLDataPointComponent[] = useMemo(() => {
+    if (dataPoints.length === 0) return [];
+
+    // Sort by id and convert to graph format
+    const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
+    return sorted.map((point, index) => {
+      // Get the orb-based color
+      let variant = point.variant();
+
+      // If value decreased from previous point, override to red
+      if (index > 0) {
+        const prevValue = sorted[index - 1].potentialMoonrocks;
+        if (point.potentialMoonrocks < prevValue) {
+          variant = "red";
+        }
+      }
+
+      return {
+        value: point.potentialMoonrocks,
+        variant,
+        id: point.id,
+      };
+    });
+  }, [dataPoints]);
 
   // Fetch username from controller
   useEffect(() => {
@@ -65,29 +92,56 @@ export const Game = () => {
     }
   }, [game]);
 
-  if (!pack || !game) return null;
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handlePull = useCallback(() => {
+    if (pack && game) {
+      pull(pack.id, game.id);
+    }
+  }, [pull, pack, game]);
 
-  const closeOverlay = () => setOverlay("none");
+  const closeOverlay = useCallback(() => setOverlay("none"), []);
 
-  const handleCashOut = async () => {
+  const handleCashOut = useCallback(async () => {
+    if (!pack || !game) return;
     try {
       await cashOut(pack.id, game.id);
     } catch (error) {
       console.error(error);
     } finally {
-      closeOverlay();
+      setOverlay("none");
     }
-  };
+  }, [cashOut, pack, game]);
 
-  const handleEnterShop = async () => {
+  const handleEnterShop = useCallback(async () => {
+    if (!pack || !game) return;
     try {
       await enter(pack.id, game.id);
     } catch (error) {
       console.error(error);
     } finally {
-      closeOverlay();
+      setOverlay("none");
     }
-  };
+  }, [enter, pack, game]);
+
+  const handleBuyAndExit = useCallback(
+    (indices: number[]) => {
+      if (pack && game) {
+        buyAndExit(pack.id, game.id, indices);
+      }
+    },
+    [buyAndExit, pack, game],
+  );
+
+  const openStash = useCallback(() => setOverlay("stash"), []);
+  const openCashout = useCallback(() => setOverlay("cashout"), []);
+
+  // Memoize computed values to prevent recalculation
+  const distribution = useMemo(
+    () => (game ? game.distribution() : { points: 0, bombs: 0 }),
+    [game],
+  );
+
+  if (!pack || !game) return null;
 
   // Determine which screen to show
   const renderScreen = () => {
@@ -103,7 +157,7 @@ export const Game = () => {
           balance={game.chips}
           orbs={game.shop}
           bag={game.bag}
-          onConfirm={(indices) => buyAndExit(pack.id, game.id, indices)}
+          onConfirm={handleBuyAndExit}
         />
       );
     }
@@ -132,55 +186,54 @@ export const Game = () => {
         );
 
       default:
-        return <GamePlayView />;
+        // Main gameplay view - inlined to prevent remount on re-render
+        return (
+          <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+            <PointsProgress points={game.points} milestone={game.milestone} />
+            <PLGraph data={plData} mode="absolute" title="POTENTIAL" />
+
+            <GameScene
+              className="grow"
+              lives={game.health}
+              bombs={distribution.bombs}
+              orbs={game.pullables.length}
+              values={distribution}
+              onPull={handlePull}
+            />
+
+            <div className="flex items-center justify-between">
+              <HeartsDisplay health={game.health} />
+              <Multiplier count={game.multiplier} className="h-12 w-20" />
+            </div>
+
+            <div className="flex items-stretch gap-3">
+              <Button
+                variant="secondary"
+                gradient="green"
+                className="min-h-14 min-w-16"
+                onClick={openStash}
+              >
+                <BagIcon className="w-6 h-6 text-green-400" />
+              </Button>
+              <GradientBorder color="purple" className="flex-1">
+                <button
+                  type="button"
+                  className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+                    color: "#FF80FF",
+                  }}
+                  onClick={openCashout}
+                >
+                  CASH OUT
+                </button>
+              </GradientBorder>
+            </div>
+          </div>
+        );
     }
   };
-
-  // Main gameplay view component
-  const GamePlayView = () => (
-    <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
-      <PointsProgress points={game.points} milestone={game.milestone} />
-      <GameGraph pulls={pulls} className="mt-8" />
-
-      <GameScene
-        className="grow"
-        lives={game.health}
-        bombs={game.distribution().bombs}
-        orbs={game.pullables.length}
-        values={game.distribution()}
-        onPull={() => pull(pack.id, game.id)}
-      />
-
-      <div className="flex items-center justify-between">
-        <HeartsDisplay health={game.health} />
-        <Multiplier count={game.multiplier} className="h-12 w-20" />
-      </div>
-
-      <div className="flex items-stretch gap-3">
-        <Button
-          variant="secondary"
-          gradient="green"
-          className="min-h-14 min-w-16"
-          onClick={() => setOverlay("stash")}
-        >
-          <BagIcon className="w-6 h-6 text-green-400" />
-        </Button>
-        <GradientBorder color="purple" className="flex-1">
-          <button
-            type="button"
-            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
-            style={{
-              background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-              color: "#FF80FF",
-            }}
-            onClick={() => setOverlay("cashout")}
-          >
-            CASH OUT
-          </button>
-        </GradientBorder>
-      </div>
-    </div>
-  );
 
   return (
     <div className="absolute inset-0 flex flex-col">

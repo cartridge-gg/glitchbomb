@@ -4,7 +4,7 @@ import {
   motion,
   useAnimationControls,
 } from "framer-motion";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { BombIcon, DotIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -75,20 +75,20 @@ export interface PullerProps
   bombs?: number;
 }
 
-export const Puller = ({
+export const Puller = memo(function Puller({
   variant,
   size,
   className,
   orbs = 0,
   bombs = 0,
   ...props
-}: PullerProps) => {
+}: PullerProps) {
   // Get color based on variant
   const color = VARIANT_COLORS[variant || "default"];
   const controls = useAnimationControls();
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
 
-  // Rainbow animation effect
+  // Rainbow animation effect - only depends on variant, not controls
   useEffect(() => {
     if (variant === "rainbow") {
       let currentIndex = 0;
@@ -102,7 +102,8 @@ export const Puller = ({
 
       return () => clearInterval(interval);
     }
-  }, [variant, controls]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variant]);
 
   // Get current color for rainbow variant
   const currentColor =
@@ -217,4 +218,4 @@ export const Puller = ({
       </div>
     </motion.button>
   );
-};
+});

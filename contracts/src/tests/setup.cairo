@@ -59,6 +59,7 @@ pub mod setup {
                 TestResource::Model(models::m_Config::TEST_CLASS_HASH),
                 TestResource::Event(events::e_GameStarted::TEST_CLASS_HASH),
                 TestResource::Event(events::e_OrbPulled::TEST_CLASS_HASH),
+                TestResource::Event(events::e_PLDataPoint::TEST_CLASS_HASH),
                 TestResource::Event(events::e_ShopEntered::TEST_CLASS_HASH),
                 TestResource::Event(events::e_OrbPurchased::TEST_CLASS_HASH),
                 TestResource::Event(events::e_ShopRefreshed::TEST_CLASS_HASH),

@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x201070f7dd25cb893d08b24a5cb6deeb9c636c123f9f19149cb66ac8a347dd7",
-    "seed": "glitchbomb-v0.0.4",
+    "address": "0x7aacf00437eeaa4bada5cb465401976cd5eb70058a4f045a1d90a24b09142f3",
+    "seed": "glitchbomb-v0.0.6",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,7 +33,7 @@
   },
   "contracts": [
     {
-      "address": "0x617e72392522326d4c7f7dc8b63ffb183c275ed92766585506ec501fb639e96",
+      "address": "0x728e23ba3f4e34f85297d65113dbb2771dae1cd432baa88be21219166df3bc7",
       "class_hash": "0x7024fc584f96b691a2304c243bb9cb1acd0e0ffd1a6a491d8671eb160bd192b",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "address": "0x56838a031f39f8aca44c5718f86add003f3901a8caad5e8a88bc742d569c799",
-      "class_hash": "0x221c71d201fc5d7294ac8aafa2e49894ba6e057f5c1a27e57b1711955c52dda",
+      "address": "0x493766715696a8d27b91845ecb783c5b56f251011e49d578c74bf800ab6f830",
+      "class_hash": "0x13f4add5bf6048d09f0440a27034c93ae18e0c2261b064a004530a962a12ac4",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "address": "0xa1393ca0df4bd2174d2a5f67318f73141c65992c9c4ab23feeafe3523d6162",
+      "address": "0x68a7bb7325a0597d05aa3b0247ef24229b71f96a1f3b6ee9b674f880c77ccfc",
       "class_hash": "0xcef487592d5e63a8af7649860d86b7f996d0707b110edc9941cebb4d9de3f8",
       "init_calldata": [
         "0x0",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "address": "0x13c0a25c0e905176ef5aba0ed2a289863c5e7386836e1b436b261291642da88",
+      "address": "0x348d80562ad9374b56c4605667cb04044678ad9310faa484aa41f73741652e3",
       "class_hash": "0x26fc3ce97e1d14e58e1f8ed5bd2a81a6be430186fede417f4db014372ecf53e",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Token",
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "address": "0x4c8706e2ff500d19b5b0893e83664a4aeb2e522542ed315cc2a5a364cbbd80e",
+      "address": "0x5e9b6846119ac254ffe7419dd0bb34b9d3b9282df90c912a7cfca4cef92d8f6",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -432,9 +432,14 @@
           "name": "orb",
           "type": "core::integer::u8",
           "key": false
+        },
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16",
+          "key": false
         }
       ],
-      "class_hash": "0xefc214ea5397bd38b68b250124683a057fb984b763b7ee82ab97950a0562ad",
+      "class_hash": "0x3d9fc63c667b4926a9ecb092204811d5f828705e5a583c84eb2f72b6114de45",
       "tag": "GLITCHBOMB-OrbPulled",
       "selector": "0x6cb2e0a7bbe5d1ffa648bf389768dca23a668e70f0312191d7b615064c1d829"
     },
@@ -469,6 +474,38 @@
       "class_hash": "0x2d83727c225b067718102a817ce82e0164fb2aa336b8c7fe7fae753f5600556",
       "tag": "GLITCHBOMB-OrbPurchased",
       "selector": "0x67b80eede7005812caef8632a83d110a50b9cd5fc3bd5f9fef39f06435862a1"
+    },
+    {
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64",
+          "key": true
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8",
+          "key": true
+        },
+        {
+          "name": "id",
+          "type": "core::integer::u32",
+          "key": true
+        },
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16",
+          "key": false
+        },
+        {
+          "name": "orb",
+          "type": "core::integer::u8",
+          "key": false
+        }
+      ],
+      "class_hash": "0x3eda8f61e4b51bef26da6169620a22ca8c995bdaede092048ab7645b22ef7a2",
+      "tag": "GLITCHBOMB-PLDataPoint",
+      "selector": "0x5a90a58bb8ae92c4c4def0ff1d1b0e00b0776948e6d46bd31c5eeb4d326e9ae"
     },
     {
       "members": [
@@ -2700,6 +2737,10 @@
         {
           "name": "orb",
           "type": "core::integer::u8"
+        },
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16"
         }
       ]
     },
@@ -2710,6 +2751,10 @@
         {
           "name": "orb",
           "type": "core::integer::u8"
+        },
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16"
         }
       ]
     },
@@ -2754,6 +2799,46 @@
         {
           "name": "chips",
           "type": "core::integer::u16"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::PLDataPoint",
+      "members": [
+        {
+          "name": "pack_id",
+          "type": "core::integer::u64"
+        },
+        {
+          "name": "game_id",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "id",
+          "type": "core::integer::u32"
+        },
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "orb",
+          "type": "core::integer::u8"
+        }
+      ]
+    },
+    {
+      "type": "struct",
+      "name": "glitchbomb::events::index::PLDataPointValue",
+      "members": [
+        {
+          "name": "potential_moonrocks",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "orb",
+          "type": "core::integer::u8"
         }
       ]
     },
@@ -2908,6 +2993,12 @@
     {
       "type": "event",
       "name": "glitchbomb::events::index::e_OrbPurchased::Event",
+      "kind": "enum",
+      "variants": []
+    },
+    {
+      "type": "event",
+      "name": "glitchbomb::events::index::e_PLDataPoint::Event",
       "kind": "enum",
       "variants": []
     },

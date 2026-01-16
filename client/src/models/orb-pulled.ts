@@ -8,12 +8,20 @@ export class OrbPulled {
   game_id: number;
   id: number;
   orb: Orb;
+  potential_moonrocks: number; // pack.moonrocks + game.points (what you'd cash out)
 
-  constructor(pack_id: number, game_id: number, id: number, orb: Orb) {
+  constructor(
+    pack_id: number,
+    game_id: number,
+    id: number,
+    orb: Orb,
+    potential_moonrocks: number,
+  ) {
     this.pack_id = pack_id;
     this.game_id = game_id;
     this.id = id;
     this.orb = orb;
+    this.potential_moonrocks = potential_moonrocks;
   }
 
   static getModelName(): string {
@@ -30,8 +38,15 @@ export class OrbPulled {
       game_id: Number(data.game_id.value),
       id: Number(data.id.value),
       orb: Orb.from(Number(data.orb.value)),
+      potential_moonrocks: Number(data.potential_moonrocks?.value ?? 0),
     };
-    return new OrbPulled(props.pack_id, props.game_id, props.id, props.orb);
+    return new OrbPulled(
+      props.pack_id,
+      props.game_id,
+      props.id,
+      props.orb,
+      props.potential_moonrocks,
+    );
   }
 
   static deduplicate(items: OrbPulled[]): OrbPulled[] {

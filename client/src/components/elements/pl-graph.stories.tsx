@@ -189,6 +189,142 @@ export const ManyPoints: Story = {
   },
 };
 
+// Potential Moonrocks - Absolute mode (simulating game progression)
+// This shows how the graph would look with OrbPulled events
+const potentialMoonrocksData: PLDataPoint[] = [
+  { value: 0, variant: "green", id: 0 }, // Start at 0
+  { value: 15, variant: "green", id: 1 }, // Point orb: +15 points
+  { value: 30, variant: "green", id: 2 }, // Point orb: +15 points
+  { value: 30, variant: "red", id: 3 }, // Bomb: 0 delta (hits health, not points)
+  { value: 50, variant: "green", id: 4 }, // Point orb: +20 points
+  { value: 65, variant: "yellow", id: 5 }, // Multiplier orb: +15 (affected by mult)
+  { value: 65, variant: "red", id: 6 }, // Another bomb
+  { value: 100, variant: "green", id: 7 }, // Big point orb
+  { value: 115, variant: "blue", id: 8 }, // Moonrock orb
+  { value: 150, variant: "green", id: 9 }, // Point orb
+  { value: 150, variant: "red", id: 10 }, // Bomb
+  { value: 180, variant: "green", id: 11 }, // Point orb
+  { value: 220, variant: "green", id: 12 }, // Point orb with high multiplier
+];
+
+export const PotentialMoonrocks: Story = {
+  args: {
+    data: potentialMoonrocksData,
+    mode: "absolute",
+    title: "POTENTIAL",
+  },
+};
+
+// Interactive Potential Moonrocks - simulates pulling orbs in a game
+const PotentialMoonrocksDemo = () => {
+  const [data, setData] = useState<PLDataPoint[]>([
+    { value: 0, variant: "green", id: 0 },
+  ]);
+  const [nextId, setNextId] = useState(1);
+  const [multiplier, setMultiplier] = useState(100); // 100 = 1x
+
+  const pullPointOrb = () => {
+    const basePoints = Math.floor(Math.random() * 15) + 5;
+    const earnedPoints = Math.floor((basePoints * multiplier) / 100);
+    const lastValue = data[data.length - 1].value;
+    setData((prev) => [
+      ...prev,
+      { value: lastValue + earnedPoints, variant: "green", id: nextId },
+    ]);
+    setNextId((prev) => prev + 1);
+  };
+
+  const pullBomb = () => {
+    // Bombs don't reduce points, they reduce health
+    const lastValue = data[data.length - 1].value;
+    setData((prev) => [
+      ...prev,
+      { value: lastValue, variant: "red", id: nextId },
+    ]);
+    setNextId((prev) => prev + 1);
+  };
+
+  const pullMultiplierOrb = () => {
+    // Multiplier orbs increase mult and give some points
+    const basePoints = Math.floor(Math.random() * 10) + 5;
+    const earnedPoints = Math.floor((basePoints * multiplier) / 100);
+    const lastValue = data[data.length - 1].value;
+    setMultiplier((prev) => prev + 50);
+    setData((prev) => [
+      ...prev,
+      { value: lastValue + earnedPoints, variant: "yellow", id: nextId },
+    ]);
+    setNextId((prev) => prev + 1);
+  };
+
+  const pullMoonrockOrb = () => {
+    // Direct moonrock orbs
+    const moonrocks = Math.floor(Math.random() * 20) + 15;
+    const lastValue = data[data.length - 1].value;
+    setData((prev) => [
+      ...prev,
+      { value: lastValue + moonrocks, variant: "blue", id: nextId },
+    ]);
+    setNextId((prev) => prev + 1);
+  };
+
+  const reset = () => {
+    setData([{ value: 0, variant: "green", id: nextId }]);
+    setNextId(nextId + 1);
+    setMultiplier(100);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="text-green-400 text-sm font-secondary">
+        Multiplier: {(multiplier / 100).toFixed(1)}x
+      </div>
+      <PLGraph data={data} mode="absolute" title="POTENTIAL" />
+      <div className="flex gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={pullPointOrb}
+          className="px-3 py-2 bg-green-900 text-green-400 rounded text-sm hover:bg-green-800 transition-colors"
+        >
+          🟢 Point Orb
+        </button>
+        <button
+          type="button"
+          onClick={pullMultiplierOrb}
+          className="px-3 py-2 bg-yellow-900 text-yellow-400 rounded text-sm hover:bg-yellow-800 transition-colors"
+        >
+          🟡 Multiplier
+        </button>
+        <button
+          type="button"
+          onClick={pullMoonrockOrb}
+          className="px-3 py-2 bg-blue-900 text-blue-400 rounded text-sm hover:bg-blue-800 transition-colors"
+        >
+          🔵 Moonrock
+        </button>
+        <button
+          type="button"
+          onClick={pullBomb}
+          className="px-3 py-2 bg-red-900 text-red-400 rounded text-sm hover:bg-red-800 transition-colors"
+        >
+          🔴 Bomb
+        </button>
+        <button
+          type="button"
+          onClick={reset}
+          className="px-3 py-2 bg-gray-800 text-gray-400 rounded text-sm hover:bg-gray-700 transition-colors"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const InteractivePotentialMoonrocks: Story = {
+  render: () => <PotentialMoonrocksDemo />,
+};
+
 // Interactive story - Add points with animation
 const InteractivePLGraph = () => {
   const [data, setData] = useState<PLDataPoint[]>([
