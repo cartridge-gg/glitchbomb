@@ -156,7 +156,7 @@ export const Game = () => {
         <GameShop
           balance={game.chips}
           orbs={game.shop}
-          bag={game.bag}
+          bag={game.pullables}
           onConfirm={handleBuyAndExit}
         />
       );
