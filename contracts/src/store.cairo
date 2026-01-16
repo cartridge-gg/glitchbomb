@@ -3,7 +3,7 @@ use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
 use crate::events::index::{
     GameOverTrait, GameStartedTrait, OrbBurnedTrait, OrbPulledTrait, OrbPurchasedTrait,
-    ShopEnteredTrait, ShopExitedTrait, ShopRefreshedTrait,
+    PLDataPointTrait, ShopEnteredTrait, ShopExitedTrait, ShopRefreshedTrait,
 };
 use crate::models::index::{Config, Game, Pack, Starterpack};
 use crate::types::orb::Orb;
@@ -76,12 +76,16 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn orb_pulled(mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8, delta: u16) {
+    fn orb_pulled(
+        mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8, pack_moonrocks: u16,
+    ) {
         if let Some(orb) = orb {
             self
                 .world
                 .emit_event(
-                    @OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox(), delta),
+                    @OrbPulledTrait::new(
+                        *game.pull_count - index, game, orb.unbox(), pack_moonrocks,
+                    ),
                 );
         }
     }
@@ -114,5 +118,14 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn game_over(mut self: Store, game: @Game, reason: u8) {
         self.world.emit_event(@GameOverTrait::new(game, reason));
+    }
+
+    #[inline]
+    fn pl_data_point(
+        mut self: Store, id: u32, pack_id: u64, game_id: u8, potential_moonrocks: u16, orb: u8,
+    ) {
+        self
+            .world
+            .emit_event(@PLDataPointTrait::new(id, pack_id, game_id, potential_moonrocks, orb));
     }
 }

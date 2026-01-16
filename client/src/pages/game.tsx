@@ -14,7 +14,7 @@ import {
 import {
   HeartsDisplay,
   Multiplier,
-  type PLDataPoint,
+  type PLDataPoint as PLDataPointComponent,
   PLGraph,
   PointsProgress,
 } from "@/components/elements";
@@ -22,7 +22,7 @@ import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
-import { usePulls } from "@/hooks";
+import { usePLDataPoints } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
@@ -36,50 +36,23 @@ export const Game = () => {
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
 
-  const { pulls } = usePulls({
+  const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
 
-  // Convert pulls to PLDataPoint[] for the potential moonrocks graph
-  const plData: PLDataPoint[] = useMemo(() => {
-    // Initial points: start at 100, then drop to 90 (entry cost)
-    const initialPoints: PLDataPoint[] = [
-      { value: 100, variant: "green", id: -2 },
-      { value: 90, variant: "green", id: -1 },
-    ];
+  // Convert PLDataPoint events to graph format
+  const plData: PLDataPointComponent[] = useMemo(() => {
+    if (dataPoints.length === 0) return [];
 
-    if (pulls.length === 0) return initialPoints;
-
-    // Sort pulls by id and map to PLDataPoint
-    const sorted = [...pulls].sort((a, b) => a.id - b.id);
-
-    // Map orb variant to PLGraph variant
-    const mapVariant = (
-      orbVariant: string,
-    ): "green" | "red" | "yellow" | "blue" => {
-      switch (orbVariant) {
-        case "red":
-          return "red"; // Bombs
-        case "yellow":
-          return "yellow"; // Multiplier orbs
-        case "blue":
-          return "blue"; // Moonrock orbs
-        default:
-          return "green"; // Point orbs, health, chips, etc.
-      }
-    };
-
-    const pullData = sorted.map((pull) => ({
-      value: pull.potential_moonrocks,
-      variant: mapVariant(pull.orb.variant()),
-      id: pull.id,
+    // Sort by id and convert to graph format
+    const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
+    return sorted.map((point) => ({
+      value: point.potentialMoonrocks,
+      variant: point.variant(),
+      id: point.id,
     }));
-
-    // If pulls don't have valid potential_moonrocks data yet, just show initial points
-    const hasValidData = pullData.some((d) => d.value > 0);
-    return hasValidData ? [...initialPoints, ...pullData] : initialPoints;
-  }, [pulls]);
+  }, [dataPoints]);
 
   // Fetch username from controller
   useEffect(() => {

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useMemo } from "react";
 
 export interface PLDataPoint {
@@ -296,9 +295,8 @@ export const PLGraph = ({
             {graphPoints.map((point, index) => {
               if (index === 0) return null;
               const prevPoint = graphPoints[index - 1];
-              const isLastLine = index === graphPoints.length - 1;
               return (
-                <motion.line
+                <line
                   key={`line-${point.id}`}
                   x1={`${prevPoint.x}%`}
                   y1={`${prevPoint.y}%`}
@@ -306,19 +304,15 @@ export const PLGraph = ({
                   y2={`${point.y}%`}
                   stroke="#348F1B"
                   strokeWidth="1.5"
-                  initial={isLastLine ? { opacity: 0 } : false}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
                 />
               );
             })}
 
             {/* Points as SVG circles */}
-            {graphPoints.map((point, index) => {
-              const isLastPoint = index === graphPoints.length - 1;
+            {graphPoints.map((point) => {
               const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
               return (
-                <motion.circle
+                <circle
                   key={`point-${point.id}`}
                   cx={`${point.x}%`}
                   cy={`${point.y}%`}
@@ -327,13 +321,6 @@ export const PLGraph = ({
                   stroke="rgba(255,255,255,0.8)"
                   strokeWidth="1"
                   filter={`url(#${filterName})`}
-                  initial={isLastPoint ? { scale: 0, opacity: 0 } : false}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    duration: isLastPoint ? 0.5 : 0.3,
-                    ease: "easeOut",
-                    delay: isLastPoint ? 0.2 : 0,
-                  }}
                 />
               );
             })}

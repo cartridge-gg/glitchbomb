@@ -39,22 +39,41 @@ pub struct OrbPulled {
     #[key]
     pub id: u8,
     pub orb: u8,
-    pub potential_moonrocks: u16, // Total points after this pull (what you'd cash out)
-    pub delta: u16 // Points earned from this pull
+    pub potential_moonrocks: u16 // pack.moonrocks + game.points (what you'd have if you cash out)
 }
 
 #[generate_trait]
 pub impl OrbPulledImpl of OrbPulledTrait {
     #[inline]
-    fn new(id: u8, game: @Game, orb: @Orb, delta: u16) -> OrbPulled {
+    fn new(id: u8, game: @Game, orb: @Orb, pack_moonrocks: u16) -> OrbPulled {
         OrbPulled {
             pack_id: *game.pack_id,
             game_id: *game.id,
             id: id,
             orb: (*orb).into(),
-            potential_moonrocks: *game.points,
-            delta: delta,
+            potential_moonrocks: pack_moonrocks + *game.points,
         }
+    }
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct PLDataPoint {
+    #[key]
+    pub pack_id: u64,
+    #[key]
+    pub game_id: u8,
+    #[key]
+    pub id: u32, // Sequential ID for ordering
+    pub potential_moonrocks: u16,
+    pub orb: u8 // 0 for non-orb events (level cost), orb type otherwise
+}
+
+#[generate_trait]
+pub impl PLDataPointImpl of PLDataPointTrait {
+    #[inline]
+    fn new(id: u32, pack_id: u64, game_id: u8, potential_moonrocks: u16, orb: u8) -> PLDataPoint {
+        PLDataPoint { pack_id, game_id, id, potential_moonrocks, orb }
     }
 }
 

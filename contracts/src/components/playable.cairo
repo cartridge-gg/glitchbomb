@@ -99,9 +99,15 @@ pub mod PlayableComponent {
             let cost = game.start();
             store.set_game(@game);
 
+            // [Event] Emit PLDataPoint before level cost (initial moonrocks)
+            store.pl_data_point(0, pack_id, game_id, pack.moonrocks, 0);
+
             // [Effect] Update pack earnings if exists
             pack.spend(cost);
             store.set_pack(@pack);
+
+            // [Event] Emit PLDataPoint after level cost
+            store.pl_data_point(1, pack_id, game_id, pack.moonrocks + game.points, 0);
 
             // [Interaction] Update token metadata
             collection.update(pack_id.into());
@@ -127,18 +133,32 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
+            // [Effect] Get pack for moonrocks tracking
+            let mut pack = store.pack(pack_id);
+
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
-            let points_before = game.points;
             let config = store.config();
             let mut rng = RandomTrait::new_vrf(config.vrf());
             let (orbs, earnings) = game.pull(rng.next_seed());
-            let points_delta = game.points - points_before;
             store.set_game(@game);
 
-            // [Event] Emit OrbPulled for each orb (max 2 with DoubleDraw)
-            // First orb gets the full points delta, second orb (if any) gets 0
-            store.orb_pulled(@game, orbs.get(0), 0, points_delta);
-            store.orb_pulled(@game, orbs.get(1), 1, 0);
+            // Calculate potential moonrocks and PL id base
+            let potential_moonrocks = pack.moonrocks + game.points;
+            let pl_base_id: u32 = 2 + (game.pull_count.into() - orbs.len()) * 2;
+
+            // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
+            store.orb_pulled(@game, orbs.get(0), 0, pack.moonrocks);
+            store.orb_pulled(@game, orbs.get(1), 1, pack.moonrocks);
+
+            if let Option::Some(orb) = orbs.get(0) {
+                let orb_type: u8 = (*orb.unbox()).into();
+                store.pl_data_point(pl_base_id, pack_id, game_id, potential_moonrocks, orb_type);
+            }
+            if let Option::Some(orb) = orbs.get(1) {
+                let orb_type: u8 = (*orb.unbox()).into();
+                store
+                    .pl_data_point(pl_base_id + 1, pack_id, game_id, potential_moonrocks, orb_type);
+            }
 
             // [Event] Emit GameOver if dead
             if game.over {
@@ -149,7 +169,6 @@ pub mod PlayableComponent {
             if (earnings == 0) {
                 return;
             }
-            let mut pack = store.pack(pack_id);
             pack.earn(earnings);
             store.set_pack(@pack);
         }
@@ -282,6 +301,13 @@ pub mod PlayableComponent {
             let mut pack = store.pack(pack_id);
             pack.spend(cost);
             store.set_pack(@pack);
+
+            // [Event] Emit PLDataPoint for level cost
+            // Use a high base id to avoid collision with pull events
+            // pl_id = 2 + pull_count * 2 + level_offset
+            let pl_id: u32 = 2 + (game.pull_count.into() * 2) + (game.level.into() - 1);
+            let potential = pack.moonrocks + game.points;
+            store.pl_data_point(pl_id, pack_id, game_id, potential, 0);
         }
 
         fn refresh(

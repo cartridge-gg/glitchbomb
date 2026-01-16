@@ -8,8 +8,7 @@ export class OrbPulled {
   game_id: number;
   id: number;
   orb: Orb;
-  potential_moonrocks: number; // Total points after this pull (what you'd cash out)
-  delta: number; // Points earned from this pull
+  potential_moonrocks: number; // pack.moonrocks + game.points (what you'd cash out)
 
   constructor(
     pack_id: number,
@@ -17,14 +16,12 @@ export class OrbPulled {
     id: number,
     orb: Orb,
     potential_moonrocks: number,
-    delta: number,
   ) {
     this.pack_id = pack_id;
     this.game_id = game_id;
     this.id = id;
     this.orb = orb;
     this.potential_moonrocks = potential_moonrocks;
-    this.delta = delta;
   }
 
   static getModelName(): string {
@@ -42,7 +39,6 @@ export class OrbPulled {
       id: Number(data.id.value),
       orb: Orb.from(Number(data.orb.value)),
       potential_moonrocks: Number(data.potential_moonrocks?.value ?? 0),
-      delta: Number(data.delta?.value ?? 0),
     };
     return new OrbPulled(
       props.pack_id,
@@ -50,7 +46,6 @@ export class OrbPulled {
       props.id,
       props.orb,
       props.potential_moonrocks,
-      props.delta,
     );
   }
 

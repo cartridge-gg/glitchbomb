@@ -8,20 +8,20 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
-import { OrbPulled, type RawOrbPulled } from "@/models";
+import { PLDataPoint, type RawPLDataPoint } from "@/models";
 
 const ENTITIES_LIMIT = 10_000;
 
-const getPullsQuery = (packId: number, gameId: number) => {
+const getPLDataPointsQuery = (packId: number, gameId: number) => {
   const clauses = OrComposeClause([
     MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
+      `${NAMESPACE}-${PLDataPoint.getModelName()}`,
       "pack_id",
       "Eq",
       `0x${packId.toString(16).padStart(16, "0")}`,
     ),
     MemberClause(
-      `${NAMESPACE}-${OrbPulled.getModelName()}`,
+      `${NAMESPACE}-${PLDataPoint.getModelName()}`,
       "game_id",
       "Eq",
       `${gameId.toString()}`,
@@ -33,7 +33,7 @@ const getPullsQuery = (packId: number, gameId: number) => {
     .withLimit(ENTITIES_LIMIT);
 };
 
-export function usePulls({
+export function usePLDataPoints({
   packId,
   gameId,
 }: {
@@ -41,7 +41,7 @@ export function usePulls({
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
-  const [pulls, setPulls] = useState<OrbPulled[]>([]);
+  const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const lastFetchedRef = useRef<string | null>(null);
 
@@ -55,13 +55,13 @@ export function usePulls({
         return;
       }
       (data.data || [data] || []).forEach((entity) => {
-        if (entity.models[`${NAMESPACE}-${OrbPulled.getModelName()}`]) {
+        if (entity.models[`${NAMESPACE}-${PLDataPoint.getModelName()}`]) {
           const model = entity.models[
-            `${NAMESPACE}-${OrbPulled.getModelName()}`
-          ] as unknown as RawOrbPulled;
-          const newPull = OrbPulled.parse(model);
-          setPulls((prev: OrbPulled[]) =>
-            OrbPulled.deduplicate([...prev, newPull]),
+            `${NAMESPACE}-${PLDataPoint.getModelName()}`
+          ] as unknown as RawPLDataPoint;
+          const newPoint = PLDataPoint.parse(model);
+          setDataPoints((prev: PLDataPoint[]) =>
+            PLDataPoint.deduplicate([...prev, newPoint]),
           );
         }
       });
@@ -79,26 +79,26 @@ export function usePulls({
       subscriptionRef.current = null;
     }
 
-    // Reset pulls when switching to a new game
-    setPulls([]);
+    // Reset data points when switching to a new game
+    setDataPoints([]);
     lastFetchedRef.current = fetchKey;
 
     // Fetch and subscribe
-    const query = getPullsQuery(packId, gameId).build();
+    const query = getPLDataPointsQuery(packId, gameId).build();
 
     client
       .getEventMessages(query)
       .then((result) => {
         onUpdate({ data: result.items, error: undefined });
       })
-      .catch((err) => console.error("[usePulls] Fetch error:", err));
+      .catch((err) => console.error("[usePLDataPoints] Fetch error:", err));
 
     client
       .onEventMessageUpdated(query.clause, [], onUpdate)
       .then((response) => {
         subscriptionRef.current = response;
       })
-      .catch((err) => console.error("[usePulls] Subscribe error:", err));
+      .catch((err) => console.error("[usePLDataPoints] Subscribe error:", err));
 
     return () => {
       if (subscriptionRef.current) {
@@ -109,7 +109,7 @@ export function usePulls({
   }, [client, fetchKey, packId, gameId, onUpdate]);
 
   return {
-    pulls,
+    dataPoints,
     isReady,
   };
 }
