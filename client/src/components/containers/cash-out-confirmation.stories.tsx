@@ -15,13 +15,18 @@ const meta = {
     ),
   ],
   argTypes: {
+    moonrocks: {
+      control: { type: "number" },
+      description: "Current moonrocks balance",
+    },
     points: {
       control: { type: "number" },
-      description: "Points to cash out",
+      description: "Points earned in game",
     },
   },
   args: {
-    points: 150,
+    moonrocks: 100,
+    points: 50,
     onConfirm: () => console.log("Confirmed cash out"),
     onCancel: () => console.log("Cancelled"),
   },
@@ -34,14 +39,16 @@ export const Default: Story = {
   args: {},
 };
 
-export const LowPoints: Story = {
+export const LowTotal: Story = {
   args: {
-    points: 25,
+    moonrocks: 80,
+    points: 5,
   },
 };
 
-export const HighPoints: Story = {
+export const HighTotal: Story = {
   args: {
-    points: 9999,
+    moonrocks: 100,
+    points: 500,
   },
 };

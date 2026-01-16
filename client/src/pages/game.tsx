@@ -179,6 +179,7 @@ export const Game = () => {
       case "cashout":
         return (
           <CashOutConfirmation
+            moonrocks={pack.moonrocks}
             points={game.points}
             onConfirm={handleCashOut}
             onCancel={closeOverlay}

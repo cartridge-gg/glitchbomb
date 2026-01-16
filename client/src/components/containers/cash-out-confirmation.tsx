@@ -3,16 +3,20 @@ import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 
 export interface CashOutConfirmationProps {
+  moonrocks: number;
   points: number;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export const CashOutConfirmation = ({
+  moonrocks,
   points,
   onConfirm,
   onCancel,
 }: CashOutConfirmationProps) => {
+  const total = moonrocks + points;
+
   return (
     <div className="flex flex-col gap-8 max-w-[420px] mx-auto px-4 h-full">
       <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
@@ -29,7 +33,7 @@ export const CashOutConfirmation = ({
           </h1>
           <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
             You will receive{" "}
-            <span className="text-green-400 font-bold">{points}</span> moonrocks
+            <span className="text-green-400 font-bold">{total}</span> moonrocks
             and end the current game. This action cannot be undone.
           </p>
         </div>
