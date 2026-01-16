@@ -203,7 +203,14 @@ export const Game = () => {
             />
 
             <div className="flex items-center justify-between">
-              <HeartsDisplay health={game.health} />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
+                  <span className="font-secondary text-green-400 text-md tracking-wider">
+                    L{game.level}
+                  </span>
+                </div>
+                <HeartsDisplay health={game.health} />
+              </div>
               <Multiplier count={game.multiplier} className="h-12 w-20" />
             </div>
 
