@@ -174,7 +174,7 @@ export const Game = () => {
         );
 
       case "stash":
-        return <GameStash orbs={game.bag} onClose={closeOverlay} />;
+        return <GameStash orbs={game.pullables} onClose={closeOverlay} />;
 
       case "cashout":
         return (
