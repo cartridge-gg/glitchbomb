@@ -60,7 +60,7 @@ const TabButton = ({
       "flex-1 flex items-center justify-center py-3 rounded-lg transition-all",
       active
         ? "bg-green-900/80 text-green-400"
-        : "text-green-700 hover:text-green-500",
+        : "text-green-900 hover:text-green-700",
     )}
   >
     {children}
