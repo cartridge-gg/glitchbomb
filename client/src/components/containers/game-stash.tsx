@@ -12,6 +12,38 @@ export interface GameStashProps {
 
 type TabType = "orbs" | "logs";
 
+// Grid icon for orbs tab
+const GridIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+  </svg>
+);
+
+// List icon for logs tab
+const ListIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="5" cy="6" r="2" fill="currentColor" />
+    <rect x="10" y="5" width="11" height="2" rx="1" fill="currentColor" />
+    <circle cx="5" cy="12" r="2" fill="currentColor" />
+    <rect x="10" y="11" width="11" height="2" rx="1" fill="currentColor" />
+    <circle cx="5" cy="18" r="2" fill="currentColor" />
+    <rect x="10" y="17" width="11" height="2" rx="1" fill="currentColor" />
+  </svg>
+);
+
 const TabButton = ({
   active,
   onClick,
@@ -25,10 +57,10 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "px-4 py-2 font-secondary text-sm tracking-wider transition-all",
+      "flex-1 flex items-center justify-center py-3 rounded-lg transition-all",
       active
-        ? "text-green-400 border-b-2 border-green-400"
-        : "text-green-600 hover:text-green-500",
+        ? "bg-green-900/80 text-green-400"
+        : "text-green-700 hover:text-green-500",
     )}
   >
     {children}
@@ -142,18 +174,18 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-green-900/50">
+      <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
         <TabButton
           active={activeTab === "orbs"}
           onClick={() => setActiveTab("orbs")}
         >
-          ORBS
+          <GridIcon className="w-6 h-6" />
         </TabButton>
         <TabButton
           active={activeTab === "logs"}
           onClick={() => setActiveTab("logs")}
         >
-          LOGS
+          <ListIcon className="w-6 h-6" />
         </TabButton>
       </div>
 
