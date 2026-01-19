@@ -126,7 +126,7 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
           sortedPulls.map((pull) => (
             <div
               key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-              className="flex items-center gap-3 p-3 rounded-lg bg-green-950/50"
+              className="flex items-center gap-3 p-3 rounded-lg bg-green-950"
             >
               {/* Orb icon */}
               <OrbDisplay orb={pull.orb} size="sm" />
