@@ -22,7 +22,7 @@ import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
-import { usePLDataPoints } from "@/hooks";
+import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
@@ -37,6 +37,11 @@ export const Game = () => {
   const [username, setUsername] = useState<string>();
 
   const { dataPoints } = usePLDataPoints({
+    packId: pack?.id ?? 0,
+    gameId: game?.id ?? 0,
+  });
+
+  const { pulls } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -174,7 +179,13 @@ export const Game = () => {
         );
 
       case "stash":
-        return <GameStash orbs={game.pullables} onClose={closeOverlay} />;
+        return (
+          <GameStash
+            orbs={game.pullables}
+            pulls={pulls}
+            onClose={closeOverlay}
+          />
+        );
 
       case "cashout":
         return (
