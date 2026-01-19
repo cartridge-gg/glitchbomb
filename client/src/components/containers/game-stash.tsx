@@ -119,24 +119,24 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
 
       {/* Logs list */}
       <div
-        className="flex-1 flex flex-col overflow-y-auto gap-3 py-2"
+        className="flex-1 flex flex-col overflow-y-auto gap-2 py-2"
         style={{ scrollbarWidth: "none" }}
       >
         {sortedPulls.length > 0 ? (
           sortedPulls.map((pull) => (
             <div
               key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-              className="flex items-center gap-4 p-3 rounded-xl border border-green-900 bg-green-950/30"
+              className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30"
             >
               {/* Orb icon */}
-              <OrbDisplay orb={pull.orb} size="md" />
+              <OrbDisplay orb={pull.orb} size="sm" />
 
               {/* Orb info */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-white font-primary text-lg tracking-wide">
+                <h3 className="text-white font-primary text-sm tracking-wide">
                   {pull.orb.name()}
                 </h3>
-                <p className="text-green-600 font-secondary text-xs tracking-wider uppercase">
+                <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
                   {pull.orb.description()}
                 </p>
               </div>
