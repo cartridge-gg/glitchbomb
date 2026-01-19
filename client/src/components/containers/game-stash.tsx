@@ -57,9 +57,9 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center py-3 rounded-lg transition-all",
+      "flex-1 flex items-center justify-center py-2 rounded-lg transition-all",
       active
-        ? "bg-green-900/80 text-green-400"
+        ? "bg-green-800 text-green-400"
         : "text-green-900 hover:text-green-700",
     )}
   >
@@ -126,15 +126,8 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
           sortedPulls.map((pull) => (
             <div
               key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-              className="flex items-center gap-3 p-3 rounded-lg bg-green-950/50 border border-green-900/50"
+              className="flex items-center gap-3 p-3 rounded-lg bg-green-950/50"
             >
-              {/* Pull number */}
-              <div className="shrink-0 w-6 h-6 rounded-full bg-green-900/50 flex items-center justify-center">
-                <span className="text-green-500 text-xs font-secondary">
-                  {pull.id}
-                </span>
-              </div>
-
               {/* Orb icon */}
               <OrbDisplay orb={pull.orb} size="sm" />
 
