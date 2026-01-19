@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef } from "react";
 
 export interface PLDataPoint {
   value: number; // The P/L value at this point (delta or absolute based on mode)
@@ -220,6 +221,27 @@ export const PLGraph = ({
     });
   }, [cumulativeData, yRange]);
 
+  // Track which points have been rendered to animate only new ones
+  const renderedPointsRef = useRef<Set<number>>(new Set());
+
+  // Determine which points are new (for animation)
+  const newPointIds = useMemo(() => {
+    const newIds = new Set<number>();
+    graphPoints.forEach((point) => {
+      if (!renderedPointsRef.current.has(point.id)) {
+        newIds.add(point.id);
+      }
+    });
+    return newIds;
+  }, [graphPoints]);
+
+  // Update rendered points after render
+  useEffect(() => {
+    graphPoints.forEach((point) => {
+      renderedPointsRef.current.add(point.id);
+    });
+  }, [graphPoints]);
+
   if (data.length === 0) {
     return null;
   }
@@ -377,8 +399,9 @@ export const PLGraph = ({
             {graphPoints.map((point, index) => {
               if (index === 0) return null;
               const prevPoint = graphPoints[index - 1];
+              const isNew = newPointIds.has(point.id);
               return (
-                <line
+                <motion.line
                   key={`line-${point.id}`}
                   x1={`${prevPoint.x}%`}
                   y1={`${prevPoint.y}%`}
@@ -386,6 +409,9 @@ export const PLGraph = ({
                   y2={`${point.y}%`}
                   stroke="#348F1B"
                   strokeWidth="1.5"
+                  initial={isNew ? { pathLength: 0, opacity: 0 } : false}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               );
             })}
@@ -393,8 +419,9 @@ export const PLGraph = ({
             {/* Points as SVG circles */}
             {graphPoints.map((point) => {
               const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
+              const isNew = newPointIds.has(point.id);
               return (
-                <circle
+                <motion.circle
                   key={`point-${point.id}`}
                   cx={`${point.x}%`}
                   cy={`${point.y}%`}
@@ -403,6 +430,13 @@ export const PLGraph = ({
                   stroke="rgba(255,255,255,0.8)"
                   strokeWidth="1"
                   filter={`url(#${filterName})`}
+                  initial={isNew ? { scale: 0, opacity: 0 } : false}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut",
+                    delay: isNew ? 0.1 : 0,
+                  }}
                 />
               );
             })}

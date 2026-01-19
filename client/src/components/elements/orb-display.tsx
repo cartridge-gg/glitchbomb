@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import {
+  BombOrbIcon,
   OrbChipIcon,
   OrbHealthIcon,
   OrbMoonrockIcon,
@@ -39,6 +40,8 @@ const glowSizeMap = {
 
 // Get the icon component for an orb type
 const getOrbIcon = (orb: Orb) => {
+  // PointBomb4 should show a bomb icon
+  if (orb.isBomb()) return BombOrbIcon;
   if (orb.isPoint()) return OrbPointIcon;
   if (orb.isMultiplier()) return OrbMultiplierIcon;
   if (orb.isHealth()) return OrbHealthIcon;
@@ -49,6 +52,8 @@ const getOrbIcon = (orb: Orb) => {
 
 // Get color for orb type
 const getOrbColor = (orb: Orb) => {
+  // PointBomb4 should be red like a bomb
+  if (orb.isBomb()) return "var(--red-100)";
   if (orb.isPoint()) return "var(--green-400)";
   if (orb.isMultiplier()) return "var(--yellow-100)";
   if (orb.isHealth()) return "var(--salmon-100)";
@@ -131,7 +136,10 @@ export const OrbDisplay = ({
         />
         {/* Icon */}
         <Icon
-          className="w-full h-full relative z-10"
+          className={cn(
+            "relative z-10",
+            orb.isBomb() ? "w-3/5 h-3/5" : "w-full h-full",
+          )}
           style={{
             color,
             filter: `drop-shadow(0 0 ${glowSize}px ${color})`,

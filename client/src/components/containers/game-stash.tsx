@@ -1,26 +1,47 @@
+import { useState } from "react";
 import { OrbDisplay } from "@/components/elements";
 import { Button } from "@/components/ui/button";
-import type { Orb } from "@/models";
+import { cn } from "@/lib/utils";
+import type { Orb, OrbPulled } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
+  pulls: OrbPulled[];
   onClose: () => void;
 }
 
-export const GameStash = ({ orbs, onClose }: GameStashProps) => {
+type TabType = "orbs" | "logs";
+
+const TabButton = ({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={cn(
+      "px-4 py-2 font-secondary text-sm tracking-wider transition-all",
+      active
+        ? "text-green-400 border-b-2 border-green-400"
+        : "text-green-600 hover:text-green-500",
+    )}
+  >
+    {children}
+  </button>
+);
+
+const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   // Filter out bombs and empty orbs for display
   const displayOrbs = orbs.filter((orb) => !orb.isBomb() && !orb.isNone());
 
   return (
-    <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
-      {/* Header - same style as ORB SHOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase text-3xl font-primary">
-          YOUR ORBS
-        </h1>
-      </div>
-
-      {/* Subtitle - same style as shop */}
+    <>
+      {/* Subtitle */}
       <p className="text-green-600 font-secondary text-sm tracking-wide">
         Orbs in your bag that can be pulled
       </p>
@@ -49,8 +70,101 @@ export const GameStash = ({ orbs, onClose }: GameStashProps) => {
           </div>
         )}
       </div>
+    </>
+  );
+};
 
-      {/* Action button - same style as shop */}
+const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
+  // Sort by id descending (most recent first)
+  const sortedPulls = [...pulls].sort((a, b) => b.id - a.id);
+
+  return (
+    <>
+      {/* Subtitle */}
+      <p className="text-green-600 font-secondary text-sm tracking-wide">
+        History of orbs you've pulled
+      </p>
+
+      {/* Logs list */}
+      <div
+        className="flex-1 flex flex-col overflow-y-auto gap-2 py-2"
+        style={{ scrollbarWidth: "none" }}
+      >
+        {sortedPulls.length > 0 ? (
+          sortedPulls.map((pull) => (
+            <div
+              key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
+              className="flex items-center gap-3 p-3 rounded-lg bg-green-950/50 border border-green-900/50"
+            >
+              {/* Pull number */}
+              <div className="shrink-0 w-6 h-6 rounded-full bg-green-900/50 flex items-center justify-center">
+                <span className="text-green-500 text-xs font-secondary">
+                  {pull.id}
+                </span>
+              </div>
+
+              {/* Orb icon */}
+              <OrbDisplay orb={pull.orb} size="sm" />
+
+              {/* Orb info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-green-400 font-secondary text-sm truncate">
+                  {pull.orb.name()}
+                </p>
+                <p className="text-green-600 font-secondary text-xs truncate">
+                  {pull.orb.description()}
+                </p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
+              No orbs pulled yet
+            </p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
+  const [activeTab, setActiveTab] = useState<TabType>("orbs");
+
+  return (
+    <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-white uppercase text-3xl font-primary">
+          YOUR STASH
+        </h1>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-green-900/50">
+        <TabButton
+          active={activeTab === "orbs"}
+          onClick={() => setActiveTab("orbs")}
+        >
+          ORBS
+        </TabButton>
+        <TabButton
+          active={activeTab === "logs"}
+          onClick={() => setActiveTab("logs")}
+        >
+          LOGS
+        </TabButton>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "orbs" ? (
+        <OrbsTab orbs={orbs} />
+      ) : (
+        <LogsTab pulls={pulls} />
+      )}
+
+      {/* Action button */}
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"

@@ -1,6 +1,6 @@
 export { CONFIG, Config } from "./config";
 export { GAME, Game } from "./game";
-export { Orb } from "./orb";
+export { Orb, OrbType } from "./orb";
 export { ORB_PULLED, OrbPulled } from "./orb-pulled";
 export { PACK, Pack } from "./pack";
 export { PL_DATA_POINT, PLDataPoint } from "./pl-data-point";
