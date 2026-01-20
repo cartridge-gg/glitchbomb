@@ -156,7 +156,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
 
   return (
     <div
-      className="flex-1 flex flex-col overflow-y-auto gap-1"
+      className="flex-1 flex flex-col p-2 overflow-y-auto gap-1"
       style={{ scrollbarWidth: "none" }}
     >
       {sortedPulls.map((pull) => {
@@ -170,15 +170,15 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
             className="flex items-center"
           >
             <span
-              className={`font-secondary text-2xs tracking-widest uppercase ${colorClass}`}
+              className={`font-secondary text-xs tracking-widest uppercase ${colorClass}`}
             >
               {category}
             </span>
-            <span className="font-secondary text-2xs tracking-widest text-green-700 mx-1">
+            <span className="font-secondary text-xs tracking-widest text-green-700 mx-1">
               {">"}
             </span>
             <span
-              className={`font-secondary text-2xs tracking-widest uppercase ${colorClass}`}
+              className={`font-secondary text-xs tracking-widest uppercase ${colorClass}`}
             >
               {effect}
             </span>
@@ -221,14 +221,7 @@ export const PLChartTabs = ({
       {activeTab === "chart" ? (
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
-        <div
-          className="relative h-[140px] overflow-hidden"
-          style={{
-            maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, black 70%, transparent 100%)",
-          }}
-        >
+        <div className="h-[140px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
           <LogsView pulls={pulls} />
         </div>
       )}
