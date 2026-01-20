@@ -232,7 +232,7 @@ export const PLChartTabs = ({
           <div
             className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
             style={{
-              background: "linear-gradient(to bottom, transparent, var(--green-950))",
+              background: "linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7))",
             }}
           />
         </div>
