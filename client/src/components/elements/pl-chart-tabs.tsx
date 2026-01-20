@@ -67,7 +67,7 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-all",
+      "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all",
       active
         ? "bg-green-800 text-green-400"
         : "text-green-900 hover:text-green-700",
@@ -200,7 +200,7 @@ export const PLChartTabs = ({
   const [activeTab, setActiveTab] = useState<TabType>("chart");
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-4", className)}>
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
         <TabButton
