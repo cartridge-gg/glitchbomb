@@ -144,33 +144,47 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
   // Sort by id ascending (oldest first, like a chat log)
   const sortedPulls = [...pulls].sort((a, b) => a.id - b.id);
 
+  if (sortedPulls.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-green-600 font-secondary text-sm tracking-widest">
+          No pulls yet
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
-      className="flex-1 flex flex-col overflow-y-auto gap-0.5"
+      className="flex-1 flex flex-col overflow-y-auto gap-1"
       style={{ scrollbarWidth: "none" }}
     >
-      {sortedPulls.length > 0 ? (
-        sortedPulls.map((pull) => (
-          <p
+      {sortedPulls.map((pull) => {
+        const category = getOrbCategory(pull.orb);
+        const effect = getOrbEffect(pull.orb);
+        const colorClass = getCategoryColor(pull.orb);
+
+        return (
+          <div
             key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-            className="font-secondary text-xs uppercase tracking-widest"
+            className="flex items-center"
           >
-            <span className={cn(getCategoryColor(pull.orb))}>
-              {getOrbCategory(pull.orb)}
+            <span
+              className={`font-secondary text-2xs tracking-widest uppercase ${colorClass}`}
+            >
+              {category}
             </span>
-            <span className="text-green-700"> &gt; </span>
-            <span className={cn(getCategoryColor(pull.orb))}>
-              {getOrbEffect(pull.orb)}
+            <span className="font-secondary text-2xs tracking-widest text-green-700 mx-1">
+              {">"}
             </span>
-          </p>
-        ))
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
-            No pulls yet
-          </p>
-        </div>
-      )}
+            <span
+              className={`font-secondary text-2xs tracking-widest uppercase ${colorClass}`}
+            >
+              {effect}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };
