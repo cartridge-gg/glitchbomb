@@ -221,20 +221,15 @@ export const PLChartTabs = ({
       {activeTab === "chart" ? (
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
-        <div className="relative h-[140px]">
-          <div
-            className="h-full overflow-y-auto"
-            style={{ scrollbarWidth: "none" }}
-          >
-            <LogsView pulls={pulls} />
-          </div>
-          {/* Fade overlay at bottom */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
-            style={{
-              background: "linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7))",
-            }}
-          />
+        <div
+          className="h-[140px] overflow-y-auto"
+          style={{
+            scrollbarWidth: "none",
+            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+          }}
+        >
+          <LogsView pulls={pulls} />
         </div>
       )}
     </div>
