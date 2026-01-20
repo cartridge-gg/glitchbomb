@@ -155,11 +155,11 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
             key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
             className="flex items-center gap-2"
           >
-            <span className={cn(getCategoryColor(pull.orb))}>
+            <span className={cn("font-primary", getCategoryColor(pull.orb))}>
               {getOrbCategory(pull.orb)}
             </span>
-            <span className="text-green-700">&gt;</span>
-            <span className={cn(getCategoryColor(pull.orb))}>
+            <span className="font-primary text-green-700">&gt;</span>
+            <span className={cn("font-primary", getCategoryColor(pull.orb))}>
               {getOrbEffect(pull.orb)}
             </span>
           </div>
