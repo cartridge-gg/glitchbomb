@@ -146,7 +146,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
 
   return (
     <div
-      className="flex-1 flex flex-col overflow-y-auto gap-0.5 font-mono text-xs"
+      className="flex-1 flex flex-col overflow-y-auto gap-0.5 font-secondary text-xs"
       style={{ scrollbarWidth: "none" }}
     >
       {sortedPulls.length > 0 ? (
