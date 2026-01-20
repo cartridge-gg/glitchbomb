@@ -1,7 +1,7 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
   GameHeader,
@@ -12,6 +12,7 @@ import {
   MilestoneReached,
 } from "@/components/containers";
 import {
+  GameRecap,
   HeartsDisplay,
   Multiplier,
   type PLDataPoint as PLDataPointComponent,
@@ -28,6 +29,7 @@ import { useActions } from "@/hooks/actions";
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
 
 export const Game = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
@@ -35,6 +37,9 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
+
+  // Check if we're in view mode (for finished games)
+  const isViewMode = searchParams.get("view") === "true";
 
   const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
@@ -150,8 +155,65 @@ export const Game = () => {
 
   // Determine which screen to show
   const renderScreen = () => {
-    // Priority 1: Game over (terminal state)
-    if (game.over) {
+    // View mode for finished games - show recap with game stats
+    if (isViewMode && game.over) {
+      // Overlay screens in view mode
+      if (overlay === "stash") {
+        return (
+          <GameStash
+            orbs={game.pullables}
+            pulls={pulls}
+            onClose={closeOverlay}
+          />
+        );
+      }
+
+      // Main view mode layout
+      return (
+        <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+          <PointsProgress points={game.points} milestone={game.milestone} />
+          <PLGraph data={plData} mode="absolute" title="POTENTIAL" />
+
+          {/* Game recap instead of GameScene */}
+          <div className="grow flex items-center justify-center">
+            <GameRecap points={game.points} level={game.level} />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
+                <span className="font-secondary text-green-400 text-md tracking-wider">
+                  L{game.level}
+                </span>
+              </div>
+              <HeartsDisplay health={game.health} />
+            </div>
+            <Multiplier count={game.multiplier} className="h-12 w-20" />
+          </div>
+
+          <div className="flex items-stretch gap-3">
+            <Button
+              variant="secondary"
+              gradient="green"
+              className="min-h-14 min-w-16"
+              onClick={openStash}
+            >
+              <BagIcon className="w-6 h-6 text-green-400" />
+            </Button>
+            <Button
+              variant="secondary"
+              className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+              onClick={() => navigate("/games")}
+            >
+              ← BACK TO GAMES
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    // Priority 1: Game over (terminal state) - only show if not in view mode
+    if (game.over && !isViewMode) {
       return <GameOver points={game.points} level={game.level} />;
     }
 
