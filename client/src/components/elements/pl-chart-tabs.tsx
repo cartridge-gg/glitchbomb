@@ -221,8 +221,20 @@ export const PLChartTabs = ({
       {activeTab === "chart" ? (
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
-        <div className="h-[140px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-          <LogsView pulls={pulls} />
+        <div className="relative h-[140px]">
+          <div
+            className="h-full overflow-y-auto"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <LogsView pulls={pulls} />
+          </div>
+          {/* Fade overlay at bottom */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+            style={{
+              background: "linear-gradient(to bottom, transparent, var(--green-950))",
+            }}
+          />
         </div>
       )}
     </div>
