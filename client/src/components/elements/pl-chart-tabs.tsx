@@ -221,7 +221,14 @@ export const PLChartTabs = ({
       {activeTab === "chart" ? (
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
-        <div className="h-[140px] bg-green-950/50 rounded-lg p-3 border border-green-900/50">
+        <div
+          className="relative h-[140px] overflow-hidden"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 70%, transparent 100%)",
+          }}
+        >
           <LogsView pulls={pulls} />
         </div>
       )}
