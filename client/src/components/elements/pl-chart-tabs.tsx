@@ -153,7 +153,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
         sortedPulls.map((pull) => (
           <p
             key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-            className="font-primary text-xs uppercase tracking-widest"
+            className="font-secondary text-xs uppercase tracking-widest"
           >
             <span className={cn(getCategoryColor(pull.orb))}>
               {getOrbCategory(pull.orb)}
