@@ -67,7 +67,7 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all",
+      "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-all",
       active
         ? "bg-green-800 text-green-400"
         : "text-green-900 hover:text-green-700",
@@ -207,15 +207,15 @@ export const PLChartTabs = ({
           active={activeTab === "chart"}
           onClick={() => setActiveTab("chart")}
         >
-          <ChartIcon className="w-4 h-4" />
-          <span className="font-secondary text-xs tracking-widest">P/L</span>
+          <ChartIcon className="w-5 h-5" />
+          <span className="font-secondary text-sm tracking-widest">P/L</span>
         </TabButton>
         <TabButton
           active={activeTab === "logs"}
           onClick={() => setActiveTab("logs")}
         >
-          <LogsIcon className="w-4 h-4" />
-          <span className="font-secondary text-xs tracking-widest">HISTORY</span>
+          <LogsIcon className="w-5 h-5" />
+          <span className="font-secondary text-sm tracking-widest">HISTORY</span>
         </TabButton>
       </div>
 
