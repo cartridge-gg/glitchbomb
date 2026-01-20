@@ -146,7 +146,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
 
   return (
     <div
-      className="flex-1 flex flex-col overflow-y-auto gap-0.5 font-secondary text-xs"
+      className="flex-1 flex flex-col overflow-y-auto gap-0.5 font-body uppercase tracking-widest text-xs"
       style={{ scrollbarWidth: "none" }}
     >
       {sortedPulls.length > 0 ? (
@@ -155,7 +155,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
             key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
             className="flex items-center gap-2"
           >
-            <span className={cn("font-bold", getCategoryColor(pull.orb))}>
+            <span className={cn(getCategoryColor(pull.orb))}>
               {getOrbCategory(pull.orb)}
             </span>
             <span className="text-green-700">&gt;</span>
