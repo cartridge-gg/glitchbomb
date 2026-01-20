@@ -5,6 +5,7 @@ export * from "./connect";
 export * from "./counter";
 export * from "./distribution";
 export * from "./game-graph";
+export * from "./game-recap";
 export * from "./goal-tracker";
 export * from "./hearts-display";
 export * from "./item";

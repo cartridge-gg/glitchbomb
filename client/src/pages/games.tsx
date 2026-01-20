@@ -19,6 +19,7 @@ interface GameCardProps {
   hasStarted: boolean;
   isOver?: boolean;
   onPlay: () => void;
+  onView?: () => void;
 }
 
 const GameCard = ({
@@ -29,6 +30,7 @@ const GameCard = ({
   hasStarted,
   isOver,
   onPlay,
+  onView,
 }: GameCardProps) => {
   return (
     <div className="flex items-center gap-4 p-3 rounded-xl border border-green-900 bg-green-950/30">
@@ -54,15 +56,24 @@ const GameCard = ({
         </p>
       </div>
 
-      {/* Play Button - same style as header buttons */}
-      <button
-        type="button"
-        className="flex items-center justify-center h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed bg-[#0A2518] text-green-400"
-        onClick={onPlay}
-        disabled={isOver}
-      >
-        {hasStarted ? "Continue" : "Play"}
-      </button>
+      {/* Play/View Button */}
+      {isOver ? (
+        <button
+          type="button"
+          className="flex items-center justify-center h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400"
+          onClick={onView}
+        >
+          View
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="flex items-center justify-center h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400"
+          onClick={onPlay}
+        >
+          {hasStarted ? "Continue" : "Play"}
+        </button>
+      )}
     </div>
   );
 };
@@ -154,6 +165,10 @@ export const Games = () => {
     navigate(`/play?pack=${packId}&game=${gameId}`);
   };
 
+  const handleView = (packId: number, gameId: number) => {
+    navigate(`/play?pack=${packId}&game=${gameId}&view=true`);
+  };
+
   const handleNewGame = useCallback(() => {
     if (starterpack) {
       (connector as ControllerConnector)?.controller.openStarterPack(
@@ -212,6 +227,7 @@ export const Games = () => {
                 onPlay={() =>
                   handlePlay(game.packId, game.gameId, game.hasNoGame)
                 }
+                onView={() => handleView(game.packId, game.gameId)}
               />
             ))}
           </div>
