@@ -7,7 +7,6 @@ export interface MilestoneReachedProps {
   onCashOut: () => void;
   onEnterShop: () => void;
   isEnteringShop?: boolean;
-  isCashingOut?: boolean;
 }
 
 export const MilestoneReached = ({
@@ -15,9 +14,7 @@ export const MilestoneReached = ({
   onCashOut,
   onEnterShop,
   isEnteringShop = false,
-  isCashingOut = false,
 }: MilestoneReachedProps) => {
-  const isLoading = isEnteringShop || isCashingOut;
 
   return (
     <div className="flex flex-col gap-8 max-w-[420px] mx-auto px-4 h-full">
@@ -51,9 +48,9 @@ export const MilestoneReached = ({
               color: "#FF80FF",
             }}
             onClick={onCashOut}
-            disabled={isLoading}
+            disabled={isEnteringShop}
           >
-            {isCashingOut ? "CASHING OUT..." : "CASH OUT"}
+            CASH OUT
           </button>
         </GradientBorder>
         <Button
@@ -62,7 +59,7 @@ export const MilestoneReached = ({
           className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           onClick={onEnterShop}
-          disabled={isLoading}
+          disabled={isEnteringShop}
         >
           {isEnteringShop ? "LOADING..." : "ENTER SHOP"}
         </Button>
