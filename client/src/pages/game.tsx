@@ -37,10 +37,19 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
-  const [currentOrb, setCurrentOrb] = useState<{
-    variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
-    content: string;
-  } | undefined>(undefined);
+  const [currentOrb, setCurrentOrb] = useState<
+    | {
+        variant:
+          | "point"
+          | "bomb"
+          | "multiplier"
+          | "chip"
+          | "moonrock"
+          | "health";
+        content: string;
+      }
+    | undefined
+  >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
 
   // Check if we're in view mode (for finished games)
@@ -113,11 +122,14 @@ export const Game = () => {
 
     // Get the latest pull (highest id)
     const latestPull = pulls.reduce((latest, pull) =>
-      pull.id > latest.id ? pull : latest
+      pull.id > latest.id ? pull : latest,
     );
 
     // Check if this is a new pull we haven't seen
-    if (lastPullIdRef.current !== null && latestPull.id > lastPullIdRef.current) {
+    if (
+      lastPullIdRef.current !== null &&
+      latestPull.id > lastPullIdRef.current
+    ) {
       // Show the outcome
       setCurrentOrb({
         variant: latestPull.orb.outcomeVariant(),

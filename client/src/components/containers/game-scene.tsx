@@ -119,9 +119,9 @@ export const GameScene = ({
           {(phase === 1 || phase === 2) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.3 }}
-              animate={{ 
-                opacity: phase === 2 ? 0.5 : 1, 
-                scale: 1 
+              animate={{
+                opacity: phase === 2 ? 0.5 : 1,
+                scale: 1,
               }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{
