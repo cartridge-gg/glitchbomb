@@ -26,6 +26,19 @@ import { useEntitiesContext } from "@/contexts";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
+// Initial game values for optimistic rendering
+const INITIAL_GAME_VALUES = {
+  health: 5,
+  level: 1,
+  points: 0,
+  milestone: 12,
+  multiplier: 1,
+  chips: 0,
+  // Initial bag: 4 bombs, 7 other orbs
+  distribution: { points: 7, bombs: 4, multipliers: 0, health: 0, chips: 0, moonrocks: 0 },
+  orbsCount: 11,
+};
+
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
 
 export const Game = () => {
@@ -193,14 +206,82 @@ export const Game = () => {
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
-    () => (game ? game.distribution() : { points: 0, bombs: 0 }),
+    () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
 
-  if (!pack || !game) return null;
+  // Check if we're still loading (have URL params but no data yet)
+  const isLoading = !pack || !game;
+  const packId = searchParams.get("pack");
+  const gameId = searchParams.get("game");
+
+  // If no URL params at all, show nothing
+  if (!packId || !gameId) return null;
 
   // Determine which screen to show
   const renderScreen = () => {
+    // Loading state - show optimistic UI
+    if (isLoading) {
+      return (
+        <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+          <PointsProgress
+            points={INITIAL_GAME_VALUES.points}
+            milestone={INITIAL_GAME_VALUES.milestone}
+          />
+          <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
+
+          <GameScene
+            className="grow"
+            lives={INITIAL_GAME_VALUES.health}
+            bombs={INITIAL_GAME_VALUES.distribution.bombs}
+            orbs={INITIAL_GAME_VALUES.orbsCount}
+            values={INITIAL_GAME_VALUES.distribution}
+            onPull={() => {}} // No-op while loading
+          />
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
+                <span className="font-secondary text-green-400 text-md tracking-wider">
+                  L{INITIAL_GAME_VALUES.level}
+                </span>
+              </div>
+              <HeartsDisplay health={INITIAL_GAME_VALUES.health} />
+            </div>
+            <Multiplier
+              count={INITIAL_GAME_VALUES.multiplier}
+              className="h-12 w-20"
+            />
+          </div>
+
+          <div className="flex items-stretch gap-3 opacity-50 pointer-events-none">
+            <Button
+              variant="secondary"
+              gradient="green"
+              className="min-h-14 min-w-16"
+              disabled
+            >
+              <BagIcon className="w-6 h-6 text-green-400" />
+            </Button>
+            <GradientBorder color="purple" className="flex-1">
+              <button
+                type="button"
+                disabled
+                className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+                  color: "#FF80FF",
+                }}
+              >
+                LOADING...
+              </button>
+            </GradientBorder>
+          </div>
+        </div>
+      );
+    }
+
     // View mode for finished games - show recap with game stats
     if (isViewMode && game.over) {
       // Overlay screens in view mode
@@ -376,8 +457,8 @@ export const Game = () => {
   return (
     <div className="absolute inset-0 flex flex-col">
       <GameHeader
-        moonrocks={pack.moonrocks}
-        chips={game.chips}
+        moonrocks={pack?.moonrocks ?? 100}
+        chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
       <div className="flex-1 overflow-hidden py-6">{renderScreen()}</div>
