@@ -128,7 +128,7 @@ export const PLGraph = ({
     return { min, max, baselinePos, hasBelowBaseline };
   }, [cumulativeData, baseline]);
 
-  // Calculate intermediate Y-axis labels between baseline and max
+  // Calculate Y-axis labels (max 3 labels: top, middle, bottom)
   const yAxisLabels = useMemo(() => {
     const { min, max, hasBelowBaseline } = yRange;
     const labels: { value: number; position: number }[] = [];
@@ -137,51 +137,26 @@ export const PLGraph = ({
     // Always show max at top
     labels.push({ value: max, position: 0 });
 
-    // Add intermediate labels between max and baseline (or max and min if below baseline)
-    const topValue = max;
-    const bottomValue = hasBelowBaseline ? baseline : min;
-    const labelRange = topValue - bottomValue;
-
-    // Calculate nice step size for 2-3 intermediate labels
-    const idealSteps = 3;
-    const rawStep = labelRange / idealSteps;
-    // Round to nice numbers (10, 20, 25, 50, etc.)
-    const niceSteps = [5, 10, 20, 25, 50, 100];
-    const step =
-      niceSteps.find((s) => s >= rawStep) || Math.ceil(rawStep / 10) * 10;
-
-    // Add labels from max down to baseline (or min)
-    for (let v = max - step; v > bottomValue; v -= step) {
-      const roundedV = Math.round(v / step) * step;
-      if (roundedV > bottomValue && roundedV < max) {
-        const position = ((max - roundedV) / range) * 100;
-        // Only add if not too close to other labels (at least 12% apart)
-        const tooClose = labels.some(
-          (l) => Math.abs(l.position - position) < 12,
-        );
-        if (!tooClose) {
-          labels.push({ value: roundedV, position });
-        }
-      }
-    }
-
-    // Add baseline label if it's in range (not at top or bottom edges)
-    const baselinePosition = ((max - baseline) / range) * 100;
-    if (baselinePosition > 10 && baselinePosition < 90) {
-      const tooClose = labels.some(
-        (l) => Math.abs(l.position - baselinePosition) < 12,
-      );
-      if (!tooClose) {
-        labels.push({ value: baseline, position: baselinePosition });
-      }
-    }
-
-    // Add min at bottom only if there are values below baseline
+    // Add bottom label
     if (hasBelowBaseline) {
       labels.push({ value: min, position: 100 });
     } else {
       // Show baseline at bottom when no values below baseline
       labels.push({ value: baseline, position: 100 });
+    }
+
+    // Add one middle label (baseline or midpoint)
+    const baselinePosition = ((max - baseline) / range) * 100;
+    // Only add middle label if there's enough space (between 20% and 80%)
+    if (baselinePosition > 20 && baselinePosition < 80) {
+      labels.push({ value: baseline, position: baselinePosition });
+    } else if (labels.length < 3) {
+      // If baseline is too close to edges, add a midpoint label
+      const midValue = Math.round((max + min) / 2 / 10) * 10;
+      const midPosition = ((max - midValue) / range) * 100;
+      if (midPosition > 20 && midPosition < 80 && midValue !== max && midValue !== min) {
+        labels.push({ value: midValue, position: midPosition });
+      }
     }
 
     // Sort by position (top to bottom)
