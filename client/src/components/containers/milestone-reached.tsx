@@ -1,3 +1,4 @@
+import { LoadingSpinner } from "@/components/elements";
 import { SparkleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
@@ -6,13 +7,16 @@ export interface MilestoneReachedProps {
   milestone: number;
   onCashOut: () => void;
   onEnterShop: () => void;
+  isEnteringShop?: boolean;
 }
 
 export const MilestoneReached = ({
   milestone,
   onCashOut,
   onEnterShop,
+  isEnteringShop = false,
 }: MilestoneReachedProps) => {
+
   return (
     <div className="flex flex-col gap-8 max-w-[420px] mx-auto px-4 h-full">
       <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
@@ -39,12 +43,13 @@ export const MilestoneReached = ({
         <GradientBorder color="purple" className="flex-1">
           <button
             type="button"
-            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
               color: "#FF80FF",
             }}
             onClick={onCashOut}
+            disabled={isEnteringShop}
           >
             CASH OUT
           </button>
@@ -55,8 +60,9 @@ export const MilestoneReached = ({
           className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           onClick={onEnterShop}
+          disabled={isEnteringShop}
         >
-          ENTER SHOP
+          {isEnteringShop ? <LoadingSpinner size="sm" /> : "ENTER SHOP"}
         </Button>
       </div>
     </div>

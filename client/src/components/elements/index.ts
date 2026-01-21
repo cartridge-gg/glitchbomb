@@ -9,6 +9,7 @@ export * from "./game-recap";
 export * from "./goal-tracker";
 export * from "./hearts-display";
 export * from "./item";
+export * from "./loading-spinner";
 export * from "./multiplier";
 export * from "./orb";
 export * from "./orb-category-summary";

@@ -26,6 +26,19 @@ import { useEntitiesContext } from "@/contexts";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 
+// Initial game values for optimistic rendering
+const INITIAL_GAME_VALUES = {
+  health: 5,
+  level: 1,
+  points: 0,
+  milestone: 12,
+  multiplier: 1,
+  chips: 0,
+  // Initial bag: 4 bombs, 7 other orbs
+  distribution: { points: 7, bombs: 4, multipliers: 0, health: 0, chips: 0, moonrocks: 0 },
+  orbsCount: 11,
+};
+
 type OverlayView = "none" | "stash" | "cashout" | "milestone";
 
 export const Game = () => {
@@ -52,6 +65,10 @@ export const Game = () => {
   >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
 
+  // Loading states for actions
+  const [isEnteringShop, setIsEnteringShop] = useState(false);
+  const [isExitingShop, setIsExitingShop] = useState(false);
+
   // Check if we're in view mode (for finished games)
   const isViewMode = searchParams.get("view") === "true";
 
@@ -60,7 +77,7 @@ export const Game = () => {
     gameId: game?.id ?? 0,
   });
 
-  const { pulls } = usePulls({
+  const { pulls, initialFetchComplete } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -106,6 +123,12 @@ export const Game = () => {
     if (packId && gameId) {
       setPackId(Number(packId));
       setGameId(Number(gameId));
+      // Reset all local state when game changes
+      lastPullIdRef.current = null;
+      setCurrentOrb(undefined);
+      setOverlay("none");
+      setIsEnteringShop(false);
+      setIsExitingShop(false);
     }
   }, [setPackId, setGameId, searchParams]);
 
@@ -116,8 +139,38 @@ export const Game = () => {
     }
   }, [game]);
 
+  // Reset loading states when data changes
+  useEffect(() => {
+    if (game?.shop && game.shop.length > 0) {
+      // Shop loaded - reset entering shop loading state and close milestone
+      setIsEnteringShop(false);
+      setOverlay("none");
+    } else if (game?.shop && game.shop.length === 0) {
+      // Shop cleared - reset exiting shop loading state
+      setIsExitingShop(false);
+    }
+  }, [game?.shop]);
+
+  // Initialize lastPullIdRef when initial fetch completes
+  useEffect(() => {
+    if (!initialFetchComplete) return;
+
+    // Set to 0 if no existing pulls, otherwise set to the max existing pull id
+    // Using 0 as sentinel means any real pull (id >= 1) will trigger animation
+    if (pulls.length === 0) {
+      lastPullIdRef.current = 0;
+    } else {
+      const maxId = Math.max(...pulls.map((p) => p.id));
+      lastPullIdRef.current = maxId;
+    }
+    // Only run once when initialFetchComplete becomes true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFetchComplete]);
+
   // Detect new pulls and show outcome animation
   useEffect(() => {
+    // Don't process until we've initialized the lastPullIdRef
+    if (lastPullIdRef.current === null) return;
     if (pulls.length === 0) return;
 
     // Get the latest pull (highest id)
@@ -126,15 +179,15 @@ export const Game = () => {
     );
 
     // Check if this is a new pull we haven't seen
-    if (
-      lastPullIdRef.current !== null &&
-      latestPull.id > lastPullIdRef.current
-    ) {
+    if (latestPull.id > lastPullIdRef.current) {
       // Show the outcome
       setCurrentOrb({
         variant: latestPull.orb.outcomeVariant(),
         content: latestPull.orb.outcome(),
       });
+
+      // Update the last seen pull id
+      lastPullIdRef.current = latestPull.id;
 
       // Clear after animation (2 seconds matches GameScene timing)
       const timer = setTimeout(() => {
@@ -143,9 +196,6 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-
-    // Update the last seen pull id
-    lastPullIdRef.current = latestPull.id;
   }, [pulls]);
 
   // Memoize callbacks to prevent unnecessary re-renders
@@ -159,30 +209,37 @@ export const Game = () => {
 
   const handleCashOut = useCallback(async () => {
     if (!pack || !game) return;
+    setOverlay("none");
     try {
       await cashOut(pack.id, game.id);
     } catch (error) {
       console.error(error);
-    } finally {
-      setOverlay("none");
     }
   }, [cashOut, pack, game]);
 
   const handleEnterShop = useCallback(async () => {
     if (!pack || !game) return;
+    setIsEnteringShop(true);
     try {
       await enter(pack.id, game.id);
+      // Don't close overlay - wait for shop to load
     } catch (error) {
       console.error(error);
-    } finally {
+      setIsEnteringShop(false);
       setOverlay("none");
     }
   }, [enter, pack, game]);
 
   const handleBuyAndExit = useCallback(
-    (indices: number[]) => {
+    async (indices: number[]) => {
       if (pack && game) {
-        buyAndExit(pack.id, game.id, indices);
+        setIsExitingShop(true);
+        try {
+          await buyAndExit(pack.id, game.id, indices);
+        } catch (error) {
+          console.error(error);
+          setIsExitingShop(false);
+        }
       }
     },
     [buyAndExit, pack, game],
@@ -193,14 +250,82 @@ export const Game = () => {
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
-    () => (game ? game.distribution() : { points: 0, bombs: 0 }),
+    () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
 
-  if (!pack || !game) return null;
+  // Check if we're still loading (have URL params but no data yet)
+  const isLoading = !pack || !game;
+  const packId = searchParams.get("pack");
+  const gameId = searchParams.get("game");
+
+  // If no URL params at all, show nothing
+  if (!packId || !gameId) return null;
 
   // Determine which screen to show
   const renderScreen = () => {
+    // Loading state - show optimistic UI
+    if (isLoading) {
+      return (
+        <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+          <PointsProgress
+            points={INITIAL_GAME_VALUES.points}
+            milestone={INITIAL_GAME_VALUES.milestone}
+          />
+          <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
+
+          <GameScene
+            className="grow"
+            lives={INITIAL_GAME_VALUES.health}
+            bombs={INITIAL_GAME_VALUES.distribution.bombs}
+            orbs={INITIAL_GAME_VALUES.orbsCount}
+            values={INITIAL_GAME_VALUES.distribution}
+            onPull={() => {}} // No-op while loading
+          />
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
+                <span className="font-secondary text-green-400 text-md tracking-wider">
+                  L{INITIAL_GAME_VALUES.level}
+                </span>
+              </div>
+              <HeartsDisplay health={INITIAL_GAME_VALUES.health} />
+            </div>
+            <Multiplier
+              count={INITIAL_GAME_VALUES.multiplier}
+              className="h-12 w-20"
+            />
+          </div>
+
+          <div className="flex items-stretch gap-3 opacity-50 pointer-events-none">
+            <Button
+              variant="secondary"
+              gradient="green"
+              className="min-h-14 min-w-16"
+              disabled
+            >
+              <BagIcon className="w-6 h-6 text-green-400" />
+            </Button>
+            <GradientBorder color="purple" className="flex-1">
+              <button
+                type="button"
+                disabled
+                className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+                  color: "#FF80FF",
+                }}
+              >
+                LOADING...
+              </button>
+            </GradientBorder>
+          </div>
+        </div>
+      );
+    }
+
     // View mode for finished games - show recap with game stats
     if (isViewMode && game.over) {
       // Overlay screens in view mode
@@ -276,6 +401,7 @@ export const Game = () => {
           orbs={game.shop}
           bag={game.pullables}
           onConfirm={handleBuyAndExit}
+          isLoading={isExitingShop}
         />
       );
     }
@@ -288,6 +414,7 @@ export const Game = () => {
             milestone={game.milestone}
             onCashOut={handleCashOut}
             onEnterShop={handleEnterShop}
+            isEnteringShop={isEnteringShop}
           />
         );
 
@@ -376,8 +503,8 @@ export const Game = () => {
   return (
     <div className="absolute inset-0 flex flex-col">
       <GameHeader
-        moonrocks={pack.moonrocks}
-        chips={game.chips}
+        moonrocks={pack?.moonrocks ?? 100}
+        chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
       <div className="flex-1 overflow-hidden py-6">{renderScreen()}</div>

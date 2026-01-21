@@ -1,8 +1,9 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
+import { LoadingSpinner } from "@/components/elements";
 import { MoonrockIcon, SparkleIcon } from "@/components/icons";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
@@ -18,6 +19,7 @@ interface GameCardProps {
   level: number;
   hasStarted: boolean;
   isOver?: boolean;
+  isLoading?: boolean;
   onPlay: () => void;
   onView?: () => void;
 }
@@ -29,6 +31,7 @@ const GameCard = ({
   level,
   hasStarted,
   isOver,
+  isLoading,
   onPlay,
   onView,
 }: GameCardProps) => {
@@ -68,10 +71,17 @@ const GameCard = ({
       ) : (
         <button
           type="button"
-          className="flex items-center justify-center h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400"
+          className="flex items-center justify-center h-10 w-24 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400 disabled:opacity-50"
           onClick={onPlay}
+          disabled={isLoading}
         >
-          {hasStarted ? "Continue" : "Play"}
+          {isLoading ? (
+            <LoadingSpinner size="sm" />
+          ) : hasStarted ? (
+            "Continue"
+          ) : (
+            "Play"
+          )}
         </button>
       )}
     </div>
@@ -86,6 +96,10 @@ export const Games = () => {
   const { start, mint } = useActions();
   const { packs } = usePacks();
   const [username, setUsername] = useState<string>();
+  const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
+  const pendingNavigationRef = useRef<{ packId: number; gameId: number } | null>(
+    null,
+  );
 
   // Token balance
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -125,6 +139,18 @@ export const Games = () => {
 
   const { getGameForPack } = useGames(gameKeys);
 
+  // Navigate when pending game becomes available
+  useEffect(() => {
+    if (!pendingNavigationRef.current) return;
+    const { packId, gameId } = pendingNavigationRef.current;
+    const game = getGameForPack(packId, gameId);
+    if (game) {
+      pendingNavigationRef.current = null;
+      setLoadingGameId(null);
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+    }
+  }, [getGameForPack, navigate]);
+
   // Build list of all games
   const gameList = useMemo(() => {
     const games: Array<{
@@ -159,10 +185,30 @@ export const Games = () => {
     gameId: number,
     hasNoGame: boolean,
   ) => {
-    if (hasNoGame) {
-      await start(packId);
+    const gameKey = `${packId}-${gameId}`;
+    setLoadingGameId(gameKey);
+
+    // Check if game already exists
+    const existingGame = getGameForPack(packId, gameId);
+    if (existingGame) {
+      // Game already loaded, navigate immediately
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+      return;
     }
-    navigate(`/play?pack=${packId}&game=${gameId}`);
+
+    // Set pending navigation - will navigate when game is available
+    pendingNavigationRef.current = { packId, gameId };
+
+    try {
+      if (hasNoGame) {
+        await start(packId);
+      }
+      // Navigation will happen in useEffect when game becomes available
+    } catch (error) {
+      console.error(error);
+      pendingNavigationRef.current = null;
+      setLoadingGameId(null);
+    }
   };
 
   const handleView = (packId: number, gameId: number) => {
@@ -224,6 +270,7 @@ export const Games = () => {
                 level={game.level}
                 hasStarted={!game.hasNoGame}
                 isOver={game.isOver}
+                isLoading={loadingGameId === `${game.packId}-${game.gameId}`}
                 onPlay={() =>
                   handlePlay(game.packId, game.gameId, game.hasNoGame)
                 }

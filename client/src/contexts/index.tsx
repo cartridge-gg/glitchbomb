@@ -97,6 +97,15 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   const setPackId = useCallback(
     (id: number) => {
       if (id !== packId) {
+        // Cancel existing subscriptions when switching packs
+        if (packSubscriptionRef.current) {
+          packSubscriptionRef.current.cancel();
+          packSubscriptionRef.current = null;
+        }
+        if (gameSubscriptionRef.current) {
+          gameSubscriptionRef.current.cancel();
+          gameSubscriptionRef.current = null;
+        }
         setPack(undefined);
         setGame(undefined);
       }
@@ -108,6 +117,11 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
   const setGameId = useCallback(
     (id: number) => {
       if (id !== gameId) {
+        // Cancel existing game subscription when switching games
+        if (gameSubscriptionRef.current) {
+          gameSubscriptionRef.current.cancel();
+          gameSubscriptionRef.current = null;
+        }
         setGame(undefined);
       }
       setGameIdState(id);
