@@ -64,7 +64,6 @@ export const Game = () => {
     | undefined
   >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
-  const isInitializedRef = useRef(false);
 
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
@@ -78,7 +77,7 @@ export const Game = () => {
     gameId: game?.id ?? 0,
   });
 
-  const { pulls } = usePulls({
+  const { pulls, initialFetchComplete } = usePulls({
     packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
@@ -126,7 +125,6 @@ export const Game = () => {
       setGameId(Number(gameId));
       // Reset all local state when game changes
       lastPullIdRef.current = null;
-      isInitializedRef.current = false;
       setCurrentOrb(undefined);
       setOverlay("none");
       setIsEnteringShop(false);
@@ -155,25 +153,29 @@ export const Game = () => {
 
   // Detect new pulls and show outcome animation
   useEffect(() => {
-    if (pulls.length === 0) return;
+    // Don't process until initial fetch is complete
+    if (!initialFetchComplete) return;
 
-    // Get the latest pull (highest id)
-    const latestPull = pulls.reduce((latest, pull) =>
-      pull.id > latest.id ? pull : latest,
-    );
+    // Get the latest pull (highest id), or null if no pulls
+    const latestPull =
+      pulls.length > 0
+        ? pulls.reduce((latest, pull) => (pull.id > latest.id ? pull : latest))
+        : null;
 
-    // First time we see pulls - just initialize the ref and mark as ready
-    if (!isInitializedRef.current) {
+    // If no pulls yet, just reset the ref
+    if (!latestPull) {
+      lastPullIdRef.current = null;
+      return;
+    }
+
+    // First time seeing pulls after initial fetch - just record the latest id
+    if (lastPullIdRef.current === null) {
       lastPullIdRef.current = latestPull.id;
-      isInitializedRef.current = true;
       return;
     }
 
     // Check if this is a new pull we haven't seen
-    if (
-      lastPullIdRef.current !== null &&
-      latestPull.id > lastPullIdRef.current
-    ) {
+    if (latestPull.id > lastPullIdRef.current) {
       // Show the outcome
       setCurrentOrb({
         variant: latestPull.orb.outcomeVariant(),
@@ -190,7 +192,7 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [pulls]);
+  }, [pulls, initialFetchComplete]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(() => {

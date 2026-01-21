@@ -34,6 +34,7 @@ export function usePulls({
 }) {
   const { client } = useEntitiesContext();
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
+  const [initialFetchComplete, setInitialFetchComplete] = useState(false);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
 
@@ -60,8 +61,8 @@ export function usePulls({
 
           // Filter by packId/gameId to prevent cross-game contamination
           if (
-            Number(newPull.packId) !== filterPackId ||
-            newPull.gameId !== filterGameId
+            Number(newPull.pack_id) !== filterPackId ||
+            newPull.game_id !== filterGameId
           ) {
             return;
           }
@@ -88,6 +89,7 @@ export function usePulls({
       }
       // Reset pulls when switching to a new game
       setPulls([]);
+      setInitialFetchComplete(false);
       currentKeyRef.current = fetchKey;
     }
 
@@ -105,6 +107,8 @@ export function usePulls({
       .getEventMessages(query)
       .then((result) => {
         filteredOnUpdate({ data: result.items, error: undefined });
+        // Mark initial fetch as complete - new pulls after this should animate
+        setInitialFetchComplete(true);
       })
       .catch((err) => console.error("[usePulls] Fetch error:", err));
 
@@ -136,5 +140,6 @@ export function usePulls({
   return {
     pulls,
     isReady,
+    initialFetchComplete,
   };
 }
