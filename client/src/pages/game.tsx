@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   CashOutConfirmation,
@@ -37,6 +37,20 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
+  const [currentOrb, setCurrentOrb] = useState<
+    | {
+        variant:
+          | "point"
+          | "bomb"
+          | "multiplier"
+          | "chip"
+          | "moonrock"
+          | "health";
+        content: string;
+      }
+    | undefined
+  >(undefined);
+  const lastPullIdRef = useRef<number | null>(null);
 
   // Check if we're in view mode (for finished games)
   const isViewMode = searchParams.get("view") === "true";
@@ -101,6 +115,38 @@ export const Game = () => {
       setOverlay("milestone");
     }
   }, [game]);
+
+  // Detect new pulls and show outcome animation
+  useEffect(() => {
+    if (pulls.length === 0) return;
+
+    // Get the latest pull (highest id)
+    const latestPull = pulls.reduce((latest, pull) =>
+      pull.id > latest.id ? pull : latest,
+    );
+
+    // Check if this is a new pull we haven't seen
+    if (
+      lastPullIdRef.current !== null &&
+      latestPull.id > lastPullIdRef.current
+    ) {
+      // Show the outcome
+      setCurrentOrb({
+        variant: latestPull.orb.outcomeVariant(),
+        content: latestPull.orb.outcome(),
+      });
+
+      // Clear after animation (2 seconds matches GameScene timing)
+      const timer = setTimeout(() => {
+        setCurrentOrb(undefined);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+
+    // Update the last seen pull id
+    lastPullIdRef.current = latestPull.id;
+  }, [pulls]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(() => {
@@ -272,6 +318,7 @@ export const Game = () => {
               bombs={distribution.bombs}
               orbs={game.pullables.length}
               values={distribution}
+              orb={currentOrb}
               onPull={handlePull}
             />
 

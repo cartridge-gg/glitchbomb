@@ -375,4 +375,66 @@ export class Orb {
         return "var(--white-100)";
     }
   }
+
+  public outcomeVariant():
+    | "point"
+    | "bomb"
+    | "multiplier"
+    | "chip"
+    | "moonrock"
+    | "health" {
+    if (this.isBomb()) return "bomb";
+    if (this.isHealth()) return "health";
+    if (this.isMultiplier()) return "multiplier";
+    if (this.isMoonrock()) return "moonrock";
+    if (this.isChips()) return "chip";
+    return "point";
+  }
+
+  public outcome(): string {
+    switch (this.value) {
+      case OrbType.Bomb1:
+        return "-1 HP";
+      case OrbType.Bomb2:
+        return "-2 HP";
+      case OrbType.Bomb3:
+        return "-3 HP";
+      case OrbType.Health1:
+        return "+1 HP";
+      case OrbType.Health2:
+        return "+2 HP";
+      case OrbType.Health3:
+        return "+3 HP";
+      case OrbType.Multiplier50:
+        return "+0.5x";
+      case OrbType.Multiplier100:
+        return "+1x";
+      case OrbType.Multiplier150:
+        return "+1.5x";
+      case OrbType.Point5:
+        return "+5 pts";
+      case OrbType.Point6:
+        return "+6 pts";
+      case OrbType.Point7:
+        return "+7 pts";
+      case OrbType.Point8:
+        return "+8 pts";
+      case OrbType.Point9:
+        return "+9 pts";
+      case OrbType.PointOrb1:
+        return "+1 pt/orb";
+      case OrbType.PointBomb4:
+        return "+4 pt/bomb";
+      case OrbType.Moonrock15:
+        return "+15 Moonrocks";
+      case OrbType.Moonrock40:
+        return "+40 Moonrocks";
+      case OrbType.Chips15:
+        return "+15 Chips";
+      case OrbType.CurseScoreDecrease:
+        return "-20% pts";
+      default:
+        return "";
+    }
+  }
 }
