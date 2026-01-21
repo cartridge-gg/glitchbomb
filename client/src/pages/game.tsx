@@ -124,10 +124,10 @@ export const Game = () => {
         content: latestPull.orb.outcome(),
       });
 
-      // Clear after animation (3 seconds matches GameScene timing)
+      // Clear after animation (2 seconds matches GameScene timing)
       const timer = setTimeout(() => {
         setCurrentOrb(undefined);
-      }, 3500);
+      }, 2500);
 
       return () => clearTimeout(timer);
     }

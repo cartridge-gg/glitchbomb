@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   Distribution,
@@ -53,15 +54,15 @@ export const GameScene = ({
       // Phase 1: Show Orb
       setPhase(1);
 
-      // Phase 2: After 1s, show Outcome and reduce Orb opacity
+      // Phase 2: After 500ms, show Outcome and reduce Orb opacity
       const phase2Timer = setTimeout(() => {
         setPhase(2);
-      }, 1000);
+      }, 500);
 
-      // Phase 3: After 3s total (1s + 2s), fade everything out
+      // Phase 3: After 2s total, fade everything out
       const phase3Timer = setTimeout(() => {
         setPhase(3);
-      }, 3000);
+      }, 2000);
 
       return () => {
         clearTimeout(phase2Timer);
@@ -77,7 +78,7 @@ export const GameScene = ({
       {/* Distribution */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
           phase === 0 && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
           phase === 3 && "opacity-100",
@@ -89,7 +90,7 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-1000",
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-300",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
           phase === 3 && "opacity-100 z-20",
@@ -113,40 +114,57 @@ export const GameScene = ({
       </div>
 
       {/* Orb */}
-      <div
-        className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
-          phase === 0 && "opacity-0",
-          phase === 1 && "opacity-100",
-          phase === 2 && "opacity-50",
-          phase === 3 && "opacity-0",
+      <AnimatePresence>
+        {(phase === 1 || phase === 2) && (
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ 
+              opacity: phase === 2 ? 0.5 : 1, 
+              scale: 1 
+            }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+            }}
+          >
+            <Orb
+              variant={orb?.variant ?? "default"}
+              style={{
+                boxShadow:
+                  "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
+              }}
+            />
+          </motion.div>
         )}
-      >
-        <Orb
-          variant={orb?.variant ?? "default"}
-          style={{
-            boxShadow:
-              "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
-          }}
-        />
-      </div>
+      </AnimatePresence>
 
       {/* Outcome */}
-      <div
-        className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000",
-          (phase === 0 || phase === 1) && "opacity-0",
-          phase === 2 && "opacity-100",
-          phase === 3 && "opacity-0",
+      <AnimatePresence>
+        {phase === 2 && (
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -10 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 15,
+              mass: 0.8,
+            }}
+          >
+            <Outcome
+              content={orb?.content ?? ""}
+              variant={orb?.variant ?? "default"}
+              size="md"
+              className="scale-[1.5]"
+            />
+          </motion.div>
         )}
-      >
-        <Outcome
-          content={orb?.content ?? ""}
-          variant={orb?.variant ?? "default"}
-          size="md"
-          className="scale-[1.5]"
-        />
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
