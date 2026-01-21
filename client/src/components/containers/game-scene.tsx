@@ -114,57 +114,59 @@ export const GameScene = ({
       </div>
 
       {/* Orb */}
-      <AnimatePresence>
-        {(phase === 1 || phase === 2) && (
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            initial={{ opacity: 0, scale: 0.3 }}
-            animate={{ 
-              opacity: phase === 2 ? 0.5 : 1, 
-              scale: 1 
-            }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20,
-            }}
-          >
-            <Orb
-              variant={orb?.variant ?? "default"}
-              style={{
-                boxShadow:
-                  "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <AnimatePresence>
+          {(phase === 1 || phase === 2) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.3 }}
+              animate={{ 
+                opacity: phase === 2 ? 0.5 : 1, 
+                scale: 1 
               }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+              }}
+            >
+              <Orb
+                variant={orb?.variant ?? "default"}
+                style={{
+                  boxShadow:
+                    "0px 0px 128px 96px #000000DD, 0px 0px 48px 16px #FFFFFF80",
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Outcome */}
-      <AnimatePresence>
-        {phase === 2 && (
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            initial={{ opacity: 0, scale: 0.5, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: -10 }}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 15,
-              mass: 0.8,
-            }}
-          >
-            <Outcome
-              content={orb?.content ?? ""}
-              variant={orb?.variant ?? "default"}
-              size="md"
-              className="scale-[1.5]"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <AnimatePresence>
+          {phase === 2 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -10 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 15,
+                mass: 0.8,
+              }}
+            >
+              <Outcome
+                content={orb?.content ?? ""}
+                variant={orb?.variant ?? "default"}
+                size="md"
+                className="scale-[1.5]"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
