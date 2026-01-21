@@ -15,8 +15,8 @@ import {
   GameRecap,
   HeartsDisplay,
   Multiplier,
+  PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
-  PLGraph,
   PointsProgress,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
@@ -218,7 +218,12 @@ export const Game = () => {
       return (
         <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
           <PointsProgress points={game.points} milestone={game.milestone} />
-          <PLGraph data={plData} mode="absolute" title="POTENTIAL" />
+          <PLChartTabs
+            data={plData}
+            pulls={pulls}
+            mode="absolute"
+            title="POTENTIAL"
+          />
 
           {/* Game recap instead of GameScene */}
           <div className="grow flex items-center justify-center">
@@ -310,7 +315,12 @@ export const Game = () => {
         return (
           <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
             <PointsProgress points={game.points} milestone={game.milestone} />
-            <PLGraph data={plData} mode="absolute" title="POTENTIAL" />
+            <PLChartTabs
+              data={plData}
+              pulls={pulls}
+              mode="absolute"
+              title="POTENTIAL"
+            />
 
             <GameScene
               className="grow"
