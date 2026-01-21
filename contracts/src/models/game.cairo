@@ -251,6 +251,8 @@ pub impl GameImpl of GameTrait {
         self.shop = 0;
         // [Effect] Reset multiplier
         self.multiplier = BASE_MULTIPLIER;
+        // [Effect] Reset discards so all orbs are available for the new level
+        self.discards = 0;
         // [Return] Entry fee
         Milestone::cost(self.level)
     }
