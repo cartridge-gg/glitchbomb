@@ -215,7 +215,9 @@ export const PLChartTabs = ({
           onClick={() => setActiveTab("logs")}
         >
           <LogsIcon className="w-5 h-5" />
-          <span className="font-secondary text-sm tracking-widest">HISTORY</span>
+          <span className="font-secondary text-sm tracking-widest">
+            HISTORY
+          </span>
         </TabButton>
       </div>
 
@@ -227,8 +229,10 @@ export const PLChartTabs = ({
           className="h-[140px] overflow-y-auto"
           style={{
             scrollbarWidth: "none",
-            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+            maskImage:
+              "linear-gradient(to bottom, black 75%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 75%, transparent 100%)",
           }}
         >
           <LogsView pulls={pulls} />
