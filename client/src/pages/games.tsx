@@ -1,6 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
@@ -97,6 +97,9 @@ export const Games = () => {
   const { packs } = usePacks();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
+  const pendingNavigationRef = useRef<{ packId: number; gameId: number } | null>(
+    null,
+  );
 
   // Token balance
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -136,6 +139,18 @@ export const Games = () => {
 
   const { getGameForPack } = useGames(gameKeys);
 
+  // Navigate when pending game becomes available
+  useEffect(() => {
+    if (!pendingNavigationRef.current) return;
+    const { packId, gameId } = pendingNavigationRef.current;
+    const game = getGameForPack(packId, gameId);
+    if (game) {
+      pendingNavigationRef.current = null;
+      setLoadingGameId(null);
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+    }
+  }, [getGameForPack, navigate]);
+
   // Build list of all games
   const gameList = useMemo(() => {
     const games: Array<{
@@ -172,13 +187,26 @@ export const Games = () => {
   ) => {
     const gameKey = `${packId}-${gameId}`;
     setLoadingGameId(gameKey);
+
+    // Check if game already exists
+    const existingGame = getGameForPack(packId, gameId);
+    if (existingGame) {
+      // Game already loaded, navigate immediately
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+      return;
+    }
+
+    // Set pending navigation - will navigate when game is available
+    pendingNavigationRef.current = { packId, gameId };
+
     try {
       if (hasNoGame) {
         await start(packId);
       }
-      navigate(`/play?pack=${packId}&game=${gameId}`);
+      // Navigation will happen in useEffect when game becomes available
     } catch (error) {
       console.error(error);
+      pendingNavigationRef.current = null;
       setLoadingGameId(null);
     }
   };
