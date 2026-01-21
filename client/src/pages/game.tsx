@@ -151,28 +151,32 @@ export const Game = () => {
     }
   }, [game?.shop]);
 
-  // Detect new pulls and show outcome animation
+  // Initialize lastPullIdRef when initial fetch completes
   useEffect(() => {
-    // Don't process until initial fetch is complete
     if (!initialFetchComplete) return;
 
-    // Get the latest pull (highest id), or null if no pulls
-    const latestPull =
-      pulls.length > 0
-        ? pulls.reduce((latest, pull) => (pull.id > latest.id ? pull : latest))
-        : null;
-
-    // If no pulls yet, just reset the ref
-    if (!latestPull) {
-      lastPullIdRef.current = null;
-      return;
+    // Set to 0 if no existing pulls, otherwise set to the max existing pull id
+    // Using 0 as sentinel means any real pull (id >= 1) will trigger animation
+    if (pulls.length === 0) {
+      lastPullIdRef.current = 0;
+    } else {
+      const maxId = Math.max(...pulls.map((p) => p.id));
+      lastPullIdRef.current = maxId;
     }
+    // Only run once when initialFetchComplete becomes true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFetchComplete]);
 
-    // First time seeing pulls after initial fetch - just record the latest id
-    if (lastPullIdRef.current === null) {
-      lastPullIdRef.current = latestPull.id;
-      return;
-    }
+  // Detect new pulls and show outcome animation
+  useEffect(() => {
+    // Don't process until we've initialized the lastPullIdRef
+    if (lastPullIdRef.current === null) return;
+    if (pulls.length === 0) return;
+
+    // Get the latest pull (highest id)
+    const latestPull = pulls.reduce((latest, pull) =>
+      pull.id > latest.id ? pull : latest,
+    );
 
     // Check if this is a new pull we haven't seen
     if (latestPull.id > lastPullIdRef.current) {
@@ -192,7 +196,7 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, initialFetchComplete]);
+  }, [pulls]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(() => {
