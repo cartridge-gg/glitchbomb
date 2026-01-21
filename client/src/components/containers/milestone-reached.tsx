@@ -16,7 +16,6 @@ export const MilestoneReached = ({
   onEnterShop,
   isEnteringShop = false,
 }: MilestoneReachedProps) => {
-
   return (
     <div className="flex flex-col gap-8 max-w-[420px] mx-auto px-4 h-full">
       <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">

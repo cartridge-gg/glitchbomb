@@ -97,9 +97,10 @@ export const Games = () => {
   const { packs } = usePacks();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
-  const pendingNavigationRef = useRef<{ packId: number; gameId: number } | null>(
-    null,
-  );
+  const pendingNavigationRef = useRef<{
+    packId: number;
+    gameId: number;
+  } | null>(null);
 
   // Token balance
   const tokenAddress = config?.token || getTokenAddress(chain.id);

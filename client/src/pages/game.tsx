@@ -35,7 +35,14 @@ const INITIAL_GAME_VALUES = {
   multiplier: 1,
   chips: 0,
   // Initial bag: 4 bombs, 7 other orbs
-  distribution: { points: 7, bombs: 4, multipliers: 0, health: 0, chips: 0, moonrocks: 0 },
+  distribution: {
+    points: 7,
+    bombs: 4,
+    multipliers: 0,
+    health: 0,
+    chips: 0,
+    moonrocks: 0,
+  },
   orbsCount: 11,
 };
 
