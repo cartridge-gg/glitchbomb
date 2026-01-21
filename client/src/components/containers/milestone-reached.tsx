@@ -1,3 +1,4 @@
+import { LoadingSpinner } from "@/components/elements";
 import { SparkleIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
@@ -61,7 +62,7 @@ export const MilestoneReached = ({
           onClick={onEnterShop}
           disabled={isEnteringShop}
         >
-          {isEnteringShop ? "LOADING..." : "ENTER SHOP"}
+          {isEnteringShop ? <LoadingSpinner size="sm" /> : "ENTER SHOP"}
         </Button>
       </div>
     </div>

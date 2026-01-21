@@ -65,8 +65,9 @@ export const Game = () => {
   >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
 
-  // Loading state for entering shop (only action that needs it)
+  // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
+  const [isExitingShop, setIsExitingShop] = useState(false);
 
   // Check if we're in view mode (for finished games)
   const isViewMode = searchParams.get("view") === "true";
@@ -138,6 +139,9 @@ export const Game = () => {
       // Shop loaded - reset entering shop loading state and close milestone
       setIsEnteringShop(false);
       setOverlay("none");
+    } else if (game?.shop && game.shop.length === 0) {
+      // Shop cleared - reset exiting shop loading state
+      setIsExitingShop(false);
     }
   }, [game?.shop]);
 
@@ -206,9 +210,15 @@ export const Game = () => {
   }, [enter, pack, game]);
 
   const handleBuyAndExit = useCallback(
-    (indices: number[]) => {
+    async (indices: number[]) => {
       if (pack && game) {
-        buyAndExit(pack.id, game.id, indices);
+        setIsExitingShop(true);
+        try {
+          await buyAndExit(pack.id, game.id, indices);
+        } catch (error) {
+          console.error(error);
+          setIsExitingShop(false);
+        }
       }
     },
     [buyAndExit, pack, game],
@@ -370,6 +380,7 @@ export const Game = () => {
           orbs={game.shop}
           bag={game.pullables}
           onConfirm={handleBuyAndExit}
+          isLoading={isExitingShop}
         />
       );
     }
