@@ -64,6 +64,7 @@ export const Game = () => {
     | undefined
   >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
+  const isInitializedRef = useRef(false);
 
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
@@ -123,6 +124,13 @@ export const Game = () => {
     if (packId && gameId) {
       setPackId(Number(packId));
       setGameId(Number(gameId));
+      // Reset all local state when game changes
+      lastPullIdRef.current = null;
+      isInitializedRef.current = false;
+      setCurrentOrb(undefined);
+      setOverlay("none");
+      setIsEnteringShop(false);
+      setIsExitingShop(false);
     }
   }, [setPackId, setGameId, searchParams]);
 
@@ -154,6 +162,13 @@ export const Game = () => {
       pull.id > latest.id ? pull : latest,
     );
 
+    // First time we see pulls - just initialize the ref and mark as ready
+    if (!isInitializedRef.current) {
+      lastPullIdRef.current = latestPull.id;
+      isInitializedRef.current = true;
+      return;
+    }
+
     // Check if this is a new pull we haven't seen
     if (
       lastPullIdRef.current !== null &&
@@ -165,6 +180,9 @@ export const Game = () => {
         content: latestPull.orb.outcome(),
       });
 
+      // Update the last seen pull id
+      lastPullIdRef.current = latestPull.id;
+
       // Clear after animation (2 seconds matches GameScene timing)
       const timer = setTimeout(() => {
         setCurrentOrb(undefined);
@@ -172,9 +190,6 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-
-    // Update the last seen pull id
-    lastPullIdRef.current = latestPull.id;
   }, [pulls]);
 
   // Memoize callbacks to prevent unnecessary re-renders

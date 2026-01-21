@@ -35,14 +35,19 @@ export function usePulls({
   const { client } = useEntitiesContext();
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
-  const lastFetchedRef = useRef<string | null>(null);
+  const currentKeyRef = useRef<string | null>(null);
 
   // Skip if invalid IDs (not yet loaded)
   const isReady = packId > 0 && gameId > 0;
   const fetchKey = isReady ? `${packId}-${gameId}` : null;
 
+  // Create onUpdate that filters by packId/gameId
   const onUpdate = useCallback(
-    (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
+    (
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+      filterPackId: number,
+      filterGameId: number,
+    ) => {
       if (!data || data.error) {
         return;
       }
@@ -52,6 +57,15 @@ export function usePulls({
             `${NAMESPACE}-${OrbPulled.getModelName()}`
           ] as unknown as RawOrbPulled;
           const newPull = OrbPulled.parse(model);
+
+          // Filter by packId/gameId to prevent cross-game contamination
+          if (
+            Number(newPull.packId) !== filterPackId ||
+            newPull.gameId !== filterGameId
+          ) {
+            return;
+          }
+
           setPulls((prev: OrbPulled[]) =>
             OrbPulled.deduplicate([...prev, newPull]),
           );
@@ -62,43 +76,62 @@ export function usePulls({
   );
 
   useEffect(() => {
-    // Skip if not ready or already fetched for this key
-    if (!client || !fetchKey || lastFetchedRef.current === fetchKey) return;
+    if (!client || !fetchKey) return;
 
-    // Cancel existing subscription
-    if (subscriptionRef.current) {
-      subscriptionRef.current.cancel();
-      subscriptionRef.current = null;
+    // Check if we're switching to a different game
+    const isNewGame = currentKeyRef.current !== fetchKey;
+    if (isNewGame) {
+      // Cancel existing subscription
+      if (subscriptionRef.current) {
+        subscriptionRef.current.cancel();
+        subscriptionRef.current = null;
+      }
+      // Reset pulls when switching to a new game
+      setPulls([]);
+      currentKeyRef.current = fetchKey;
     }
-
-    // Reset pulls when switching to a new game
-    setPulls([]);
-    lastFetchedRef.current = fetchKey;
 
     // Fetch and subscribe
     const query = getPullsQuery(packId, gameId).build();
 
+    // Create a wrapped callback that includes the filter
+    const filteredOnUpdate = (
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+    ) => {
+      onUpdate(data, packId, gameId);
+    };
+
     client
       .getEventMessages(query)
       .then((result) => {
-        onUpdate({ data: result.items, error: undefined });
+        filteredOnUpdate({ data: result.items, error: undefined });
       })
       .catch((err) => console.error("[usePulls] Fetch error:", err));
 
-    client
-      .onEventMessageUpdated(query.clause, [], onUpdate)
-      .then((response) => {
-        subscriptionRef.current = response;
-      })
-      .catch((err) => console.error("[usePulls] Subscribe error:", err));
+    // Only set up subscription once per game
+    if (!subscriptionRef.current) {
+      client
+        .onEventMessageUpdated(query.clause, [], filteredOnUpdate)
+        .then((response) => {
+          subscriptionRef.current = response;
+        })
+        .catch((err) => console.error("[usePulls] Subscribe error:", err));
+    }
 
+    return () => {
+      // Cleanup handled in separate effect
+    };
+  }, [client, fetchKey, packId, gameId, onUpdate]);
+
+  // Cleanup subscription on unmount
+  useEffect(() => {
     return () => {
       if (subscriptionRef.current) {
         subscriptionRef.current.cancel();
         subscriptionRef.current = null;
       }
     };
-  }, [client, fetchKey, packId, gameId, onUpdate]);
+  }, []);
 
   return {
     pulls,
