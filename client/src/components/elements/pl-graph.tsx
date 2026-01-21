@@ -154,7 +154,12 @@ export const PLGraph = ({
       // If baseline is too close to edges, add a midpoint label
       const midValue = Math.round((max + min) / 2 / 10) * 10;
       const midPosition = ((max - midValue) / range) * 100;
-      if (midPosition > 20 && midPosition < 80 && midValue !== max && midValue !== min) {
+      if (
+        midPosition > 20 &&
+        midPosition < 80 &&
+        midValue !== max &&
+        midValue !== min
+      ) {
         labels.push({ value: midValue, position: midPosition });
       }
     }
