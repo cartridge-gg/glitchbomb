@@ -7,6 +7,7 @@ export interface CashOutConfirmationProps {
   points: number;
   onConfirm: () => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
 export const CashOutConfirmation = ({
@@ -14,6 +15,7 @@ export const CashOutConfirmation = ({
   points,
   onConfirm,
   onCancel,
+  isLoading = false,
 }: CashOutConfirmationProps) => {
   const total = moonrocks + points;
 
@@ -45,20 +47,22 @@ export const CashOutConfirmation = ({
           gradient="green"
           className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
           onClick={onCancel}
+          disabled={isLoading}
         >
           ← BACK
         </Button>
         <GradientBorder color="purple" className="flex-1">
           <button
             type="button"
-            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+            className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
               color: "#FF80FF",
             }}
             onClick={onConfirm}
+            disabled={isLoading}
           >
-            CASH OUT
+            {isLoading ? "CASHING OUT..." : "CASH OUT"}
           </button>
         </GradientBorder>
       </div>

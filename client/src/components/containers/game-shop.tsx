@@ -18,6 +18,7 @@ export interface GameShopProps
   orbs: Orb[];
   bag: Orb[];
   onConfirm: (indices: number[]) => void;
+  isLoading?: boolean;
 }
 
 const gameShopVariants = cva("select-none relative flex flex-col gap-4", {
@@ -135,6 +136,7 @@ export const GameShop = ({
   variant,
   className,
   onConfirm,
+  isLoading = false,
   ...props
 }: GameShopProps) => {
   // Store quantities per orb index
@@ -275,7 +277,7 @@ export const GameShop = ({
 
   // Show stash screen
   if (showStash) {
-    return <GameStash orbs={displayBag} onClose={() => setShowStash(false)} />;
+    return <GameStash orbs={displayBag} pulls={[]} onClose={() => setShowStash(false)} />;
   }
 
   // Show exit confirmation screen
@@ -371,7 +373,7 @@ export const GameShop = ({
           gradient="green"
           className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
-          disabled={history.length === 0}
+          disabled={history.length === 0 || isLoading}
           onClick={handleUndo}
         >
           <span className="text-md leading-none translate-y-[1px]">↻</span>
@@ -383,8 +385,9 @@ export const GameShop = ({
           className="min-h-14 w-full font-secondary text-sm tracking-widest"
           wrapperClassName="flex-1"
           onClick={handleContinue}
+          disabled={isLoading}
         >
-          CONTINUE
+          {isLoading ? "LOADING..." : "CONTINUE"}
         </Button>
       </div>
     </div>

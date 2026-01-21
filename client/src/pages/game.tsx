@@ -65,6 +65,11 @@ export const Game = () => {
   >(undefined);
   const lastPullIdRef = useRef<number | null>(null);
 
+  // Loading states for actions
+  const [isEnteringShop, setIsEnteringShop] = useState(false);
+  const [isCashingOut, setIsCashingOut] = useState(false);
+  const [isExitingShop, setIsExitingShop] = useState(false);
+
   // Check if we're in view mode (for finished games)
   const isViewMode = searchParams.get("view") === "true";
 
@@ -129,6 +134,30 @@ export const Game = () => {
     }
   }, [game]);
 
+  // Reset loading states when data changes
+  useEffect(() => {
+    if (game?.shop && game.shop.length > 0) {
+      // Shop loaded - reset entering shop loading state and close milestone
+      setIsEnteringShop(false);
+      setOverlay("none");
+    }
+  }, [game?.shop]);
+
+  useEffect(() => {
+    if (game?.over) {
+      // Game ended - reset cashing out loading state
+      setIsCashingOut(false);
+      setOverlay("none");
+    }
+  }, [game?.over]);
+
+  useEffect(() => {
+    // Shop cleared (exited) - reset exiting shop loading state
+    if (game && game.shop.length === 0) {
+      setIsExitingShop(false);
+    }
+  }, [game]);
+
   // Detect new pulls and show outcome animation
   useEffect(() => {
     if (pulls.length === 0) return;
@@ -172,30 +201,41 @@ export const Game = () => {
 
   const handleCashOut = useCallback(async () => {
     if (!pack || !game) return;
+    setIsCashingOut(true);
     try {
       await cashOut(pack.id, game.id);
+      // Don't close overlay - wait for game.over to become true
     } catch (error) {
       console.error(error);
-    } finally {
+      setIsCashingOut(false);
       setOverlay("none");
     }
   }, [cashOut, pack, game]);
 
   const handleEnterShop = useCallback(async () => {
     if (!pack || !game) return;
+    setIsEnteringShop(true);
     try {
       await enter(pack.id, game.id);
+      // Don't close overlay - wait for shop to load
     } catch (error) {
       console.error(error);
-    } finally {
+      setIsEnteringShop(false);
       setOverlay("none");
     }
   }, [enter, pack, game]);
 
   const handleBuyAndExit = useCallback(
-    (indices: number[]) => {
+    async (indices: number[]) => {
       if (pack && game) {
-        buyAndExit(pack.id, game.id, indices);
+        setIsExitingShop(true);
+        try {
+          await buyAndExit(pack.id, game.id, indices);
+          // Don't reset - wait for shop to clear
+        } catch (error) {
+          console.error(error);
+          setIsExitingShop(false);
+        }
       }
     },
     [buyAndExit, pack, game],
@@ -357,6 +397,7 @@ export const Game = () => {
           orbs={game.shop}
           bag={game.pullables}
           onConfirm={handleBuyAndExit}
+          isLoading={isExitingShop}
         />
       );
     }
@@ -369,6 +410,8 @@ export const Game = () => {
             milestone={game.milestone}
             onCashOut={handleCashOut}
             onEnterShop={handleEnterShop}
+            isEnteringShop={isEnteringShop}
+            isCashingOut={isCashingOut}
           />
         );
 
@@ -388,6 +431,7 @@ export const Game = () => {
             points={game.points}
             onConfirm={handleCashOut}
             onCancel={closeOverlay}
+            isLoading={isCashingOut}
           />
         );
 
