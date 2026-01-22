@@ -89,7 +89,7 @@ export const InfoCard = ({
           className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full transition-all duration-200 ${
             isDisabled
               ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer hover:brightness-125 hover:scale-[1.02] active:scale-[0.98]"
+              : "cursor-pointer hover:brightness-125"
           }`}
           style={{ backgroundColor: styles.cardBg }}
         >
