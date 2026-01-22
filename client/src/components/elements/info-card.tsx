@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LoadingSpinner } from "./loading-spinner";
 
 export type InfoCardVariant = "green" | "red" | "yellow";
 
@@ -28,6 +29,9 @@ export interface InfoCardProps {
   label?: string;
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export const InfoCard = ({
@@ -35,14 +39,16 @@ export const InfoCard = ({
   label,
   children,
   className = "",
+  onClick,
+  disabled = false,
+  isLoading = false,
 }: InfoCardProps) => {
   const styles = variantStyles[variant];
+  const isClickable = !!onClick;
+  const isDisabled = disabled || isLoading;
 
-  return (
-    <div
-      className={`flex flex-col items-center gap-3 rounded-2xl p-4 ${className}`}
-      style={{ backgroundColor: styles.cardBg }}
-    >
+  const cardContent = (
+    <>
       {label && (
         <span
           className={`${styles.textColor} font-secondary text-sm tracking-[0.4em] uppercase`}
@@ -56,8 +62,35 @@ export const InfoCard = ({
         className="flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
         style={{ backgroundColor: styles.innerBg }}
       >
-        {children}
+        {isLoading ? <LoadingSpinner size="md" /> : children}
       </div>
+    </>
+  );
+
+  if (isClickable) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={isDisabled}
+        className={`flex flex-col items-center gap-3 rounded-2xl p-4 transition-all duration-200 ${
+          isDisabled
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:brightness-125 hover:scale-[1.02] active:scale-[0.98]"
+        } ${className}`}
+        style={{ backgroundColor: styles.cardBg }}
+      >
+        {cardContent}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={`flex flex-col items-center gap-3 rounded-2xl p-4 ${className}`}
+      style={{ backgroundColor: styles.cardBg }}
+    >
+      {cardContent}
     </div>
   );
 };
