@@ -14,7 +14,7 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-[1fr_minmax(0,420px)_1fr] items-center gap-2 py-4 px-4">
+    <div className="grid grid-cols-[1fr_minmax(0,400px)_1fr] items-center gap-2 py-4 px-4">
       {/* Left column - back button aligned left */}
       <div className="flex justify-start">
         <Button
