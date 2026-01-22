@@ -1,29 +1,38 @@
 import type { ReactNode } from "react";
+import {
+  GradientBorder,
+  type GradientColor,
+} from "@/components/ui/gradient-border";
 import { LoadingSpinner } from "./loading-spinner";
 
 export type InfoCardVariant = "green" | "red" | "yellow";
 
 const variantStyles: Record<
   InfoCardVariant,
-  { cardBg: string; innerBg: string; textColor: string; borderGradient: string }
+  {
+    cardBg: string;
+    innerBg: string;
+    textColor: string;
+    borderColor: GradientColor;
+  }
 > = {
   green: {
-    cardBg: "#00FF0010",
-    innerBg: "#00200025",
+    cardBg: "#0A1A0A", // Solid dark green
+    innerBg: "#051005", // Darker inner
     textColor: "text-green-400",
-    borderGradient: "linear-gradient(180deg, #35F81850 0%, #35F81800 100%)",
+    borderColor: "green",
   },
   red: {
-    cardBg: "#FF1E0012",
-    innerBg: "#10000030",
+    cardBg: "#1A0A0A", // Solid dark red
+    innerBg: "#100505", // Darker inner
     textColor: "text-red-100",
-    borderGradient: "linear-gradient(180deg, #FF6B6B50 0%, #FF6B6B00 100%)",
+    borderColor: "red",
   },
   yellow: {
-    cardBg: "#FFD70010",
-    innerBg: "#20180025",
+    cardBg: "#1A1A0A", // Solid dark yellow/gold
+    innerBg: "#101005", // Darker inner
     textColor: "text-yellow-400",
-    borderGradient: "linear-gradient(180deg, #FFD70060 0%, #FFD70000 100%)",
+    borderColor: "yellow",
   },
 };
 
@@ -72,10 +81,7 @@ export const InfoCard = ({
 
   if (isClickable) {
     return (
-      <div
-        className={`rounded-2xl p-[1px] ${className}`}
-        style={{ background: styles.borderGradient }}
-      >
+      <GradientBorder color={styles.borderColor} className={`rounded-2xl ${className}`}>
         <button
           type="button"
           onClick={onClick}
@@ -89,21 +95,18 @@ export const InfoCard = ({
         >
           {cardContent}
         </button>
-      </div>
+      </GradientBorder>
     );
   }
 
   return (
-    <div
-      className={`rounded-2xl p-[1px] ${className}`}
-      style={{ background: styles.borderGradient }}
-    >
+    <GradientBorder color={styles.borderColor} className={`rounded-2xl ${className}`}>
       <div
         className="flex flex-col items-center gap-3 rounded-2xl p-4"
         style={{ backgroundColor: styles.cardBg }}
       >
         {cardContent}
       </div>
-    </div>
+    </GradientBorder>
   );
 };
