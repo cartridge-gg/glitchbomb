@@ -5,22 +5,25 @@ export type InfoCardVariant = "green" | "red" | "yellow";
 
 const variantStyles: Record<
   InfoCardVariant,
-  { cardBg: string; innerBg: string; textColor: string }
+  { cardBg: string; innerBg: string; textColor: string; borderGradient: string }
 > = {
   green: {
     cardBg: "#00FF0010",
     innerBg: "#00200025",
     textColor: "text-green-400",
+    borderGradient: "linear-gradient(180deg, #35F81850 0%, #35F81800 100%)",
   },
   red: {
     cardBg: "#FF1E0012",
     innerBg: "#10000030",
     textColor: "text-red-100",
+    borderGradient: "linear-gradient(180deg, #FF6B6B50 0%, #FF6B6B00 100%)",
   },
   yellow: {
     cardBg: "#FFD70010",
     innerBg: "#20180025",
     textColor: "text-yellow-400",
+    borderGradient: "linear-gradient(180deg, #FFD70060 0%, #FFD70000 100%)",
   },
 };
 
@@ -69,28 +72,38 @@ export const InfoCard = ({
 
   if (isClickable) {
     return (
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={isDisabled}
-        className={`flex flex-col items-center gap-3 rounded-2xl p-4 transition-all duration-200 ${
-          isDisabled
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer hover:brightness-125 hover:scale-[1.02] active:scale-[0.98]"
-        } ${className}`}
-        style={{ backgroundColor: styles.cardBg }}
+      <div
+        className={`rounded-2xl p-[1px] ${className}`}
+        style={{ background: styles.borderGradient }}
       >
-        {cardContent}
-      </button>
+        <button
+          type="button"
+          onClick={onClick}
+          disabled={isDisabled}
+          className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full transition-all duration-200 ${
+            isDisabled
+              ? "opacity-50 cursor-not-allowed"
+              : "cursor-pointer hover:brightness-125 hover:scale-[1.02] active:scale-[0.98]"
+          }`}
+          style={{ backgroundColor: styles.cardBg }}
+        >
+          {cardContent}
+        </button>
+      </div>
     );
   }
 
   return (
     <div
-      className={`flex flex-col items-center gap-3 rounded-2xl p-4 ${className}`}
-      style={{ backgroundColor: styles.cardBg }}
+      className={`rounded-2xl p-[1px] ${className}`}
+      style={{ background: styles.borderGradient }}
     >
-      {cardContent}
+      <div
+        className="flex flex-col items-center gap-3 rounded-2xl p-4"
+        style={{ backgroundColor: styles.cardBg }}
+      >
+        {cardContent}
+      </div>
     </div>
   );
 };
