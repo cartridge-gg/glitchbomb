@@ -12,7 +12,6 @@ import {
   MilestoneReached,
 } from "@/components/containers";
 import {
-  GameRecap,
   HeartsDisplay,
   Multiplier,
   PLChartTabs,
@@ -75,9 +74,6 @@ export const Game = () => {
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
   const [isExitingShop, setIsExitingShop] = useState(false);
-
-  // Check if we're in view mode (for finished games)
-  const isViewMode = searchParams.get("view") === "true";
 
   const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
@@ -333,71 +329,25 @@ export const Game = () => {
       );
     }
 
-    // View mode for finished games - show recap with game stats
-    if (isViewMode && game.over) {
-      // Overlay screens in view mode
-      if (overlay === "stash") {
-        return (
-          <GameStash
-            orbs={game.pullables}
-            pulls={pulls}
-            onClose={closeOverlay}
-          />
-        );
-      }
+    // Game over (terminal state) - both view mode and immediate game over
+    if (game.over) {
+      const cashedOut = game.health > 0;
+      // When cashed out, points were converted to moonrocks (game.points is now 0)
+      // Calculate from the final P/L value (last data point before cash out)
+      // When died (health = 0), no moonrocks earned
+      const lastPLValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
+      const moonrocksEarned = cashedOut ? Math.max(0, lastPLValue) : 0;
 
-      // Main view mode layout
       return (
-        <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
-          <PointsProgress points={game.points} milestone={game.milestone} />
-          <PLChartTabs
-            data={plData}
-            pulls={pulls}
-            mode="absolute"
-            title="POTENTIAL"
-          />
-
-          {/* Game recap instead of GameScene */}
-          <div className="grow flex items-center justify-center">
-            <GameRecap points={game.points} level={game.level} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
-                <span className="font-secondary text-green-400 text-md tracking-wider">
-                  L{game.level}
-                </span>
-              </div>
-              <HeartsDisplay health={game.health} />
-            </div>
-            <Multiplier count={game.multiplier} className="h-12 w-20" />
-          </div>
-
-          <div className="flex items-stretch gap-3">
-            <Button
-              variant="secondary"
-              gradient="green"
-              className="min-h-14 min-w-16"
-              onClick={openStash}
-            >
-              <BagIcon className="w-6 h-6 text-green-400" />
-            </Button>
-            <Button
-              variant="secondary"
-              className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
-              onClick={() => navigate("/games")}
-            >
-              ← BACK TO GAMES
-            </Button>
-          </div>
-        </div>
+        <GameOver
+          level={game.level}
+          moonrocksEarned={moonrocksEarned}
+          plData={plData}
+          pulls={pulls}
+          cashedOut={cashedOut}
+          onPlayAgain={() => navigate("/games")}
+        />
       );
-    }
-
-    // Priority 1: Game over (terminal state) - only show if not in view mode
-    if (game.over && !isViewMode) {
-      return <GameOver points={game.points} level={game.level} />;
     }
 
     // Priority 2: Shop (when shop has items)
@@ -447,7 +397,7 @@ export const Game = () => {
       default:
         // Main gameplay view - inlined to prevent remount on re-render
         return (
-          <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+          <div className="flex flex-col justify-between gap-4 max-w-[420px] mx-auto px-4 h-full">
             <PointsProgress points={game.points} milestone={game.milestone} />
             <PLChartTabs
               data={plData}
@@ -457,7 +407,7 @@ export const Game = () => {
             />
 
             <GameScene
-              className="grow"
+              className="flex-1"
               lives={game.health}
               bombs={distribution.bombs}
               orbs={game.pullables.length}
