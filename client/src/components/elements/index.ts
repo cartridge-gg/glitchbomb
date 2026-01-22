@@ -11,6 +11,7 @@ export * from "./goal-tracker";
 export * from "./hearts-display";
 export * from "./item";
 export * from "./loading-spinner";
+export * from "./milestone-choice";
 export * from "./multiplier";
 export * from "./orb";
 export * from "./orb-category-summary";

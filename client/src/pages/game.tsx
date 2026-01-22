@@ -9,10 +9,10 @@ import {
   GameScene,
   GameShop,
   GameStash,
-  MilestoneReached,
 } from "@/components/containers";
 import {
   GameStats,
+  MilestoneChoice,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
 } from "@/components/elements";
@@ -43,7 +43,7 @@ const INITIAL_GAME_VALUES = {
   orbsCount: 11,
 };
 
-type OverlayView = "none" | "stash" | "cashout" | "milestone";
+type OverlayView = "none" | "stash" | "cashout";
 
 export const Game = () => {
   const navigate = useNavigate();
@@ -72,6 +72,7 @@ export const Game = () => {
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
   const [isExitingShop, setIsExitingShop] = useState(false);
+  const [isCashingOut, setIsCashingOut] = useState(false);
 
   const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
@@ -132,13 +133,6 @@ export const Game = () => {
       setIsExitingShop(false);
     }
   }, [setPackId, setGameId, searchParams]);
-
-  // Auto-show milestone screen when reached
-  useEffect(() => {
-    if (game && game.points >= game.milestone && !game.over) {
-      setOverlay("milestone");
-    }
-  }, [game]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -210,11 +204,14 @@ export const Game = () => {
 
   const handleCashOut = useCallback(async () => {
     if (!pack || !game) return;
-    setOverlay("none");
+    setIsCashingOut(true);
     try {
       await cashOut(pack.id, game.id);
+      setOverlay("none");
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsCashingOut(false);
     }
   }, [cashOut, pack, game]);
 
@@ -352,16 +349,6 @@ export const Game = () => {
 
     // Priority 3: Overlay screens
     switch (overlay) {
-      case "milestone":
-        return (
-          <MilestoneReached
-            milestone={game.milestone}
-            onCashOut={handleCashOut}
-            onEnterShop={handleEnterShop}
-            isEnteringShop={isEnteringShop}
-          />
-        );
-
       case "stash":
         return (
           <GameStash
@@ -381,7 +368,10 @@ export const Game = () => {
           />
         );
 
-      default:
+      default: {
+        // Check if milestone reached
+        const milestoneReached = game.points >= game.milestone;
+
         // Main gameplay view - inlined to prevent remount on re-render
         return (
           <div className="flex flex-col justify-between gap-4 max-w-[420px] mx-auto px-4 h-full">
@@ -398,16 +388,28 @@ export const Game = () => {
               title="POTENTIAL"
             />
 
-            <GameScene
-              className="flex-1"
-              lives={game.health}
-              bombs={distribution.bombs}
-              orbs={game.pullables.length}
-              multiplier={game.multiplier}
-              values={distribution}
-              orb={currentOrb}
-              onPull={handlePull}
-            />
+            {milestoneReached ? (
+              <div className="flex-1 flex items-center justify-center">
+                <MilestoneChoice
+                  points={game.points}
+                  onCashOut={handleCashOut}
+                  onEnterShop={handleEnterShop}
+                  isEnteringShop={isEnteringShop}
+                  isCashingOut={isCashingOut}
+                />
+              </div>
+            ) : (
+              <GameScene
+                className="flex-1"
+                lives={game.health}
+                bombs={distribution.bombs}
+                orbs={game.pullables.length}
+                multiplier={game.multiplier}
+                values={distribution}
+                orb={currentOrb}
+                onPull={handlePull}
+              />
+            )}
 
             <div className="flex items-stretch gap-3">
               <GradientBorder color="yellow" className="flex-1">
@@ -432,6 +434,7 @@ export const Game = () => {
             </div>
           </div>
         );
+      }
     }
   };
 
