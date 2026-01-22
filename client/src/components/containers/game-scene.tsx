@@ -114,7 +114,7 @@ export const GameScene = ({
           bombs={bombs}
         />
         {/* Multiplier Badge - top right of puller */}
-        {multiplier > 1 && (
+        {multiplier >= 1 && (
           <div
             className="absolute -top-2 -right-2 w-12 h-12 rounded-full flex items-center justify-center z-30"
             style={{
