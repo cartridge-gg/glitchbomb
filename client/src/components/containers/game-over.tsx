@@ -29,7 +29,7 @@ export const GameOver = ({
   // Use glitch font only for "glitched out", regular font for "cashed out"
   const titleFont = cashedOut ? "font-primary font-bold" : "font-glitch";
   // Bigger icon for cashed out
-  const iconSize = cashedOut ? "w-20 h-20" : "w-16 h-16";
+  const iconSize = "w-[72px] h-[72px]";
 
   return (
     <div className="flex flex-col gap-4 max-w-[420px] w-full mx-auto px-4 h-full">
