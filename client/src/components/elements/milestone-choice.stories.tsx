@@ -15,9 +15,13 @@ const meta = {
     ),
   ],
   argTypes: {
+    moonrocks: {
+      control: { type: "number" },
+      description: "Current pack moonrocks",
+    },
     points: {
       control: { type: "number" },
-      description: "Current points (will become chips or moonrocks)",
+      description: "Current game points (added to moonrocks on cash out)",
     },
     isEnteringShop: {
       control: { type: "boolean" },
@@ -29,6 +33,7 @@ const meta = {
     },
   },
   args: {
+    moonrocks: 100,
     points: 50,
     onCashOut: () => console.log("Cash out clicked"),
     onEnterShop: () => console.log("Enter shop clicked"),

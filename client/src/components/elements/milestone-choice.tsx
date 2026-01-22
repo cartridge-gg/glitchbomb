@@ -2,7 +2,8 @@ import { BombIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
 import { InfoCard } from "./info-card";
 
 export interface MilestoneChoiceProps {
-  points: number; // Current points (will become chips on continue, moonrocks on cash out)
+  moonrocks: number; // Current pack moonrocks
+  points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
   onCashOut: () => void;
   onEnterShop: () => void;
   isEnteringShop?: boolean;
@@ -10,6 +11,7 @@ export interface MilestoneChoiceProps {
 }
 
 export const MilestoneChoice = ({
+  moonrocks,
   points,
   onCashOut,
   onEnterShop,
@@ -17,6 +19,7 @@ export const MilestoneChoice = ({
   isCashingOut = false,
 }: MilestoneChoiceProps) => {
   const isLoading = isEnteringShop || isCashingOut;
+  const totalMoonrocks = moonrocks + points;
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -30,7 +33,7 @@ export const MilestoneChoice = ({
       >
         <MoonrockIcon className="w-10 h-10 text-yellow-400" />
         <span className="text-yellow-400 font-secondary text-xl tracking-wider">
-          +{points} MOON ROCKS
+          {totalMoonrocks} MOON ROCKS
         </span>
       </InfoCard>
 
