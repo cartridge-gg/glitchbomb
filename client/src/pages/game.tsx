@@ -335,7 +335,8 @@ export const Game = () => {
       // When cashed out, points were converted to moonrocks (game.points is now 0)
       // Calculate from the final P/L value (last data point before cash out)
       // When died (health = 0), no moonrocks earned
-      const lastPLValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
+      const lastPLValue =
+        plData.length > 0 ? plData[plData.length - 1].value : 0;
       const moonrocksEarned = cashedOut ? Math.max(0, lastPLValue) : 0;
 
       return (

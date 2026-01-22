@@ -4,9 +4,7 @@ import type { OrbPulled } from "@/models";
 import { GameOver } from "./game-over";
 
 // Mock Orb class for storybook
-const createMockOrb = (
-  value: string,
-): OrbPulled["orb"] =>
+const createMockOrb = (value: string): OrbPulled["orb"] =>
   ({
     value,
     name: () => value,
