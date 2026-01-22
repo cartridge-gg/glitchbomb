@@ -22,6 +22,10 @@ const meta: Meta<typeof GameScene> = {
       control: "number",
       description: "Number of orbs",
     },
+    multiplier: {
+      control: "number",
+      description: "Current multiplier value",
+    },
     values: {
       control: "object",
       description:
@@ -84,6 +88,7 @@ export const Default: Story = {
     lives: 5,
     bombs: 3,
     orbs: 5,
+    multiplier: 3,
     values: {
       bombs: 20,
       points: 58,

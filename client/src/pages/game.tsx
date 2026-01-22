@@ -13,7 +13,6 @@ import {
 } from "@/components/containers";
 import {
   GameStats,
-  Multiplier,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
 } from "@/components/elements";
@@ -283,16 +282,10 @@ export const Game = () => {
             lives={INITIAL_GAME_VALUES.health}
             bombs={INITIAL_GAME_VALUES.distribution.bombs}
             orbs={INITIAL_GAME_VALUES.orbsCount}
+            multiplier={INITIAL_GAME_VALUES.multiplier}
             values={INITIAL_GAME_VALUES.distribution}
             onPull={() => {}} // No-op while loading
           />
-
-          <div className="flex items-center justify-end">
-            <Multiplier
-              count={INITIAL_GAME_VALUES.multiplier}
-              className="h-12 w-20"
-            />
-          </div>
 
           <div className="flex items-stretch gap-3 opacity-50 pointer-events-none">
             <Button
@@ -410,14 +403,11 @@ export const Game = () => {
               lives={game.health}
               bombs={distribution.bombs}
               orbs={game.pullables.length}
+              multiplier={game.multiplier}
               values={distribution}
               orb={currentOrb}
               onPull={handlePull}
             />
-
-            <div className="flex items-center justify-end">
-              <Multiplier count={game.multiplier} className="h-12 w-20" />
-            </div>
 
             <div className="flex items-stretch gap-3">
               <Button
