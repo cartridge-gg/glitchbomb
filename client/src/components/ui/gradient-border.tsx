@@ -1,13 +1,20 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export type GradientColor = "green" | "blue" | "orange" | "purple" | "none";
+export type GradientColor =
+  | "green"
+  | "blue"
+  | "orange"
+  | "purple"
+  | "yellow"
+  | "none";
 
 const gradientColors: Record<GradientColor, string> = {
   green: "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
   blue: "linear-gradient(180deg, #60A5FA40 0%, #60A5FA00 100%)",
   orange: "linear-gradient(180deg, #FB923C40 0%, #FB923C00 100%)",
   purple: "linear-gradient(180deg, #FF80FF60 0%, #FF80FF00 100%)",
+  yellow: "linear-gradient(180deg, #FACC1540 0%, #FACC1500 100%)",
   none: "transparent",
 };
 

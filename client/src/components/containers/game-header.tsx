@@ -29,23 +29,23 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
 
       {/* Center column - Moonrocks + Chips (max 420px, shrinks on mobile) */}
       <div className="flex items-stretch gap-2 min-w-0">
-        {/* Moonrocks (blue) with gradient border */}
-        <GradientBorder color="blue" className="flex-1 min-w-0">
+        {/* Moonrocks (yellow) with gradient border */}
+        <GradientBorder color="yellow" className="flex-1 min-w-0 rounded-full">
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-3 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2530]"
+            className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-4 rounded-full transition-all duration-200 hover:brightness-110 bg-[#302A10]"
           >
-            <MoonrockIcon className="w-5 h-5 text-blue-400 shrink-0" />
-            <span className="font-secondary text-sm tracking-widest text-blue-400 truncate">
+            <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
+            <span className="font-secondary text-sm tracking-widest text-yellow-400 truncate">
               {Math.floor(moonrocks).toLocaleString()}
             </span>
           </button>
         </GradientBorder>
         {/* Chips (orange) with gradient border */}
-        <GradientBorder color="orange" className="flex-1 min-w-0">
+        <GradientBorder color="orange" className="flex-1 min-w-0 rounded-full">
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-3 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302510]"
+            className="w-full flex items-center justify-center gap-2 min-h-12 min-w-0 px-4 rounded-full transition-all duration-200 hover:brightness-110 bg-[#302510]"
           >
             <ChipIcon className="w-5 h-5 text-orange-400 shrink-0" />
             <span className="font-secondary text-sm tracking-widest text-orange-400 truncate">
