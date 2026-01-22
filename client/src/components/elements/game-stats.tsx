@@ -31,9 +31,14 @@ export const GameStats = ({
           <div className="flex items-center gap-1">
             <HeartIcon
               className="w-4 h-4"
-              style={{ color: "#FF0080", filter: "drop-shadow(0 0 4px #FF0080)" }}
+              style={{
+                color: "#FF0080",
+                filter: "drop-shadow(0 0 4px #FF0080)",
+              }}
             />
-            <span className="text-pink-400 font-secondary text-sm">{health}</span>
+            <span className="text-pink-400 font-secondary text-sm">
+              {health}
+            </span>
           </div>
         </div>
         {/* Health Bar */}
