@@ -12,11 +12,9 @@ import {
   MilestoneReached,
 } from "@/components/containers";
 import {
-  HeartsDisplay,
-  Multiplier,
+  GameStats,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
-  PointsProgress,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -271,9 +269,11 @@ export const Game = () => {
     if (isLoading) {
       return (
         <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
-          <PointsProgress
+          <GameStats
             points={INITIAL_GAME_VALUES.points}
             milestone={INITIAL_GAME_VALUES.milestone}
+            health={INITIAL_GAME_VALUES.health}
+            level={INITIAL_GAME_VALUES.level}
           />
           <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
 
@@ -282,24 +282,10 @@ export const Game = () => {
             lives={INITIAL_GAME_VALUES.health}
             bombs={INITIAL_GAME_VALUES.distribution.bombs}
             orbs={INITIAL_GAME_VALUES.orbsCount}
+            multiplier={INITIAL_GAME_VALUES.multiplier}
             values={INITIAL_GAME_VALUES.distribution}
             onPull={() => {}} // No-op while loading
           />
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
-                <span className="font-secondary text-green-400 text-md tracking-wider">
-                  L{INITIAL_GAME_VALUES.level}
-                </span>
-              </div>
-              <HeartsDisplay health={INITIAL_GAME_VALUES.health} />
-            </div>
-            <Multiplier
-              count={INITIAL_GAME_VALUES.multiplier}
-              className="h-12 w-20"
-            />
-          </div>
 
           <div className="flex items-stretch gap-3 opacity-50 pointer-events-none">
             <Button
@@ -399,7 +385,12 @@ export const Game = () => {
         // Main gameplay view - inlined to prevent remount on re-render
         return (
           <div className="flex flex-col justify-between gap-4 max-w-[420px] mx-auto px-4 h-full">
-            <PointsProgress points={game.points} milestone={game.milestone} />
+            <GameStats
+              points={game.points}
+              milestone={game.milestone}
+              health={game.health}
+              level={game.level}
+            />
             <PLChartTabs
               data={plData}
               pulls={pulls}
@@ -412,22 +403,11 @@ export const Game = () => {
               lives={game.health}
               bombs={distribution.bombs}
               orbs={game.pullables.length}
+              multiplier={game.multiplier}
               values={distribution}
               orb={currentOrb}
               onPull={handlePull}
             />
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center px-2 py-1.5 rounded-lg border border-green-900">
-                  <span className="font-secondary text-green-400 text-md tracking-wider">
-                    L{game.level}
-                  </span>
-                </div>
-                <HeartsDisplay health={game.health} />
-              </div>
-              <Multiplier count={game.multiplier} className="h-12 w-20" />
-            </div>
 
             <div className="flex items-stretch gap-3">
               <Button

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Distribution,
   type DistributionValues,
+  Multiplier,
   Orb,
   Outcome,
   Puller,
@@ -16,6 +17,7 @@ export interface GameSceneProps
   lives: number;
   bombs: number;
   orbs: number;
+  multiplier: number;
   values: DistributionValues;
   orb?: {
     variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
@@ -39,6 +41,7 @@ export const GameScene = ({
   lives,
   bombs,
   orbs,
+  multiplier,
   values,
   orb,
   variant,
@@ -111,6 +114,14 @@ export const GameScene = ({
           orbs={orbs}
           bombs={bombs}
         />
+        {/* Multiplier Badge - top right of puller */}
+        <div className="absolute -top-32 -right-24 z-30">
+          <Multiplier
+            count={multiplier}
+            cornerRadius={50}
+            className="w-[72px] h-[72px]"
+          />
+        </div>
       </div>
 
       {/* Orb */}
