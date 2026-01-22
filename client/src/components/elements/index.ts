@@ -9,6 +9,7 @@ export * from "./game-recap";
 export * from "./game-stats";
 export * from "./goal-tracker";
 export * from "./hearts-display";
+export * from "./info-card";
 export * from "./item";
 export * from "./loading-spinner";
 export * from "./milestone-choice";

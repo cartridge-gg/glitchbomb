@@ -1,7 +1,7 @@
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { OrbPulled } from "@/models";
-import { PLChartTabs, type PLDataPoint } from "../elements";
+import { InfoCard, PLChartTabs, type PLDataPoint } from "../elements";
 
 export interface GameOverProps {
   level: number;
@@ -22,14 +22,10 @@ export const GameOver = ({
 }: GameOverProps) => {
   // Green theme for cashed out, red theme for glitched out
   const titleColor = cashedOut ? "text-green-400" : "text-red-100";
-  const cardBg = cashedOut ? "#00FF0008" : "#FF1E000A";
-  const innerCardBg = cashedOut ? "#00200020" : "#01010129";
   const textColor = cashedOut ? "text-green-400" : "text-red-100";
 
   // Use glitch font only for "glitched out", regular font for "cashed out"
   const titleFont = cashedOut ? "font-primary font-bold" : "font-glitch";
-  // Bigger icon for cashed out
-  const iconSize = "w-[72px] h-[72px]";
 
   return (
     <div className="flex flex-col gap-4 max-w-[420px] w-full mx-auto px-4 h-full">
@@ -50,28 +46,19 @@ export const GameOver = ({
 
       {/* Centered earnings section - fills remaining space and centers content */}
       <div className="flex-1 relative min-h-[280px]">
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full min-h-[280px] flex flex-col items-center gap-4 rounded-2xl pt-4 pb-4 px-4"
-          style={{ backgroundColor: cardBg }}
-        >
-          <span
-            className={`${textColor} font-secondary text-sm tracking-[0.4em] uppercase`}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">
+          <InfoCard
+            variant={cashedOut ? "green" : "red"}
+            label={`You Earned${cashedOut ? "!" : ""}`}
+            className="min-h-[240px]"
           >
-            You Earned{cashedOut ? "!" : ""}
-          </span>
-
-          {/* Inner card - dark */}
-          <div
-            className="flex-1 flex flex-col items-center justify-center gap-4 w-full rounded-lg py-8 px-6"
-            style={{ backgroundColor: innerCardBg }}
-          >
-            <MoonrockIcon className={`${iconSize} ${textColor}`} />
+            <MoonrockIcon className={`w-[72px] h-[72px] ${textColor}`} />
             <span
               className={`${textColor} font-secondary text-xl md:text-2xl tracking-[0.2em]`}
             >
               {moonrocksEarned} MOON ROCKS
             </span>
-          </div>
+          </InfoCard>
         </div>
       </div>
 
