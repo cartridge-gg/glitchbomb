@@ -114,12 +114,12 @@ export const GameScene = ({
           orbs={orbs}
           bombs={bombs}
         />
-        {/* Multiplier Badge - above and to the right of puller */}
+        {/* Multiplier Badge - top right of puller */}
         <div className="absolute -top-20 -right-6 z-30">
           <Multiplier
             count={multiplier}
             cornerRadius={50}
-            className="w-12 h-12 rounded-full"
+            className="w-12 h-12"
           />
         </div>
       </div>
