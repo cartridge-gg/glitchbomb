@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Distribution,
   type DistributionValues,
+  Multiplier,
   Orb,
   Outcome,
   Puller,
@@ -113,31 +114,14 @@ export const GameScene = ({
           orbs={orbs}
           bombs={bombs}
         />
-        {/* Multiplier Badge - top right of puller */}
-        {multiplier >= 1 && (
-          <div
-            className="absolute -top-2 -right-2 w-12 h-12 rounded-full flex items-center justify-center z-30"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(147,51,234,0.3) 0%, rgba(147,51,234,0.1) 70%, transparent 100%)",
-              boxShadow: "0 0 20px rgba(147,51,234,0.5)",
-            }}
-          >
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-purple-500"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(88,28,135,0.9) 0%, rgba(147,51,234,0.9) 100%)",
-                boxShadow:
-                  "inset 0 2px 4px rgba(255,255,255,0.1), 0 0 12px rgba(147,51,234,0.6)",
-              }}
-            >
-              <span className="text-purple-200 font-secondary text-sm font-bold tracking-wide">
-                {multiplier}X
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Multiplier Badge - above and to the right of puller */}
+        <div className="absolute -top-14 -right-6 z-30">
+          <Multiplier
+            count={multiplier}
+            cornerRadius={50}
+            className="w-12 h-12 rounded-full"
+          />
+        </div>
       </div>
 
       {/* Orb */}
