@@ -413,12 +413,7 @@ export const Game = () => {
               <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"
-                  className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, #4A4A1A 0%, #2D2D10 100%)",
-                    color: "#FACC15",
-                  }}
+                  className="w-full flex items-center justify-center min-h-14 font-secondary text-sm tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
                   onClick={openCashout}
                 >
                   CASH OUT
@@ -427,12 +422,7 @@ export const Game = () => {
               <GradientBorder color="green" className="flex-1">
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(74,222,128,0.5)]"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, #1A4A2E 0%, #0D2518 100%)",
-                    color: "#4ADE80",
-                  }}
+                  className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
                   onClick={openStash}
                 >
                   <BagIcon className="w-5 h-5" />
