@@ -51,38 +51,54 @@ export const MilestoneChoice = ({
         <div className="flex gap-3 w-full h-full">
           {/* Reward Inner Card */}
           <div
-            className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
           >
-            <span className="text-orange-400 font-secondary text-xs tracking-[0.3em] uppercase">
-              Reward
-            </span>
-            <div className="flex items-center gap-2">
-              <ChipIcon size="md" className="text-orange-300" />
-              <span className="text-orange-300 font-glitch text-2xl">
-                +{points}
+            {/* Header */}
+            <div className="py-3 px-4">
+              <span className="text-orange-400 font-secondary text-xs tracking-[0.3em] uppercase">
+                Reward
               </span>
             </div>
-            <span className="text-orange-400/70 font-secondary text-xs tracking-wider">
-              Gain Chips
-            </span>
+            {/* Separator */}
+            <div className="h-px bg-orange-400/20" />
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+              <div className="flex items-center gap-2">
+                <ChipIcon size="md" className="text-orange-300" />
+                <span className="text-orange-300 font-glitch text-2xl">
+                  +{points}
+                </span>
+              </div>
+              <span className="text-orange-400/70 font-secondary text-xs tracking-wider">
+                Gain Chips
+              </span>
+            </div>
           </div>
 
           {/* Curse Inner Card */}
           <div
-            className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
           >
-            <span className="text-red-400 font-secondary text-xs tracking-[0.3em] uppercase">
-              Curse
-            </span>
-            <div className="flex items-center gap-2">
-              <BombIcon className="w-6 h-6 text-red-400" />
-              <span className="text-red-400 font-glitch text-2xl">+1</span>
+            {/* Header */}
+            <div className="py-3 px-4">
+              <span className="text-red-400 font-secondary text-xs tracking-[0.3em] uppercase">
+                Curse
+              </span>
             </div>
-            <span className="text-red-400/70 font-secondary text-xs tracking-wider">
-              Random Curse
-            </span>
+            {/* Separator */}
+            <div className="h-px bg-red-400/20" />
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+              <div className="flex items-center gap-2">
+                <BombIcon className="w-6 h-6 text-red-400" />
+                <span className="text-red-400 font-glitch text-2xl">+1</span>
+              </div>
+              <span className="text-red-400/70 font-secondary text-xs tracking-wider">
+                Random Curse
+              </span>
+            </div>
           </div>
         </div>
       </InfoCard>
