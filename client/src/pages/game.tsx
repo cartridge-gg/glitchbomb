@@ -410,26 +410,33 @@ export const Game = () => {
             />
 
             <div className="flex items-stretch gap-3">
-              <Button
-                variant="secondary"
-                gradient="green"
-                className="min-h-14 min-w-16"
-                onClick={openStash}
-              >
-                <BagIcon className="w-6 h-6 text-green-400" />
-              </Button>
-              <GradientBorder color="purple" className="flex-1">
+              <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"
-                  className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(128,0,128,0.5)]"
+                  className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]"
                   style={{
                     background:
-                      "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-                    color: "#FF80FF",
+                      "linear-gradient(180deg, #4A4A1A 0%, #2D2D10 100%)",
+                    color: "#FACC15",
                   }}
                   onClick={openCashout}
                 >
                   CASH OUT
+                </button>
+              </GradientBorder>
+              <GradientBorder color="green" className="flex-1">
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest rounded-lg transition-all duration-200 hover:brightness-125 hover:shadow-[0_0_20px_rgba(74,222,128,0.5)]"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #1A4A2E 0%, #0D2518 100%)",
+                    color: "#4ADE80",
+                  }}
+                  onClick={openStash}
+                >
+                  <BagIcon className="w-5 h-5" />
+                  ORBS
                 </button>
               </GradientBorder>
             </div>
