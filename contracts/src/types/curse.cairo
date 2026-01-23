@@ -2,6 +2,9 @@ use crate::elements::curses;
 use crate::models::game::{Game, GameTrait};
 use crate::types::orb::Orb;
 
+// Number of available curses (excluding None)
+pub const NUM_CURSES: u8 = 5;
+
 #[derive(Drop, Copy)]
 pub enum Curse {
     None,
@@ -25,12 +28,7 @@ pub impl CurseImpl of CurseTrait {
             // Bag curses - add orbs to the bag
             Curse::DoubleBomb => game.add(Orb::Bomb2),
             Curse::NormalBomb => game.add(Orb::Bomb1),
-            Curse::ScoreDecrease => {
-                // Only add if player has points to lose
-                if game.points > 0 {
-                    game.add(Orb::CurseScoreDecrease);
-                }
-            },
+            Curse::ScoreDecrease => game.add(Orb::CurseScoreDecrease),
             _ => {},
         }
     }

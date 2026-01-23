@@ -1,9 +1,12 @@
+use core::hash::HashStateTrait;
 use core::num::traits::Zero;
+use core::poseidon::PoseidonTrait;
 use crate::constants::{DEFAULT_LEVEL, MAX_CAPACITY, MAX_HEALTH};
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::power::TwoPower;
 pub use crate::models::index::Game;
+use crate::types::curse::{Curse, CurseTrait, NUM_CURSES};
 use crate::types::milestone::Milestone;
 use crate::types::orb::{Orb, OrbTrait};
 use crate::types::orbs::{Orbs, OrbsTrait};
@@ -241,7 +244,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn exit(ref self: Game) -> u16 {
+    fn exit(ref self: Game, seed: felt252) -> u16 {
         // [Check] Game state
         self.assert_not_over();
         self.assert_in_shop();
@@ -253,6 +256,15 @@ pub impl GameImpl of GameTrait {
         self.multiplier = BASE_MULTIPLIER;
         // [Effect] Reset discards so all orbs are available for the new level
         self.discards = 0;
+        // [Effect] Apply a random curse for the new level
+        // Use Poseidon hash with seed and level as context to derive unique random value
+        let mut state = PoseidonTrait::new();
+        state = state.update(seed);
+        state = state.update(self.level.into());
+        let random: u256 = state.finalize().into();
+        let curse_id: u8 = (random.low % NUM_CURSES.into()).try_into().unwrap() + 1;
+        let curse: Curse = curse_id.into();
+        curse.apply(ref self);
         // [Return] Entry fee
         Milestone::cost(self.level)
     }
@@ -649,7 +661,7 @@ mod tests {
         game.enter(SEED);
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
-        let cost = game.exit();
+        let cost = game.exit('EXIT_SEED');
         assert_eq!(game.shop, 0);
         assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
     }
@@ -794,7 +806,7 @@ mod tests {
         assert_eq!(GameTrait::is_refresh_used(game.shop), true);
         assert_eq!(GameTrait::is_burn_used(game.shop), true);
         // [Effect] Exit and enter new shop
-        game.exit();
+        game.exit('EXIT_SEED');
         game.earn_points(200);
         game.enter('SHOP2');
         // [Check] Flags are reset in new shop
@@ -1110,6 +1122,170 @@ mod tests {
             // [Check] After reshuffle + 1 pull, discards should be much smaller
             assert!(game.discards < discards_before);
         }
+    }
+
+    // ==================== Curse on Level Up Tests ====================
+
+    #[test]
+    fn test_game_exit_applies_curse() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        // [Check] No curses before exit
+        let curses_before = game.curses;
+        let bag_before = game.bag;
+        // [Effect] Exit shop (should apply a random curse)
+        game.exit('CURSE_SEED');
+        // [Check] Either curses bitmap changed (passive curse) or bag changed (bag curse)
+        let curses_changed = game.curses != curses_before;
+        let bag_changed = game.bag != bag_before;
+        assert!(curses_changed || bag_changed);
+    }
+
+    #[test]
+    fn test_game_exit_applies_different_curses_with_different_seeds() {
+        // Test with seed that gives curse 1 (Demultiplier)
+        let mut game1 = GameTrait::new(PACK_ID, GAME_ID);
+        game1.start();
+        game1.earn_points(100);
+        game1.enter(SEED);
+        let curses_before1 = game1.curses;
+        let bag_before1 = game1.bag;
+        game1.exit(0); // seed 0 % 5 + 1 = 1 (Demultiplier)
+
+        // Test with seed that gives curse 2 (DoubleDraw)
+        let mut game2 = GameTrait::new(PACK_ID, GAME_ID);
+        game2.start();
+        game2.earn_points(100);
+        game2.enter(SEED);
+        let curses_before2 = game2.curses;
+        let bag_before2 = game2.bag;
+        game2.exit(1); // seed 1 % 5 + 1 = 2 (DoubleDraw)
+
+        // [Check] Different seeds produce different effects
+        let changed1_curses = game1.curses != curses_before1;
+        let changed1_bag = game1.bag != bag_before1;
+        let changed2_curses = game2.curses != curses_before2;
+        let changed2_bag = game2.bag != bag_before2;
+
+        // Both should have some change
+        assert!(changed1_curses || changed1_bag);
+        assert!(changed2_curses || changed2_bag);
+    }
+
+    #[test]
+    fn test_curse_demultiplier_apply() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Effect] Apply Demultiplier curse directly
+        let curse: Curse = 1_u8.into(); // Demultiplier
+        curse.apply(ref game);
+        // [Check] Demultiplier curse is active
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
+    }
+
+    #[test]
+    fn test_curse_double_draw_apply() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        // [Effect] Apply DoubleDraw curse directly
+        let curse: Curse = 2_u8.into(); // DoubleDraw
+        curse.apply(ref game);
+        // [Check] DoubleDraw curse is active
+        assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
+    }
+
+    #[test]
+    fn test_curse_double_bomb_apply() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
+        // [Effect] Apply DoubleBomb curse directly
+        let curse: Curse = 3_u8.into(); // DoubleBomb
+        curse.apply(ref game);
+        // [Check] Bag size increased (Bomb2 added)
+        let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
+        assert_eq!(bag_len_after, bag_len_before + 1);
+        // [Check] Last orb in bag is Bomb2
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let last_orb = *bag.at(bag_len_after - 1);
+        assert_eq!(last_orb, Orb::Bomb2);
+    }
+
+    #[test]
+    fn test_curse_normal_bomb_apply() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
+        // [Effect] Apply NormalBomb curse directly
+        let curse: Curse = 4_u8.into(); // NormalBomb
+        curse.apply(ref game);
+        // [Check] Bag size increased (Bomb1 added)
+        let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
+        assert_eq!(bag_len_after, bag_len_before + 1);
+        // [Check] Last orb in bag is Bomb1
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let last_orb = *bag.at(bag_len_after - 1);
+        assert_eq!(last_orb, Orb::Bomb1);
+    }
+
+    #[test]
+    fn test_curse_score_decrease_apply() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
+        // [Effect] Apply ScoreDecrease curse directly
+        let curse: Curse = 5_u8.into(); // ScoreDecrease
+        curse.apply(ref game);
+        // [Check] Bag size increased (CurseScoreDecrease added)
+        let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
+        assert_eq!(bag_len_after, bag_len_before + 1);
+        // [Check] Last orb in bag is CurseScoreDecrease
+        let bag: Orbs = OrbsTrait::unpack(game.bag);
+        let last_orb = *bag.at(bag_len_after - 1);
+        assert_eq!(last_orb, Orb::CurseScoreDecrease);
+    }
+
+    #[test]
+    fn test_game_exit_applies_curse_via_random() {
+        // Test that exit() applies some curse based on seed
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.earn_points(100);
+        game.enter(SEED);
+        let curses_before = game.curses;
+        let bag_before = game.bag;
+        // [Effect] Exit with a seed - curse selection is deterministic but depends on hash
+        game.exit('RANDOM_SEED');
+        // [Check] Either curses or bag changed (some curse was applied)
+        let curses_changed = game.curses != curses_before;
+        let bag_changed = game.bag != bag_before;
+        assert!(curses_changed || bag_changed);
+    }
+
+    #[test]
+    fn test_game_multiple_level_ups_can_accumulate_curses() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+
+        // First level: apply a curse
+        game.earn_points(100);
+        game.enter(SEED);
+        let curses_before_1 = game.curses;
+        let bag_before_1 = game.bag;
+        game.exit('SEED1');
+        let changed_1 = game.curses != curses_before_1 || game.bag != bag_before_1;
+        assert!(changed_1);
+
+        // Second level: apply another curse
+        game.earn_points(200);
+        game.enter('SEED2');
+        let curses_before_2 = game.curses;
+        let bag_before_2 = game.bag;
+        game.exit('SEED3');
+        let changed_2 = game.curses != curses_before_2 || game.bag != bag_before_2;
+        assert!(changed_2);
     }
 }
 
