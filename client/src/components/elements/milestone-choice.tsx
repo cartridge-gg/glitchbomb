@@ -1,0 +1,129 @@
+import { BombIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
+import { InfoCard } from "./info-card";
+
+export interface MilestoneChoiceProps {
+  moonrocks: number; // Current pack moonrocks
+  points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
+  onCashOut: () => void;
+  onEnterShop: () => void;
+  isEnteringShop?: boolean;
+  isCashingOut?: boolean;
+}
+
+export const MilestoneChoice = ({
+  moonrocks,
+  points,
+  onCashOut,
+  onEnterShop,
+  isEnteringShop = false,
+  isCashingOut = false,
+}: MilestoneChoiceProps) => {
+  const isLoading = isEnteringShop || isCashingOut;
+  const totalMoonrocks = moonrocks + points;
+
+  return (
+    <div className="flex flex-col gap-3 w-full h-full">
+      {/* Cash Out Card - clickable */}
+      <InfoCard
+        variant="yellow"
+        label="Cash Out"
+        onClick={onCashOut}
+        disabled={isLoading}
+        isLoading={isCashingOut}
+        className="flex-1"
+        hideInner
+      >
+        <div
+          className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+        >
+          {/* Header */}
+          <div className="py-1 px-4">
+            <span className="text-yellow-400 font-secondary text-2xs tracking-[0.3em] uppercase">
+              Reward
+            </span>
+          </div>
+          {/* Separator */}
+          <div className="h-px bg-yellow-500" />
+          {/* Content */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+            <div className="flex items-center justify-center gap-1">
+              <MoonrockIcon className="w-[40px] h-[40px] text-yellow-400" />
+              <span className="text-yellow-400 font-secondary text-4xl">
+                +{totalMoonrocks}
+              </span>
+            </div>
+            <span className="text-yellow-400/70 font-secondary text-sm tracking-wider">
+              Moon Rocks
+            </span>
+          </div>
+        </div>
+      </InfoCard>
+
+      {/* Continue Card - clickable */}
+      <InfoCard
+        variant="orange"
+        label="Continue"
+        onClick={onEnterShop}
+        disabled={isLoading}
+        isLoading={isEnteringShop}
+        className="flex-1"
+        hideInner
+      >
+        <div className="flex gap-3 w-full h-full">
+          {/* Reward Inner Card */}
+          <div
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+          >
+            {/* Header */}
+            <div className="py-1 px-4">
+              <span className="text-orange-400 font-secondary text-2xs tracking-[0.3em] uppercase">
+                Reward
+              </span>
+            </div>
+            {/* Separator */}
+            <div className="h-px bg-orange-500" />
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+              <div className="flex items-center gap-2">
+                <ChipIcon size="md" className="text-orange-400" />
+                <span className="text-orange-400 font-secondary text-2xl">
+                  +{points}
+                </span>
+              </div>
+              <span className="text-orange-400/70 font-secondary text-xs tracking-wider">
+                Gain Chips
+              </span>
+            </div>
+          </div>
+
+          {/* Curse Inner Card */}
+          <div
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+          >
+            {/* Header */}
+            <div className="py-1 px-4">
+              <span className="text-red-400 font-secondary text-2xs tracking-[0.3em] uppercase">
+                Curse
+              </span>
+            </div>
+            {/* Separator */}
+            <div className="h-px bg-orange-500" />
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+              <div className="flex items-center gap-2">
+                <BombIcon className="w-6 h-6 text-red-400" />
+                <span className="text-red-400 font-secondary text-2xl">+1</span>
+              </div>
+              <span className="text-red-400 font-secondary text-xs tracking-wider">
+                Random Curse
+              </span>
+            </div>
+          </div>
+        </div>
+      </InfoCard>
+    </div>
+  );
+};

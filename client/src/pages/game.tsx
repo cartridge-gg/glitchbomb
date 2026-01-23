@@ -3,16 +3,16 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  CashOutConfirmation,
   GameHeader,
   GameOver,
   GameScene,
   GameShop,
   GameStash,
-  MilestoneReached,
 } from "@/components/containers";
 import {
+  CashOutChoice,
   GameStats,
+  MilestoneChoice,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
 } from "@/components/elements";
@@ -43,7 +43,7 @@ const INITIAL_GAME_VALUES = {
   orbsCount: 11,
 };
 
-type OverlayView = "none" | "stash" | "cashout" | "milestone";
+type OverlayView = "none" | "stash" | "cashout";
 
 export const Game = () => {
   const navigate = useNavigate();
@@ -72,6 +72,7 @@ export const Game = () => {
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
   const [isExitingShop, setIsExitingShop] = useState(false);
+  const [isCashingOut, setIsCashingOut] = useState(false);
 
   const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
@@ -132,13 +133,6 @@ export const Game = () => {
       setIsExitingShop(false);
     }
   }, [setPackId, setGameId, searchParams]);
-
-  // Auto-show milestone screen when reached
-  useEffect(() => {
-    if (game && game.points >= game.milestone && !game.over) {
-      setOverlay("milestone");
-    }
-  }, [game]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -210,11 +204,14 @@ export const Game = () => {
 
   const handleCashOut = useCallback(async () => {
     if (!pack || !game) return;
-    setOverlay("none");
+    setIsCashingOut(true);
     try {
       await cashOut(pack.id, game.id);
+      setOverlay("none");
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsCashingOut(false);
     }
   }, [cashOut, pack, game]);
 
@@ -352,16 +349,6 @@ export const Game = () => {
 
     // Priority 3: Overlay screens
     switch (overlay) {
-      case "milestone":
-        return (
-          <MilestoneReached
-            milestone={game.milestone}
-            onCashOut={handleCashOut}
-            onEnterShop={handleEnterShop}
-            isEnteringShop={isEnteringShop}
-          />
-        );
-
       case "stash":
         return (
           <GameStash
@@ -371,17 +358,11 @@ export const Game = () => {
           />
         );
 
-      case "cashout":
-        return (
-          <CashOutConfirmation
-            moonrocks={pack.moonrocks}
-            points={game.points}
-            onConfirm={handleCashOut}
-            onCancel={closeOverlay}
-          />
-        );
+      default: {
+        // Check if milestone reached or cashout confirmation
+        const milestoneReached = game.points >= game.milestone;
+        const showCashoutChoice = overlay === "cashout";
 
-      default:
         // Main gameplay view - inlined to prevent remount on re-render
         return (
           <div className="flex flex-col justify-between gap-4 max-w-[420px] mx-auto px-4 h-full">
@@ -398,40 +379,66 @@ export const Game = () => {
               title="POTENTIAL"
             />
 
-            <GameScene
-              className="flex-1"
-              lives={game.health}
-              bombs={distribution.bombs}
-              orbs={game.pullables.length}
-              multiplier={game.multiplier}
-              values={distribution}
-              orb={currentOrb}
-              onPull={handlePull}
-            />
+            {showCashoutChoice ? (
+              <div className="flex-1 flex flex-col">
+                <CashOutChoice
+                  moonrocks={pack.moonrocks}
+                  points={game.points}
+                  onConfirm={handleCashOut}
+                  onCancel={closeOverlay}
+                  isConfirming={isCashingOut}
+                />
+              </div>
+            ) : milestoneReached ? (
+              <div className="flex-1 flex flex-col">
+                <MilestoneChoice
+                  moonrocks={pack.moonrocks}
+                  points={game.points}
+                  onCashOut={handleCashOut}
+                  onEnterShop={handleEnterShop}
+                  isEnteringShop={isEnteringShop}
+                  isCashingOut={isCashingOut}
+                />
+              </div>
+            ) : (
+              <GameScene
+                className="flex-1"
+                lives={game.health}
+                bombs={distribution.bombs}
+                orbs={game.pullables.length}
+                multiplier={game.multiplier}
+                values={distribution}
+                orb={currentOrb}
+                onPull={handlePull}
+              />
+            )}
 
-            <div className="flex items-stretch gap-3">
-              <GradientBorder color="yellow" className="flex-1">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center min-h-14 font-secondary text-sm tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
-                  onClick={openCashout}
-                >
-                  CASH OUT
-                </button>
-              </GradientBorder>
-              <GradientBorder color="green" className="flex-1">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={openStash}
-                >
-                  <BagIcon className="w-5 h-5" />
-                  ORBS
-                </button>
-              </GradientBorder>
-            </div>
+            {!showCashoutChoice && !milestoneReached && (
+              <div className="flex items-stretch gap-3">
+                <GradientBorder color="yellow" className="flex-1">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center min-h-14 font-secondary text-sm tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
+                    onClick={openCashout}
+                  >
+                    CASH OUT
+                  </button>
+                </GradientBorder>
+                <GradientBorder color="green" className="flex-1">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    onClick={openStash}
+                  >
+                    <BagIcon className="w-5 h-5" />
+                    ORBS
+                  </button>
+                </GradientBorder>
+              </div>
+            )}
           </div>
         );
+      }
     }
   };
 
