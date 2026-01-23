@@ -50,6 +50,7 @@ export interface InfoCardProps {
   onClick?: () => void;
   disabled?: boolean;
   isLoading?: boolean;
+  hideInner?: boolean;
 }
 
 export const InfoCard = ({
@@ -60,6 +61,7 @@ export const InfoCard = ({
   onClick,
   disabled = false,
   isLoading = false,
+  hideInner = false,
 }: InfoCardProps) => {
   const styles = variantStyles[variant];
   const isClickable = !!onClick;
@@ -75,13 +77,18 @@ export const InfoCard = ({
         </span>
       )}
 
-      {/* Inner card - dark */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
-        style={{ backgroundColor: styles.innerBg }}
-      >
-        {isLoading ? <LoadingSpinner size="md" /> : children}
-      </div>
+      {hideInner ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 w-full">
+          {isLoading ? <LoadingSpinner size="md" /> : children}
+        </div>
+      ) : (
+        <div
+          className="flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
+          style={{ backgroundColor: styles.innerBg }}
+        >
+          {isLoading ? <LoadingSpinner size="md" /> : children}
+        </div>
+      )}
     </>
   );
 
