@@ -23,7 +23,7 @@ export const CashOutChoice = ({
       {/* Confirm Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
-        label="Confirm Cash Out"
+        label="Cash Out"
         onClick={onConfirm}
         disabled={isConfirming}
         isLoading={isConfirming}

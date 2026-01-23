@@ -18,19 +18,19 @@ const variantStyles: Record<
 > = {
   green: {
     cardBg: "#0A1A0A",
-    innerBg: "rgba(0, 0, 0, 0.3)",
+    innerBg: "rgba(0, 0, 0, 0.1)",
     textColor: "text-green-400",
     borderColor: "green",
   },
   red: {
     cardBg: "#1A0A0A",
-    innerBg: "rgba(0, 0, 0, 0.3)",
+    innerBg: "rgba(0, 0, 0, 0.1)",
     textColor: "text-red-100",
     borderColor: "red",
   },
   yellow: {
     cardBg: "#1A1A0A",
-    innerBg: "rgba(0, 0, 0, 0.3)",
+    innerBg: "rgba(0, 0, 0, 0.1)",
     textColor: "text-yellow-400",
     borderColor: "yellow",
   },
