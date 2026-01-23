@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/gradient-border";
 import { LoadingSpinner } from "./loading-spinner";
 
-export type InfoCardVariant = "green" | "red" | "yellow";
+export type InfoCardVariant = "green" | "red" | "yellow" | "orange";
 
 const variantStyles: Record<
   InfoCardVariant,
@@ -33,6 +33,12 @@ const variantStyles: Record<
     innerBg: "rgba(0, 0, 0, 0.1)",
     textColor: "text-yellow-400",
     borderColor: "yellow",
+  },
+  orange: {
+    cardBg: "#1A120A",
+    innerBg: "rgba(0, 0, 0, 0.1)",
+    textColor: "text-orange-400",
+    borderColor: "orange",
   },
 };
 

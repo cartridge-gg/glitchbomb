@@ -40,7 +40,7 @@ export const MilestoneChoice = ({
 
       {/* Continue Card - clickable */}
       <InfoCard
-        variant="red"
+        variant="orange"
         label="Continue"
         onClick={onEnterShop}
         disabled={isLoading}
