@@ -44,13 +44,13 @@ export const CashOutChoice = ({
           <div className="h-px bg-yellow-500" />
           {/* Content */}
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
-            <div className="flex items-center gap-2">
-              <MoonrockIcon className="w-10 h-10 text-yellow-400" />
-              <span className="text-yellow-400 font-secondary text-2xl">
+            <div className="flex items-center gap-3">
+              <MoonrockIcon className="w-12 h-12 text-yellow-400" />
+              <span className="text-yellow-400 font-secondary text-4xl">
                 +{totalMoonrocks}
               </span>
             </div>
-            <span className="text-yellow-400/70 font-secondary text-xs tracking-wider">
+            <span className="text-yellow-400/70 font-secondary text-sm tracking-wider">
               Moon Rocks
             </span>
           </div>
