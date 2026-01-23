@@ -9,6 +9,13 @@ import {
   Outcome,
   Puller,
 } from "@/components/elements";
+import { FireIcon } from "@/components/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
@@ -19,6 +26,8 @@ export interface GameSceneProps
   orbs: number;
   multiplier: number;
   values: DistributionValues;
+  hasCurse?: boolean;
+  curseLabel?: string;
   orb?: {
     variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
     content: string;
@@ -43,6 +52,8 @@ export const GameScene = ({
   orbs,
   multiplier,
   values,
+  hasCurse = false,
+  curseLabel,
   orb,
   variant,
   className,
@@ -114,6 +125,38 @@ export const GameScene = ({
           orbs={orbs}
           bombs={bombs}
         />
+        {hasCurse && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="absolute -top-32 -left-24 z-30">
+                  <div className="relative h-[72px] w-[72px]">
+                    <Multiplier
+                      count={3}
+                      cornerRadius={50}
+                      className="h-full w-full [&_p]:opacity-0"
+                      electricGradient="linear-gradient(180deg, #F89149CC 0%, #D10D07CC 100%)"
+                      electricBorderGradient="linear-gradient(180deg, #F89149 0%, #D10D07 100%)"
+                      electricColor="#F89149"
+                      contentOpacity={0.55}
+                      borderWidthMin={1.25}
+                      borderWidthMax={2.5}
+                    />
+                    <div className="absolute inset-0 z-20 flex items-center justify-center">
+                      <FireIcon className="h-6 w-6" />
+                    </div>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-[#1A120A] text-orange-100 font-secondary text-[10px] tracking-[0.25em] uppercase border border-orange-500/50"
+              >
+                {curseLabel ?? "Random Curse"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         {/* Multiplier Badge - top right of puller */}
         <div className="absolute -top-32 -right-24 z-30">
           <Multiplier

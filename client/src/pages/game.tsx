@@ -43,6 +43,21 @@ const INITIAL_GAME_VALUES = {
   orbsCount: 11,
 };
 
+const CURSE_LABELS = [
+  { bit: 0, label: "Double Draw" },
+  { bit: 1, label: "Demultiplier" },
+];
+
+const getCurseLabel = (curses: number) => {
+  const active = CURSE_LABELS.filter(
+    ({ bit }) => (curses & (1 << bit)) !== 0,
+  ).map(({ label }) => label);
+
+  if (active.length === 0) return "Random Curse";
+  if (active.length === 1) return active[0];
+  return active.join(" + ");
+};
+
 type OverlayView = "none" | "stash" | "cashout";
 
 export const Game = () => {
@@ -246,6 +261,11 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
+  const curseLabel = useMemo(
+    () => getCurseLabel(game?.curses ?? 0),
+    [game?.curses],
+  );
+  const hasCurse = (game?.curses ?? 0) > 0;
 
   // Check if we're still loading (have URL params but no data yet)
   const isLoading = !pack || !game;
@@ -276,6 +296,7 @@ export const Game = () => {
             orbs={INITIAL_GAME_VALUES.orbsCount}
             multiplier={INITIAL_GAME_VALUES.multiplier}
             values={INITIAL_GAME_VALUES.distribution}
+            hasCurse={false}
             onPull={() => {}} // No-op while loading
           />
 
@@ -403,6 +424,8 @@ export const Game = () => {
                 orbs={game.pullables.length}
                 multiplier={game.multiplier}
                 values={distribution}
+                hasCurse={hasCurse}
+                curseLabel={curseLabel}
                 orb={currentOrb}
                 onPull={handlePull}
               />
