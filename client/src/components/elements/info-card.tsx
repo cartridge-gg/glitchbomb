@@ -94,7 +94,10 @@ export const InfoCard = ({
 
   if (isClickable) {
     return (
-      <GradientBorder color={styles.borderColor} className={`rounded-2xl h-full ${className}`}>
+      <GradientBorder
+        color={styles.borderColor}
+        className={`rounded-2xl h-full ${className}`}
+      >
         <button
           type="button"
           onClick={onClick}
@@ -113,7 +116,10 @@ export const InfoCard = ({
   }
 
   return (
-    <GradientBorder color={styles.borderColor} className={`rounded-2xl h-full ${className}`}>
+    <GradientBorder
+      color={styles.borderColor}
+      className={`rounded-2xl h-full ${className}`}
+    >
       <div
         className="flex flex-col items-center gap-3 rounded-2xl p-4 h-full"
         style={{ backgroundColor: styles.cardBg }}
