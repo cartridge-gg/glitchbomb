@@ -205,39 +205,34 @@ export const Game = () => {
   const handleCashOut = useCallback(async () => {
     if (!pack || !game) return;
     setIsCashingOut(true);
-    try {
-      await cashOut(pack.id, game.id);
+    const success = await cashOut(pack.id, game.id);
+    if (success) {
       setOverlay("none");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsCashingOut(false);
     }
+    setIsCashingOut(false);
   }, [cashOut, pack, game]);
 
   const handleEnterShop = useCallback(async () => {
     if (!pack || !game) return;
     setIsEnteringShop(true);
-    try {
-      await enter(pack.id, game.id);
-      // Don't close overlay - wait for shop to load
-    } catch (error) {
-      console.error(error);
+    const success = await enter(pack.id, game.id);
+    if (!success) {
+      // User cancelled or error - reset loading state
       setIsEnteringShop(false);
-      setOverlay("none");
     }
+    // On success, don't close overlay - wait for shop to load
   }, [enter, pack, game]);
 
   const handleBuyAndExit = useCallback(
     async (indices: number[]) => {
       if (pack && game) {
         setIsExitingShop(true);
-        try {
-          await buyAndExit(pack.id, game.id, indices);
-        } catch (error) {
-          console.error(error);
+        const success = await buyAndExit(pack.id, game.id, indices);
+        if (!success) {
+          // User cancelled or error - reset loading state
           setIsExitingShop(false);
         }
+        // On success, wait for shop to clear via useEffect
       }
     },
     [buyAndExit, pack, game],
