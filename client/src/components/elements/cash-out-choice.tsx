@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, MoonrockIcon } from "@/components/icons";
-import { InfoCard } from "./info-card";
+import { LoadingSpinner } from "./loading-spinner";
 
 export interface CashOutChoiceProps {
   moonrocks: number; // Current pack moonrocks
@@ -19,37 +19,56 @@ export const CashOutChoice = ({
   const totalMoonrocks = moonrocks + points;
 
   return (
-    <div className="flex flex-col gap-3 w-full h-full max-h-[600px]">
-      {/* Confirm Cash Out Card - clickable */}
-      <InfoCard
-        variant="yellow"
-        label="Cash Out"
+    <div className="flex gap-3 w-full h-full max-h-[400px]">
+      {/* Cash Out Inner Card - clickable */}
+      <button
+        type="button"
         onClick={onConfirm}
         disabled={isConfirming}
-        isLoading={isConfirming}
-        className="flex-1"
+        className={`flex-1 flex flex-col items-center justify-center gap-4 rounded-2xl p-6 bg-[#1A1A0A] border border-yellow-400/30 transition-all duration-200 ${
+          isConfirming
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:brightness-125"
+        }`}
       >
-        <MoonrockIcon className="w-10 h-10 text-yellow-400" />
-        <span className="text-yellow-400 font-secondary text-xl tracking-wider">
-          {totalMoonrocks} MOON ROCKS
+        <span className="text-yellow-400 font-secondary text-sm tracking-[0.3em] uppercase">
+          Cash Out
         </span>
-      </InfoCard>
+        {isConfirming ? (
+          <LoadingSpinner size="md" />
+        ) : (
+          <>
+            <MoonrockIcon className="w-12 h-12 text-yellow-400" />
+            <span className="text-yellow-400 font-glitch text-2xl">
+              {totalMoonrocks}
+            </span>
+            <span className="text-yellow-400/70 font-secondary text-xs tracking-wider">
+              Moon Rocks
+            </span>
+          </>
+        )}
+      </button>
 
-      {/* Cancel Card - clickable */}
-      <InfoCard
-        variant="green"
-        label="Go Back"
+      {/* Cancel Inner Card - clickable */}
+      <button
+        type="button"
         onClick={onCancel}
         disabled={isConfirming}
-        className="flex-1"
+        className={`flex-1 flex flex-col items-center justify-center gap-4 rounded-2xl p-6 bg-[#0A1A0A] border border-green-400/30 transition-all duration-200 ${
+          isConfirming
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer hover:brightness-125"
+        }`}
       >
-        <div className="flex items-center gap-2">
-          <ArrowLeftIcon size="sm" className="text-green-400" />
-          <span className="text-green-400 font-secondary text-lg tracking-wider">
-            CANCEL
-          </span>
-        </div>
-      </InfoCard>
+        <span className="text-green-400 font-secondary text-sm tracking-[0.3em] uppercase">
+          Go Back
+        </span>
+        <ArrowLeftIcon size="md" className="text-green-400" />
+        <span className="text-green-400 font-glitch text-2xl">Cancel</span>
+        <span className="text-green-400/70 font-secondary text-xs tracking-wider">
+          Keep Playing
+        </span>
+      </button>
     </div>
   );
 };
