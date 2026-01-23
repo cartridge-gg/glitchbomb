@@ -19,7 +19,7 @@ export const CashOutChoice = ({
   const totalMoonrocks = moonrocks + points;
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full h-full">
       {/* Confirm Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
@@ -27,6 +27,7 @@ export const CashOutChoice = ({
         onClick={onConfirm}
         disabled={isConfirming}
         isLoading={isConfirming}
+        className="flex-1"
       >
         <MoonrockIcon className="w-10 h-10 text-yellow-400" />
         <span className="text-yellow-400 font-secondary text-xl tracking-wider">
@@ -35,7 +36,13 @@ export const CashOutChoice = ({
       </InfoCard>
 
       {/* Cancel Card - clickable */}
-      <InfoCard variant="green" label="Go Back" onClick={onCancel} disabled={isConfirming}>
+      <InfoCard
+        variant="green"
+        label="Go Back"
+        onClick={onCancel}
+        disabled={isConfirming}
+        className="flex-1"
+      >
         <div className="flex items-center gap-2">
           <ArrowLeftIcon size="sm" className="text-green-400" />
           <span className="text-green-400 font-secondary text-lg tracking-wider">

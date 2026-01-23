@@ -71,7 +71,7 @@ export const InfoCard = ({
 
       {/* Inner card - dark */}
       <div
-        className="flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
+        className="flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
         style={{ backgroundColor: styles.innerBg }}
       >
         {isLoading ? <LoadingSpinner size="md" /> : children}
@@ -81,12 +81,12 @@ export const InfoCard = ({
 
   if (isClickable) {
     return (
-      <GradientBorder color={styles.borderColor} className={`rounded-2xl ${className}`}>
+      <GradientBorder color={styles.borderColor} className={`rounded-2xl h-full ${className}`}>
         <button
           type="button"
           onClick={onClick}
           disabled={isDisabled}
-          className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full transition-all duration-200 ${
+          className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full h-full transition-all duration-200 ${
             isDisabled
               ? "opacity-50 cursor-not-allowed"
               : "cursor-pointer hover:brightness-125"
@@ -100,9 +100,9 @@ export const InfoCard = ({
   }
 
   return (
-    <GradientBorder color={styles.borderColor} className={`rounded-2xl ${className}`}>
+    <GradientBorder color={styles.borderColor} className={`rounded-2xl h-full ${className}`}>
       <div
-        className="flex flex-col items-center gap-3 rounded-2xl p-4"
+        className="flex flex-col items-center gap-3 rounded-2xl p-4 h-full"
         style={{ backgroundColor: styles.cardBg }}
       >
         {cardContent}

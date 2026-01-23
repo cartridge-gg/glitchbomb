@@ -22,7 +22,7 @@ export const MilestoneChoice = ({
   const totalMoonrocks = moonrocks + points;
 
   return (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-3 w-full h-full">
       {/* Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
@@ -30,6 +30,7 @@ export const MilestoneChoice = ({
         onClick={onCashOut}
         disabled={isLoading}
         isLoading={isCashingOut}
+        className="flex-1"
       >
         <MoonrockIcon className="w-10 h-10 text-yellow-400" />
         <span className="text-yellow-400 font-secondary text-xl tracking-wider">
@@ -44,6 +45,7 @@ export const MilestoneChoice = ({
         onClick={onEnterShop}
         disabled={isLoading}
         isLoading={isEnteringShop}
+        className="flex-1"
       >
         <div className="flex gap-4 w-full">
           {/* Reward */}
