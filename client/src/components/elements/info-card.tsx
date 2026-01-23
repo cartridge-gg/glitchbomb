@@ -17,20 +17,20 @@ const variantStyles: Record<
   }
 > = {
   green: {
-    cardBg: "#0A1A0A", // Solid dark green
-    innerBg: "#081408", // Slightly darker inner
+    cardBg: "#0A1A0A",
+    innerBg: "rgba(0, 0, 0, 0.3)",
     textColor: "text-green-400",
     borderColor: "green",
   },
   red: {
-    cardBg: "#1A0A0A", // Solid dark red
-    innerBg: "#140808", // Slightly darker inner
+    cardBg: "#1A0A0A",
+    innerBg: "rgba(0, 0, 0, 0.3)",
     textColor: "text-red-100",
     borderColor: "red",
   },
   yellow: {
-    cardBg: "#1A1A0A", // Solid dark yellow/gold
-    innerBg: "#141408", // Slightly darker inner
+    cardBg: "#1A1A0A",
+    innerBg: "rgba(0, 0, 0, 0.3)",
     textColor: "text-yellow-400",
     borderColor: "yellow",
   },
