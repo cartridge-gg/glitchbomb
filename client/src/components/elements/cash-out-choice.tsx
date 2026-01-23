@@ -19,7 +19,7 @@ export const CashOutChoice = ({
   const totalMoonrocks = moonrocks + points;
 
   return (
-    <div className="flex flex-col gap-3 w-full h-full">
+    <div className="flex flex-col gap-3 w-full h-full max-h-[600px]">
       {/* Confirm Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
