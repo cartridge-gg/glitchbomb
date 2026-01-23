@@ -3,7 +3,6 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  CashOutConfirmation,
   GameHeader,
   GameOver,
   GameScene,
@@ -11,6 +10,7 @@ import {
   GameStash,
 } from "@/components/containers";
 import {
+  CashOutChoice,
   GameStats,
   MilestoneChoice,
   PLChartTabs,
@@ -358,19 +358,10 @@ export const Game = () => {
           />
         );
 
-      case "cashout":
-        return (
-          <CashOutConfirmation
-            moonrocks={pack.moonrocks}
-            points={game.points}
-            onConfirm={handleCashOut}
-            onCancel={closeOverlay}
-          />
-        );
-
       default: {
-        // Check if milestone reached
+        // Check if milestone reached or cashout confirmation
         const milestoneReached = game.points >= game.milestone;
+        const showCashoutChoice = overlay === "cashout";
 
         // Main gameplay view - inlined to prevent remount on re-render
         return (
@@ -388,7 +379,17 @@ export const Game = () => {
               title="POTENTIAL"
             />
 
-            {milestoneReached ? (
+            {showCashoutChoice ? (
+              <div className="flex-1 flex items-center justify-center">
+                <CashOutChoice
+                  moonrocks={pack.moonrocks}
+                  points={game.points}
+                  onConfirm={handleCashOut}
+                  onCancel={closeOverlay}
+                  isConfirming={isCashingOut}
+                />
+              </div>
+            ) : milestoneReached ? (
               <div className="flex-1 flex items-center justify-center">
                 <MilestoneChoice
                   moonrocks={pack.moonrocks}
