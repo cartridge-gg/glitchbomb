@@ -31,11 +31,33 @@ export const MilestoneChoice = ({
         disabled={isLoading}
         isLoading={isCashingOut}
         className="flex-1"
+        hideInner
       >
-        <MoonrockIcon className="w-10 h-10 text-yellow-400" />
-        <span className="text-yellow-400 font-secondary text-xl tracking-wider">
-          {totalMoonrocks} MOON ROCKS
-        </span>
+        <div
+          className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+        >
+          {/* Header */}
+          <div className="py-1 px-4">
+            <span className="text-yellow-400 font-secondary text-2xs tracking-[0.3em] uppercase">
+              Reward
+            </span>
+          </div>
+          {/* Separator */}
+          <div className="h-px bg-yellow-500" />
+          {/* Content */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+            <div className="flex items-center gap-2">
+              <MoonrockIcon className="w-10 h-10 text-yellow-400" />
+              <span className="text-yellow-400 font-secondary text-2xl">
+                +{totalMoonrocks}
+              </span>
+            </div>
+            <span className="text-yellow-400/70 font-secondary text-xs tracking-wider">
+              Moon Rocks
+            </span>
+          </div>
+        </div>
       </InfoCard>
 
       {/* Continue Card - clickable */}
@@ -55,18 +77,18 @@ export const MilestoneChoice = ({
             style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
           >
             {/* Header */}
-            <div className="py-3 px-4">
-              <span className="text-orange-400 font-secondary text-xs tracking-[0.3em] uppercase">
+            <div className="py-1 px-4">
+              <span className="text-orange-400 font-secondary text-2xs tracking-[0.3em] uppercase">
                 Reward
               </span>
             </div>
             {/* Separator */}
-            <div className="h-px bg-orange-400/20" />
+            <div className="h-px bg-orange-500" />
             {/* Content */}
             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
               <div className="flex items-center gap-2">
-                <ChipIcon size="md" className="text-orange-300" />
-                <span className="text-orange-300 font-glitch text-2xl">
+                <ChipIcon size="md" className="text-orange-400" />
+                <span className="text-orange-400 font-secondary text-2xl">
                   +{points}
                 </span>
               </div>
@@ -82,20 +104,20 @@ export const MilestoneChoice = ({
             style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
           >
             {/* Header */}
-            <div className="py-3 px-4">
-              <span className="text-red-400 font-secondary text-xs tracking-[0.3em] uppercase">
+            <div className="py-1 px-4">
+              <span className="text-red-400 font-secondary text-2xs tracking-[0.3em] uppercase">
                 Curse
               </span>
             </div>
             {/* Separator */}
-            <div className="h-px bg-red-400/20" />
+            <div className="h-px bg-orange-500" />
             {/* Content */}
             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
               <div className="flex items-center gap-2">
                 <BombIcon className="w-6 h-6 text-red-400" />
-                <span className="text-red-400 font-glitch text-2xl">+1</span>
+                <span className="text-red-400 font-secondary text-2xl">+1</span>
               </div>
-              <span className="text-red-400/70 font-secondary text-xs tracking-wider">
+              <span className="text-red-400 font-secondary text-xs tracking-wider">
                 Random Curse
               </span>
             </div>
