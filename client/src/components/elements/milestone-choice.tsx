@@ -47,32 +47,35 @@ export const MilestoneChoice = ({
         isLoading={isEnteringShop}
         className="flex-1"
       >
-        <div className="flex gap-4 w-full">
-          {/* Reward */}
-          <div className="flex-1 flex flex-col items-center gap-2">
-            <span className="text-green-500 font-secondary text-xs tracking-[0.2em] uppercase">
+        <div className="flex gap-3 w-full">
+          {/* Reward Card */}
+          <div className="flex-1 flex flex-col items-center gap-3 rounded-lg py-4 px-3 bg-black/20">
+            <span className="text-orange-400 font-secondary text-xs tracking-[0.3em] uppercase">
               Reward
             </span>
             <div className="flex items-center gap-2">
-              <ChipIcon size="sm" className="text-orange-300" />
-              <span className="text-orange-300 font-secondary text-lg">
+              <ChipIcon size="md" className="text-orange-300" />
+              <span className="text-orange-300 font-glitch text-2xl">
                 +{points}
               </span>
             </div>
+            <span className="text-orange-400/70 font-secondary text-xs tracking-wider">
+              Gain Chips
+            </span>
           </div>
 
-          {/* Divider */}
-          <div className="w-px bg-red-900/50" />
-
-          {/* Curse */}
-          <div className="flex-1 flex flex-col items-center gap-2">
-            <span className="text-red-500 font-secondary text-xs tracking-[0.2em] uppercase">
+          {/* Curse Card */}
+          <div className="flex-1 flex flex-col items-center gap-3 rounded-lg py-4 px-3 bg-black/20">
+            <span className="text-red-400 font-secondary text-xs tracking-[0.3em] uppercase">
               Curse
             </span>
             <div className="flex items-center gap-2">
-              <BombIcon className="w-5 h-5 text-red-400" />
-              <span className="text-red-400 font-secondary text-lg">+1</span>
+              <BombIcon className="w-6 h-6 text-red-400" />
+              <span className="text-red-400 font-glitch text-2xl">+1</span>
             </div>
+            <span className="text-red-400/70 font-secondary text-xs tracking-wider">
+              Random Curse
+            </span>
           </div>
         </div>
       </InfoCard>
