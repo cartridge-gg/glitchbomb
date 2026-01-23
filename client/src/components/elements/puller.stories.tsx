@@ -135,3 +135,12 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+export const Cursed: Story = {
+  args: {
+    variant: "default",
+    size: "md",
+    orbs: 6,
+    bombs: 2,
+  },
+};

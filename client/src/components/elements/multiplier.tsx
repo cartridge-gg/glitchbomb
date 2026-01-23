@@ -28,6 +28,10 @@ export interface MultiplierProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof multiplierVariants> {
   count: number;
+  electricColor?: string;
+  electricGradient?: string;
+  electricBorderGradient?: string;
+  contentOpacity?: number;
   // Animation constants (optional, with defaults)
   animationFrames?: number;
   cornerRadius?: number;
@@ -78,6 +82,10 @@ export const Multiplier = ({
   variant,
   size,
   className,
+  electricColor,
+  electricGradient,
+  electricBorderGradient,
+  contentOpacity,
   // Constants with defaults
   animationFrames = ANIMATION_FRAMES,
   cornerRadius = CORNER_RADIUS,
@@ -150,6 +158,10 @@ export const Multiplier = ({
     [magnitude],
   );
 
+  const resolvedGradient = electricGradient ?? cssGradient;
+  const resolvedBorderGradient = electricBorderGradient ?? cssBorderGradient;
+  const resolvedColor = electricColor ?? cssColor;
+
   // Generates CSS animation with procedural noise
   const clipPathAnimation = useMemo(() => {
     const seed = magnitude * 100; // Different seed per magnitude
@@ -220,9 +232,9 @@ export const Multiplier = ({
           className="relative w-full h-full flex items-center justify-center"
           style={
             {
-              "--electric-color": cssColor,
-              "--electric-gradient": cssGradient,
-              "--electric-border-gradient": cssBorderGradient,
+              "--electric-color": resolvedColor,
+              "--electric-gradient": resolvedGradient,
+              "--electric-border-gradient": resolvedBorderGradient,
               padding: `${safetyMargin}%`,
             } as React.CSSProperties
           }
@@ -249,6 +261,7 @@ export const Multiplier = ({
             style={{
               backgroundImage: "var(--electric-gradient)",
               animation: `${clipPathAnimation.contentName} 2s ease-in-out infinite`,
+              opacity: contentOpacity ?? 1,
             }}
             {...props}
           >

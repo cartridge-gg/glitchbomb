@@ -23,6 +23,10 @@ const meta = {
       control: { type: "number" },
       description: "Current game points (added to moonrocks on cash out)",
     },
+    nextCurseLabel: {
+      control: { type: "text" },
+      description: "Optional label for the next curse (if known)",
+    },
     isEnteringShop: {
       control: { type: "boolean" },
       description: "Whether entering shop is in progress",
@@ -72,5 +76,12 @@ export const CashingOut: Story = {
   args: {
     points: 50,
     isCashingOut: true,
+  },
+};
+
+export const KnownCurse: Story = {
+  args: {
+    points: 80,
+    nextCurseLabel: "Double Draw",
   },
 };

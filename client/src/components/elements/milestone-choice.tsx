@@ -1,9 +1,10 @@
-import { BombIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
+import { ChipIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
 import { InfoCard } from "./info-card";
 
 export interface MilestoneChoiceProps {
   moonrocks: number; // Current pack moonrocks
   points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
+  nextCurseLabel?: string; // Optional label if the next curse is known
   onCashOut: () => void;
   onEnterShop: () => void;
   isEnteringShop?: boolean;
@@ -17,9 +18,11 @@ export const MilestoneChoice = ({
   onEnterShop,
   isEnteringShop = false,
   isCashingOut = false,
+  nextCurseLabel,
 }: MilestoneChoiceProps) => {
   const isLoading = isEnteringShop || isCashingOut;
   const totalMoonrocks = moonrocks + points;
+  const curseLabel = nextCurseLabel?.trim() || "Random Curse";
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
@@ -114,11 +117,13 @@ export const MilestoneChoice = ({
             {/* Content */}
             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
               <div className="flex items-center gap-2">
-                <BombIcon className="w-6 h-6 text-red-400" />
-                <span className="text-red-400 font-secondary text-2xl">+1</span>
+                <GlitchBombIcon className="w-6 h-6 text-red-400" />
+                <span className="text-red-400 font-secondary text-base text-center leading-tight">
+                  {curseLabel}
+                </span>
               </div>
-              <span className="text-red-400 font-secondary text-xs tracking-wider">
-                Random Curse
+              <span className="text-red-400/70 font-secondary text-[10px] tracking-[0.3em]">
+                Applied next level
               </span>
             </div>
           </div>
