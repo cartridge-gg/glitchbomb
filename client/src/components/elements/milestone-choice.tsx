@@ -50,7 +50,7 @@ export const MilestoneChoice = ({
       >
         <div className="flex gap-3 w-full h-full">
           {/* Reward Inner Card */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4 bg-black/30">
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4 bg-[#0A0A05]">
             <span className="text-orange-400 font-secondary text-xs tracking-[0.3em] uppercase">
               Reward
             </span>
@@ -66,7 +66,7 @@ export const MilestoneChoice = ({
           </div>
 
           {/* Curse Inner Card */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4 bg-black/30">
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 rounded-lg py-6 px-4 bg-[#0A0505]">
             <span className="text-red-400 font-secondary text-xs tracking-[0.3em] uppercase">
               Curse
             </span>
