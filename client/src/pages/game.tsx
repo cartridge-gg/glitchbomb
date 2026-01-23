@@ -380,7 +380,7 @@ export const Game = () => {
             />
 
             {showCashoutChoice ? (
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex flex-col">
                 <CashOutChoice
                   moonrocks={pack.moonrocks}
                   points={game.points}
@@ -390,7 +390,7 @@ export const Game = () => {
                 />
               </div>
             ) : milestoneReached ? (
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex flex-col">
                 <MilestoneChoice
                   moonrocks={pack.moonrocks}
                   points={game.points}

@@ -22,7 +22,7 @@ export const MilestoneChoice = ({
   const totalMoonrocks = moonrocks + points;
 
   return (
-    <div className="flex flex-col gap-3 w-full h-full max-h-[600px]">
+    <div className="flex flex-col gap-3 w-full h-full">
       {/* Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
