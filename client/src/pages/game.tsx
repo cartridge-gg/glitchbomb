@@ -22,6 +22,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
+import { OrbType } from "@/models/orb";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -43,25 +44,10 @@ const INITIAL_GAME_VALUES = {
   orbsCount: 11,
 };
 
-const CURSE_LABELS = [
-  { bit: 0, label: "Double Draw" },
-  { bit: 1, label: "Demultiplier" },
-];
-
 const NEXT_LEVEL_CURSES: Record<number, string> = {
   4: "Double Bomb",
   6: "Sticky Bomb",
   7: "Double Bomb",
-};
-
-const getCurseLabel = (curses: number) => {
-  const active = CURSE_LABELS.filter(
-    ({ bit }) => (curses & (1 << bit)) !== 0,
-  ).map(({ label }) => label);
-
-  if (active.length === 0) return "Random Curse";
-  if (active.length === 1) return active[0];
-  return active.join(" + ");
 };
 
 type OverlayView = "none" | "stash" | "cashout";
@@ -267,15 +253,16 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
-  const curseLabel = useMemo(
-    () => getCurseLabel(game?.curses ?? 0),
-    [game?.curses],
+  const hasStickyBomb = useMemo(
+    () => game?.bag?.some((orb) => orb.value === OrbType.StickyBomb) ?? false,
+    [game?.bag],
   );
   const nextCurseLabel = useMemo(() => {
     const nextLevel = (game?.level ?? 0) + 1;
     return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
-  const hasCurse = (game?.curses ?? 0) > 0;
+  const hasCurse = hasStickyBomb;
+  const curseLabel = hasStickyBomb ? "Sticky Bomb" : undefined;
 
   // Check if we're still loading (have URL params but no data yet)
   const isLoading = !pack || !game;

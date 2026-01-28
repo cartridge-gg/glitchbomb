@@ -21,9 +21,10 @@ export enum OrbType {
   Moonrock40 = "Moonrock40",
   Chips15 = "Chips15",
   CurseScoreDecrease = "CurseScoreDecrease",
+  StickyBomb = "StickyBomb",
 }
 
-export const ORB_COUNT = 20;
+export const ORB_COUNT = 21;
 
 export class Orb {
   value: OrbType;
@@ -76,6 +77,8 @@ export class Orb {
         return 19;
       case OrbType.CurseScoreDecrease:
         return 20;
+      case OrbType.StickyBomb:
+        return 21;
       default:
         return 0;
     }
@@ -94,7 +97,8 @@ export class Orb {
     return (
       this.value === OrbType.Bomb1 ||
       this.value === OrbType.Bomb2 ||
-      this.value === OrbType.Bomb3
+      this.value === OrbType.Bomb3 ||
+      this.value === OrbType.StickyBomb
     );
   }
 
@@ -152,6 +156,8 @@ export class Orb {
         return "Double Bomb";
       case OrbType.Bomb3:
         return "Triple Bomb";
+      case OrbType.StickyBomb:
+        return "Sticky Bomb";
       case OrbType.Health1:
         return "Health";
       case OrbType.Health2:
@@ -199,6 +205,8 @@ export class Orb {
         return "Lose 2 health points.";
       case OrbType.Bomb3:
         return "Lose 3 health points.";
+      case OrbType.StickyBomb:
+        return "Lose 1 health point.";
       case OrbType.Health1:
         return "Restore 1 health point.";
       case OrbType.Health2:
@@ -287,6 +295,8 @@ export class Orb {
         return "red";
       case OrbType.Bomb3:
         return "red";
+      case OrbType.StickyBomb:
+        return "red";
       case OrbType.Health1:
         return "salmon";
       case OrbType.Health2:
@@ -338,6 +348,8 @@ export class Orb {
       case OrbType.Bomb2:
         return "var(--red-100)";
       case OrbType.Bomb3:
+        return "var(--red-100)";
+      case OrbType.StickyBomb:
         return "var(--red-100)";
       case OrbType.Health1:
         return "var(--salmon-100)";
@@ -399,6 +411,8 @@ export class Orb {
         return "-2 HP";
       case OrbType.Bomb3:
         return "-3 HP";
+      case OrbType.StickyBomb:
+        return "-1 HP";
       case OrbType.Health1:
         return "+1 HP";
       case OrbType.Health2:
