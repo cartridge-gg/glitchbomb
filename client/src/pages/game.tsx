@@ -48,6 +48,12 @@ const CURSE_LABELS = [
   { bit: 1, label: "Demultiplier" },
 ];
 
+const NEXT_LEVEL_CURSES: Record<number, string> = {
+  4: "Double Bomb",
+  6: "Sticky Bomb",
+  7: "Double Bomb",
+};
+
 const getCurseLabel = (curses: number) => {
   const active = CURSE_LABELS.filter(
     ({ bit }) => (curses & (1 << bit)) !== 0,
@@ -265,6 +271,10 @@ export const Game = () => {
     () => getCurseLabel(game?.curses ?? 0),
     [game?.curses],
   );
+  const nextCurseLabel = useMemo(() => {
+    if (!game) return undefined;
+    return NEXT_LEVEL_CURSES[game.level + 1];
+  }, [game?.level]);
   const hasCurse = (game?.curses ?? 0) > 0;
 
   // Check if we're still loading (have URL params but no data yet)
@@ -414,6 +424,7 @@ export const Game = () => {
                   onEnterShop={handleEnterShop}
                   isEnteringShop={isEnteringShop}
                   isCashingOut={isCashingOut}
+                  nextCurseLabel={nextCurseLabel}
                 />
               </div>
             ) : (
