@@ -272,8 +272,8 @@ export const Game = () => {
     [game?.curses],
   );
   const nextCurseLabel = useMemo(() => {
-    if (!game) return undefined;
-    return NEXT_LEVEL_CURSES[game.level + 1];
+    const nextLevel = (game?.level ?? 0) + 1;
+    return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
   const hasCurse = (game?.curses ?? 0) > 0;
 
