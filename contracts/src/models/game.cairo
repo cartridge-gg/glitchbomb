@@ -139,31 +139,19 @@ pub impl GameImpl of GameTrait {
     #[inline]
     fn pullable_orbs_count(self: @Game) -> u8 {
         let bag: Orbs = OrbsTrait::unpack(*self.bag);
-        let bag_len: u8 = bag.len().try_into().unwrap();
-        let mut discards: u64 = *self.discards;
-        let mut index: u8 = 0;
-        while index < bag_len {
-            if Bitmap::get(discards, index) == 1 {
-                let orb = *bag.at(index.into());
-                if orb == Orb::StickyBomb {
-                    discards = Bitmap::unset(discards, index);
-                }
-            }
-            index += 1;
-        }
-        let full: u64 = TwoPower::pow(bag_len).try_into().unwrap() - 1;
-        Bitmap::popcount(full ^ discards)
+        let exp: u8 = bag.len().try_into().unwrap();
+        let full: u64 = TwoPower::pow(exp).try_into().unwrap() - 1;
+        Bitmap::popcount(full ^ *self.discards)
     }
 
     #[inline]
-    fn pullable_non_sticky_orbs_count(self: @Game) -> u8 {
+    fn sticky_orbs_count(self: @Game) -> u8 {
         let bag: Orbs = OrbsTrait::unpack(*self.bag);
         let bag_len: u8 = bag.len().try_into().unwrap();
         let mut count: u8 = 0;
         let mut index: u8 = 0;
         while index < bag_len {
-            let orb = *bag.at(index.into());
-            if orb != Orb::StickyBomb && Bitmap::get(*self.discards, index) == 0 {
+            if *bag.at(index.into()) == Orb::StickyBomb {
                 count += 1;
             }
             index += 1;
@@ -406,25 +394,14 @@ pub impl GameImpl of GameTrait {
         // [Effect] Store seed for effects that need randomness
         self.seed = seed;
         // [Effect] If all non-sticky orbs have been pulled, regenerate the bag
-        let should_reset = self.pullable_non_sticky_orbs_count() == 0;
+        let sticky_count = self.sticky_orbs_count();
+        let should_reset = self.pullable_orbs_count() == sticky_count;
         if should_reset {
             self.discards = 0;
         }
         // [Effect] Pull orb(s) from the remaining orbs in the bag
         let bag: Orbs = OrbsTrait::unpack(self.bag);
-        let mut discards: u64 = self.discards;
-        let bag_len: u8 = bag.len().try_into().unwrap();
-        let mut index: u8 = 0;
-        while index < bag_len {
-            if Bitmap::get(discards, index) == 1 {
-                let orb = *bag.at(index.into());
-                if orb == Orb::StickyBomb {
-                    discards = Bitmap::unset(discards, index);
-                }
-            }
-            index += 1;
-        }
-        let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), discards.into());
+        let mut deck: Deck = DeckTrait::from_bitmap(seed, bag.len(), self.discards.into());
 
         // [Info] Determine how many orbs to draw (2 if DoubleDraw curse is active)
         let draw_count: u8 = if Self::has_curse(self.curses, CURSE_DOUBLE_DRAW) {
@@ -441,8 +418,10 @@ pub impl GameImpl of GameTrait {
         while draws_done < draw_count && deck.remaining > 0 {
             let index: u8 = deck.draw() - 1;
             let orb: Orb = *bag.at(index.into());
-            // [Effect] Add the orb to the discards
-            self.discards = Bitmap::set(self.discards, index);
+            // [Effect] Add the orb to the discards unless sticky
+            if orb != Orb::StickyBomb {
+                self.discards = Bitmap::set(self.discards, index);
+            }
             // [Effect] Apply the orb
             let earnings = orb.apply(ref self);
             total_earnings += earnings;
@@ -1355,6 +1334,7 @@ mod tests {
         game.discards = 0;
         let (orbs_first, _earnings_first) = game.pull(SEED);
         assert_eq!(orbs_first.len(), 1);
+        assert_eq!(game.discards, 0);
         assert_eq!(game.pullable_orbs_count(), 1);
         let (orbs_second, _earnings_second) = game.pull('SECOND');
         assert_eq!(orbs_second.len(), 1);
