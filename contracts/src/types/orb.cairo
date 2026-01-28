@@ -8,6 +8,7 @@ pub enum Orb {
     Bomb1,
     Bomb2,
     Bomb3,
+    StickyBomb,
     Health1,
     Health2,
     Health3,
@@ -35,6 +36,7 @@ pub impl OrbImpl of OrbTrait {
             Orb::Bomb1 => Effect::Explode.apply(ref game, 1),
             Orb::Bomb2 => Effect::Explode.apply(ref game, 2),
             Orb::Bomb3 => Effect::Explode.apply(ref game, 3),
+            Orb::StickyBomb => Effect::Explode.apply(ref game, 1),
             Orb::Health1 => Effect::Heal.apply(ref game, 1),
             Orb::Health2 => Effect::Heal.apply(ref game, 2),
             Orb::Health3 => Effect::Heal.apply(ref game, 3),
@@ -82,6 +84,7 @@ pub impl OrbImpl of OrbTrait {
             Orb::Bomb1 => 1,
             Orb::Bomb2 => 1,
             Orb::Bomb3 => 1,
+            Orb::StickyBomb => 1,
             _ => 0,
         }
     }
@@ -111,6 +114,7 @@ pub impl IntoOrbU8 of Into<Orb, u8> {
             Orb::Moonrock40 => 18,
             Orb::Chips15 => 19,
             Orb::CurseScoreDecrease => 20,
+            Orb::StickyBomb => 21,
             _ => 0,
         }
     }
@@ -140,6 +144,7 @@ pub impl IntoU8Orb of Into<u8, Orb> {
             18 => Orb::Moonrock40,
             19 => Orb::Chips15,
             20 => Orb::CurseScoreDecrease,
+            21 => Orb::StickyBomb,
             _ => Orb::None,
         }
     }

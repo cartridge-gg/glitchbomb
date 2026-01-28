@@ -3,7 +3,7 @@ use crate::models::game::{Game, GameTrait};
 use crate::types::orb::Orb;
 
 // Number of available curses (excluding None)
-pub const NUM_CURSES: u8 = 5;
+pub const NUM_CURSES: u8 = 6;
 
 #[derive(Drop, Copy)]
 pub enum Curse {
@@ -14,7 +14,8 @@ pub enum Curse {
     // Bag curses (add curse orbs to the bag)
     DoubleBomb, // Adds Bomb2 to bag
     NormalBomb, // Adds Bomb1 to bag
-    ScoreDecrease // Adds CurseScoreDecrease to bag
+    ScoreDecrease, // Adds CurseScoreDecrease to bag
+    StickyBomb // Adds StickyBomb to bag
 }
 
 #[generate_trait]
@@ -29,6 +30,7 @@ pub impl CurseImpl of CurseTrait {
             Curse::DoubleBomb => game.add(Orb::Bomb2),
             Curse::NormalBomb => game.add(Orb::Bomb1),
             Curse::ScoreDecrease => game.add(Orb::CurseScoreDecrease),
+            Curse::StickyBomb => game.add(Orb::StickyBomb),
             _ => {},
         }
     }
@@ -40,6 +42,7 @@ pub impl CurseImpl of CurseTrait {
             Curse::DoubleBomb => true,
             Curse::NormalBomb => true,
             Curse::ScoreDecrease => true,
+            Curse::StickyBomb => true,
             _ => false,
         }
     }
@@ -53,6 +56,7 @@ pub impl IntoCurseU8 of Into<Curse, u8> {
             Curse::DoubleBomb => 3,
             Curse::NormalBomb => 4,
             Curse::ScoreDecrease => 5,
+            Curse::StickyBomb => 6,
             _ => 0,
         }
     }
@@ -66,6 +70,7 @@ pub impl IntoU8Curse of Into<u8, Curse> {
             3 => Curse::DoubleBomb,
             4 => Curse::NormalBomb,
             5 => Curse::ScoreDecrease,
+            6 => Curse::StickyBomb,
             _ => Curse::None,
         }
     }
