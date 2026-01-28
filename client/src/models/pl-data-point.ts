@@ -34,6 +34,7 @@ export class PLDataPoint {
    *   17-18 = Moonrock15/40 (blue)
    *   19 = Chips15 (yellow)
    *   20 = CurseScoreDecrease (red)
+   *   21 = StickyBomb (red)
    */
   variant(): "green" | "red" | "yellow" | "blue" {
     const orbType = this.orb;
@@ -43,8 +44,8 @@ export class PLDataPoint {
       return "green";
     }
 
-    // Bombs (1-3) - red
-    if (orbType >= 1 && orbType <= 3) {
+    // Bombs (1-3, 21) - red
+    if ((orbType >= 1 && orbType <= 3) || orbType === 21) {
       return "red";
     }
 

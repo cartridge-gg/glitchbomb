@@ -4,7 +4,7 @@ import { InfoCard } from "./info-card";
 export interface MilestoneChoiceProps {
   moonrocks: number; // Current pack moonrocks
   points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
-  nextCurseLabel?: string; // Optional label if the next curse is known
+  nextCurseLabel?: string; // Optional label if the next level has a known curse
   onCashOut: () => void;
   onEnterShop: () => void;
   isEnteringShop?: boolean;
@@ -22,7 +22,8 @@ export const MilestoneChoice = ({
 }: MilestoneChoiceProps) => {
   const isLoading = isEnteringShop || isCashingOut;
   const totalMoonrocks = moonrocks + points;
-  const curseLabel = nextCurseLabel?.trim() || "Random Curse";
+  const curseLabel = nextCurseLabel?.trim();
+  const showCurse = Boolean(curseLabel);
 
   return (
     <div className="flex flex-col gap-3 w-full h-full">
@@ -102,31 +103,33 @@ export const MilestoneChoice = ({
           </div>
 
           {/* Curse Inner Card */}
-          <div
-            className="flex-1 flex flex-col rounded-lg overflow-hidden"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-          >
-            {/* Header */}
-            <div className="py-1 px-4">
-              <span className="text-red-400 font-secondary text-2xs tracking-[0.3em] uppercase">
-                Curse
-              </span>
-            </div>
-            {/* Separator */}
-            <div className="h-px bg-orange-500" />
-            {/* Content */}
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
-              <div className="flex items-center gap-2">
-                <GlitchBombIcon className="w-6 h-6 text-red-400" />
-                <span className="text-red-400 font-secondary text-base text-center leading-tight">
-                  {curseLabel}
+          {showCurse && (
+            <div
+              className="flex-1 flex flex-col rounded-lg overflow-hidden"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+            >
+              {/* Header */}
+              <div className="py-1 px-4">
+                <span className="text-red-400 font-secondary text-2xs tracking-[0.3em] uppercase">
+                  Curse
                 </span>
               </div>
-              <span className="text-red-400/70 font-secondary text-[10px] tracking-[0.3em]">
-                Applied next level
-              </span>
+              {/* Separator */}
+              <div className="h-px bg-orange-500" />
+              {/* Content */}
+              <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 px-4">
+                <div className="flex items-center gap-2">
+                  <GlitchBombIcon className="w-6 h-6 text-red-400" />
+                  <span className="text-red-400 font-secondary text-base text-center leading-tight">
+                    {curseLabel}
+                  </span>
+                </div>
+                <span className="text-red-400/70 font-secondary text-[10px] tracking-[0.3em]">
+                  Applied next level
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </InfoCard>
     </div>
