@@ -9,7 +9,13 @@ import {
 } from "@starknet-react/core";
 import { Toaster } from "sonner";
 import { shortString } from "starknet";
-import { chains, DEFAULT_CHAIN_ID } from "@/config";
+import {
+  chains,
+  DEFAULT_CHAIN_ID,
+  getGameAddress,
+  getVrfAddress,
+  getTokenAddress,
+} from "@/config";
 import { EntitiesProvider } from "@/contexts";
 import Router from "@/routes";
 
@@ -27,7 +33,37 @@ const provider = jsonRpcProvider({
 });
 
 const buildPolicies = () => {
-  const policies: SessionPolicies = {};
+  const chainId = BigInt(DEFAULT_CHAIN_ID);
+  const gameAddress = getGameAddress(chainId);
+  const vrfAddress = getVrfAddress(chainId);
+  const tokenAddress = getTokenAddress(chainId);
+
+  const policies: SessionPolicies = {
+    contracts: {
+      [gameAddress]: {
+        methods: [
+          { entrypoint: "start", description: "Start a new game" },
+          { entrypoint: "pull", description: "Pull an orb" },
+          { entrypoint: "cash_out", description: "Cash out and end the game" },
+          { entrypoint: "enter", description: "Enter the shop at milestone" },
+          { entrypoint: "buy", description: "Buy items in the shop" },
+          { entrypoint: "exit", description: "Exit the shop" },
+          { entrypoint: "refresh", description: "Refresh shop items" },
+          { entrypoint: "burn", description: "Burn an item from bag" },
+        ],
+      },
+      [vrfAddress]: {
+        methods: [
+          { entrypoint: "request_random", description: "Request random number" },
+        ],
+      },
+      [tokenAddress]: {
+        methods: [
+          { entrypoint: "mint", description: "Mint tokens" },
+        ],
+      },
+    },
+  };
   return policies;
 };
 
