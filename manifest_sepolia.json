@@ -58,7 +58,7 @@
     },
     {
       "address": "0x7f5f0f8ea0d878f222761c8c7b7ac04d520da35db70f26bec81eb9000ac8165",
-      "class_hash": "0x6d9b68981849fcce15c188805f6384d48d6b57d42b36d5955e591562bd7ec6d",
+      "class_hash": "0x7c149c504e551ecacc70a24c47a017b7e2ed8419c95a983a4f8ef539f007514",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
