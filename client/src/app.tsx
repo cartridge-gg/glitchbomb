@@ -8,13 +8,12 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { Toaster } from "sonner";
-import { shortString } from "starknet";
 import {
   chains,
   DEFAULT_CHAIN_ID,
   getGameAddress,
-  getVrfAddress,
   getTokenAddress,
+  getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
 import Router from "@/routes";
@@ -54,13 +53,14 @@ const buildPolicies = () => {
       },
       [vrfAddress]: {
         methods: [
-          { entrypoint: "request_random", description: "Request random number" },
+          {
+            entrypoint: "request_random",
+            description: "Request random number",
+          },
         ],
       },
       [tokenAddress]: {
-        methods: [
-          { entrypoint: "mint", description: "Mint tokens" },
-        ],
+        methods: [{ entrypoint: "mint", description: "Mint tokens" }],
       },
     },
   };
