@@ -38,6 +38,8 @@ const buildPolicies = () => {
   const vrfAddress = getVrfAddress(chainId);
   const tokenAddress = getTokenAddress(chainId);
 
+  console.log("Building policies for:", { gameAddress, vrfAddress, tokenAddress });
+
   const policies: SessionPolicies = {
     contracts: {
       [gameAddress]: {
@@ -82,11 +84,8 @@ const buildChains = () => {
 const options: ControllerOptions = {
   defaultChainId: DEFAULT_CHAIN_ID,
   chains: buildChains(),
-  policies:
-    DEFAULT_CHAIN_ID === shortString.encodeShortString("SN_MSEPOLIA")
-      ? undefined
-      : buildPolicies(),
-  preset: "glitch-bomb",
+  policies: buildPolicies(),
+  // preset: "glitch-bomb", // Disabled to use local policies
   // namespace: "GLITCHBOMB",
   slot: "gb-bal",
 };
