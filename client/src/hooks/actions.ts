@@ -174,8 +174,19 @@ export const useActions = () => {
     async (packId: number, gameId: number, indices: number[]) => {
       try {
         if (!account?.address) return false;
+        const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
         const calls = [];
+
+        // Request VRF randomness first (required for exit)
+        calls.push({
+          contractAddress: vrfAddress,
+          entrypoint: "request_random",
+          calldata: CallData.compile({
+            caller: gameAddress,
+            source: { type: 0, address: gameAddress },
+          }),
+        });
 
         // Add buy calls if there are items to purchase
         if (indices.length > 0) {
