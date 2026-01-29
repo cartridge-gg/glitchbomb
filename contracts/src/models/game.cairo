@@ -256,7 +256,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn exit(ref self: Game, _seed: felt252) -> u16 {
+    fn exit(ref self: Game) -> u16 {
         // [Check] Game state
         self.assert_not_over();
         self.assert_in_shop();
@@ -684,7 +684,7 @@ mod tests {
         game.enter(SEED);
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
-        let cost = game.exit('EXIT_SEED');
+        let cost = game.exit();
         assert_eq!(game.shop, 0);
         assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
     }
@@ -829,7 +829,7 @@ mod tests {
         assert_eq!(GameTrait::is_refresh_used(game.shop), true);
         assert_eq!(GameTrait::is_burn_used(game.shop), true);
         // [Effect] Exit and enter new shop
-        game.exit('EXIT_SEED');
+        game.exit();
         game.earn_points(200);
         game.enter('SHOP2');
         // [Check] Flags are reset in new shop
@@ -1156,15 +1156,15 @@ mod tests {
         // [Info] Advance to level 4
         game.points = Milestone::get(game.level);
         game.enter(SEED);
-        game.exit('L2');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L3_IN');
-        game.exit('L3_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L4_IN');
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Exit to level 4 (should add DoubleBomb)
-        game.exit('L4_OUT');
+        game.exit();
         assert_eq!(game.level, 4);
         let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
         assert_eq!(bag_len_after, bag_len_before + 1);
@@ -1180,21 +1180,21 @@ mod tests {
         // [Info] Advance to level 6
         game.points = Milestone::get(game.level);
         game.enter(SEED);
-        game.exit('L2');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L3_IN');
-        game.exit('L3_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L4_IN');
-        game.exit('L4_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L5_IN');
-        game.exit('L5_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L6_IN');
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Exit to level 6 (adds StickyBomb)
-        game.exit('L6_OUT');
+        game.exit();
         assert_eq!(game.level, 6);
         let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
         assert_eq!(bag_len_after, bag_len_before + 1);
@@ -1210,24 +1210,24 @@ mod tests {
         // [Info] Advance to level 7
         game.points = Milestone::get(game.level);
         game.enter(SEED);
-        game.exit('L2');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L3_IN');
-        game.exit('L3_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L4_IN');
-        game.exit('L4_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L5_IN');
-        game.exit('L5_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L6_IN');
-        game.exit('L6_OUT');
+        game.exit();
         game.points = Milestone::get(game.level);
         game.enter('L7_IN');
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Exit to level 7 (adds DoubleBomb)
-        game.exit('L7_OUT');
+        game.exit();
         assert_eq!(game.level, 7);
         let bag_len_after: u32 = OrbsTrait::unpack(game.bag).len();
         assert_eq!(bag_len_after, bag_len_before + 1);

@@ -291,9 +291,7 @@ pub mod PlayableComponent {
             game.assert_not_over();
 
             // [Effect] Exit shop and get next level cost (applies level-based curse)
-            let config = store.config();
-            let mut rng = RandomTrait::new_vrf(config.vrf());
-            let cost = game.exit(rng.next_seed());
+            let cost = game.exit();
             store.set_game(@game);
 
             // [Event] Emit ShopExited (includes next level info)
