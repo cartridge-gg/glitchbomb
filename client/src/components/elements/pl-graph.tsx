@@ -282,7 +282,9 @@ export const PLGraph = ({
   const pointStrokeWidth = 1 * unitPerPx;
   const lineStrokeWidth = 1.5 * unitPerPx;
   const baselineStrokeWidth = 1 * unitPerPx;
-  const gridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
+  const baseGridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
+  const gridZoom = baseViewHeight / Math.max(viewBox.height, 1);
+  const gridSpacing = Math.max(8, Math.min(80, baseGridSpacing * gridZoom));
   const glowBlur = 4 * unitPerPx;
   const glowExtent = 18 * unitPerPx;
 
