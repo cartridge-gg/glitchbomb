@@ -278,8 +278,8 @@ export const PLGraph = ({
   const pointRadius = 6 * unitPerPx;
   const pointStrokeWidth = 1 * unitPerPx;
   const lineStrokeWidth = 1.5 * unitPerPx;
-  const gridStrokeWidth = 1 * unitPerPx;
   const baselineStrokeWidth = 1 * unitPerPx;
+  const gridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -457,6 +457,18 @@ export const PLGraph = ({
         {/* Graph area */}
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, rgba(20, 83, 45, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 83, 45, 0.4) 1px, transparent 1px)",
+              backgroundSize: `${gridSpacing}px ${gridSpacing}px`,
+              maskImage:
+                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+            }}
+          />
+          <div
             ref={interactionRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
@@ -475,27 +487,6 @@ export const PLGraph = ({
               shapeRendering="geometricPrecision"
             >
               <defs>
-                <radialGradient id="grid-fade" cx="50%" cy="50%" r="70%">
-                  <stop offset="30%" stopColor="white" stopOpacity="1" />
-                  <stop offset="65%" stopColor="white" stopOpacity="0" />
-                </radialGradient>
-                <mask
-                  id="grid-mask"
-                  maskUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
-                  width={baseViewWidth}
-                  height={baseViewHeight}
-                >
-                  <rect
-                    x="0"
-                    y="0"
-                    width={baseViewWidth}
-                    height={baseViewHeight}
-                    fill="url(#grid-fade)"
-                  />
-                </mask>
-
                 {/* Glow filters for each color */}
                 <filter
                   id="glow-green"
@@ -550,34 +541,6 @@ export const PLGraph = ({
                   </feMerge>
                 </filter>
               </defs>
-
-              {/* Extended grid background with fade */}
-              <g mask="url(#grid-mask)">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <line
-                    key={`v-${i}`}
-                    x1={(i + 1) * 0.077 * baseViewWidth}
-                    y1={0}
-                    x2={(i + 1) * 0.077 * baseViewWidth}
-                    y2={baseViewHeight}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth={gridStrokeWidth}
-                    strokeDasharray="4 4"
-                  />
-                ))}
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <line
-                    key={`h-${i}`}
-                    x1={0}
-                    y1={(i + 1) * 0.111 * baseViewHeight}
-                    x2={baseViewWidth}
-                    y2={(i + 1) * 0.111 * baseViewHeight}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth={gridStrokeWidth}
-                    strokeDasharray="4 4"
-                  />
-                ))}
-              </g>
 
               {/* Baseline line - dashed white/green */}
               <line
