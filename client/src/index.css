@@ -43,9 +43,9 @@ body {
     to bottom,
     var(--safe-area-top, var(--black-100)) 0%,
     var(--safe-area-top, var(--black-100))
-      calc(100% - env(safe-area-inset-bottom, 0px)),
+      calc(100% - var(--safe-area-bottom-size)),
     var(--safe-area-bottom, var(--black-100))
-      calc(100% - env(safe-area-inset-bottom, 0px)),
+      calc(100% - var(--safe-area-bottom-size)),
     var(--safe-area-bottom, var(--black-100)) 100%
   );
 }
@@ -53,6 +53,14 @@ body {
 body {
   --safe-area-top: var(--black-100);
   --safe-area-bottom: var(--black-100);
+  --safe-area-top-size: max(
+    env(safe-area-inset-top, 0px),
+    var(--safe-area-top-fallback, 0px)
+  );
+  --safe-area-bottom-size: max(
+    env(safe-area-inset-bottom, 0px),
+    var(--safe-area-bottom-fallback, 20px)
+  );
 }
 
 body::before,
@@ -67,13 +75,13 @@ body::after {
 
 body::before {
   top: 0;
-  height: env(safe-area-inset-top, 0px);
+  height: var(--safe-area-top-size);
   background: var(--safe-area-top);
 }
 
 body::after {
   bottom: 0;
-  height: env(safe-area-inset-bottom, 0px);
+  height: var(--safe-area-bottom-size);
   background: var(--safe-area-bottom);
 }
 
