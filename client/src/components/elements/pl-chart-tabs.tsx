@@ -200,12 +200,7 @@ export const PLChartTabs = ({
   const [activeTab, setActiveTab] = useState<TabType>("chart");
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-[clamp(8px,2svh,16px)]",
-        className,
-      )}
-    >
+    <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
         <TabButton

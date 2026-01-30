@@ -114,13 +114,7 @@ export const Puller = memo(function Puller({
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
   const defaultSizePx =
-    size === "lg"
-      ? 233
-      : size === "sm"
-        ? 150
-        : size === "xs"
-          ? 130
-          : 180;
+    size === "lg" ? 233 : size === "sm" ? 150 : size === "xs" ? 130 : 180;
   const resolvedSizePx = sizePx ?? defaultSizePx;
   const labelFontSize = Math.round(resolvedSizePx * 0.19);
   const labelLineHeight = Math.round(labelFontSize * 0.86);

@@ -84,15 +84,11 @@ export const GameScene = ({
     Math.min(Math.max(value, min), max);
   const viewportHeight = height || 800;
 
-  const distributionSize = Math.round(
-    clamp(200, viewportHeight * 0.34, 300),
-  );
+  const distributionSize = Math.round(clamp(200, viewportHeight * 0.34, 300));
   const distributionThickness = Math.round(
     clamp(30, viewportHeight * 0.065, 50),
   );
-  const pullerSizePx = Math.round(
-    clamp(130, distributionSize * 0.62, 190),
-  );
+  const pullerSizePx = Math.round(clamp(130, distributionSize * 0.62, 190));
   const heightScale = clamp(0.7, viewportHeight / 800, 1);
   const badgeSizePx = Math.round(clamp(36, 72 * heightScale, 72));
   const badgeOffsetTop = Math.round(
