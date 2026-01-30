@@ -27,7 +27,8 @@ const gameShopVariants = cva(
   {
     variants: {
       variant: {
-        default: "min-h-full max-w-[420px] mx-auto px-4",
+        default:
+          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(6px,1.1svh,12px)]",
       },
     },
     defaultVariants: {
@@ -75,7 +76,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
 
   return (
     <motion.div
-      className="flex items-center gap-4 py-2"
+      className="flex items-center gap-[clamp(8px,2svh,16px)] py-[clamp(4px,1.2svh,8px)]"
       animate={isAnimating ? { scale: [1, 1.02, 1] } : {}}
       transition={{ duration: 0.2 }}
     >
@@ -334,52 +335,59 @@ export const GameShop = ({
 
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
-          ORB SHOP
-        </h1>
-      </div>
+      <div className="flex-1 min-h-0 flex flex-col justify-center">
+        {/* Scrollable content */}
+        <div
+          className="flex flex-col gap-[clamp(8px,2svh,12px)] max-h-full overflow-y-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {/* Header */}
+          <div className="flex flex-col gap-[clamp(2px,0.8svh,6px)]">
+            <div className="flex items-center justify-between">
+              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
+                ORB SHOP
+              </h1>
+            </div>
 
-      {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
-        Spend Chips to add orbs to your bag
-      </p>
+            {/* Subtitle */}
+            <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
+              Spend Chips to add orbs to your bag
+            </p>
+          </div>
 
-      {/* Shop items */}
-      <div
-        className="flex flex-col gap-1 grow overflow-y-auto"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {orbs.map((orb, index) => {
-          const nextPrice = getNextPrice(orb);
-          const canAfford = nextPrice <= virtualBalance;
+          {/* Shop items */}
+          <div className="flex flex-col gap-1">
+            {orbs.map((orb, index) => {
+              const nextPrice = getNextPrice(orb);
+              const canAfford = nextPrice <= virtualBalance;
 
-          return (
-            <ShopItem
-              key={`${orb.value}-${index}`}
-              orb={orb}
-              price={nextPrice}
-              disabled={!canAfford}
-              onAdd={() => handleIncrement(index)}
+              return (
+                <ShopItem
+                  key={`${orb.value}-${index}`}
+                  orb={orb}
+                  price={nextPrice}
+                  disabled={!canAfford}
+                  onAdd={() => handleIncrement(index)}
+                />
+              );
+            })}
+          </div>
+
+          {/* Your Orbs section - clickable category summary */}
+          <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)]">
+            <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
+              Your Orbs
+            </h2>
+            <OrbCategorySummary
+              orbs={displayBag}
+              onClick={() => setShowStash(true)}
             />
-          );
-        })}
-      </div>
-
-      {/* Your Orbs section - clickable category summary */}
-      <div className="flex flex-col gap-[clamp(8px,2svh,12px)] pt-[clamp(8px,2svh,16px)]">
-        <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
-          Your Orbs
-        </h2>
-        <OrbCategorySummary
-          orbs={displayBag}
-          onClick={() => setShowStash(true)}
-        />
+          </div>
+        </div>
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-stretch gap-3 w-full pt-2">
+      <div className="flex items-stretch gap-3 w-full pt-2 shrink-0">
         <Button
           variant="secondary"
           gradient="green"

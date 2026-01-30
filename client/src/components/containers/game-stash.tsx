@@ -77,8 +77,7 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
 
       {/* Orbs grid */}
       <div
-        className="flex-1 min-h-0 flex flex-col overflow-y-auto"
-        style={{ scrollbarWidth: "none" }}
+        className="flex flex-col"
       >
         {orbs.length > 0 ? (
           <div className="grid grid-cols-3 gap-6 py-4 justify-items-center">
@@ -116,8 +115,7 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
 
       {/* Logs list */}
       <div
-        className="flex-1 min-h-0 flex flex-col overflow-y-auto gap-2 py-2"
-        style={{ scrollbarWidth: "none" }}
+        className="flex flex-col gap-2 py-2"
       >
         {sortedPulls.length > 0 ? (
           sortedPulls.map((pull) => (
@@ -156,35 +154,44 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
 
   return (
     <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 h-full min-h-0">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
-          YOUR STASH
-        </h1>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
-        <TabButton
-          active={activeTab === "orbs"}
-          onClick={() => setActiveTab("orbs")}
+      <div className="flex-1 min-h-0 flex flex-col justify-center">
+        <div
+          className="flex flex-col gap-[clamp(8px,2svh,16px)] max-h-full overflow-y-auto"
+          style={{ scrollbarWidth: "none" }}
         >
-          <GridIcon className="w-6 h-6" />
-        </TabButton>
-        <TabButton
-          active={activeTab === "logs"}
-          onClick={() => setActiveTab("logs")}
-        >
-          <ListIcon className="w-6 h-6" />
-        </TabButton>
-      </div>
+          <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
+                YOUR STASH
+              </h1>
+            </div>
 
-      {/* Tab Content */}
-      {activeTab === "orbs" ? (
-        <OrbsTab orbs={orbs} />
-      ) : (
-        <LogsTab pulls={pulls} />
-      )}
+            {/* Tabs */}
+            <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
+              <TabButton
+                active={activeTab === "orbs"}
+                onClick={() => setActiveTab("orbs")}
+              >
+                <GridIcon className="w-6 h-6" />
+              </TabButton>
+              <TabButton
+                active={activeTab === "logs"}
+                onClick={() => setActiveTab("logs")}
+              >
+                <ListIcon className="w-6 h-6" />
+              </TabButton>
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === "orbs" ? (
+            <OrbsTab orbs={orbs} />
+          ) : (
+            <LogsTab pulls={pulls} />
+          )}
+        </div>
+      </div>
 
       {/* Action button */}
       <div className="flex items-stretch gap-3 w-full pt-2 pb-[clamp(6px,1.1svh,12px)]">
