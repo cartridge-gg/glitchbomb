@@ -44,25 +44,23 @@ export const GameOver = ({
       {/* Reuse the same PLChartTabs component */}
       <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
 
-      {/* Centered earnings section - fills remaining space and centers content */}
-      <div className="relative flex-none min-h-[clamp(140px,22svh,200px)] max-h-[clamp(200px,30svh,240px)]">
-        <div className="absolute inset-0 flex items-center justify-center w-full [@media(max-height:720px)]:items-end [@media(max-height:720px)]:pb-[clamp(6px,1.4svh,12px)]">
-          <InfoCard
-            variant={cashedOut ? "green" : "red"}
-            label={`You Earned${cashedOut ? "!" : ""}`}
-            className="w-full"
-            innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(6px,1.4svh,12px)]"
+      {/* Centered earnings section - keeps the card compact and readable */}
+      <div className="flex flex-col items-center justify-center flex-none [@media(max-height:720px)]:justify-end [@media(max-height:720px)]:pb-[clamp(6px,1.4svh,12px)]">
+        <InfoCard
+          variant={cashedOut ? "green" : "red"}
+          label={`You Earned${cashedOut ? "!" : ""}`}
+          className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
+          innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(6px,1.4svh,12px)]"
+        >
+          <MoonrockIcon
+            className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
+          />
+          <span
+            className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em]`}
           >
-            <MoonrockIcon
-              className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
-            />
-            <span
-              className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em]`}
-            >
-              {moonrocksEarned} MOON ROCKS
-            </span>
-          </InfoCard>
-        </div>
+            {moonrocksEarned} MOON ROCKS
+          </span>
+        </InfoCard>
       </div>
 
       {/* Play Again Button */}
