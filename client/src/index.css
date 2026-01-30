@@ -57,7 +57,7 @@ body {
 
 .safe-area-bottom {
   bottom: 0;
-  height: var(--safe-area-bottom-fallback, 8px);
+  height: var(--safe-area-bottom-fallback, 2px);
   background: var(--safe-area-bottom, var(--black-100));
 }
 
@@ -72,7 +72,7 @@ body {
   .safe-area-bottom {
     height: max(
       env(safe-area-inset-bottom, 0px),
-      var(--safe-area-bottom-fallback, 8px)
+      var(--safe-area-bottom-fallback, 2px)
     );
   }
 }
