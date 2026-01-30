@@ -45,12 +45,15 @@ export const PLGraph = ({
   title = "P/L",
   baseline: baselineProp,
 }: PLGraphProps) => {
-  const baseViewSize = 100;
+  const baseViewWidth = 100;
+  const [baseViewHeight, setBaseViewHeight] = useState(100);
+  const baseViewHeightRef = useRef(100);
+  const prevBaseViewHeightRef = useRef(100);
   const [viewBox, setViewBox] = useState({
     x: 0,
     y: 0,
-    width: baseViewSize,
-    height: baseViewSize,
+    width: baseViewWidth,
+    height: 100,
   });
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
@@ -59,8 +62,8 @@ export const PLGraph = ({
     startY: 0,
     originX: 0,
     originY: 0,
-    originWidth: baseViewSize,
-    originHeight: baseViewSize,
+    originWidth: baseViewWidth,
+    originHeight: 100,
   });
   const interactionRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
@@ -200,10 +203,10 @@ export const PLGraph = ({
   const graphPoints = useMemo(() => {
     if (cumulativeData.length === 0) return [];
 
-    const width = baseViewSize;
-    const height = baseViewSize;
-    const paddingX = 12;
-    const paddingY = 8;
+    const width = baseViewWidth;
+    const height = baseViewHeight;
+    const paddingX = width * 0.12;
+    const paddingY = height * 0.08;
 
     const { min, max } = yRange;
     const range = max - min;
@@ -227,7 +230,7 @@ export const PLGraph = ({
         id: point.id ?? index,
       };
     });
-  }, [baseViewSize, cumulativeData, yRange]);
+  }, [baseViewHeight, baseViewWidth, cumulativeData, yRange]);
 
   // Track which points have been rendered to animate only new ones
   const renderedPointsRef = useRef<Set<number>>(new Set());
@@ -250,21 +253,19 @@ export const PLGraph = ({
     });
   }, [graphPoints]);
 
-  if (data.length === 0) {
-    return null;
-  }
-
-  const minViewSize = baseViewSize / zoomMax;
-  const maxViewSize = baseViewSize / zoomMin;
+  const minViewWidth = baseViewWidth / zoomMax;
+  const maxViewWidth = baseViewWidth / zoomMin;
+  const minViewHeight = baseViewHeight / zoomMax;
+  const maxViewHeight = baseViewHeight / zoomMin;
 
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
   const clampViewBox = (next: typeof viewBox) => {
-    const minX = Math.min(0, baseViewSize - next.width);
-    const maxX = Math.max(0, baseViewSize - next.width);
-    const minY = Math.min(0, baseViewSize - next.height);
-    const maxY = Math.max(0, baseViewSize - next.height);
+    const minX = Math.min(0, baseViewWidth - next.width);
+    const maxX = Math.max(0, baseViewWidth - next.width);
+    const minY = Math.min(0, baseViewHeight - next.height);
+    const maxY = Math.max(0, baseViewHeight - next.height);
     return {
       ...next,
       x: clamp(next.x, minX, maxX),
@@ -272,12 +273,49 @@ export const PLGraph = ({
     };
   };
 
+  useEffect(() => {
+    const target = interactionRef.current;
+    if (!target || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      if (!width || !height) return;
+      const nextHeight = (height / width) * baseViewWidth;
+      if (Math.abs(nextHeight - baseViewHeightRef.current) < 0.01) return;
+      baseViewHeightRef.current = nextHeight;
+      setBaseViewHeight(nextHeight);
+    });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [baseViewWidth]);
+
+  useEffect(() => {
+    setViewBox((prev) => {
+      const scaleY = baseViewHeight / prevBaseViewHeightRef.current;
+      const next = clampViewBox({
+        x: prev.x,
+        y: prev.y * scaleY,
+        width: prev.width,
+        height: prev.height * scaleY,
+      });
+      prevBaseViewHeightRef.current = baseViewHeight;
+      return next;
+    });
+  }, [baseViewHeight]);
+
+  if (data.length === 0) {
+    return null;
+  }
+
   const resetView = () => {
     setViewBox({
       x: 0,
       y: 0,
-      width: baseViewSize,
-      height: baseViewSize,
+      width: baseViewWidth,
+      height: baseViewHeight,
     });
   };
 
@@ -294,13 +332,13 @@ export const PLGraph = ({
     setViewBox((prev) => {
       const nextWidth = clamp(
         prev.width / zoomFactor,
-        minViewSize,
-        maxViewSize,
+        minViewWidth,
+        maxViewWidth,
       );
       const nextHeight = clamp(
         prev.height / zoomFactor,
-        minViewSize,
-        maxViewSize,
+        minViewHeight,
+        maxViewHeight,
       );
       if (nextWidth === prev.width && nextHeight === prev.height) return prev;
 
@@ -437,14 +475,14 @@ export const PLGraph = ({
                   maskUnits="userSpaceOnUse"
                   x="0"
                   y="0"
-                  width={baseViewSize}
-                  height={baseViewSize}
+                  width={baseViewWidth}
+                  height={baseViewHeight}
                 >
                   <rect
                     x="0"
                     y="0"
-                    width={baseViewSize}
-                    height={baseViewSize}
+                    width={baseViewWidth}
+                    height={baseViewHeight}
                     fill="url(#grid-fade)"
                   />
                 </mask>
@@ -509,10 +547,10 @@ export const PLGraph = ({
                 {Array.from({ length: 12 }).map((_, i) => (
                   <line
                     key={`v-${i}`}
-                    x1={(i + 1) * 7.7}
+                    x1={(i + 1) * 0.077 * baseViewWidth}
                     y1={0}
-                    x2={(i + 1) * 7.7}
-                    y2={baseViewSize}
+                    x2={(i + 1) * 0.077 * baseViewWidth}
+                    y2={baseViewHeight}
                     stroke="rgba(20, 83, 45, 0.4)"
                     strokeWidth="1"
                     strokeDasharray="4 4"
@@ -523,9 +561,9 @@ export const PLGraph = ({
                   <line
                     key={`h-${i}`}
                     x1={0}
-                    y1={(i + 1) * 11.1}
-                    x2={baseViewSize}
-                    y2={(i + 1) * 11.1}
+                    y1={(i + 1) * 0.111 * baseViewHeight}
+                    x2={baseViewWidth}
+                    y2={(i + 1) * 0.111 * baseViewHeight}
                     stroke="rgba(20, 83, 45, 0.4)"
                     strokeWidth="1"
                     strokeDasharray="4 4"
@@ -537,9 +575,9 @@ export const PLGraph = ({
               {/* Baseline line - dashed white/green */}
               <line
                 x1={0}
-                y1={yRange.baselinePos}
-                x2={baseViewSize}
-                y2={yRange.baselinePos}
+                y1={(yRange.baselinePos / 100) * baseViewHeight}
+                x2={baseViewWidth}
+                y2={(yRange.baselinePos / 100) * baseViewHeight}
                 stroke="#15803d"
                 strokeWidth="1"
                 strokeDasharray="4 4"
