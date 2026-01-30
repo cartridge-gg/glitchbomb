@@ -42,7 +42,9 @@ export const GameOver = ({
       </div>
 
       {/* Reuse the same PLChartTabs component */}
-      <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
+      <div className="mt-[clamp(6px,1.6svh,12px)]">
+        <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
+      </div>
 
       {/* Centered earnings section - keeps the card compact and readable */}
       <div className="flex flex-col items-center justify-center flex-none [@media(max-height:720px)]:justify-end [@media(max-height:720px)]:pb-[clamp(6px,1.4svh,12px)]">
