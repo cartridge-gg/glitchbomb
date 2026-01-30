@@ -45,7 +45,7 @@ export const GameOver = ({
       <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
 
       {/* Centered earnings section - fills remaining space and centers content */}
-      <div className="flex-1 relative min-h-[clamp(180px,30svh,280px)]">
+      <div className="relative flex-none min-h-[clamp(140px,22svh,200px)] max-h-[clamp(200px,30svh,240px)]">
         <div className="absolute inset-0 flex items-center justify-center w-full [@media(max-height:720px)]:items-end [@media(max-height:720px)]:pb-[clamp(6px,1.4svh,12px)]">
           <InfoCard
             variant={cashedOut ? "green" : "red"}
