@@ -38,7 +38,7 @@ body {
   min-height: 100svh;
   min-height: 100dvh;
   width: 100%;
-  background-color: var(--black-100);
+  background-color: var(--safe-area-top, var(--black-100));
 }
 
 .safe-area-bar {
@@ -57,7 +57,7 @@ body {
 
 .safe-area-bottom {
   bottom: 0;
-  height: var(--safe-area-bottom-fallback, 2px);
+  height: var(--safe-area-bottom-fallback, 6px);
   background: var(--safe-area-bottom, var(--black-100));
 }
 
@@ -72,7 +72,7 @@ body {
   .safe-area-bottom {
     height: max(
       env(safe-area-inset-bottom, 0px),
-      var(--safe-area-bottom-fallback, 2px)
+      var(--safe-area-bottom-fallback, 6px)
     );
   }
 }
