@@ -277,49 +277,52 @@ export const Game = () => {
     // Loading state - show optimistic UI
     if (isLoading) {
       return (
-        <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
-          <GameStats
-            points={INITIAL_GAME_VALUES.points}
-            milestone={INITIAL_GAME_VALUES.milestone}
-            health={INITIAL_GAME_VALUES.health}
-            level={INITIAL_GAME_VALUES.level}
-          />
-          <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
+        <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4">
+          <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <GameStats
+              points={INITIAL_GAME_VALUES.points}
+              milestone={INITIAL_GAME_VALUES.milestone}
+              health={INITIAL_GAME_VALUES.health}
+              level={INITIAL_GAME_VALUES.level}
+            />
+            <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
+            <div className="flex flex-col gap-0">
+              <GameScene
+                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                lives={INITIAL_GAME_VALUES.health}
+                bombs={INITIAL_GAME_VALUES.distribution.bombs}
+                orbs={INITIAL_GAME_VALUES.orbsCount}
+                multiplier={INITIAL_GAME_VALUES.multiplier}
+                values={INITIAL_GAME_VALUES.distribution}
+                hasCurse={false}
+                onPull={() => {}} // No-op while loading
+              />
 
-          <GameScene
-            className="grow"
-            lives={INITIAL_GAME_VALUES.health}
-            bombs={INITIAL_GAME_VALUES.distribution.bombs}
-            orbs={INITIAL_GAME_VALUES.orbsCount}
-            multiplier={INITIAL_GAME_VALUES.multiplier}
-            values={INITIAL_GAME_VALUES.distribution}
-            hasCurse={false}
-            onPull={() => {}} // No-op while loading
-          />
-
-          <div className="flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
-            <Button
-              variant="secondary"
-              gradient="green"
-              className="min-h-[clamp(40px,6svh,56px)] min-w-16"
-              disabled
-            >
-              <BagIcon className="w-6 h-6 text-green-400" />
-            </Button>
-            <GradientBorder color="purple" className="flex-1">
-              <button
-                type="button"
-                disabled
-                className="w-full min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-                  color: "#FF80FF",
-                }}
-              >
-                LOADING...
-              </button>
-            </GradientBorder>
+              <div className="mt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="min-h-[clamp(40px,6svh,56px)] min-w-16"
+                  disabled
+                >
+                  <BagIcon className="w-6 h-6 text-green-400" />
+                </Button>
+                <GradientBorder color="purple" className="flex-1">
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
+                      color: "#FF80FF",
+                    }}
+                  >
+                    LOADING...
+                  </button>
+                </GradientBorder>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -378,80 +381,82 @@ export const Game = () => {
 
         // Main gameplay view - inlined to prevent remount on re-render
         return (
-          <div className="flex flex-col justify-between gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
-            <GameStats
-              points={game.points}
-              milestone={game.milestone}
-              health={game.health}
-              level={game.level}
-            />
-            <PLChartTabs
-              data={plData}
-              pulls={pulls}
-              mode="absolute"
-              title="POTENTIAL"
-            />
-
-            {showCashoutChoice ? (
-              <div className="flex-1 flex flex-col">
-                <CashOutChoice
-                  moonrocks={pack.moonrocks}
-                  points={game.points}
-                  onConfirm={handleCashOut}
-                  onCancel={closeOverlay}
-                  isConfirming={isCashingOut}
-                />
-              </div>
-            ) : milestoneReached ? (
-              <div className="flex-1 flex flex-col">
-                <MilestoneChoice
-                  moonrocks={pack.moonrocks}
-                  points={game.points}
-                  onCashOut={handleCashOut}
-                  onEnterShop={handleEnterShop}
-                  isEnteringShop={isEnteringShop}
-                  isCashingOut={isCashingOut}
-                  nextCurseLabel={nextCurseLabel}
-                />
-              </div>
-            ) : (
-              <GameScene
-                className="flex-1"
-                lives={game.health}
-                bombs={distribution.bombs}
-                orbs={game.pullables.length}
-                multiplier={game.multiplier}
-                values={distribution}
-                hasCurse={hasCurse}
-                curseLabel={curseLabel}
-                orb={currentOrb}
-                onPull={handlePull}
+          <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4">
+            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+              <GameStats
+                points={game.points}
+                milestone={game.milestone}
+                health={game.health}
+                level={game.level}
               />
-            )}
+              <PLChartTabs
+                data={plData}
+                pulls={pulls}
+                mode="absolute"
+                title="POTENTIAL"
+              />
 
-            {!showCashoutChoice && !milestoneReached && (
-              <div className="flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
-                <GradientBorder color="yellow" className="flex-1">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
-                    onClick={openCashout}
-                  >
-                    CASH OUT
-                  </button>
-                </GradientBorder>
-                <GradientBorder color="green" className="flex-1">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                    onClick={openStash}
-                  >
-                    <BagIcon className="w-5 h-5" />
-                    ORBS
-                  </button>
-                </GradientBorder>
-              </div>
-            )}
+              {showCashoutChoice ? (
+                <div className="flex flex-col">
+                  <CashOutChoice
+                    moonrocks={pack.moonrocks}
+                    points={game.points}
+                    onConfirm={handleCashOut}
+                    onCancel={closeOverlay}
+                    isConfirming={isCashingOut}
+                  />
+                </div>
+              ) : milestoneReached ? (
+                <div className="flex flex-col">
+                  <MilestoneChoice
+                    moonrocks={pack.moonrocks}
+                    points={game.points}
+                    onCashOut={handleCashOut}
+                    onEnterShop={handleEnterShop}
+                    isEnteringShop={isEnteringShop}
+                    isCashingOut={isCashingOut}
+                    nextCurseLabel={nextCurseLabel}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-0">
+                  <GameScene
+                    className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                    lives={game.health}
+                    bombs={distribution.bombs}
+                    orbs={game.pullables.length}
+                    multiplier={game.multiplier}
+                    values={distribution}
+                    hasCurse={hasCurse}
+                    curseLabel={curseLabel}
+                    orb={currentOrb}
+                    onPull={handlePull}
+                  />
+
+                  <div className="mt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+                    <GradientBorder color="yellow" className="flex-1">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
+                        onClick={openCashout}
+                      >
+                        CASH OUT
+                      </button>
+                    </GradientBorder>
+                    <GradientBorder color="green" className="flex-1">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                        onClick={openStash}
+                      >
+                        <BagIcon className="w-5 h-5" />
+                        ORBS
+                      </button>
+                    </GradientBorder>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
       }
@@ -465,7 +470,7 @@ export const Game = () => {
         chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pt-0 pb-[clamp(8px,3svh,24px)]">
+      <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
       </div>
     </div>
