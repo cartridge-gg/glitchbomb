@@ -22,6 +22,11 @@
 #root {
   overflow: hidden;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--black-100);
 }
 
 html,
@@ -29,6 +34,11 @@ body {
   overflow: hidden;
   touch-action: manipulation;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--black-100);
 }
 
 /* Puller orb rotation animation - CSS for Safari compatibility */
