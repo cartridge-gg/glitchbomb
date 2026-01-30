@@ -42,7 +42,7 @@ function RouterView() {
         className="safe-area-bar safe-area-top"
         style={{
           "--safe-area-top": safeArea.top,
-          "--safe-area-top-fallback": "16px",
+          "--safe-area-top-fallback": "12px",
         } as CSSProperties}
         aria-hidden="true"
       />
@@ -50,7 +50,7 @@ function RouterView() {
         className="safe-area-bar safe-area-bottom"
         style={{
           "--safe-area-bottom": safeArea.bottom,
-          "--safe-area-bottom-fallback": "16px",
+          "--safe-area-bottom-fallback": "12px",
         } as CSSProperties}
         aria-hidden="true"
       />
