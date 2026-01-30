@@ -45,15 +45,15 @@ export const PLGraph = ({
   title = "P/L",
   baseline: baselineProp,
 }: PLGraphProps) => {
-  const baseViewWidth = 100;
-  const [baseViewHeight, setBaseViewHeight] = useState(100);
-  const baseViewHeightRef = useRef(100);
-  const prevBaseViewHeightRef = useRef(100);
+  const baseViewHeight = 100;
+  const [baseViewWidth, setBaseViewWidth] = useState(100);
+  const baseViewWidthRef = useRef(100);
+  const prevBaseViewWidthRef = useRef(100);
   const [viewBox, setViewBox] = useState({
     x: 0,
     y: 0,
     width: baseViewWidth,
-    height: 100,
+    height: baseViewHeight,
   });
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
@@ -63,7 +63,7 @@ export const PLGraph = ({
     originX: 0,
     originY: 0,
     originWidth: baseViewWidth,
-    originHeight: 100,
+    originHeight: baseViewHeight,
   });
   const interactionRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
@@ -282,29 +282,29 @@ export const PLGraph = ({
       if (!entry) return;
       const { width, height } = entry.contentRect;
       if (!width || !height) return;
-      const nextHeight = (height / width) * baseViewWidth;
-      if (Math.abs(nextHeight - baseViewHeightRef.current) < 0.01) return;
-      baseViewHeightRef.current = nextHeight;
-      setBaseViewHeight(nextHeight);
+      const nextWidth = (width / height) * baseViewHeight;
+      if (Math.abs(nextWidth - baseViewWidthRef.current) < 0.01) return;
+      baseViewWidthRef.current = nextWidth;
+      setBaseViewWidth(nextWidth);
     });
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [baseViewWidth]);
+  }, [baseViewHeight]);
 
   useEffect(() => {
     setViewBox((prev) => {
-      const scaleY = baseViewHeight / prevBaseViewHeightRef.current;
+      const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
       const next = clampViewBox({
-        x: prev.x,
-        y: prev.y * scaleY,
-        width: prev.width,
-        height: prev.height * scaleY,
+        x: prev.x * scaleX,
+        y: prev.y,
+        width: prev.width * scaleX,
+        height: prev.height,
       });
-      prevBaseViewHeightRef.current = baseViewHeight;
+      prevBaseViewWidthRef.current = baseViewWidth;
       return next;
     });
-  }, [baseViewHeight]);
+  }, [baseViewWidth]);
 
   if (data.length === 0) {
     return null;
@@ -462,7 +462,7 @@ export const PLGraph = ({
             <svg
               className="absolute inset-0 h-full w-full"
               viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-              preserveAspectRatio="none"
+              preserveAspectRatio="xMidYMid meet"
               shapeRendering="geometricPrecision"
             >
               <defs>
