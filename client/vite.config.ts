@@ -19,25 +19,37 @@ export default defineConfig({
       registerType: "autoUpdate",
       workbox: {
         maximumFileSizeToCacheInBytes: 4000000, // 4 MB
+        navigateFallback: "/index.html",
       },
+      includeAssets: ["apple-touch-icon.png"],
       manifest: {
         name: "Glitch Bomb",
         short_name: "Glitch Bomb",
+        description: "Play Glitch Bomb and manage your on-chain profile.",
+        start_url: "/",
+        scope: "/",
+        id: "/",
         icons: [
           {
-            src: "/apple-touch-icon.png",
-            sizes: "180x180",
+            src: "/web-app-manifest-192x192.png",
+            sizes: "192x192",
             type: "image/png",
-            purpose: "maskable",
+            purpose: "any",
           },
           {
-            src: "/web-app-manifest-192x192.png",
+            src: "/web-app-manifest-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/web-app-manifest-192x192-maskable.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "maskable",
           },
           {
-            src: "/web-app-manifest-512x512.png",
+            src: "/web-app-manifest-512x512-maskable.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
