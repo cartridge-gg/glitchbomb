@@ -77,7 +77,7 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
 
       {/* Orbs grid */}
       <div
-        className="flex-1 flex flex-col overflow-y-auto"
+        className="flex-1 min-h-0 flex flex-col overflow-y-auto"
         style={{ scrollbarWidth: "none" }}
       >
         {orbs.length > 0 ? (
@@ -116,7 +116,7 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
 
       {/* Logs list */}
       <div
-        className="flex-1 flex flex-col overflow-y-auto gap-2 py-2"
+        className="flex-1 min-h-0 flex flex-col overflow-y-auto gap-2 py-2"
         style={{ scrollbarWidth: "none" }}
       >
         {sortedPulls.length > 0 ? (
@@ -155,7 +155,7 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 h-full min-h-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
@@ -187,10 +187,12 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
       )}
 
       {/* Action button */}
-      <div className="flex items-stretch gap-3 w-full pt-2">
+      <div className="flex items-stretch gap-3 w-full pt-2 pb-[clamp(6px,1.1svh,12px)]">
         <Button
           variant="secondary"
-          className="min-h-[clamp(40px,6svh,56px)] flex-1 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
+          gradient="green"
+          wrapperClassName="flex-1"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest transition-all duration-200 hover:bg-green-950 hover:brightness-110"
           onClick={onClose}
         >
           ← BACK
