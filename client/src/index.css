@@ -22,6 +22,11 @@
 #root {
   overflow: hidden;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--black-100);
 }
 
 html,
@@ -29,6 +34,47 @@ body {
   overflow: hidden;
   touch-action: manipulation;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--safe-area-top, var(--black-100));
+}
+
+.safe-area-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.safe-area-top {
+  top: 0;
+  height: var(--safe-area-top-fallback, 0px);
+  background: var(--safe-area-top, var(--black-100));
+}
+
+.safe-area-bottom {
+  bottom: 0;
+  height: var(--safe-area-bottom-fallback, 6px);
+  background: var(--safe-area-bottom, var(--black-100));
+}
+
+@supports (height: max(0px, 0px)) {
+  .safe-area-top {
+    height: max(
+      env(safe-area-inset-top, 0px),
+      var(--safe-area-top-fallback, 0px)
+    );
+  }
+
+  .safe-area-bottom {
+    height: max(
+      env(safe-area-inset-bottom, 0px),
+      var(--safe-area-bottom-fallback, 6px)
+    );
+  }
 }
 
 /* Puller orb rotation animation - CSS for Safari compatibility */
