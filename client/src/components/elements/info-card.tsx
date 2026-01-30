@@ -47,6 +47,9 @@ export interface InfoCardProps {
   label?: string;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
+  labelClassName?: string;
+  innerClassName?: string;
   onClick?: () => void;
   disabled?: boolean;
   isLoading?: boolean;
@@ -58,6 +61,9 @@ export const InfoCard = ({
   label,
   children,
   className = "",
+  contentClassName = "",
+  labelClassName = "",
+  innerClassName = "",
   onClick,
   disabled = false,
   isLoading = false,
@@ -71,19 +77,21 @@ export const InfoCard = ({
     <>
       {label && (
         <span
-          className={`${styles.textColor} font-secondary text-sm tracking-[0.4em] uppercase`}
+          className={`${styles.textColor} font-secondary text-sm tracking-[0.4em] uppercase ${labelClassName}`}
         >
           {label}
         </span>
       )}
 
       {hideInner ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 w-full">
+        <div
+          className={`flex-1 flex flex-col items-center justify-center gap-3 w-full ${innerClassName}`}
+        >
           {isLoading ? <LoadingSpinner size="md" /> : children}
         </div>
       ) : (
         <div
-          className="flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4"
+          className={`flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4 ${innerClassName}`}
           style={{ backgroundColor: styles.innerBg }}
         >
           {isLoading ? <LoadingSpinner size="md" /> : children}
@@ -102,7 +110,7 @@ export const InfoCard = ({
           type="button"
           onClick={onClick}
           disabled={isDisabled}
-          className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full h-full transition-all duration-200 ${
+          className={`flex flex-col items-center gap-3 rounded-2xl p-4 w-full h-full transition-all duration-200 ${contentClassName} ${
             isDisabled
               ? "opacity-50 cursor-not-allowed"
               : "cursor-pointer hover:brightness-125"
@@ -121,7 +129,7 @@ export const InfoCard = ({
       className={`rounded-2xl h-full ${className}`}
     >
       <div
-        className="flex flex-col items-center gap-3 rounded-2xl p-4 h-full"
+        className={`flex flex-col items-center gap-3 rounded-2xl p-4 h-full ${contentClassName}`}
         style={{ backgroundColor: styles.cardBg }}
       >
         {cardContent}

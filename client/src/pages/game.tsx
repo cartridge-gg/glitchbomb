@@ -387,7 +387,7 @@ export const Game = () => {
         return (
           <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
             {showCashoutChoice ? (
-              <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+              <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
                 <GameStats
                   points={game.points}
                   milestone={game.milestone}
@@ -400,16 +400,18 @@ export const Game = () => {
                   mode="absolute"
                   title="POTENTIAL"
                 />
-                <CashOutChoice
-                  moonrocks={pack.moonrocks}
-                  points={game.points}
-                  onConfirm={handleCashOut}
-                  onCancel={closeOverlay}
-                  isConfirming={isCashingOut}
-                />
+                <div className="mt-[clamp(6px,2.2svh,18px)]">
+                  <CashOutChoice
+                    moonrocks={pack.moonrocks}
+                    points={game.points}
+                    onConfirm={handleCashOut}
+                    onCancel={closeOverlay}
+                    isConfirming={isCashingOut}
+                  />
+                </div>
               </div>
             ) : milestoneReached ? (
-              <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+              <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
                 <GameStats
                   points={game.points}
                   milestone={game.milestone}
