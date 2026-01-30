@@ -1,33 +1,42 @@
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Game, Games, Home } from "@/pages";
 
 function RouterView() {
   const { pathname } = useLocation();
-  const safeAreaStyle = useMemo(() => {
+  const safeArea = useMemo(() => {
     if (pathname.startsWith("/play")) {
       return {
-        "--safe-area-top": "var(--green-900)",
-        "--safe-area-bottom": "var(--black-100)",
-      } as CSSProperties;
+        top: "var(--green-900)",
+        bottom: "var(--black-100)",
+      };
     }
     if (pathname.startsWith("/games")) {
       return {
-        "--safe-area-top": "var(--green-900)",
-        "--safe-area-bottom": "var(--green-950)",
-      } as CSSProperties;
+        top: "var(--green-900)",
+        bottom: "var(--green-950)",
+      };
     }
     return {
-      "--safe-area-top": "var(--green-900)",
-      "--safe-area-bottom": "var(--green-950)",
-    } as CSSProperties;
+      top: "var(--green-900)",
+      bottom: "var(--green-950)",
+    };
   }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.setProperty("--safe-area-top", safeArea.top);
+    document.body.style.setProperty("--safe-area-bottom", safeArea.bottom);
+    document.documentElement.style.setProperty("--safe-area-top", safeArea.top);
+    document.documentElement.style.setProperty(
+      "--safe-area-bottom",
+      safeArea.bottom,
+    );
+  }, [safeArea]);
 
   return (
     <div
-      className="safe-area-paint relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black"
-      style={safeAreaStyle}
+      className="relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black"
     >
       <div
         className={cn(

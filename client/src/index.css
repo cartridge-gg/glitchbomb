@@ -38,16 +38,16 @@ body {
   min-height: 100svh;
   min-height: 100dvh;
   width: 100%;
-  background-color: var(--black-100);
+  background-color: var(--safe-area-top, var(--black-100));
 }
 
-.safe-area-paint {
+body {
   --safe-area-top: var(--black-100);
   --safe-area-bottom: var(--black-100);
 }
 
-.safe-area-paint::before,
-.safe-area-paint::after {
+body::before,
+body::after {
   content: "";
   position: fixed;
   left: 0;
@@ -56,13 +56,13 @@ body {
   z-index: 5;
 }
 
-.safe-area-paint::before {
+body::before {
   top: 0;
   height: env(safe-area-inset-top, 0px);
   background: var(--safe-area-top);
 }
 
-.safe-area-paint::after {
+body::after {
   bottom: 0;
   height: env(safe-area-inset-bottom, 0px);
   background: var(--safe-area-bottom);
