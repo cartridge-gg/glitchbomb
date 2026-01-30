@@ -25,6 +25,11 @@
 - Scale UI elements smoothly; prioritize core gameplay elements on short viewports.
 - Keep curse/multiplier indicators visible and consistently positioned relative to the puller.
 - Ensure text remains readable at the smallest supported sizes using `clamp()`.
+- iOS safe areas often need explicit styling on `html`, `body`, and `#root` with `height: 100%`, `min-height: 100vh`, `min-height: 100svh`, and `min-height: 100dvh`, plus `viewport-fit=cover` in the meta tag.
+- Use CSS variables like `--safe-area-top` and `--safe-area-bottom` to control safe area painting, especially when colors change per route.
+- Route-aware safe area styling should live inside the `BrowserRouter` and use `useLocation` for per-route logic.
+- If `env(safe-area-inset-*)` returns 0 in some scroll/layout states, use fallbacks like `max(env(...), <fallback>)` or fixed heights.
+- Mind `z-index` layering when safe area overlays are used so they sit correctly over content.
 
 ## Responsive Pitfalls
 - Avoid relying on fixed height breakpoints for layout; prefer fluid scaling.
