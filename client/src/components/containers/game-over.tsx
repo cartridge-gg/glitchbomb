@@ -50,7 +50,8 @@ export const GameOver = ({
           <InfoCard
             variant={cashedOut ? "green" : "red"}
             label={`You Earned${cashedOut ? "!" : ""}`}
-            className="min-h-[clamp(160px,26svh,240px)] w-full"
+            className="w-full"
+            innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(6px,1.4svh,12px)]"
           >
             <MoonrockIcon
               className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
