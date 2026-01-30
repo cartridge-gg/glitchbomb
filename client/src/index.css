@@ -41,6 +41,33 @@ body {
   background-color: var(--black-100);
 }
 
+.safe-area-paint {
+  --safe-area-top: var(--black-100);
+  --safe-area-bottom: var(--black-100);
+}
+
+.safe-area-paint::before,
+.safe-area-paint::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.safe-area-paint::before {
+  top: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--safe-area-top);
+}
+
+.safe-area-paint::after {
+  bottom: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--safe-area-bottom);
+}
+
 /* Puller orb rotation animation - CSS for Safari compatibility */
 @keyframes puller-spin {
   from {
