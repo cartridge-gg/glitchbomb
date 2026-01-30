@@ -46,7 +46,7 @@ export const GameOver = ({
 
       {/* Centered earnings section - fills remaining space and centers content */}
       <div className="flex-1 relative min-h-[clamp(180px,30svh,280px)]">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">
+        <div className="absolute inset-0 flex items-center justify-center w-full [@media(max-height:720px)]:items-end [@media(max-height:720px)]:pb-[clamp(6px,1.4svh,12px)]">
           <InfoCard
             variant={cashedOut ? "green" : "red"}
             label={`You Earned${cashedOut ? "!" : ""}`}
