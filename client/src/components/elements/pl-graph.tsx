@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -265,17 +266,20 @@ export const PLGraph = ({
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
-  const clampViewBox = (next: typeof viewBox) => {
-    const minX = Math.min(0, baseViewWidth - next.width);
-    const maxX = Math.max(0, baseViewWidth - next.width);
-    const minY = Math.min(0, baseViewHeight - next.height);
-    const maxY = Math.max(0, baseViewHeight - next.height);
-    return {
-      ...next,
-      x: clamp(next.x, minX, maxX),
-      y: clamp(next.y, minY, maxY),
-    };
-  };
+  const clampViewBox = useCallback(
+    (next: typeof viewBox) => {
+      const minX = Math.min(0, baseViewWidth - next.width);
+      const maxX = Math.max(0, baseViewWidth - next.width);
+      const minY = Math.min(0, baseViewHeight - next.height);
+      const maxY = Math.max(0, baseViewHeight - next.height);
+      return {
+        ...next,
+        x: clamp(next.x, minX, maxX),
+        y: clamp(next.y, minY, maxY),
+      };
+    },
+    [baseViewHeight, baseViewWidth],
+  );
 
   const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
   const pointRadius = 6 * unitPerPx;
@@ -320,7 +324,7 @@ export const PLGraph = ({
       prevBaseViewWidthRef.current = baseViewWidth;
       return next;
     });
-  }, [baseViewWidth]);
+  }, [baseViewWidth, clampViewBox]);
 
   if (data.length === 0) {
     return null;
