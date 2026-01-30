@@ -4,6 +4,14 @@
 - Curses use bit flags in `game.curses` (`u8`), with each curse as a distinct power-of-two bit.
 - Orbs expose `apply` (mutates game state and returns earnings) and `cost` (chip price) functions.
 - Orb discards are tracked via a `u64` bitmap (`game.discards`), one bit per orb index.
+- Prefer fluid sizing with `clamp()` and viewport units like `svh` over fixed breakpoints.
+- `useViewportSize` is used to drive responsive sizing for scene elements.
+- `cva` variants are used for component styling (e.g., `gameSceneVariants`, `pullerVariants`).
+- `framer-motion` (AnimatePresence/motion) is used for transitions and visibility states.
+- Use `cn` for conditional class merging.
+- Favor component composition (GameScene composed of Distribution, Puller, Multiplier, Outcome).
+- Memoize computed values with `useMemo` and handlers with `useCallback` to avoid rerenders.
+- `useRef` is used to track animation-related state like last pull ids.
 
 ## Gameplay/Mechanics Notes
 - Sticky Bomb is a specific orb; it should not affect all bombs.
@@ -13,3 +21,13 @@
 - Prefer simple, readable logic over clever complexity.
 - Avoid overloading `game.discards` to mean conflicting states; model sticky behavior explicitly.
 - If sticky behavior complicates counts, consider helpers like `pullable_non_sticky_orbs_count` or separate checks for bag regeneration.
+- Keep no vertical gap between the header and main game content across viewports.
+- Scale UI elements smoothly; prioritize core gameplay elements on short viewports.
+- Keep curse/multiplier indicators visible and consistently positioned relative to the puller.
+- Ensure text remains readable at the smallest supported sizes using `clamp()`.
+
+## Responsive Pitfalls
+- Avoid relying on fixed height breakpoints for layout; prefer fluid scaling.
+- When updating layout strategy, recheck all affected components for sizing and positioning.
+- Be careful to merge inline `style` props (e.g., sizePx) so sizing changes apply correctly.
+- Avoid introducing unintended gaps between stacked sections (especially header/content and puller/footer).

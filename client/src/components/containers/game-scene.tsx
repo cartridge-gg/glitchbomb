@@ -97,6 +97,7 @@ export const GameScene = ({
   const badgeOffsetX = 104;
   const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
   const fireIconSize = Math.round(badgeSizePx * 0.4);
+  const sceneOffsetY = Math.round(clamp(4, viewportHeight * 0.02, 36));
 
   // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
@@ -130,11 +131,12 @@ export const GameScene = ({
       {/* Distribution */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
+          "absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
           phase === 0 && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
           phase === 3 && "opacity-100",
         )}
+        style={{ top: `calc(50% + ${sceneOffsetY}px)` }}
       >
         <Distribution
           values={values}
@@ -146,11 +148,12 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-300",
+          "absolute left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-300",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
           phase === 3 && "opacity-100 z-20",
         )}
+        style={{ top: `calc(50% + ${sceneOffsetY}px)` }}
       >
         <Puller
           onClick={onPull}
