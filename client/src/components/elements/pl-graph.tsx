@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -69,6 +70,7 @@ export const PLGraph = ({
   const interactionRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
   const zoomMax = 3.5;
+  const gridPatternId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -459,15 +461,52 @@ export const PLGraph = ({
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage:
-                "linear-gradient(to right, rgba(20, 83, 45, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 83, 45, 0.4) 1px, transparent 1px)",
-              backgroundSize: `${gridSpacing}px ${gridSpacing}px`,
               maskImage:
                 "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
             }}
-          />
+          >
+            <svg
+              className="absolute inset-0 h-full w-full"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <defs>
+                <pattern
+                  id={`pl-grid-${gridPatternId}`}
+                  width={gridSpacing}
+                  height={gridSpacing}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <line
+                    x1={gridSpacing}
+                    y1={0}
+                    x2={gridSpacing}
+                    y2={gridSpacing}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                  <line
+                    x1={0}
+                    y1={gridSpacing}
+                    x2={gridSpacing}
+                    y2={gridSpacing}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                </pattern>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill={`url(#pl-grid-${gridPatternId})`}
+              />
+            </svg>
+          </div>
           <div
             ref={interactionRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
