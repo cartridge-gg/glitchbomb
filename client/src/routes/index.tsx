@@ -42,7 +42,7 @@ function RouterView() {
         className="safe-area-bar safe-area-top"
         style={{
           "--safe-area-top": safeArea.top,
-          "--safe-area-top-fallback": "24px",
+          "--safe-area-top-fallback": "16px",
         } as CSSProperties}
         aria-hidden="true"
       />
