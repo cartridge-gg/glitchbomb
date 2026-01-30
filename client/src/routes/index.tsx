@@ -8,18 +8,18 @@ function RouterView() {
   const safeArea = useMemo(() => {
     if (pathname.startsWith("/play")) {
       return {
-        top: "var(--green-900)",
+        top: "#0C1806",
         bottom: "var(--black-100)",
       };
     }
     if (pathname.startsWith("/games")) {
       return {
-        top: "var(--green-900)",
+        top: "#0C1806",
         bottom: "var(--black-100)",
       };
     }
     return {
-      top: "var(--green-900)",
+      top: "#0C1806",
       bottom: "var(--black-100)",
     };
   }, [pathname]);
@@ -42,7 +42,7 @@ function RouterView() {
         className="safe-area-bar safe-area-top"
         style={{
           "--safe-area-top": safeArea.top,
-          "--safe-area-top-fallback": "12px",
+          "--safe-area-top-fallback": "8px",
         } as CSSProperties}
         aria-hidden="true"
       />
@@ -50,7 +50,7 @@ function RouterView() {
         className="safe-area-bar safe-area-bottom"
         style={{
           "--safe-area-bottom": safeArea.bottom,
-          "--safe-area-bottom-fallback": "12px",
+          "--safe-area-bottom-fallback": "8px",
         } as CSSProperties}
         aria-hidden="true"
       />
