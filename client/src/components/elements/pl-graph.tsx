@@ -49,6 +49,7 @@ export const PLGraph = ({
   const [baseViewWidth, setBaseViewWidth] = useState(100);
   const baseViewWidthRef = useRef(100);
   const prevBaseViewWidthRef = useRef(100);
+  const [containerSize, setContainerSize] = useState({ width: 1, height: 1 });
   const [viewBox, setViewBox] = useState({
     x: 0,
     y: 0,
@@ -273,6 +274,13 @@ export const PLGraph = ({
     };
   };
 
+  const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
+  const pointRadius = 6 * unitPerPx;
+  const pointStrokeWidth = 1 * unitPerPx;
+  const lineStrokeWidth = 1.5 * unitPerPx;
+  const gridStrokeWidth = 1 * unitPerPx;
+  const baselineStrokeWidth = 1 * unitPerPx;
+
   useEffect(() => {
     const target = interactionRef.current;
     if (!target || typeof ResizeObserver === "undefined") return;
@@ -282,6 +290,7 @@ export const PLGraph = ({
       if (!entry) return;
       const { width, height } = entry.contentRect;
       if (!width || !height) return;
+      setContainerSize({ width, height });
       const nextWidth = (width / height) * baseViewHeight;
       if (Math.abs(nextWidth - baseViewWidthRef.current) < 0.01) return;
       baseViewWidthRef.current = nextWidth;
@@ -552,9 +561,8 @@ export const PLGraph = ({
                     x2={(i + 1) * 0.077 * baseViewWidth}
                     y2={baseViewHeight}
                     stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
+                    strokeWidth={gridStrokeWidth}
                     strokeDasharray="4 4"
-                    vectorEffect="non-scaling-stroke"
                   />
                 ))}
                 {Array.from({ length: 8 }).map((_, i) => (
@@ -565,9 +573,8 @@ export const PLGraph = ({
                     x2={baseViewWidth}
                     y2={(i + 1) * 0.111 * baseViewHeight}
                     stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
+                    strokeWidth={gridStrokeWidth}
                     strokeDasharray="4 4"
-                    vectorEffect="non-scaling-stroke"
                   />
                 ))}
               </g>
@@ -579,9 +586,8 @@ export const PLGraph = ({
                 x2={baseViewWidth}
                 y2={(yRange.baselinePos / 100) * baseViewHeight}
                 stroke="#15803d"
-                strokeWidth="1"
+                strokeWidth={baselineStrokeWidth}
                 strokeDasharray="4 4"
-                vectorEffect="non-scaling-stroke"
               />
 
               {/* Lines connecting points */}
@@ -597,8 +603,7 @@ export const PLGraph = ({
                     x2={point.x}
                     y2={point.y}
                     stroke="#348F1B"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
+                    strokeWidth={lineStrokeWidth}
                     initial={isNew ? { pathLength: 0, opacity: 0 } : false}
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
@@ -623,11 +628,10 @@ export const PLGraph = ({
                     key={`point-${point.id}`}
                     cx={point.x}
                     cy={point.y}
-                    r="6"
+                    r={pointRadius}
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
-                    strokeWidth="1"
-                    vectorEffect="non-scaling-stroke"
+                    strokeWidth={pointStrokeWidth}
                     filter={`url(#${filterName})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
