@@ -71,6 +71,7 @@ export const PLGraph = ({
   const zoomMin = 0.75;
   const zoomMax = 3.5;
   const gridPatternId = useId();
+  const glowFilterId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -282,6 +283,8 @@ export const PLGraph = ({
   const lineStrokeWidth = 1.5 * unitPerPx;
   const baselineStrokeWidth = 1 * unitPerPx;
   const gridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
+  const glowBlur = 4 * unitPerPx;
+  const glowExtent = 18 * unitPerPx;
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -525,7 +528,23 @@ export const PLGraph = ({
               preserveAspectRatio="xMidYMid meet"
               shapeRendering="geometricPrecision"
             >
-              <defs></defs>
+              <defs>
+                <filter
+                  id={`point-glow-${glowFilterId}`}
+                  x={-glowExtent}
+                  y={-glowExtent}
+                  width={baseViewWidth + glowExtent * 2}
+                  height={baseViewHeight + glowExtent * 2}
+                  filterUnits="userSpaceOnUse"
+                  colorInterpolationFilters="sRGB"
+                >
+                  <feGaussianBlur stdDeviation={glowBlur} result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
               {/* Baseline line - dashed white/green */}
               <line
@@ -571,6 +590,7 @@ export const PLGraph = ({
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
                     strokeWidth={pointStrokeWidth}
+                    filter={`url(#point-glow-${glowFilterId})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
