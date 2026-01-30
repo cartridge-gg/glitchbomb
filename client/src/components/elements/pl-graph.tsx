@@ -465,9 +465,9 @@ export const PLGraph = ({
             className="absolute inset-0 pointer-events-none"
             style={{
               maskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
               WebkitMaskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
             }}
           >
             <svg
