@@ -525,61 +525,7 @@ export const PLGraph = ({
               preserveAspectRatio="xMidYMid meet"
               shapeRendering="geometricPrecision"
             >
-              <defs>
-                {/* Glow filters for each color */}
-                <filter
-                  id="glow-green"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-red"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-blue"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-yellow"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+              <defs></defs>
 
               {/* Baseline line - dashed white/green */}
               <line
@@ -615,15 +561,6 @@ export const PLGraph = ({
 
               {/* Points as SVG circles */}
               {graphPoints.map((point) => {
-                const filterName = `glow-${
-                  point.color === "#36F818"
-                    ? "green"
-                    : point.color === "#FF1E00"
-                      ? "red"
-                      : point.color === "#7487FF"
-                        ? "blue"
-                        : "yellow"
-                }`;
                 const isNew = newPointIds.has(point.id);
                 return (
                   <motion.circle
@@ -634,7 +571,6 @@ export const PLGraph = ({
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
                     strokeWidth={pointStrokeWidth}
-                    filter={`url(#${filterName})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
