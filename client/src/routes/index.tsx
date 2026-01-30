@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type CSSProperties } from "react";
+import { type CSSProperties, useEffect, useMemo } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Game, Games, Home } from "@/pages";
@@ -35,23 +35,25 @@ function RouterView() {
   }, [safeArea]);
 
   return (
-    <div
-      className="relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black"
-    >
+    <div className="relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black">
       <div
         className="safe-area-bar safe-area-top"
-        style={{
-          "--safe-area-top": safeArea.top,
-          "--safe-area-top-fallback": "6px",
-        } as CSSProperties}
+        style={
+          {
+            "--safe-area-top": safeArea.top,
+            "--safe-area-top-fallback": "6px",
+          } as CSSProperties
+        }
         aria-hidden="true"
       />
       <div
         className="safe-area-bar safe-area-bottom"
-        style={{
-          "--safe-area-bottom": safeArea.bottom,
-          "--safe-area-bottom-fallback": "6px",
-        } as CSSProperties}
+        style={
+          {
+            "--safe-area-bottom": safeArea.bottom,
+            "--safe-area-bottom-fallback": "6px",
+          } as CSSProperties
+        }
         aria-hidden="true"
       />
       <div
