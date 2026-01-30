@@ -285,7 +285,12 @@ export const Game = () => {
               health={INITIAL_GAME_VALUES.health}
               level={INITIAL_GAME_VALUES.level}
             />
-            <PLChartTabs data={[]} pulls={[]} mode="absolute" title="POTENTIAL" />
+            <PLChartTabs
+              data={[]}
+              pulls={[]}
+              mode="absolute"
+              title="POTENTIAL"
+            />
             <div className="flex flex-col gap-0">
               <GameScene
                 className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
