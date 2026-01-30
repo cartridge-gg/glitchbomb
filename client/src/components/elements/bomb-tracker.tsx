@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { BombIcon } from "@/components/icons";
+import { Bomb1xIcon, Bomb2xIcon, Bomb3xIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface BombDetail {
@@ -24,7 +24,7 @@ const bombTrackerVariants = cva(
   {
     variants: {
       variant: {
-        default: "text-green-400",
+        default: "text-red-400",
       },
       size: {
         md: "h-10 w-auto",
@@ -55,7 +55,7 @@ export const BombTracker = ({
         const key = `bomb-${keyCounter++}`;
         const isEnabled = index >= details.simple.total - details.simple.count;
         return (
-          <BombIcon
+          <Bomb1xIcon
             key={key}
             className={cn(
               "min-h-10 min-w-8 transition-opacity duration-300",
@@ -68,13 +68,12 @@ export const BombTracker = ({
         const key = `bomb-${keyCounter++}`;
         const isEnabled = index >= details.double.total - details.double.count;
         return (
-          <BombIcon
+          <Bomb2xIcon
             key={key}
             className={cn(
               "min-h-10 min-w-8 transition-opacity duration-300",
               isEnabled ? "opacity-100" : "opacity-20",
             )}
-            variant="double"
           />
         );
       })}
@@ -82,13 +81,12 @@ export const BombTracker = ({
         const key = `bomb-${keyCounter++}`;
         const isEnabled = index >= details.triple.total - details.triple.count;
         return (
-          <BombIcon
+          <Bomb3xIcon
             key={key}
             className={cn(
               "min-h-10 min-w-8 transition-opacity duration-300",
               isEnabled ? "opacity-100" : "opacity-20",
             )}
-            variant="triple"
           />
         );
       })}
