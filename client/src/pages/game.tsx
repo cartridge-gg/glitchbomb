@@ -277,7 +277,7 @@ export const Game = () => {
     // Loading state - show optimistic UI
     if (isLoading) {
       return (
-        <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+        <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
           <GameStats
             points={INITIAL_GAME_VALUES.points}
             milestone={INITIAL_GAME_VALUES.milestone}
@@ -297,11 +297,11 @@ export const Game = () => {
             onPull={() => {}} // No-op while loading
           />
 
-          <div className="flex items-stretch gap-3 opacity-50 pointer-events-none">
+          <div className="flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
             <Button
               variant="secondary"
               gradient="green"
-              className="min-h-14 min-w-16"
+              className="min-h-[clamp(40px,6svh,56px)] min-w-16"
               disabled
             >
               <BagIcon className="w-6 h-6 text-green-400" />
@@ -310,7 +310,7 @@ export const Game = () => {
               <button
                 type="button"
                 disabled
-                className="w-full min-h-14 font-secondary text-sm tracking-widest rounded-lg"
+                className="w-full min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg"
                 style={{
                   background:
                     "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
@@ -378,7 +378,7 @@ export const Game = () => {
 
         // Main gameplay view - inlined to prevent remount on re-render
         return (
-          <div className="flex flex-col justify-between gap-4 max-w-[420px] mx-auto px-4 h-full">
+          <div className="flex flex-col justify-between gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
             <GameStats
               points={game.points}
               milestone={game.milestone}
@@ -430,11 +430,11 @@ export const Game = () => {
             )}
 
             {!showCashoutChoice && !milestoneReached && (
-              <div className="flex items-stretch gap-3">
+              <div className="flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
                 <GradientBorder color="yellow" className="flex-1">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-center min-h-14 font-secondary text-sm tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
+                    className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
                     onClick={openCashout}
                   >
                     CASH OUT
@@ -443,7 +443,7 @@ export const Game = () => {
                 <GradientBorder color="green" className="flex-1">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-center gap-2 min-h-14 font-secondary text-sm tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
                     onClick={openStash}
                   >
                     <BagIcon className="w-5 h-5" />
@@ -459,13 +459,15 @@ export const Game = () => {
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col">
+    <div className="absolute inset-0 flex flex-col min-h-0">
       <GameHeader
         moonrocks={pack?.moonrocks ?? 100}
         chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
-      <div className="flex-1 overflow-hidden py-6">{renderScreen()}</div>
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pt-0 pb-[clamp(8px,3svh,24px)]">
+        {renderScreen()}
+      </div>
     </div>
   );
 };

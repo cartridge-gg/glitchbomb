@@ -67,7 +67,7 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all",
+      "flex-1 flex items-center justify-center gap-2 py-[clamp(4px,1svh,8px)] rounded-lg transition-all",
       active
         ? "bg-green-800 text-green-400"
         : "text-green-900 hover:text-green-700",
@@ -200,22 +200,24 @@ export const PLChartTabs = ({
   const [activeTab, setActiveTab] = useState<TabType>("chart");
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
         <TabButton
           active={activeTab === "chart"}
           onClick={() => setActiveTab("chart")}
         >
-          <ChartIcon className="w-5 h-5" />
-          <span className="font-secondary text-sm tracking-widest">P/L</span>
+          <ChartIcon className="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]" />
+          <span className="font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest">
+            P/L
+          </span>
         </TabButton>
         <TabButton
           active={activeTab === "logs"}
           onClick={() => setActiveTab("logs")}
         >
-          <LogsIcon className="w-5 h-5" />
-          <span className="font-secondary text-sm tracking-widest">
+          <LogsIcon className="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]" />
+          <span className="font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest">
             HISTORY
           </span>
         </TabButton>
@@ -226,7 +228,7 @@ export const PLChartTabs = ({
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
         <div
-          className="h-[140px] overflow-y-auto"
+          className="h-[clamp(84px,16svh,140px)] overflow-y-auto"
           style={{
             scrollbarWidth: "none",
             maskImage:

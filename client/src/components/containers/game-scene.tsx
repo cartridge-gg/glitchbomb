@@ -35,6 +35,25 @@ export interface GameSceneProps
   onPull: () => void;
 }
 
+const useViewportSize = () => {
+  const [size, setSize] = useState(() => ({
+    width: typeof window === "undefined" ? 0 : window.innerWidth,
+    height: typeof window === "undefined" ? 0 : window.innerHeight,
+  }));
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleResize = () => {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return size;
+};
+
 const gameSceneVariants = cva("relative", {
   variants: {
     variant: {
@@ -60,6 +79,25 @@ export const GameScene = ({
   onPull,
   ...props
 }: GameSceneProps) => {
+  const { height } = useViewportSize();
+  const clamp = (min: number, value: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+  const viewportHeight = height || 800;
+
+  const distributionSize = Math.round(clamp(200, viewportHeight * 0.34, 300));
+  const distributionThickness = Math.round(
+    clamp(30, viewportHeight * 0.065, 50),
+  );
+  const pullerSizePx = Math.round(clamp(130, distributionSize * 0.62, 190));
+  const heightScale = clamp(0.7, viewportHeight / 800, 1);
+  const badgeSizePx = Math.round(clamp(36, 72 * heightScale, 72));
+  const badgeOffsetTop = Math.round(
+    (badgeSizePx * 1.05 + pullerSizePx * 0.22) * heightScale,
+  );
+  const badgeOffsetX = 104;
+  const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
+  const fireIconSize = Math.round(badgeSizePx * 0.4);
+
   // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
 
@@ -98,7 +136,11 @@ export const GameScene = ({
           phase === 3 && "opacity-100",
         )}
       >
-        <Distribution values={values} />
+        <Distribution
+          values={values}
+          size={distributionSize}
+          thickness={distributionThickness}
+        />
       </div>
 
       {/* Puller */}
@@ -122,6 +164,7 @@ export const GameScene = ({
                   : "point"
           }
           size="md"
+          sizePx={pullerSizePx}
           orbs={orbs}
           bombs={bombs}
         />
@@ -129,8 +172,11 @@ export const GameScene = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="absolute -top-32 -left-24 z-30">
-                  <div className="relative h-[72px] w-[72px]">
+                <div
+                  className="absolute z-30"
+                  style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
+                >
+                  <div style={{ width: badgeSizePx, height: badgeSizePx }}>
                     <Multiplier
                       count={3}
                       cornerRadius={50}
@@ -143,7 +189,9 @@ export const GameScene = ({
                       borderWidthMax={2.5}
                     />
                     <div className="absolute inset-0 z-20 flex items-center justify-center">
-                      <FireIcon className="h-6 w-6" />
+                      <FireIcon
+                        style={{ width: fireIconSize, height: fireIconSize }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -158,12 +206,17 @@ export const GameScene = ({
           </TooltipProvider>
         )}
         {/* Multiplier Badge - top right of puller */}
-        <div className="absolute -top-32 -right-24 z-30">
-          <Multiplier
-            count={multiplier}
-            cornerRadius={50}
-            className="w-[72px] h-[72px]"
-          />
+        <div
+          className="absolute z-30"
+          style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
+        >
+          <div style={{ width: badgeSizePx, height: badgeSizePx }}>
+            <Multiplier
+              count={multiplier}
+              cornerRadius={50}
+              className="h-full w-full"
+            />
+          </div>
         </div>
       </div>
 
@@ -211,12 +264,13 @@ export const GameScene = ({
                 mass: 0.8,
               }}
             >
-              <Outcome
-                content={orb?.content ?? ""}
-                variant={orb?.variant ?? "default"}
-                size="md"
-                className="scale-[1.5]"
-              />
+              <div style={{ transform: `scale(${outcomeScale})` }}>
+                <Outcome
+                  content={orb?.content ?? ""}
+                  variant={orb?.variant ?? "default"}
+                  size="md"
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

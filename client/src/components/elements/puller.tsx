@@ -22,6 +22,8 @@ const pullerVariants = cva(
         rainbow: "",
       },
       size: {
+        xs: "w-[130px] h-[130px]",
+        sm: "w-[150px] h-[150px]",
         md: "w-[180px] h-[180px]",
         lg: "w-[233px] h-[233px]",
       },
@@ -73,6 +75,7 @@ export interface PullerProps
     VariantProps<typeof pullerVariants> {
   orbs?: number;
   bombs?: number;
+  sizePx?: number;
 }
 
 export const Puller = memo(function Puller({
@@ -81,6 +84,8 @@ export const Puller = memo(function Puller({
   className,
   orbs = 0,
   bombs = 0,
+  sizePx,
+  style,
   ...props
 }: PullerProps) {
   // Get color based on variant
@@ -108,15 +113,24 @@ export const Puller = memo(function Puller({
   // Get current color for rainbow variant
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
+  const defaultSizePx =
+    size === "lg" ? 233 : size === "sm" ? 150 : size === "xs" ? 130 : 180;
+  const resolvedSizePx = sizePx ?? defaultSizePx;
+  const labelFontSize = Math.round(resolvedSizePx * 0.19);
+  const labelLineHeight = Math.round(labelFontSize * 0.86);
+  const mergedStyle = {
+    boxShadow: "0px 0px 50px 30px #000000",
+    ...(sizePx ? { width: resolvedSizePx, height: resolvedSizePx } : {}),
+    ...style,
+  };
+  const iconScale = Math.min(Math.max(resolvedSizePx / 180, 0.85), 1);
 
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}
       whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
-      style={{
-        boxShadow: "0px 0px 50px 30px #000000",
-      }}
+      style={mergedStyle}
       {...props}
     >
       <div className="absolute inset-0 rounded-full overflow-hidden">
@@ -171,9 +185,11 @@ export const Puller = memo(function Puller({
       {/* 5. Content */}
       <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0">
         <p
-          className="text-center text-[35px]/[30px] font-[900]"
+          className="text-center font-[900]"
           style={{
             color: currentColor.cssVar,
+            fontSize: `${labelFontSize}px`,
+            lineHeight: `${labelLineHeight}px`,
             filter: `drop-shadow(0 0 20px color-mix(in srgb, ${currentColor.cssVar} 80%, transparent))`,
             transition: "color 0.5s ease-in-out, filter 0.5s ease-in-out",
           }}
@@ -187,6 +203,8 @@ export const Puller = memo(function Puller({
           style={{
             color: currentColor.cssVar,
             transition: "color 0.5s ease-in-out",
+            transform: `scale(${iconScale})`,
+            transformOrigin: "center",
           }}
         >
           <div

@@ -155,10 +155,10 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
-    <div className="flex flex-col gap-4 max-w-[420px] mx-auto px-4 h-full">
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase text-3xl font-primary">
+        <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
           YOUR STASH
         </h1>
       </div>
@@ -190,7 +190,7 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
       <div className="flex items-stretch gap-3 w-full pt-2">
         <Button
           variant="secondary"
-          className="min-h-14 flex-1 font-secondary text-sm tracking-widest"
+          className="min-h-[clamp(40px,6svh,56px)] flex-1 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
           onClick={onClose}
         >
           ← BACK

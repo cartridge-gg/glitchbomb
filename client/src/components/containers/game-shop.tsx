@@ -22,16 +22,19 @@ export interface GameShopProps
   isLoading?: boolean;
 }
 
-const gameShopVariants = cva("select-none relative flex flex-col gap-4", {
-  variants: {
-    variant: {
-      default: "h-full max-w-[420px] mx-auto px-4",
+const gameShopVariants = cva(
+  "select-none relative flex flex-col gap-[clamp(8px,2svh,16px)]",
+  {
+    variants: {
+      variant: {
+        default: "min-h-full max-w-[420px] mx-auto px-4",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
     },
   },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+);
 
 // Get short name for orb type
 const getOrbTypeName = (orb: Orb): string => {
@@ -297,7 +300,7 @@ export const GameShop = ({
             <h1 className="text-white uppercase text-2xl font-primary">
               Leave Shop?
             </h1>
-            <p className="text-green-600 font-secondary text-sm tracking-wide max-w-xs">
+            <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide max-w-xs">
               You haven't selected any orbs. Are you sure you want to leave
               without buying anything?
             </p>
@@ -309,7 +312,7 @@ export const GameShop = ({
           <Button
             variant="secondary"
             gradient="green"
-            className="min-h-14 w-full font-secondary text-sm tracking-widest"
+            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
             wrapperClassName="flex-1"
             onClick={() => setShowExitConfirmation(false)}
           >
@@ -318,7 +321,7 @@ export const GameShop = ({
           <Button
             variant="default"
             gradient="green"
-            className="min-h-14 w-full font-secondary text-sm tracking-widest"
+            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
             wrapperClassName="flex-1"
             onClick={handleConfirmExit}
           >
@@ -333,11 +336,13 @@ export const GameShop = ({
     <div className={gameShopVariants({ variant, className })} {...props}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-white uppercase text-3xl font-primary">ORB SHOP</h1>
+        <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
+          ORB SHOP
+        </h1>
       </div>
 
       {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide">
+      <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
         Spend Chips to add orbs to your bag
       </p>
 
@@ -363,8 +368,8 @@ export const GameShop = ({
       </div>
 
       {/* Your Orbs section - clickable category summary */}
-      <div className="flex flex-col gap-3 pt-4">
-        <h2 className="text-green-600 font-secondary text-sm tracking-wider uppercase">
+      <div className="flex flex-col gap-[clamp(8px,2svh,12px)] pt-[clamp(8px,2svh,16px)]">
+        <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
           Your Orbs
         </h2>
         <OrbCategorySummary
@@ -378,7 +383,7 @@ export const GameShop = ({
         <Button
           variant="secondary"
           gradient="green"
-          className="min-h-14 w-full font-secondary text-sm tracking-widest"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
           wrapperClassName="flex-1"
           disabled={history.length === 0 || isLoading}
           onClick={handleUndo}
@@ -389,7 +394,7 @@ export const GameShop = ({
         <Button
           variant="default"
           gradient="green"
-          className="min-h-14 w-full font-secondary text-sm tracking-widest"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
           wrapperClassName="flex-1"
           onClick={handleContinue}
           disabled={isLoading}
