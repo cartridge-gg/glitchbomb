@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, type CSSProperties } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Game, Games, Home } from "@/pages";
@@ -38,6 +38,22 @@ function RouterView() {
     <div
       className="relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black"
     >
+      <div
+        className="safe-area-bar safe-area-top"
+        style={{
+          "--safe-area-top": safeArea.top,
+          "--safe-area-top-fallback": "44px",
+        } as CSSProperties}
+        aria-hidden="true"
+      />
+      <div
+        className="safe-area-bar safe-area-bottom"
+        style={{
+          "--safe-area-bottom": safeArea.bottom,
+          "--safe-area-bottom-fallback": "34px",
+        } as CSSProperties}
+        aria-hidden="true"
+      />
       <div
         className={cn(
           "absolute inset-0 bg-green-gradient-100 transition-opacity duration-700 ease-in-out",

@@ -39,33 +39,9 @@ body {
   min-height: 100dvh;
   width: 100%;
   background-color: var(--safe-area-top, var(--black-100));
-  background-image: linear-gradient(
-    to bottom,
-    var(--safe-area-top, var(--black-100)) 0%,
-    var(--safe-area-top, var(--black-100))
-      calc(100% - var(--safe-area-bottom-size)),
-    var(--safe-area-bottom, var(--black-100))
-      calc(100% - var(--safe-area-bottom-size)),
-    var(--safe-area-bottom, var(--black-100)) 100%
-  );
 }
 
-body {
-  --safe-area-top: var(--black-100);
-  --safe-area-bottom: var(--black-100);
-  --safe-area-top-size: max(
-    env(safe-area-inset-top, 0px),
-    var(--safe-area-top-fallback, 0px)
-  );
-  --safe-area-bottom-size: max(
-    env(safe-area-inset-bottom, 0px),
-    var(--safe-area-bottom-fallback, 20px)
-  );
-}
-
-body::before,
-body::after {
-  content: "";
+.safe-area-bar {
   position: fixed;
   left: 0;
   right: 0;
@@ -73,16 +49,32 @@ body::after {
   z-index: 9999;
 }
 
-body::before {
+.safe-area-top {
   top: 0;
-  height: var(--safe-area-top-size);
-  background: var(--safe-area-top);
+  height: var(--safe-area-top-fallback, 0px);
+  background: var(--safe-area-top, var(--black-100));
 }
 
-body::after {
+.safe-area-bottom {
   bottom: 0;
-  height: var(--safe-area-bottom-size);
-  background: var(--safe-area-bottom);
+  height: var(--safe-area-bottom-fallback, 34px);
+  background: var(--safe-area-bottom, var(--black-100));
+}
+
+@supports (height: max(0px, 0px)) {
+  .safe-area-top {
+    height: max(
+      env(safe-area-inset-top, 0px),
+      var(--safe-area-top-fallback, 0px)
+    );
+  }
+
+  .safe-area-bottom {
+    height: max(
+      env(safe-area-inset-bottom, 0px),
+      var(--safe-area-bottom-fallback, 34px)
+    );
+  }
 }
 
 /* Puller orb rotation animation - CSS for Safari compatibility */
