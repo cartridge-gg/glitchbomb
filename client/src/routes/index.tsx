@@ -15,12 +15,12 @@ function RouterView() {
     if (pathname.startsWith("/games")) {
       return {
         top: "var(--green-900)",
-        bottom: "var(--green-950)",
+        bottom: "var(--black-100)",
       };
     }
     return {
       top: "var(--green-900)",
-      bottom: "var(--green-950)",
+      bottom: "var(--black-100)",
     };
   }, [pathname]);
 
