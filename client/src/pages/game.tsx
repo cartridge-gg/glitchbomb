@@ -278,7 +278,7 @@ export const Game = () => {
     if (isLoading) {
       return (
         <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4">
-          <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+          <div className="flex flex-1 flex-col gap-[clamp(4px,1.2svh,10px)]">
             <GameStats
               points={INITIAL_GAME_VALUES.points}
               milestone={INITIAL_GAME_VALUES.milestone}
@@ -291,7 +291,7 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <div className="flex flex-col gap-0">
+            <div className="flex flex-1 flex-col gap-0">
               <GameScene
                 className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
                 lives={INITIAL_GAME_VALUES.health}
@@ -303,7 +303,7 @@ export const Game = () => {
                 onPull={() => {}} // No-op while loading
               />
 
-              <div className="mt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
+              <div className="mt-auto pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
                 <Button
                   variant="secondary"
                   gradient="green"
@@ -387,7 +387,7 @@ export const Game = () => {
         // Main gameplay view - inlined to prevent remount on re-render
         return (
           <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4">
-            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 flex-col gap-[clamp(4px,1.2svh,10px)]">
               <GameStats
                 points={game.points}
                 milestone={game.milestone}
@@ -402,7 +402,7 @@ export const Game = () => {
               />
 
               {showCashoutChoice ? (
-                <div className="flex flex-col">
+                <div className="flex flex-1 flex-col justify-center">
                   <CashOutChoice
                     moonrocks={pack.moonrocks}
                     points={game.points}
@@ -412,7 +412,7 @@ export const Game = () => {
                   />
                 </div>
               ) : milestoneReached ? (
-                <div className="flex flex-col">
+                <div className="flex flex-1 flex-col justify-center">
                   <MilestoneChoice
                     moonrocks={pack.moonrocks}
                     points={game.points}
@@ -424,7 +424,7 @@ export const Game = () => {
                   />
                 </div>
               ) : (
-                <div className="flex flex-col gap-0">
+                <div className="flex flex-1 flex-col gap-0">
                   <GameScene
                     className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
                     lives={game.health}
@@ -438,7 +438,7 @@ export const Game = () => {
                     onPull={handlePull}
                   />
 
-                  <div className="mt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+                  <div className="mt-auto pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
                     <GradientBorder color="yellow" className="flex-1">
                       <button
                         type="button"
