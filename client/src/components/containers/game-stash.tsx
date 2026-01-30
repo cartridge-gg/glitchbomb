@@ -76,9 +76,7 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
       </p>
 
       {/* Orbs grid */}
-      <div
-        className="flex flex-col"
-      >
+      <div className="flex flex-col">
         {orbs.length > 0 ? (
           <div className="grid grid-cols-3 gap-6 py-4 justify-items-center">
             {orbs.map((orb, index) => (
@@ -114,9 +112,7 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
       </p>
 
       {/* Logs list */}
-      <div
-        className="flex flex-col gap-2 py-2"
-      >
+      <div className="flex flex-col gap-2 py-2">
         {sortedPulls.length > 0 ? (
           sortedPulls.map((pull) => (
             <div
