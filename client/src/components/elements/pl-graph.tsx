@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import {
+  type PointerEventHandler,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type PointerEventHandler,
   type WheelEventHandler,
 } from "react";
 
@@ -256,7 +256,10 @@ export const PLGraph = ({
     const zoomFactor = direction > 0 ? 1.12 : 0.9;
 
     setView((prev) => {
-      const nextScale = Math.min(zoomMax, Math.max(zoomMin, prev.scale * zoomFactor));
+      const nextScale = Math.min(
+        zoomMax,
+        Math.max(zoomMin, prev.scale * zoomFactor),
+      );
       if (nextScale === prev.scale) return prev;
       const scaleRatio = nextScale / prev.scale;
       const nextX = pointerX - (pointerX - prev.x) * scaleRatio;
