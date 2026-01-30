@@ -40,7 +40,7 @@ export const Profile = ({
       {...props}
     >
       <ControllerIcon size="sm" />
-      <span className="truncate font-secondary uppercase text-sm tracking-widest font-normal">
+      <span className="truncate font-secondary uppercase text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest font-normal">
         {username}
       </span>
     </Button>

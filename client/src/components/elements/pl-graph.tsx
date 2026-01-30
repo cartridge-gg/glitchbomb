@@ -230,14 +230,14 @@ export const PLGraph = ({
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Header: stats and net value */}
       <div className="flex items-center justify-between">
-        <div className="font-secondary text-green-700 text-lg tracking-widest uppercase">
+        <div className="font-secondary text-green-700 text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest uppercase">
           {title}:{" "}
           <span className="font-secondary text-green-700">
             {stats.wins}/{stats.losses}
           </span>
         </div>
         <div
-          className={`font-secondary text-lg tracking-widest ${
+          className={`font-secondary text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest ${
             stats.netPL >= 0 ? "text-green-700" : "text-red-400"
           }`}
         >
@@ -247,13 +247,13 @@ export const PLGraph = ({
       </div>
 
       {/* Graph container */}
-      <div className="relative w-full h-40">
+      <div className="relative w-full h-[clamp(80px,16svh,160px)]">
         {/* Y-axis labels as pills */}
         <div className="absolute left-0 top-0 bottom-0 z-10">
           {yAxisLabels.map((label, index) => (
             <span
               key={`label-${label.value}-${index}`}
-              className="absolute font-secondary text-green-400 text-sm tracking-widest leading-none bg-green-950 px-3 py-1.5 rounded-full"
+              className="absolute font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
               style={{
                 top: `${label.position}%`,
                 transform:
