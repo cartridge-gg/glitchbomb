@@ -30,7 +30,6 @@ const meta = {
   argTypes: {},
   args: {
     orbs: mockOrbs,
-    onClose: () => console.log("Closed stash"),
   },
 } satisfies Meta<typeof GameStash>;
 

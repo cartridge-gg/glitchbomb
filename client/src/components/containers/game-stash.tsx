@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { OrbDisplay } from "@/components/elements";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
-  onClose: () => void;
 }
 
 type TabType = "orbs" | "list";
@@ -141,7 +139,7 @@ const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   );
 };
 
-export const GameStash = ({ orbs, onClose }: GameStashProps) => {
+export const GameStash = ({ orbs }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
@@ -183,19 +181,6 @@ export const GameStash = ({ orbs, onClose }: GameStashProps) => {
             <ListTab orbs={orbs} />
           )}
         </div>
-      </div>
-
-      {/* Action button */}
-      <div className="flex items-stretch gap-3 w-full pt-2 pb-[clamp(6px,1.1svh,12px)]">
-        <Button
-          variant="secondary"
-          gradient="green"
-          wrapperClassName="flex-1"
-          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest transition-all duration-200 hover:bg-green-950 hover:brightness-110"
-          onClick={onClose}
-        >
-          ← BACK
-        </Button>
       </div>
     </div>
   );
