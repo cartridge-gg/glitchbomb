@@ -649,9 +649,9 @@ export const PLGraph = ({
 
               {/* Baseline line - dashed white/green */}
               <line
-                x1={0}
+                x1={viewBox.x}
                 y1={(yRange.baselinePos / 100) * baseViewHeight}
-                x2={baseViewWidth}
+                x2={viewBox.x + viewBox.width}
                 y2={(yRange.baselinePos / 100) * baseViewHeight}
                 stroke="#15803d"
                 strokeWidth={baselineStrokeWidth}
