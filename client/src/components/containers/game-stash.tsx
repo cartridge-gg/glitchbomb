@@ -145,7 +145,7 @@ export const GameStash = ({ orbs }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] w-full max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
           {/* Header */}
