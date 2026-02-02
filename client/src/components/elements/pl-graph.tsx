@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -46,31 +45,13 @@ export const PLGraph = ({
   title = "P/L",
   baseline: baselineProp,
 }: PLGraphProps) => {
-  const baseViewHeight = 100;
-  const [baseViewWidth, setBaseViewWidth] = useState(100);
-  const baseViewWidthRef = useRef(100);
-  const prevBaseViewWidthRef = useRef(100);
-  const [containerSize, setContainerSize] = useState({ width: 1, height: 1 });
-  const [viewBox, setViewBox] = useState({
-    x: 0,
-    y: 0,
-    width: baseViewWidth,
-    height: baseViewHeight,
-  });
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
-  const panRef = useRef({
-    startX: 0,
-    startY: 0,
-    originX: 0,
-    originY: 0,
-    originWidth: baseViewWidth,
-    originHeight: baseViewHeight,
-  });
-  const interactionRef = useRef<HTMLDivElement | null>(null);
+  const panRef = useRef({ startX: 0, startY: 0, originX: 0, originY: 0 });
+  const zoomRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
   const zoomMax = 3.5;
-  const gridPatternId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -206,10 +187,10 @@ export const PLGraph = ({
   const graphPoints = useMemo(() => {
     if (cumulativeData.length === 0) return [];
 
-    const width = baseViewWidth;
-    const height = baseViewHeight;
-    const paddingX = width * 0.12;
-    const paddingY = height * 0.08;
+    const width = 100;
+    const height = 100;
+    const paddingX = 12;
+    const paddingY = 8;
 
     const { min, max } = yRange;
     const range = max - min;
@@ -233,7 +214,7 @@ export const PLGraph = ({
         id: point.id ?? index,
       };
     });
-  }, [baseViewHeight, baseViewWidth, cumulativeData, yRange]);
+  }, [cumulativeData, yRange]);
 
   // Track which points have been rendered to animate only new ones
   const renderedPointsRef = useRef<Set<number>>(new Set());
@@ -256,83 +237,17 @@ export const PLGraph = ({
     });
   }, [graphPoints]);
 
-  const minViewWidth = baseViewWidth / zoomMax;
-  const maxViewWidth = baseViewWidth / zoomMin;
-  const minViewHeight = baseViewHeight / zoomMax;
-  const maxViewHeight = baseViewHeight / zoomMin;
-
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
-
-  const clampViewBox = (next: typeof viewBox) => {
-    const minX = Math.min(0, baseViewWidth - next.width);
-    const maxX = Math.max(0, baseViewWidth - next.width);
-    const minY = Math.min(0, baseViewHeight - next.height);
-    const maxY = Math.max(0, baseViewHeight - next.height);
-    return {
-      ...next,
-      x: clamp(next.x, minX, maxX),
-      y: clamp(next.y, minY, maxY),
-    };
-  };
-
-  const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
-  const pointRadius = 6 * unitPerPx;
-  const pointStrokeWidth = 1 * unitPerPx;
-  const lineStrokeWidth = 1.5 * unitPerPx;
-  const baselineStrokeWidth = 1 * unitPerPx;
-  const gridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
-
-  useEffect(() => {
-    const target = interactionRef.current;
-    if (!target || typeof ResizeObserver === "undefined") return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const { width, height } = entry.contentRect;
-      if (!width || !height) return;
-      setContainerSize({ width, height });
-      const nextWidth = (width / height) * baseViewHeight;
-      if (Math.abs(nextWidth - baseViewWidthRef.current) < 0.01) return;
-      baseViewWidthRef.current = nextWidth;
-      setBaseViewWidth(nextWidth);
-    });
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [baseViewHeight]);
-
-  useEffect(() => {
-    setViewBox((prev) => {
-      const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
-      const next = clampViewBox({
-        x: prev.x * scaleX,
-        y: prev.y,
-        width: prev.width * scaleX,
-        height: prev.height,
-      });
-      prevBaseViewWidthRef.current = baseViewWidth;
-      return next;
-    });
-  }, [baseViewWidth]);
-
   if (data.length === 0) {
     return null;
   }
 
   const resetView = () => {
-    setViewBox({
-      x: 0,
-      y: 0,
-      width: baseViewWidth,
-      height: baseViewHeight,
-    });
+    setView({ scale: 1, x: 0, y: 0 });
   };
 
   const handleWheel: WheelEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
-    const target = interactionRef.current;
+    const target = zoomRef.current;
     if (!target) return;
     const rect = target.getBoundingClientRect();
     const pointerX = event.clientX - rect.left;
@@ -340,32 +255,16 @@ export const PLGraph = ({
     const direction = event.deltaY < 0 ? 1 : -1;
     const zoomFactor = direction > 0 ? 1.12 : 0.9;
 
-    setViewBox((prev) => {
-      const nextWidth = clamp(
-        prev.width / zoomFactor,
-        minViewWidth,
-        maxViewWidth,
+    setView((prev) => {
+      const nextScale = Math.min(
+        zoomMax,
+        Math.max(zoomMin, prev.scale * zoomFactor),
       );
-      const nextHeight = clamp(
-        prev.height / zoomFactor,
-        minViewHeight,
-        maxViewHeight,
-      );
-      if (nextWidth === prev.width && nextHeight === prev.height) return prev;
-
-      const pointerXRatio = pointerX / rect.width;
-      const pointerYRatio = pointerY / rect.height;
-      const pointerXInView = prev.x + pointerXRatio * prev.width;
-      const pointerYInView = prev.y + pointerYRatio * prev.height;
-      const nextX = pointerXInView - pointerXRatio * nextWidth;
-      const nextY = pointerYInView - pointerYRatio * nextHeight;
-
-      return clampViewBox({
-        x: nextX,
-        y: nextY,
-        width: nextWidth,
-        height: nextHeight,
-      });
+      if (nextScale === prev.scale) return prev;
+      const scaleRatio = nextScale / prev.scale;
+      const nextX = pointerX - (pointerX - prev.x) * scaleRatio;
+      const nextY = pointerY - (pointerY - prev.y) * scaleRatio;
+      return { scale: nextScale, x: nextX, y: nextY };
     });
   };
 
@@ -378,30 +277,21 @@ export const PLGraph = ({
     panRef.current = {
       startX: event.clientX,
       startY: event.clientY,
-      originX: viewBox.x,
-      originY: viewBox.y,
-      originWidth: viewBox.width,
-      originHeight: viewBox.height,
+      originX: view.x,
+      originY: view.y,
     };
   };
 
   const handlePointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
     if (!isPanningRef.current) return;
     event.preventDefault();
-    const target = interactionRef.current;
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
     const deltaX = event.clientX - panRef.current.startX;
     const deltaY = event.clientY - panRef.current.startY;
-    const shiftX = (deltaX / rect.width) * panRef.current.originWidth;
-    const shiftY = (deltaY / rect.height) * panRef.current.originHeight;
-    setViewBox((prev) =>
-      clampViewBox({
-        ...prev,
-        x: panRef.current.originX - shiftX,
-        y: panRef.current.originY - shiftY,
-      }),
-    );
+    setView((prev) => ({
+      ...prev,
+      x: panRef.current.originX + deltaX,
+      y: panRef.current.originY + deltaY,
+    }));
   };
 
   const handlePointerUp: PointerEventHandler<HTMLDivElement> = (event) => {
@@ -459,56 +349,7 @@ export const PLGraph = ({
         {/* Graph area */}
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              maskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-              WebkitMaskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-            }}
-          >
-            <svg
-              className="absolute inset-0 h-full w-full"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <defs>
-                <pattern
-                  id={`pl-grid-${gridPatternId}`}
-                  width={gridSpacing}
-                  height={gridSpacing}
-                  patternUnits="userSpaceOnUse"
-                >
-                  <line
-                    x1={gridSpacing}
-                    y1={0}
-                    x2={gridSpacing}
-                    y2={gridSpacing}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                  <line
-                    x1={0}
-                    y1={gridSpacing}
-                    x2={gridSpacing}
-                    y2={gridSpacing}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                </pattern>
-              </defs>
-              <rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                fill={`url(#pl-grid-${gridPatternId})`}
-              />
-            </svg>
-          </div>
-          <div
-            ref={interactionRef}
+            ref={zoomRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
             onWheel={handleWheel}
@@ -519,69 +360,165 @@ export const PLGraph = ({
             onPointerCancel={handlePointerUp}
             onDoubleClick={resetView}
           >
-            <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-              preserveAspectRatio="xMidYMid meet"
-              shapeRendering="geometricPrecision"
+            <div
+              className="absolute inset-0"
+              style={{
+                transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+                transformOrigin: "0 0",
+                willChange: "transform",
+              }}
             >
-              <defs></defs>
+              {/* Extended grid background with fade */}
+              <div
+                className="absolute -inset-12 pointer-events-none"
+                style={{
+                  maskImage:
+                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                }}
+              >
+                <svg className="absolute inset-0 w-full h-full">
+                  {/* Vertical grid lines */}
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <line
+                      key={`v-${i}`}
+                      x1={`${(i + 1) * 7.7}%`}
+                      y1="0"
+                      x2={`${(i + 1) * 7.7}%`}
+                      y2="100%"
+                      stroke="rgba(20, 83, 45, 0.4)"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                    />
+                  ))}
+                  {/* Horizontal grid lines */}
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <line
+                      key={`h-${i}`}
+                      x1="0"
+                      y1={`${(i + 1) * 11.1}%`}
+                      x2="100%"
+                      y2={`${(i + 1) * 11.1}%`}
+                      stroke="rgba(20, 83, 45, 0.4)"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                    />
+                  ))}
+                </svg>
+              </div>
 
               {/* Baseline line - dashed white/green */}
-              <line
-                x1={0}
-                y1={(yRange.baselinePos / 100) * baseViewHeight}
-                x2={baseViewWidth}
-                y2={(yRange.baselinePos / 100) * baseViewHeight}
-                stroke="#15803d"
-                strokeWidth={baselineStrokeWidth}
-                strokeDasharray="4 4"
+              <div
+                className="absolute left-0 right-0 border-t border-dashed border-green-700"
+                style={{ top: `${yRange.baselinePos}%` }}
               />
 
-              {/* Lines connecting points */}
-              {graphPoints.map((point, index) => {
-                if (index === 0) return null;
-                const prevPoint = graphPoints[index - 1];
-                const isNew = newPointIds.has(point.id);
-                return (
-                  <motion.line
-                    key={`line-${point.id}`}
-                    x1={prevPoint.x}
-                    y1={prevPoint.y}
-                    x2={point.x}
-                    y2={point.y}
-                    stroke="#348F1B"
-                    strokeWidth={lineStrokeWidth}
-                    initial={isNew ? { pathLength: 0, opacity: 0 } : false}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  />
-                );
-              })}
+              {/* Chart area for points and lines */}
+              <svg className="absolute inset-0 w-full h-full overflow-visible">
+                <defs>
+                  {/* Glow filters for each color */}
+                  <filter
+                    id="glow-green"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-red"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-blue"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-yellow"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
 
-              {/* Points as SVG circles */}
-              {graphPoints.map((point) => {
-                const isNew = newPointIds.has(point.id);
-                return (
-                  <motion.circle
-                    key={`point-${point.id}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r={pointRadius}
-                    fill={point.color}
-                    stroke="rgba(255,255,255,0.8)"
-                    strokeWidth={pointStrokeWidth}
-                    initial={isNew ? { scale: 0, opacity: 0 } : false}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      duration: 0.3,
-                      ease: "easeOut",
-                      delay: isNew ? 0.1 : 0,
-                    }}
-                  />
-                );
-              })}
-            </svg>
+                {/* Lines connecting points */}
+                {graphPoints.map((point, index) => {
+                  if (index === 0) return null;
+                  const prevPoint = graphPoints[index - 1];
+                  const isNew = newPointIds.has(point.id);
+                  return (
+                    <motion.line
+                      key={`line-${point.id}`}
+                      x1={`${prevPoint.x}%`}
+                      y1={`${prevPoint.y}%`}
+                      x2={`${point.x}%`}
+                      y2={`${point.y}%`}
+                      stroke="#348F1B"
+                      strokeWidth="1.5"
+                      initial={isNew ? { pathLength: 0, opacity: 0 } : false}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    />
+                  );
+                })}
+
+                {/* Points as SVG circles */}
+                {graphPoints.map((point) => {
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
+                  const isNew = newPointIds.has(point.id);
+                  return (
+                    <motion.circle
+                      key={`point-${point.id}`}
+                      cx={`${point.x}%`}
+                      cy={`${point.y}%`}
+                      r="6"
+                      fill={point.color}
+                      stroke="rgba(255,255,255,0.8)"
+                      strokeWidth="1"
+                      filter={`url(#${filterName})`}
+                      initial={isNew ? { scale: 0, opacity: 0 } : false}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: "easeOut",
+                        delay: isNew ? 0.1 : 0,
+                      }}
+                    />
+                  );
+                })}
+              </svg>
+            </div>
           </div>
         </div>
       </div>
