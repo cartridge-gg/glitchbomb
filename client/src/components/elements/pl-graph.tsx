@@ -281,7 +281,8 @@ export const PLGraph = ({
     [baseViewHeight, baseViewWidth],
   );
 
-  const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
+  const unitPerPx =
+    baseViewHeight / Math.max(containerSize.height, baseViewHeight);
   const pointRadius = 6 * unitPerPx;
   const pointStrokeWidth = 1 * unitPerPx;
   const lineStrokeWidth = 1.5 * unitPerPx;
