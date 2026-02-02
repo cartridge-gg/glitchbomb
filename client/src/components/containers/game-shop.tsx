@@ -362,17 +362,18 @@ export const GameShop = ({
             })}
           </div>
 
-          {/* Your Orbs section - clickable category summary */}
-          <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)]">
-            <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
-              Your Orbs
-            </h2>
-            <OrbCategorySummary
-              orbs={displayBag}
-              onClick={() => setShowStash(true)}
-            />
-          </div>
         </div>
+      </div>
+
+      {/* Your Orbs section - clickable category summary */}
+      <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)] shrink-0">
+        <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
+          Your Orbs
+        </h2>
+        <OrbCategorySummary
+          orbs={displayBag}
+          onClick={() => setShowStash(true)}
+        />
       </div>
 
       {/* Action buttons */}
