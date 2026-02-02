@@ -355,7 +355,11 @@ export const PLGraph = ({
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Graph container */}
-      <div className="relative w-full h-[clamp(80px,16svh,160px)]">
+      <div
+        className="relative w-full h-[clamp(80px,16svh,160px)]"
+        aria-label={title}
+        role="img"
+      >
         {/* Y-axis labels as pills */}
         <div className="absolute left-0 top-0 bottom-0 z-10">
           {yAxisLabels.map((label, index) => (

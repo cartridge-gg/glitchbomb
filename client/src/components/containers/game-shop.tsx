@@ -368,7 +368,6 @@ export const GameShop = ({
               );
             })}
           </div>
-
         </div>
       </div>
 

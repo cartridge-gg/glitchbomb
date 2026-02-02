@@ -5,7 +5,6 @@ import {
   useAnimationControls,
 } from "framer-motion";
 import { memo, useEffect, useState } from "react";
-import { BombIcon, DotIcon, OrbIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
@@ -82,12 +81,14 @@ export const Puller = memo(function Puller({
   variant,
   size,
   className,
-  orbs = 0,
-  bombs = 0,
+  orbs: _orbs = 0,
+  bombs: _bombs = 0,
   sizePx,
   style,
   ...props
 }: PullerProps) {
+  void _orbs;
+  void _bombs;
   // Get color based on variant
   const color = VARIANT_COLORS[variant || "default"];
   const controls = useAnimationControls();
@@ -123,8 +124,6 @@ export const Puller = memo(function Puller({
     ...(sizePx ? { width: resolvedSizePx, height: resolvedSizePx } : {}),
     ...style,
   };
-  const iconScale = Math.min(Math.max(resolvedSizePx / 180, 0.85), 1);
-
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}

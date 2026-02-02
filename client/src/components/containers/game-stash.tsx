@@ -65,13 +65,7 @@ const TabButton = ({
   </button>
 );
 
-const OrbsTab = ({
-  orbs,
-  discards,
-}: {
-  orbs: Orb[];
-  discards?: boolean[];
-}) => {
+const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
       {/* Orbs grid */}
@@ -100,7 +94,7 @@ const OrbsTab = ({
                         isDiscarded && "text-green-700/70",
                       )}
                     >
-                    {orb.name()}
+                      {orb.name()}
                     </p>
                   </div>
                 );
@@ -119,13 +113,7 @@ const OrbsTab = ({
   );
 };
 
-const ListTab = ({
-  orbs,
-  discards,
-}: {
-  orbs: Orb[];
-  discards?: boolean[];
-}) => {
+const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
       {/* Orbs list */}
@@ -185,14 +173,14 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
         <div className="flex flex-col gap-0">
           {/* Header */}
           <div className="flex items-center justify-between w-full">
-              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
-                YOUR STASH
-              </h1>
-            </div>
+            <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
+              YOUR STASH
+            </h1>
+          </div>
 
-            <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
-              {description}
-            </p>
+          <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
+            {description}
+          </p>
 
           {/* Tabs */}
           <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full mt-2">
