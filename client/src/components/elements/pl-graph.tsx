@@ -1,5 +1,12 @@
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef } from "react";
+import {
+  type PointerEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export interface PLDataPoint {
   value: number; // The P/L value at this point (delta or absolute based on mode)
@@ -38,6 +45,14 @@ export const PLGraph = ({
   title = "P/L",
   baseline: baselineProp,
 }: PLGraphProps) => {
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const isPanningRef = useRef(false);
+  const panRef = useRef({ startX: 0, startY: 0, originX: 0, originY: 0 });
+  const zoomRef = useRef<HTMLDivElement | null>(null);
+  const zoomMin = 0.75;
+  const zoomMax = 3.5;
+
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
   // Calculate cumulative values at each point
@@ -222,9 +237,120 @@ export const PLGraph = ({
     });
   }, [graphPoints]);
 
+  const resetView = () => {
+    setView({ scale: 1, x: 0, y: 0 });
+  };
+
+  const applyZoomAt = useCallback(
+    (zoomFactor: number, pointerX: number, pointerY: number) => {
+      setView((prev) => {
+        const nextScale = Math.min(
+          zoomMax,
+          Math.max(zoomMin, prev.scale * zoomFactor),
+        );
+        if (nextScale === prev.scale) return prev;
+        const scaleRatio = nextScale / prev.scale;
+        const nextX = pointerX - (pointerX - prev.x) * scaleRatio;
+        const nextY = pointerY - (pointerY - prev.y) * scaleRatio;
+        return { scale: nextScale, x: nextX, y: nextY };
+      });
+    },
+    [zoomMax, zoomMin],
+  );
+
+  const handleWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      event.preventDefault();
+      const target = zoomRef.current;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left;
+      const pointerY = event.clientY - rect.top;
+      const zoomFactor =
+        event.ctrlKey || event.metaKey
+          ? Math.exp(-event.deltaY * 0.002)
+          : event.deltaY < 0
+            ? 1.12
+            : 0.9;
+
+      applyZoomAt(zoomFactor, pointerX, pointerY);
+    },
+    [applyZoomAt],
+  );
+
+  useEffect(() => {
+    const target = zoomRef.current;
+    if (!target) return;
+    const listener = (event: WheelEvent) => handleWheelEvent(event);
+    target.addEventListener("wheel", listener, { passive: false });
+    return () => target.removeEventListener("wheel", listener);
+  }, [handleWheelEvent]);
+
+  useEffect(() => {
+    const target = zoomRef.current as unknown as HTMLElement | null;
+    if (!target) return;
+    let lastScale = 1;
+    const onGestureStart = (event: Event) => {
+      event.preventDefault();
+      const scale = (event as unknown as { scale?: number }).scale ?? 1;
+      lastScale = scale;
+    };
+    const onGestureChange = (event: Event) => {
+      event.preventDefault();
+      const scale = (event as unknown as { scale?: number }).scale ?? 1;
+      const delta = scale / lastScale;
+      lastScale = scale;
+      const rect = target.getBoundingClientRect();
+      applyZoomAt(delta, rect.width / 2, rect.height / 2);
+    };
+    target.addEventListener("gesturestart", onGestureStart, { passive: false });
+    target.addEventListener("gesturechange", onGestureChange, {
+      passive: false,
+    });
+    return () => {
+      target.removeEventListener("gesturestart", onGestureStart);
+      target.removeEventListener("gesturechange", onGestureChange);
+    };
+  }, [applyZoomAt]);
+
   if (data.length === 0) {
     return null;
   }
+
+  const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (event.button !== 0) return;
+    const target = event.currentTarget;
+    target.setPointerCapture(event.pointerId);
+    isPanningRef.current = true;
+    setIsPanning(true);
+    panRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: view.x,
+      originY: view.y,
+    };
+  };
+
+  const handlePointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!isPanningRef.current) return;
+    event.preventDefault();
+    const deltaX = event.clientX - panRef.current.startX;
+    const deltaY = event.clientY - panRef.current.startY;
+    setView((prev) => ({
+      ...prev,
+      x: panRef.current.originX + deltaX,
+      y: panRef.current.originY + deltaY,
+    }));
+  };
+
+  const handlePointerUp: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!isPanningRef.current) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    isPanningRef.current = false;
+    setIsPanning(false);
+  };
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
@@ -270,157 +396,178 @@ export const PLGraph = ({
         </div>
 
         {/* Graph area */}
-        <div className="absolute left-10 right-0 top-0 bottom-0">
-          {/* Extended grid background with fade */}
+        <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
-            className="absolute -inset-12 pointer-events-none"
-            style={{
-              maskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-              WebkitMaskImage:
-                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-            }}
+            ref={zoomRef}
+            className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
+            style={{ touchAction: "none" }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onDoubleClick={resetView}
           >
-            <svg className="absolute inset-0 w-full h-full">
-              {/* Vertical grid lines */}
-              {Array.from({ length: 12 }).map((_, i) => (
-                <line
-                  key={`v-${i}`}
-                  x1={`${(i + 1) * 7.7}%`}
-                  y1="0"
-                  x2={`${(i + 1) * 7.7}%`}
-                  y2="100%"
-                  stroke="rgba(20, 83, 45, 0.4)"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                />
-              ))}
-              {/* Horizontal grid lines */}
-              {Array.from({ length: 8 }).map((_, i) => (
-                <line
-                  key={`h-${i}`}
-                  x1="0"
-                  y1={`${(i + 1) * 11.1}%`}
-                  x2="100%"
-                  y2={`${(i + 1) * 11.1}%`}
-                  stroke="rgba(20, 83, 45, 0.4)"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                />
-              ))}
-            </svg>
+            <div
+              className="absolute inset-0"
+              style={{
+                transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+                transformOrigin: "0 0",
+                willChange: "transform",
+              }}
+            >
+              {/* Extended grid background with fade */}
+              <div
+                className="absolute -inset-12 pointer-events-none"
+                style={{
+                  maskImage:
+                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
+                }}
+              >
+                <svg className="absolute inset-0 w-full h-full">
+                  {/* Vertical grid lines */}
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <line
+                      key={`v-${i}`}
+                      x1={`${(i + 1) * 7.7}%`}
+                      y1="0"
+                      x2={`${(i + 1) * 7.7}%`}
+                      y2="100%"
+                      stroke="rgba(20, 83, 45, 0.4)"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                    />
+                  ))}
+                  {/* Horizontal grid lines */}
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <line
+                      key={`h-${i}`}
+                      x1="0"
+                      y1={`${(i + 1) * 11.1}%`}
+                      x2="100%"
+                      y2={`${(i + 1) * 11.1}%`}
+                      stroke="rgba(20, 83, 45, 0.4)"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                    />
+                  ))}
+                </svg>
+              </div>
+
+              {/* Baseline line - dashed white/green */}
+              <div
+                className="absolute left-0 right-0 border-t border-dashed border-green-700"
+                style={{ top: `${yRange.baselinePos}%` }}
+              />
+
+              {/* Chart area for points and lines */}
+              <svg className="absolute inset-0 w-full h-full overflow-visible">
+                <defs>
+                  {/* Glow filters for each color */}
+                  <filter
+                    id="glow-green"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-red"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-blue"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-yellow"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Lines connecting points */}
+                {graphPoints.map((point, index) => {
+                  if (index === 0) return null;
+                  const prevPoint = graphPoints[index - 1];
+                  const isNew = newPointIds.has(point.id);
+                  return (
+                    <motion.line
+                      key={`line-${point.id}`}
+                      x1={`${prevPoint.x}%`}
+                      y1={`${prevPoint.y}%`}
+                      x2={`${point.x}%`}
+                      y2={`${point.y}%`}
+                      stroke="#348F1B"
+                      strokeWidth="1.5"
+                      initial={isNew ? { pathLength: 0, opacity: 0 } : false}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    />
+                  );
+                })}
+
+                {/* Points as SVG circles */}
+                {graphPoints.map((point) => {
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
+                  const isNew = newPointIds.has(point.id);
+                  return (
+                    <motion.circle
+                      key={`point-${point.id}`}
+                      cx={`${point.x}%`}
+                      cy={`${point.y}%`}
+                      r="6"
+                      fill={point.color}
+                      stroke="rgba(255,255,255,0.8)"
+                      strokeWidth="1"
+                      filter={`url(#${filterName})`}
+                      initial={isNew ? { scale: 0, opacity: 0 } : false}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: "easeOut",
+                        delay: isNew ? 0.1 : 0,
+                      }}
+                    />
+                  );
+                })}
+              </svg>
+            </div>
           </div>
-
-          {/* Baseline line - dashed white/green */}
-          <div
-            className="absolute left-0 right-0 border-t border-dashed border-green-700"
-            style={{ top: `${yRange.baselinePos}%` }}
-          />
-
-          {/* Chart area for points and lines */}
-          <svg className="absolute inset-0 w-full h-full overflow-visible">
-            <defs>
-              {/* Glow filters for each color */}
-              <filter
-                id="glow-green"
-                x="-50%"
-                y="-50%"
-                width="200%"
-                height="200%"
-              >
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter
-                id="glow-red"
-                x="-50%"
-                y="-50%"
-                width="200%"
-                height="200%"
-              >
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter
-                id="glow-blue"
-                x="-50%"
-                y="-50%"
-                width="200%"
-                height="200%"
-              >
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter
-                id="glow-yellow"
-                x="-50%"
-                y="-50%"
-                width="200%"
-                height="200%"
-              >
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Lines connecting points */}
-            {graphPoints.map((point, index) => {
-              if (index === 0) return null;
-              const prevPoint = graphPoints[index - 1];
-              const isNew = newPointIds.has(point.id);
-              return (
-                <motion.line
-                  key={`line-${point.id}`}
-                  x1={`${prevPoint.x}%`}
-                  y1={`${prevPoint.y}%`}
-                  x2={`${point.x}%`}
-                  y2={`${point.y}%`}
-                  stroke="#348F1B"
-                  strokeWidth="1.5"
-                  initial={isNew ? { pathLength: 0, opacity: 0 } : false}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                />
-              );
-            })}
-
-            {/* Points as SVG circles */}
-            {graphPoints.map((point) => {
-              const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
-              const isNew = newPointIds.has(point.id);
-              return (
-                <motion.circle
-                  key={`point-${point.id}`}
-                  cx={`${point.x}%`}
-                  cy={`${point.y}%`}
-                  r="6"
-                  fill={point.color}
-                  stroke="rgba(255,255,255,0.8)"
-                  strokeWidth="1"
-                  filter={`url(#${filterName})`}
-                  initial={isNew ? { scale: 0, opacity: 0 } : false}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: "easeOut",
-                    delay: isNew ? 0.1 : 0,
-                  }}
-                />
-              );
-            })}
-          </svg>
         </div>
       </div>
     </div>
