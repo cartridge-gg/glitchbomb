@@ -61,6 +61,9 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
+  const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
+    null,
+  );
   const [currentOrb, setCurrentOrb] = useState<
     | {
         variant:
@@ -150,6 +153,9 @@ export const Game = () => {
     } else if (game?.shop && game.shop.length === 0) {
       // Shop cleared - reset exiting shop loading state
       setIsExitingShop(false);
+    }
+    if (!game?.shop || game.shop.length === 0) {
+      setShopBalanceOverride(null);
     }
   }, [game?.shop]);
 
@@ -363,6 +369,7 @@ export const Game = () => {
           bag={game.pullables}
           onConfirm={handleBuyAndExit}
           isLoading={isExitingShop}
+          onBalanceChange={setShopBalanceOverride}
         />
       );
     }
@@ -481,7 +488,7 @@ export const Game = () => {
     <div className="absolute inset-0 flex flex-col min-h-0">
       <GameHeader
         moonrocks={pack?.moonrocks ?? 100}
-        chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
+        chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">

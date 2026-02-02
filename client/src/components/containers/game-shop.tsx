@@ -20,6 +20,7 @@ export interface GameShopProps
   bag: Orb[];
   onConfirm: (indices: number[]) => void;
   isLoading?: boolean;
+  onBalanceChange?: (balance: number) => void;
 }
 
 const gameShopVariants = cva(
@@ -152,6 +153,7 @@ export const GameShop = ({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   // Show stash modal
   const [showStash, setShowStash] = useState(false);
+  const [stashPulse, setStashPulse] = useState(0);
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -215,6 +217,9 @@ export const GameShop = ({
   }, [orbs, history]);
 
   const virtualBalance = balance - totalSpent;
+  useEffect(() => {
+    onBalanceChange?.(virtualBalance);
+  }, [virtualBalance, onBalanceChange]);
 
   // Build basket indices array (with duplicates for quantity)
   const basketIndices = useMemo(() => {
@@ -237,6 +242,7 @@ export const GameShop = ({
         [index]: (prev[index] || 0) + 1,
       }));
       setHistory((prev) => [...prev, index]);
+      setStashPulse((prev) => prev + 1);
     }
   };
 
@@ -370,10 +376,17 @@ export const GameShop = ({
         <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
           Your Orbs
         </h2>
-        <OrbCategorySummary
-          orbs={displayBag}
-          onClick={() => setShowStash(true)}
-        />
+        <motion.div
+          key={stashPulse}
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.02, 1] }}
+          transition={{ duration: 0.25 }}
+        >
+          <OrbCategorySummary
+            orbs={displayBag}
+            onClick={() => setShowStash(true)}
+          />
+        </motion.div>
       </div>
 
       {/* Action buttons */}
