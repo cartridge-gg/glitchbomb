@@ -2,15 +2,14 @@ import { useState } from "react";
 import { OrbDisplay } from "@/components/elements";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Orb, OrbPulled } from "@/models";
+import type { Orb } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
-  pulls: OrbPulled[];
   onClose: () => void;
 }
 
-type TabType = "orbs" | "logs";
+type TabType = "orbs" | "list";
 
 // Grid icon for orbs tab
 const GridIcon = ({ className }: { className?: string }) => (
@@ -27,7 +26,7 @@ const GridIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// List icon for logs tab
+// List icon for list tab
 const ListIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -100,35 +99,32 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   );
 };
 
-const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
-  // Sort by id descending (most recent first)
-  const sortedPulls = [...pulls].sort((a, b) => b.id - a.id);
-
+const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
       {/* Subtitle */}
       <p className="text-green-600 font-secondary text-sm tracking-wide">
-        History of orbs you've pulled
+        List view of the orbs in your bag
       </p>
 
-      {/* Logs list */}
+      {/* Orbs list */}
       <div className="flex flex-col gap-2 py-2">
-        {sortedPulls.length > 0 ? (
-          sortedPulls.map((pull) => (
+        {orbs.length > 0 ? (
+          orbs.map((orb, index) => (
             <div
-              key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
+              key={`${orb.value}-${index}`}
               className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30"
             >
               {/* Orb icon */}
-              <OrbDisplay orb={pull.orb} size="sm" />
+              <OrbDisplay orb={orb} size="sm" />
 
               {/* Orb info */}
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-primary text-sm tracking-wide">
-                  {pull.orb.name()}
+                  {orb.name()}
                 </h3>
                 <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
-                  {pull.orb.description()}
+                  {orb.description()}
                 </p>
               </div>
             </div>
@@ -136,7 +132,7 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
-              No orbs pulled yet
+              No orbs in your bag yet
             </p>
           </div>
         )}
@@ -145,11 +141,11 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
   );
 };
 
-export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
+export const GameStash = ({ orbs, onClose }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 h-full min-h-0">
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0">
       <div className="flex-1 min-h-0 flex flex-col justify-center">
         <div
           className="flex flex-col gap-[clamp(8px,2svh,16px)] max-h-full overflow-y-auto"
@@ -172,8 +168,8 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
                 <GridIcon className="w-6 h-6" />
               </TabButton>
               <TabButton
-                active={activeTab === "logs"}
-                onClick={() => setActiveTab("logs")}
+                active={activeTab === "list"}
+                onClick={() => setActiveTab("list")}
               >
                 <ListIcon className="w-6 h-6" />
               </TabButton>
@@ -184,7 +180,7 @@ export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
           {activeTab === "orbs" ? (
             <OrbsTab orbs={orbs} />
           ) : (
-            <LogsTab pulls={pulls} />
+            <ListTab orbs={orbs} />
           )}
         </div>
       </div>

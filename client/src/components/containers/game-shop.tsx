@@ -8,6 +8,7 @@ import {
   RarityPill,
 } from "@/components/elements";
 import { ChipIcon, WarningIcon } from "@/components/icons";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
 import { GameStash } from "./game-stash";
@@ -150,7 +151,7 @@ export const GameShop = ({
   const [history, setHistory] = useState<number[]>([]);
   // Confirmation dialog for leaving without buying
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
-  // Show stash overlay
+  // Show stash modal
   const [showStash, setShowStash] = useState(false);
 
   // Create a stable key that changes when orbs or balance change
@@ -280,17 +281,6 @@ export const GameShop = ({
     onConfirm([]);
   };
 
-  // Show stash screen
-  if (showStash) {
-    return (
-      <GameStash
-        orbs={displayBag}
-        pulls={[]}
-        onClose={() => setShowStash(false)}
-      />
-    );
-  }
-
   // Show exit confirmation screen
   if (showExitConfirmation) {
     return (
@@ -410,6 +400,12 @@ export const GameShop = ({
           {isLoading ? <LoadingSpinner size="sm" /> : "CONTINUE"}
         </Button>
       </div>
+
+      <Dialog open={showStash} onOpenChange={setShowStash}>
+        <DialogContent className="w-[min(92vw,420px)] max-w-none border border-green-900/70 bg-[#0B130D] p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+          <GameStash orbs={displayBag} onClose={() => setShowStash(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
