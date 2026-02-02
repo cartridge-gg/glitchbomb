@@ -68,7 +68,7 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
       {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide text-left">
+      <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
         Orbs in your bag that can be pulled
       </p>
 
@@ -103,7 +103,7 @@ const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
       {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide text-left">
+      <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
         List view of the orbs in your bag
       </p>
 
@@ -145,18 +145,18 @@ export const GameStash = ({ orbs }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0">
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
               YOUR STASH
             </h1>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
+          <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full">
             <TabButton
               active={activeTab === "orbs"}
               onClick={() => setActiveTab("orbs")}
