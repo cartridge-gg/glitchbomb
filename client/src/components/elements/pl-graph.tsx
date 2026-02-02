@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
-  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -72,7 +71,6 @@ export const PLGraph = ({
   const zoomMin = 0.75;
   const zoomMax = 3.5;
   const gridPatternId = useId();
-  const glowFilterId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -266,31 +264,24 @@ export const PLGraph = ({
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
-  const clampViewBox = useCallback(
-    (next: typeof viewBox) => {
-      const minX = Math.min(0, baseViewWidth - next.width);
-      const maxX = Math.max(0, baseViewWidth - next.width);
-      const minY = Math.min(0, baseViewHeight - next.height);
-      const maxY = Math.max(0, baseViewHeight - next.height);
-      return {
-        ...next,
-        x: clamp(next.x, minX, maxX),
-        y: clamp(next.y, minY, maxY),
-      };
-    },
-    [baseViewHeight, baseViewWidth],
-  );
+  const clampViewBox = (next: typeof viewBox) => {
+    const minX = Math.min(0, baseViewWidth - next.width);
+    const maxX = Math.max(0, baseViewWidth - next.width);
+    const minY = Math.min(0, baseViewHeight - next.height);
+    const maxY = Math.max(0, baseViewHeight - next.height);
+    return {
+      ...next,
+      x: clamp(next.x, minX, maxX),
+      y: clamp(next.y, minY, maxY),
+    };
+  };
 
   const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
   const pointRadius = 6 * unitPerPx;
   const pointStrokeWidth = 1 * unitPerPx;
   const lineStrokeWidth = 1.5 * unitPerPx;
   const baselineStrokeWidth = 1 * unitPerPx;
-  const baseGridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
-  const gridZoom = baseViewHeight / Math.max(viewBox.height, 1);
-  const gridSpacing = Math.max(8, Math.min(80, baseGridSpacing * gridZoom));
-  const glowBlur = 4 * unitPerPx;
-  const glowExtent = 18 * unitPerPx;
+  const gridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -324,7 +315,7 @@ export const PLGraph = ({
       prevBaseViewWidthRef.current = baseViewWidth;
       return next;
     });
-  }, [baseViewWidth, clampViewBox]);
+  }, [baseViewWidth]);
 
   if (data.length === 0) {
     return null;
@@ -471,9 +462,9 @@ export const PLGraph = ({
             className="absolute inset-0 pointer-events-none"
             style={{
               maskImage:
-                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
+                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
               WebkitMaskImage:
-                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
+                "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
             }}
           >
             <svg
@@ -534,23 +525,7 @@ export const PLGraph = ({
               preserveAspectRatio="xMidYMid meet"
               shapeRendering="geometricPrecision"
             >
-              <defs>
-                <filter
-                  id={`point-glow-${glowFilterId}`}
-                  x={-glowExtent}
-                  y={-glowExtent}
-                  width={baseViewWidth + glowExtent * 2}
-                  height={baseViewHeight + glowExtent * 2}
-                  filterUnits="userSpaceOnUse"
-                  colorInterpolationFilters="sRGB"
-                >
-                  <feGaussianBlur stdDeviation={glowBlur} result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+              <defs></defs>
 
               {/* Baseline line - dashed white/green */}
               <line
@@ -596,7 +571,6 @@ export const PLGraph = ({
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
                     strokeWidth={pointStrokeWidth}
-                    filter={`url(#point-glow-${glowFilterId})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
