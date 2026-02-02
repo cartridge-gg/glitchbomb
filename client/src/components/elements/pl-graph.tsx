@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
+  useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -69,6 +71,8 @@ export const PLGraph = ({
   const interactionRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
   const zoomMax = 3.5;
+  const gridPatternId = useId();
+  const glowFilterId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -262,24 +266,31 @@ export const PLGraph = ({
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
-  const clampViewBox = (next: typeof viewBox) => {
-    const minX = Math.min(0, baseViewWidth - next.width);
-    const maxX = Math.max(0, baseViewWidth - next.width);
-    const minY = Math.min(0, baseViewHeight - next.height);
-    const maxY = Math.max(0, baseViewHeight - next.height);
-    return {
-      ...next,
-      x: clamp(next.x, minX, maxX),
-      y: clamp(next.y, minY, maxY),
-    };
-  };
+  const clampViewBox = useCallback(
+    (next: typeof viewBox) => {
+      const minX = Math.min(0, baseViewWidth - next.width);
+      const maxX = Math.max(0, baseViewWidth - next.width);
+      const minY = Math.min(0, baseViewHeight - next.height);
+      const maxY = Math.max(0, baseViewHeight - next.height);
+      return {
+        ...next,
+        x: clamp(next.x, minX, maxX),
+        y: clamp(next.y, minY, maxY),
+      };
+    },
+    [baseViewHeight, baseViewWidth],
+  );
 
   const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
   const pointRadius = 6 * unitPerPx;
   const pointStrokeWidth = 1 * unitPerPx;
   const lineStrokeWidth = 1.5 * unitPerPx;
-  const gridStrokeWidth = 1 * unitPerPx;
   const baselineStrokeWidth = 1 * unitPerPx;
+  const baseGridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
+  const gridZoom = baseViewHeight / Math.max(viewBox.height, 1);
+  const gridSpacing = Math.max(8, Math.min(80, baseGridSpacing * gridZoom));
+  const glowBlur = 4 * unitPerPx;
+  const glowExtent = 18 * unitPerPx;
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -313,7 +324,7 @@ export const PLGraph = ({
       prevBaseViewWidthRef.current = baseViewWidth;
       return next;
     });
-  }, [baseViewWidth]);
+  }, [baseViewWidth, clampViewBox]);
 
   if (data.length === 0) {
     return null;
@@ -457,6 +468,55 @@ export const PLGraph = ({
         {/* Graph area */}
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              maskImage:
+                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
+            }}
+          >
+            <svg
+              className="absolute inset-0 h-full w-full"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <defs>
+                <pattern
+                  id={`pl-grid-${gridPatternId}`}
+                  width={gridSpacing}
+                  height={gridSpacing}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <line
+                    x1={gridSpacing}
+                    y1={0}
+                    x2={gridSpacing}
+                    y2={gridSpacing}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                  <line
+                    x1={0}
+                    y1={gridSpacing}
+                    x2={gridSpacing}
+                    y2={gridSpacing}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                </pattern>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill={`url(#pl-grid-${gridPatternId})`}
+              />
+            </svg>
+          </div>
+          <div
             ref={interactionRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
@@ -475,109 +535,22 @@ export const PLGraph = ({
               shapeRendering="geometricPrecision"
             >
               <defs>
-                <radialGradient id="grid-fade" cx="50%" cy="50%" r="70%">
-                  <stop offset="30%" stopColor="white" stopOpacity="1" />
-                  <stop offset="65%" stopColor="white" stopOpacity="0" />
-                </radialGradient>
-                <mask
-                  id="grid-mask"
-                  maskUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
-                  width={baseViewWidth}
-                  height={baseViewHeight}
-                >
-                  <rect
-                    x="0"
-                    y="0"
-                    width={baseViewWidth}
-                    height={baseViewHeight}
-                    fill="url(#grid-fade)"
-                  />
-                </mask>
-
-                {/* Glow filters for each color */}
                 <filter
-                  id="glow-green"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
+                  id={`point-glow-${glowFilterId}`}
+                  x={-glowExtent}
+                  y={-glowExtent}
+                  width={baseViewWidth + glowExtent * 2}
+                  height={baseViewHeight + glowExtent * 2}
+                  filterUnits="userSpaceOnUse"
+                  colorInterpolationFilters="sRGB"
                 >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-red"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-blue"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter
-                  id="glow-yellow"
-                  x="-50%"
-                  y="-50%"
-                  width="200%"
-                  height="200%"
-                >
-                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feGaussianBlur stdDeviation={glowBlur} result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
-
-              {/* Extended grid background with fade */}
-              <g mask="url(#grid-mask)">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <line
-                    key={`v-${i}`}
-                    x1={(i + 1) * 0.077 * baseViewWidth}
-                    y1={0}
-                    x2={(i + 1) * 0.077 * baseViewWidth}
-                    y2={baseViewHeight}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth={gridStrokeWidth}
-                    strokeDasharray="4 4"
-                  />
-                ))}
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <line
-                    key={`h-${i}`}
-                    x1={0}
-                    y1={(i + 1) * 0.111 * baseViewHeight}
-                    x2={baseViewWidth}
-                    y2={(i + 1) * 0.111 * baseViewHeight}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth={gridStrokeWidth}
-                    strokeDasharray="4 4"
-                  />
-                ))}
-              </g>
 
               {/* Baseline line - dashed white/green */}
               <line
@@ -613,15 +586,6 @@ export const PLGraph = ({
 
               {/* Points as SVG circles */}
               {graphPoints.map((point) => {
-                const filterName = `glow-${
-                  point.color === "#36F818"
-                    ? "green"
-                    : point.color === "#FF1E00"
-                      ? "red"
-                      : point.color === "#7487FF"
-                        ? "blue"
-                        : "yellow"
-                }`;
                 const isNew = newPointIds.has(point.id);
                 return (
                   <motion.circle
@@ -632,7 +596,7 @@ export const PLGraph = ({
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
                     strokeWidth={pointStrokeWidth}
-                    filter={`url(#${filterName})`}
+                    filter={`url(#point-glow-${glowFilterId})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
