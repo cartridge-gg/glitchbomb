@@ -626,7 +626,7 @@ export const PLGraph = ({
             <svg
               className="absolute inset-0 h-full w-full"
               viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
               shapeRendering="geometricPrecision"
             >
               <defs>
