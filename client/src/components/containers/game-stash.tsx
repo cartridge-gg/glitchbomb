@@ -68,22 +68,24 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
       {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide">
+      <p className="text-green-600 font-secondary text-sm tracking-wide text-left">
         Orbs in your bag that can be pulled
       </p>
 
       {/* Orbs grid */}
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
-          <div className="grid grid-cols-3 gap-6 py-4 justify-items-start w-full">
-            {orbs.map((orb, index) => (
-              <div key={index} className="flex flex-col items-start gap-4">
-                <OrbDisplay orb={orb} size="lg" />
-                <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide text-left">
-                  {orb.name()}
-                </p>
-              </div>
-            ))}
+          <div className="flex justify-center w-full">
+            <div className="grid grid-cols-3 gap-6 py-4 place-items-center">
+              {orbs.map((orb, index) => (
+                <div key={index} className="flex flex-col items-center gap-4">
+                  <OrbDisplay orb={orb} size="lg" />
+                  <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide text-center">
+                    {orb.name()}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -101,17 +103,17 @@ const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
       {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide">
+      <p className="text-green-600 font-secondary text-sm tracking-wide text-left">
         List view of the orbs in your bag
       </p>
 
       {/* Orbs list */}
-      <div className="flex flex-col gap-2 py-4">
+      <div className="flex flex-col gap-2 py-4 w-full">
         {orbs.length > 0 ? (
           orbs.map((orb, index) => (
             <div
               key={`${orb.value}-${index}`}
-              className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30"
+              className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full"
             >
               {/* Orb icon */}
               <OrbDisplay orb={orb} size="sm" />
