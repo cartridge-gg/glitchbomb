@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type WheelEventHandler,
 } from "react";
 
 export interface PLDataPoint {
@@ -237,36 +237,51 @@ export const PLGraph = ({
     });
   }, [graphPoints]);
 
-  if (data.length === 0) {
-    return null;
-  }
-
   const resetView = () => {
     setView({ scale: 1, x: 0, y: 0 });
   };
 
-  const handleWheel: WheelEventHandler<HTMLDivElement> = (event) => {
-    event.preventDefault();
+  const handleWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      event.preventDefault();
+      const target = zoomRef.current;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left;
+      const pointerY = event.clientY - rect.top;
+      const zoomFactor =
+        event.ctrlKey || event.metaKey
+          ? Math.exp(-event.deltaY * 0.002)
+          : event.deltaY < 0
+            ? 1.12
+            : 0.9;
+
+      setView((prev) => {
+        const nextScale = Math.min(
+          zoomMax,
+          Math.max(zoomMin, prev.scale * zoomFactor),
+        );
+        if (nextScale === prev.scale) return prev;
+        const scaleRatio = nextScale / prev.scale;
+        const nextX = pointerX - (pointerX - prev.x) * scaleRatio;
+        const nextY = pointerY - (pointerY - prev.y) * scaleRatio;
+        return { scale: nextScale, x: nextX, y: nextY };
+      });
+    },
+    [zoomMax, zoomMin],
+  );
+
+  useEffect(() => {
     const target = zoomRef.current;
     if (!target) return;
-    const rect = target.getBoundingClientRect();
-    const pointerX = event.clientX - rect.left;
-    const pointerY = event.clientY - rect.top;
-    const direction = event.deltaY < 0 ? 1 : -1;
-    const zoomFactor = direction > 0 ? 1.12 : 0.9;
+    const listener = (event: WheelEvent) => handleWheelEvent(event);
+    target.addEventListener("wheel", listener, { passive: false });
+    return () => target.removeEventListener("wheel", listener);
+  }, [handleWheelEvent]);
 
-    setView((prev) => {
-      const nextScale = Math.min(
-        zoomMax,
-        Math.max(zoomMin, prev.scale * zoomFactor),
-      );
-      if (nextScale === prev.scale) return prev;
-      const scaleRatio = nextScale / prev.scale;
-      const nextX = pointerX - (pointerX - prev.x) * scaleRatio;
-      const nextY = pointerY - (pointerY - prev.y) * scaleRatio;
-      return { scale: nextScale, x: nextX, y: nextY };
-    });
-  };
+  if (data.length === 0) {
+    return null;
+  }
 
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
     if (event.button !== 0) return;
@@ -352,7 +367,6 @@ export const PLGraph = ({
             ref={zoomRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
-            onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
