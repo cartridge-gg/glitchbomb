@@ -198,7 +198,7 @@ export const Puller = memo(function Puller({
           <br />
           ORB
         </p>
-        <div
+        {/* <div
           className="flex items-center justify-center"
           style={{
             color: currentColor.cssVar,
@@ -232,7 +232,7 @@ export const Puller = memo(function Puller({
             <BombIcon size="md" />
             <p className="text-xs font-secondary uppercase whitespace-nowrap">{`x ${bombs}`}</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </motion.button>
   );
