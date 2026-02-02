@@ -60,6 +60,7 @@ export const PLGraph = ({
   });
   const viewBoxRef = useRef(viewBox);
   const rafRef = useRef<number | null>(null);
+  const hasInteractedRef = useRef(false);
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const panRef = useRef({
@@ -212,7 +213,7 @@ export const PLGraph = ({
 
     const width = baseViewWidth;
     const height = baseViewHeight;
-    const paddingX = width * 0.12;
+    const paddingX = width * 0.04;
     const paddingY = height * 0.08;
 
     const { min, max } = yRange;
@@ -400,6 +401,16 @@ export const PLGraph = ({
     commitViewBox(next);
   }, [baseViewWidth, clampViewBox, commitViewBox]);
 
+  useEffect(() => {
+    if (hasInteractedRef.current) return;
+    commitViewBox({
+      x: 0,
+      y: 0,
+      width: baseViewWidth,
+      height: baseViewHeight,
+    });
+  }, [baseViewHeight, baseViewWidth, commitViewBox, data.length]);
+
   useLayoutEffect(() => {
     viewBoxRef.current = viewBox;
   }, [viewBox]);
@@ -421,6 +432,7 @@ export const PLGraph = ({
 
       // Prevent page scroll/zoom while interacting with the graph.
       event.preventDefault();
+      hasInteractedRef.current = true;
 
       if (event.ctrlKey || event.metaKey) {
         const zoomFactor = Math.exp(-event.deltaY * 0.002);
@@ -451,6 +463,7 @@ export const PLGraph = ({
   }
 
   const resetView = () => {
+    hasInteractedRef.current = false;
     commitViewBox({
       x: 0,
       y: 0,
@@ -464,6 +477,7 @@ export const PLGraph = ({
     const target = event.currentTarget;
     target.setPointerCapture(event.pointerId);
     isPanningRef.current = true;
+    hasInteractedRef.current = true;
     setIsPanning(true);
     panRef.current = {
       startX: event.clientX,
