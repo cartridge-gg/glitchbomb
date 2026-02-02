@@ -198,6 +198,26 @@ export const PLChartTabs = ({
   baseline,
 }: PLChartTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("chart");
+  const baselineValue = baseline ?? (mode === "absolute" ? 100 : 0);
+  const stats = (() => {
+    if (mode === "absolute") {
+      let wins = 0;
+      let losses = 0;
+      for (let i = 1; i < data.length; i++) {
+        const delta = data[i].value - data[i - 1].value;
+        if (delta > 0) wins++;
+        else if (delta < 0) losses++;
+      }
+      const currentValue =
+        data.length > 0 ? data[data.length - 1].value : baselineValue;
+      const netPL = currentValue - baselineValue;
+      return { wins, losses, netPL };
+    }
+    const wins = data.filter((d) => d.value > 0).length;
+    const losses = data.filter((d) => d.value < 0).length;
+    const netPL = data.reduce((sum, d) => sum + d.value, 0);
+    return { wins, losses, netPL };
+  })();
 
   return (
     <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
@@ -223,12 +243,36 @@ export const PLChartTabs = ({
         </TabButton>
       </div>
 
+      {/* Header: stats and net value */}
+      <div className="flex items-center justify-between">
+        <div className="font-secondary text-green-700 text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest uppercase">
+          {title}:{" "}
+          <span className="font-secondary text-green-700">
+            {stats.wins}/{stats.losses}
+          </span>
+        </div>
+        <div
+          className={`font-secondary text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest ${
+            stats.netPL >= 0 ? "text-green-700" : "text-red-400"
+          }`}
+        >
+          {stats.netPL >= 0 ? "+" : ""}
+          {stats.netPL}
+        </div>
+      </div>
+
       {/* Tab Content */}
       {activeTab === "chart" ? (
-        <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
+        <PLGraph
+          data={data}
+          mode={mode}
+          title={title}
+          baseline={baseline}
+          showHeader={false}
+        />
       ) : (
         <div
-          className="h-[clamp(84px,16svh,140px)] overflow-y-auto"
+          className="h-[clamp(80px,16svh,160px)] overflow-y-auto"
           style={{
             scrollbarWidth: "none",
             maskImage:
