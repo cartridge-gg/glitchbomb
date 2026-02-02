@@ -1,13 +1,11 @@
 import { motion } from "framer-motion";
 import {
   type PointerEventHandler,
-  useCallback,
   useEffect,
-  useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
+  type WheelEventHandler,
 } from "react";
 
 export interface PLDataPoint {
@@ -58,9 +56,6 @@ export const PLGraph = ({
     width: baseViewWidth,
     height: baseViewHeight,
   });
-  const viewBoxRef = useRef(viewBox);
-  const rafRef = useRef<number | null>(null);
-  const hasInteractedRef = useRef(false);
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const panRef = useRef({
@@ -74,8 +69,6 @@ export const PLGraph = ({
   const interactionRef = useRef<HTMLDivElement | null>(null);
   const zoomMin = 0.75;
   const zoomMax = 3.5;
-  const gridPatternId = useId();
-  const glowFilterId = useId();
 
   // Default baseline: 0 for delta mode, 100 for absolute mode
   const baseline = baselineProp ?? (mode === "absolute" ? 100 : 0);
@@ -213,7 +206,7 @@ export const PLGraph = ({
 
     const width = baseViewWidth;
     const height = baseViewHeight;
-    const paddingX = width * 0.04;
+    const paddingX = width * 0.12;
     const paddingY = height * 0.08;
 
     const { min, max } = yRange;
@@ -269,105 +262,24 @@ export const PLGraph = ({
   const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
-  const clampViewBox = useCallback(
-    (next: typeof viewBox) => {
-      const minX = Math.min(0, baseViewWidth - next.width);
-      const maxX = Math.max(0, baseViewWidth - next.width);
-      const minY = Math.min(0, baseViewHeight - next.height);
-      const maxY = Math.max(0, baseViewHeight - next.height);
-      return {
-        ...next,
-        x: clamp(next.x, minX, maxX),
-        y: clamp(next.y, minY, maxY),
-      };
-    },
-    [baseViewHeight, baseViewWidth],
-  );
+  const clampViewBox = (next: typeof viewBox) => {
+    const minX = Math.min(0, baseViewWidth - next.width);
+    const maxX = Math.max(0, baseViewWidth - next.width);
+    const minY = Math.min(0, baseViewHeight - next.height);
+    const maxY = Math.max(0, baseViewHeight - next.height);
+    return {
+      ...next,
+      x: clamp(next.x, minX, maxX),
+      y: clamp(next.y, minY, maxY),
+    };
+  };
 
-  const commitViewBox = useCallback((next: typeof viewBox) => {
-    viewBoxRef.current = next;
-    setViewBox(next);
-  }, []);
-
-  const scheduleViewBox = useCallback((next: typeof viewBox) => {
-    viewBoxRef.current = next;
-    if (rafRef.current !== null) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      setViewBox(viewBoxRef.current);
-    });
-  }, []);
-
-  const applyPanDelta = useCallback(
-    (deltaX: number, deltaY: number, rect: DOMRect) => {
-      const current = viewBoxRef.current;
-      const shiftX = (deltaX / rect.width) * current.width;
-      const shiftY = (deltaY / rect.height) * current.height;
-      scheduleViewBox(
-        clampViewBox({
-          x: current.x + shiftX,
-          y: current.y + shiftY,
-          width: current.width,
-          height: current.height,
-        }),
-      );
-    },
-    [clampViewBox, scheduleViewBox],
-  );
-
-  const applyZoomAt = useCallback(
-    (zoomFactor: number, pointerX: number, pointerY: number, rect: DOMRect) => {
-      const current = viewBoxRef.current;
-      const nextWidth = clamp(
-        current.width / zoomFactor,
-        minViewWidth,
-        maxViewWidth,
-      );
-      const nextHeight = clamp(
-        current.height / zoomFactor,
-        minViewHeight,
-        maxViewHeight,
-      );
-      if (nextWidth === current.width && nextHeight === current.height) return;
-
-      const pointerXRatio = pointerX / rect.width;
-      const pointerYRatio = pointerY / rect.height;
-      const pointerXInView = current.x + pointerXRatio * current.width;
-      const pointerYInView = current.y + pointerYRatio * current.height;
-      const nextX = pointerXInView - pointerXRatio * nextWidth;
-      const nextY = pointerYInView - pointerYRatio * nextHeight;
-
-      scheduleViewBox(
-        clampViewBox({
-          x: nextX,
-          y: nextY,
-          width: nextWidth,
-          height: nextHeight,
-        }),
-      );
-    },
-    [
-      clamp,
-      clampViewBox,
-      maxViewHeight,
-      maxViewWidth,
-      minViewHeight,
-      minViewWidth,
-      scheduleViewBox,
-    ],
-  );
-
-  const unitPerPx =
-    baseViewHeight / Math.max(containerSize.height, baseViewHeight);
-  const pointRadius = 4 * unitPerPx;
-  const pointStrokeWidth = 0.9 * unitPerPx;
-  const lineStrokeWidth = 1.25 * unitPerPx;
-  const baselineStrokeWidth = 0.9 * unitPerPx;
-  const baseGridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
-  const gridZoom = baseViewHeight / Math.max(viewBox.height, 1);
-  const gridSpacing = Math.max(8, Math.min(80, baseGridSpacing * gridZoom));
-  const glowBlur = pointRadius * 0.9;
-  const glowExtent = pointRadius * 6;
+  const unitPerPx = baseViewHeight / Math.max(containerSize.height, 1);
+  const pointRadius = 6 * unitPerPx;
+  const pointStrokeWidth = 1 * unitPerPx;
+  const lineStrokeWidth = 1.5 * unitPerPx;
+  const gridStrokeWidth = 1 * unitPerPx;
+  const baselineStrokeWidth = 1 * unitPerPx;
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -390,85 +302,68 @@ export const PLGraph = ({
   }, [baseViewHeight]);
 
   useEffect(() => {
-    const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
-    const next = clampViewBox({
-      x: viewBoxRef.current.x * scaleX,
-      y: viewBoxRef.current.y,
-      width: viewBoxRef.current.width * scaleX,
-      height: viewBoxRef.current.height,
+    setViewBox((prev) => {
+      const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
+      const next = clampViewBox({
+        x: prev.x * scaleX,
+        y: prev.y,
+        width: prev.width * scaleX,
+        height: prev.height,
+      });
+      prevBaseViewWidthRef.current = baseViewWidth;
+      return next;
     });
-    prevBaseViewWidthRef.current = baseViewWidth;
-    commitViewBox(next);
-  }, [baseViewWidth, clampViewBox, commitViewBox]);
-
-  useEffect(() => {
-    if (hasInteractedRef.current) return;
-    commitViewBox({
-      x: 0,
-      y: 0,
-      width: baseViewWidth,
-      height: baseViewHeight,
-    });
-  }, [baseViewHeight, baseViewWidth, commitViewBox, data.length]);
-
-  useLayoutEffect(() => {
-    viewBoxRef.current = viewBox;
-  }, [viewBox]);
-
-  useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
-
-  const handleWheelEvent = useCallback(
-    (event: WheelEvent) => {
-      const target = interactionRef.current;
-      if (!target) return;
-      const rect = target.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-
-      // Prevent page scroll/zoom while interacting with the graph.
-      event.preventDefault();
-      hasInteractedRef.current = true;
-
-      if (event.ctrlKey || event.metaKey) {
-        const zoomFactor = Math.exp(-event.deltaY * 0.002);
-        applyZoomAt(
-          zoomFactor,
-          event.clientX - rect.left,
-          event.clientY - rect.top,
-          rect,
-        );
-        return;
-      }
-
-      applyPanDelta(event.deltaX, event.deltaY, rect);
-    },
-    [applyPanDelta, applyZoomAt],
-  );
-
-  useEffect(() => {
-    const target = interactionRef.current;
-    if (!target) return;
-    const listener = (event: WheelEvent) => handleWheelEvent(event);
-    target.addEventListener("wheel", listener, { passive: false });
-    return () => target.removeEventListener("wheel", listener);
-  }, [handleWheelEvent]);
+  }, [baseViewWidth]);
 
   if (data.length === 0) {
     return null;
   }
 
   const resetView = () => {
-    hasInteractedRef.current = false;
-    commitViewBox({
+    setViewBox({
       x: 0,
       y: 0,
       width: baseViewWidth,
       height: baseViewHeight,
+    });
+  };
+
+  const handleWheel: WheelEventHandler<HTMLDivElement> = (event) => {
+    event.preventDefault();
+    const target = interactionRef.current;
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const pointerX = event.clientX - rect.left;
+    const pointerY = event.clientY - rect.top;
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const zoomFactor = direction > 0 ? 1.12 : 0.9;
+
+    setViewBox((prev) => {
+      const nextWidth = clamp(
+        prev.width / zoomFactor,
+        minViewWidth,
+        maxViewWidth,
+      );
+      const nextHeight = clamp(
+        prev.height / zoomFactor,
+        minViewHeight,
+        maxViewHeight,
+      );
+      if (nextWidth === prev.width && nextHeight === prev.height) return prev;
+
+      const pointerXRatio = pointerX / rect.width;
+      const pointerYRatio = pointerY / rect.height;
+      const pointerXInView = prev.x + pointerXRatio * prev.width;
+      const pointerYInView = prev.y + pointerYRatio * prev.height;
+      const nextX = pointerXInView - pointerXRatio * nextWidth;
+      const nextY = pointerYInView - pointerYRatio * nextHeight;
+
+      return clampViewBox({
+        x: nextX,
+        y: nextY,
+        width: nextWidth,
+        height: nextHeight,
+      });
     });
   };
 
@@ -477,7 +372,6 @@ export const PLGraph = ({
     const target = event.currentTarget;
     target.setPointerCapture(event.pointerId);
     isPanningRef.current = true;
-    hasInteractedRef.current = true;
     setIsPanning(true);
     panRef.current = {
       startX: event.clientX,
@@ -499,12 +393,11 @@ export const PLGraph = ({
     const deltaY = event.clientY - panRef.current.startY;
     const shiftX = (deltaX / rect.width) * panRef.current.originWidth;
     const shiftY = (deltaY / rect.height) * panRef.current.originHeight;
-    scheduleViewBox(
+    setViewBox((prev) =>
       clampViewBox({
+        ...prev,
         x: panRef.current.originX - shiftX,
         y: panRef.current.originY - shiftY,
-        width: panRef.current.originWidth,
-        height: panRef.current.originHeight,
       }),
     );
   };
@@ -564,58 +457,10 @@ export const PLGraph = ({
         {/* Graph area */}
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              maskImage:
-                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
-              WebkitMaskImage:
-                "radial-gradient(ellipse 120% 140% at 50% 50%, black 20%, transparent 85%)",
-            }}
-          >
-            <svg
-              className="absolute inset-0 h-full w-full"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <defs>
-                <pattern
-                  id={`pl-grid-${gridPatternId}`}
-                  width={gridSpacing}
-                  height={gridSpacing}
-                  patternUnits="userSpaceOnUse"
-                >
-                  <line
-                    x1={gridSpacing}
-                    y1={0}
-                    x2={gridSpacing}
-                    y2={gridSpacing}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                  <line
-                    x1={0}
-                    y1={gridSpacing}
-                    x2={gridSpacing}
-                    y2={gridSpacing}
-                    stroke="rgba(20, 83, 45, 0.4)"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                </pattern>
-              </defs>
-              <rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                fill={`url(#pl-grid-${gridPatternId})`}
-              />
-            </svg>
-          </div>
-          <div
             ref={interactionRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
+            onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -630,16 +475,75 @@ export const PLGraph = ({
               shapeRendering="geometricPrecision"
             >
               <defs>
-                <filter
-                  id={`point-glow-${glowFilterId}`}
-                  x={-glowExtent}
-                  y={-glowExtent}
-                  width={baseViewWidth + glowExtent * 2}
-                  height={baseViewHeight + glowExtent * 2}
-                  filterUnits="userSpaceOnUse"
-                  colorInterpolationFilters="sRGB"
+                <radialGradient id="grid-fade" cx="50%" cy="50%" r="70%">
+                  <stop offset="30%" stopColor="white" stopOpacity="1" />
+                  <stop offset="65%" stopColor="white" stopOpacity="0" />
+                </radialGradient>
+                <mask
+                  id="grid-mask"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width={baseViewWidth}
+                  height={baseViewHeight}
                 >
-                  <feGaussianBlur stdDeviation={glowBlur} result="blur" />
+                  <rect
+                    x="0"
+                    y="0"
+                    width={baseViewWidth}
+                    height={baseViewHeight}
+                    fill="url(#grid-fade)"
+                  />
+                </mask>
+
+                {/* Glow filters for each color */}
+                <filter
+                  id="glow-green"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter
+                  id="glow-red"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter
+                  id="glow-blue"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter
+                  id="glow-yellow"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur stdDeviation="3" result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
@@ -647,11 +551,39 @@ export const PLGraph = ({
                 </filter>
               </defs>
 
+              {/* Extended grid background with fade */}
+              <g mask="url(#grid-mask)">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <line
+                    key={`v-${i}`}
+                    x1={(i + 1) * 0.077 * baseViewWidth}
+                    y1={0}
+                    x2={(i + 1) * 0.077 * baseViewWidth}
+                    y2={baseViewHeight}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth={gridStrokeWidth}
+                    strokeDasharray="4 4"
+                  />
+                ))}
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <line
+                    key={`h-${i}`}
+                    x1={0}
+                    y1={(i + 1) * 0.111 * baseViewHeight}
+                    x2={baseViewWidth}
+                    y2={(i + 1) * 0.111 * baseViewHeight}
+                    stroke="rgba(20, 83, 45, 0.4)"
+                    strokeWidth={gridStrokeWidth}
+                    strokeDasharray="4 4"
+                  />
+                ))}
+              </g>
+
               {/* Baseline line - dashed white/green */}
               <line
-                x1={viewBox.x}
+                x1={0}
                 y1={(yRange.baselinePos / 100) * baseViewHeight}
-                x2={viewBox.x + viewBox.width}
+                x2={baseViewWidth}
                 y2={(yRange.baselinePos / 100) * baseViewHeight}
                 stroke="#15803d"
                 strokeWidth={baselineStrokeWidth}
@@ -681,6 +613,15 @@ export const PLGraph = ({
 
               {/* Points as SVG circles */}
               {graphPoints.map((point) => {
+                const filterName = `glow-${
+                  point.color === "#36F818"
+                    ? "green"
+                    : point.color === "#FF1E00"
+                      ? "red"
+                      : point.color === "#7487FF"
+                        ? "blue"
+                        : "yellow"
+                }`;
                 const isNew = newPointIds.has(point.id);
                 return (
                   <motion.circle
@@ -691,7 +632,7 @@ export const PLGraph = ({
                     fill={point.color}
                     stroke="rgba(255,255,255,0.8)"
                     strokeWidth={pointStrokeWidth}
-                    filter={`url(#point-glow-${glowFilterId})`}
+                    filter={`url(#${filterName})`}
                     initial={isNew ? { scale: 0, opacity: 0 } : false}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
