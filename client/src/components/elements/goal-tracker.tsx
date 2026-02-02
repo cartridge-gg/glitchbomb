@@ -34,7 +34,8 @@ export const GoalTracker = ({
   className,
   ...props
 }: GoalTrackerProps) => {
-  const percentage = (value / total) * 100;
+  const percentage = total > 0 ? (value / total) * 100 : 0;
+  const displayPercentage = percentage === 0 ? 3 : Math.min(percentage, 100);
 
   return (
     <div
@@ -44,7 +45,7 @@ export const GoalTracker = ({
       <motion.div
         className="absolute inset-0 bg-green-900 h-full"
         initial={{ width: "0%" }}
-        animate={{ width: `${percentage}%` }}
+        animate={{ width: `${displayPercentage}%` }}
         transition={{
           duration: 0.5,
           ease: "easeInOut",
