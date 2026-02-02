@@ -29,7 +29,7 @@ const gameShopVariants = cva(
     variants: {
       variant: {
         default:
-          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(6px,1.1svh,12px)]",
+          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(10px,2.4svh,18px)]",
       },
     },
     defaultVariants: {
