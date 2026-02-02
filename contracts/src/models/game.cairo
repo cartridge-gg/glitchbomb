@@ -217,6 +217,8 @@ pub impl GameImpl of GameTrait {
         self.assert_not_over();
         self.assert_not_shop();
         self.assert_is_completed();
+        // [Effect] Reset discards so all orbs are available on entering the shop
+        self.discards = 0;
         // [Effect] Generate and set the shop (orbs in bits 0-29, flags/counts reset)
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
@@ -266,8 +268,6 @@ pub impl GameImpl of GameTrait {
         self.shop = 0;
         // [Effect] Reset multiplier
         self.multiplier = BASE_MULTIPLIER;
-        // [Effect] Reset discards so all orbs are available for the new level
-        self.discards = 0;
         // [Effect] Apply a level-based curse for the new level
         match self.level {
             4 => {
@@ -835,6 +835,16 @@ mod tests {
         // [Check] Flags are reset in new shop
         assert_eq!(GameTrait::is_refresh_used(game.shop), false);
         assert_eq!(GameTrait::is_burn_used(game.shop), false);
+    }
+
+    #[test]
+    fn test_game_discards_reset_on_enter_shop() {
+        let mut game = GameTrait::new(PACK_ID, GAME_ID);
+        game.start();
+        game.discards = 0b1011;
+        game.earn_points(12); // Reach milestone to enter shop
+        game.enter(SEED);
+        assert_eq!(game.discards, 0);
     }
 
     #[test]
