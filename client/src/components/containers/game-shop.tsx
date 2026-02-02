@@ -261,7 +261,7 @@ export const GameShop = ({
 
   // Combine existing bag with pending purchases for display
   const displayBag = useMemo(() => {
-    const existingOrbs = bag.filter((orb) => !orb.isBomb() && !orb.isNone());
+    const existingOrbs = bag.filter((orb) => !orb.isNone());
     const pendingOrbs = basketIndices.map((index) => orbs[index]);
     return [...existingOrbs, ...pendingOrbs];
   }, [bag, basketIndices, orbs]);
