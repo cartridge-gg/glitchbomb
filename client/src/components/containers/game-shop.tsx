@@ -8,10 +8,9 @@ import {
   RarityPill,
 } from "@/components/elements";
 import { ChipIcon, WarningIcon } from "@/components/icons";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
-import { GameStash } from "./game-stash";
+import { StashModal } from "./stash-modal";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -401,11 +400,11 @@ export const GameShop = ({
         </Button>
       </div>
 
-      <Dialog open={showStash} onOpenChange={setShowStash}>
-        <DialogContent className="w-[min(92vw,420px)] max-w-none border border-[rgba(29,58,41,0.8)] bg-[#0B130D] p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
-          <GameStash orbs={displayBag} />
-        </DialogContent>
-      </Dialog>
+      <StashModal
+        open={showStash}
+        onOpenChange={setShowStash}
+        orbs={displayBag}
+      />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import {
   GameOver,
   GameScene,
   GameShop,
-  GameStash,
+  StashModal,
 } from "@/components/containers";
 import {
   CashOutChoice,
@@ -18,7 +18,6 @@ import {
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
 import { usePLDataPoints, usePulls } from "@/hooks";
@@ -488,17 +487,12 @@ export const Game = () => {
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
       </div>
-      <Dialog
+      <StashModal
         open={overlay === "stash"}
         onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
-      >
-        <DialogContent className="w-[min(92vw,420px)] max-w-none border border-[rgba(29,58,41,0.8)] bg-[#0B130D] p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
-          <GameStash
-            orbs={game?.bag ?? []}
-            discards={game?.discards ?? []}
-          />
-        </DialogContent>
-      </Dialog>
+        orbs={game?.bag ?? []}
+        discards={game?.discards ?? []}
+      />
     </div>
   );
 };
