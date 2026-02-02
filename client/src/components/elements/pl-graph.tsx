@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -58,6 +59,8 @@ export const PLGraph = ({
     width: baseViewWidth,
     height: baseViewHeight,
   });
+  const viewBoxRef = useRef(viewBox);
+  const rafRef = useRef<number | null>(null);
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
   const panRef = useRef({
@@ -281,17 +284,31 @@ export const PLGraph = ({
     [baseViewHeight, baseViewWidth],
   );
 
+  const commitViewBox = useCallback((next: typeof viewBox) => {
+    viewBoxRef.current = next;
+    setViewBox(next);
+  }, []);
+
+  const scheduleViewBox = useCallback((next: typeof viewBox) => {
+    viewBoxRef.current = next;
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      setViewBox(viewBoxRef.current);
+    });
+  }, []);
+
   const unitPerPx =
     baseViewHeight / Math.max(containerSize.height, baseViewHeight);
-  const pointRadius = 6 * unitPerPx;
-  const pointStrokeWidth = 1 * unitPerPx;
-  const lineStrokeWidth = 1.5 * unitPerPx;
-  const baselineStrokeWidth = 1 * unitPerPx;
+  const pointRadius = 4 * unitPerPx;
+  const pointStrokeWidth = 0.9 * unitPerPx;
+  const lineStrokeWidth = 1.25 * unitPerPx;
+  const baselineStrokeWidth = 0.9 * unitPerPx;
   const baseGridSpacing = Math.max(18, Math.min(32, containerSize.height / 6));
   const gridZoom = baseViewHeight / Math.max(viewBox.height, 1);
   const gridSpacing = Math.max(8, Math.min(80, baseGridSpacing * gridZoom));
-  const glowBlur = 4 * unitPerPx;
-  const glowExtent = 18 * unitPerPx;
+  const glowBlur = pointRadius * 0.9;
+  const glowExtent = pointRadius * 6;
 
   useEffect(() => {
     const target = interactionRef.current;
@@ -314,25 +331,35 @@ export const PLGraph = ({
   }, [baseViewHeight]);
 
   useEffect(() => {
-    setViewBox((prev) => {
-      const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
-      const next = clampViewBox({
-        x: prev.x * scaleX,
-        y: prev.y,
-        width: prev.width * scaleX,
-        height: prev.height,
-      });
-      prevBaseViewWidthRef.current = baseViewWidth;
-      return next;
+    const scaleX = baseViewWidth / prevBaseViewWidthRef.current;
+    const next = clampViewBox({
+      x: viewBoxRef.current.x * scaleX,
+      y: viewBoxRef.current.y,
+      width: viewBoxRef.current.width * scaleX,
+      height: viewBoxRef.current.height,
     });
-  }, [baseViewWidth, clampViewBox]);
+    prevBaseViewWidthRef.current = baseViewWidth;
+    commitViewBox(next);
+  }, [baseViewWidth, clampViewBox, commitViewBox]);
+
+  useLayoutEffect(() => {
+    viewBoxRef.current = viewBox;
+  }, [viewBox]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
 
   if (data.length === 0) {
     return null;
   }
 
   const resetView = () => {
-    setViewBox({
+    commitViewBox({
       x: 0,
       y: 0,
       width: baseViewWidth,
@@ -350,33 +377,34 @@ export const PLGraph = ({
     const direction = event.deltaY < 0 ? 1 : -1;
     const zoomFactor = direction > 0 ? 1.12 : 0.9;
 
-    setViewBox((prev) => {
-      const nextWidth = clamp(
-        prev.width / zoomFactor,
-        minViewWidth,
-        maxViewWidth,
-      );
-      const nextHeight = clamp(
-        prev.height / zoomFactor,
-        minViewHeight,
-        maxViewHeight,
-      );
-      if (nextWidth === prev.width && nextHeight === prev.height) return prev;
+    const current = viewBoxRef.current;
+    const nextWidth = clamp(
+      current.width / zoomFactor,
+      minViewWidth,
+      maxViewWidth,
+    );
+    const nextHeight = clamp(
+      current.height / zoomFactor,
+      minViewHeight,
+      maxViewHeight,
+    );
+    if (nextWidth === current.width && nextHeight === current.height) return;
 
-      const pointerXRatio = pointerX / rect.width;
-      const pointerYRatio = pointerY / rect.height;
-      const pointerXInView = prev.x + pointerXRatio * prev.width;
-      const pointerYInView = prev.y + pointerYRatio * prev.height;
-      const nextX = pointerXInView - pointerXRatio * nextWidth;
-      const nextY = pointerYInView - pointerYRatio * nextHeight;
+    const pointerXRatio = pointerX / rect.width;
+    const pointerYRatio = pointerY / rect.height;
+    const pointerXInView = current.x + pointerXRatio * current.width;
+    const pointerYInView = current.y + pointerYRatio * current.height;
+    const nextX = pointerXInView - pointerXRatio * nextWidth;
+    const nextY = pointerYInView - pointerYRatio * nextHeight;
 
-      return clampViewBox({
+    scheduleViewBox(
+      clampViewBox({
         x: nextX,
         y: nextY,
         width: nextWidth,
         height: nextHeight,
-      });
-    });
+      }),
+    );
   };
 
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
@@ -405,11 +433,12 @@ export const PLGraph = ({
     const deltaY = event.clientY - panRef.current.startY;
     const shiftX = (deltaX / rect.width) * panRef.current.originWidth;
     const shiftY = (deltaY / rect.height) * panRef.current.originHeight;
-    setViewBox((prev) =>
+    scheduleViewBox(
       clampViewBox({
-        ...prev,
         x: panRef.current.originX - shiftX,
         y: panRef.current.originY - shiftY,
+        width: panRef.current.originWidth,
+        height: panRef.current.originHeight,
       }),
     );
   };
