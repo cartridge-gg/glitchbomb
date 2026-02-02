@@ -194,9 +194,9 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
               {description}
             </p>
 
-            {/* Tabs */}
-            <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full">
-              <TabButton
+          {/* Tabs */}
+          <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full mt-2">
+            <TabButton
               active={activeTab === "orbs"}
               onClick={() => setActiveTab("orbs")}
             >
