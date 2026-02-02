@@ -202,7 +202,7 @@ export const PLChartTabs = ({
   return (
     <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
+      <div className="flex gap-1 p-1 bg-green-950 rounded-xl [@media(max-height:720px)]:hidden">
         <TabButton
           active={activeTab === "chart"}
           onClick={() => setActiveTab("chart")}
