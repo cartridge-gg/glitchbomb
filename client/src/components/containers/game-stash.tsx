@@ -5,6 +5,7 @@ import type { Orb } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
+  discards?: boolean[];
 }
 
 type TabType = "orbs" | "list";
@@ -64,7 +65,13 @@ const TabButton = ({
   </button>
 );
 
-const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
+const OrbsTab = ({
+  orbs,
+  discards,
+}: {
+  orbs: Orb[];
+  discards?: boolean[];
+}) => {
   return (
     <>
       {/* Orbs grid */}
@@ -72,14 +79,32 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
         {orbs.length > 0 ? (
           <div className="flex justify-center w-full">
             <div className="grid grid-cols-3 gap-6 py-4 place-items-center">
-              {orbs.map((orb, index) => (
-                <div key={index} className="flex flex-col items-center gap-4">
-                  <OrbDisplay orb={orb} size="lg" />
-                  <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide text-center">
+              {orbs.map((orb, index) => {
+                const isDiscarded = Boolean(discards?.[index]);
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex flex-col items-center gap-4",
+                      isDiscarded && "opacity-40 grayscale",
+                    )}
+                  >
+                    <OrbDisplay
+                      orb={orb}
+                      size="lg"
+                      className={isDiscarded ? "opacity-70" : undefined}
+                    />
+                    <p
+                      className={cn(
+                        "text-green-500 text-2xs font-secondary uppercase tracking-wide text-center",
+                        isDiscarded && "text-green-700/70",
+                      )}
+                    >
                     {orb.name()}
-                  </p>
-                </div>
-              ))}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -94,31 +119,47 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   );
 };
 
-const ListTab = ({ orbs }: { orbs: Orb[] }) => {
+const ListTab = ({
+  orbs,
+  discards,
+}: {
+  orbs: Orb[];
+  discards?: boolean[];
+}) => {
   return (
     <>
       {/* Orbs list */}
       <div className="flex flex-col gap-2 py-4 w-full">
         {orbs.length > 0 ? (
-          orbs.map((orb, index) => (
-            <div
-              key={`${orb.value}-${index}`}
-              className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full"
-            >
-              {/* Orb icon */}
-              <OrbDisplay orb={orb} size="sm" />
+          orbs.map((orb, index) => {
+            const isDiscarded = Boolean(discards?.[index]);
+            return (
+              <div
+                key={`${orb.value}-${index}`}
+                className={cn(
+                  "flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full",
+                  isDiscarded && "opacity-40 grayscale",
+                )}
+              >
+                {/* Orb icon */}
+                <OrbDisplay
+                  orb={orb}
+                  size="sm"
+                  className={isDiscarded ? "opacity-70" : undefined}
+                />
 
-              {/* Orb info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-primary text-sm tracking-wide">
-                  {orb.name()}
-                </h3>
-                <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
-                  {orb.description()}
-                </p>
+                {/* Orb info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-primary text-sm tracking-wide">
+                    {orb.name()}
+                  </h3>
+                  <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
+                    {orb.description()}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
@@ -131,7 +172,7 @@ const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   );
 };
 
-export const GameStash = ({ orbs }: GameStashProps) => {
+export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
   const description =
     activeTab === "orbs"
@@ -176,9 +217,9 @@ export const GameStash = ({ orbs }: GameStashProps) => {
         >
           {/* Tab Content */}
           {activeTab === "orbs" ? (
-            <OrbsTab orbs={orbs} />
+            <OrbsTab orbs={orbs} discards={discards} />
           ) : (
-            <ListTab orbs={orbs} />
+            <ListTab orbs={orbs} discards={discards} />
           )}
         </div>
       </div>

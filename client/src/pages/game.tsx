@@ -493,7 +493,10 @@ export const Game = () => {
         onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
       >
         <DialogContent className="w-[min(92vw,420px)] max-w-none border border-[rgba(29,58,41,0.8)] bg-[#0B130D] p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
-          <GameStash orbs={game?.pullables ?? []} />
+          <GameStash
+            orbs={game?.bag ?? []}
+            discards={game?.discards ?? []}
+          />
         </DialogContent>
       </Dialog>
     </div>
