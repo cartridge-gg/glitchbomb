@@ -11,6 +11,12 @@ import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
+import { isOfflineMode } from "@/offline/mode";
+import {
+  createPack,
+  selectTotalMoonrocks,
+  useOfflineStore,
+} from "@/offline/store";
 
 interface GameCardProps {
   gameId: number;
@@ -95,6 +101,8 @@ export const Games = () => {
   const { starterpack, config } = useEntitiesContext();
   const { start, mint } = useActions();
   const { packs } = usePacks();
+  const offlineState = useOfflineStore();
+  const offline = isOfflineMode();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
   const pendingNavigationRef = useRef<{
@@ -121,14 +129,20 @@ export const Games = () => {
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContracts, tokenBalances, tokenAddress]);
+  const offlineMoonrocks = useMemo(
+    () => selectTotalMoonrocks(offlineState),
+    [offlineState],
+  );
+  const displayMoonrocks = offline ? offlineMoonrocks : balance;
+  const displayUsername = offline ? "Offline" : username;
 
   // Fetch username
   useEffect(() => {
-    if (!connector) return;
+    if (!connector || offline) return;
     (connector as never as ControllerConnector).controller
       .username()
       ?.then((name) => setUsername(name));
-  }, [connector]);
+  }, [connector, offline]);
 
   // Build game keys from packs
   const gameKeys = useMemo(() => {
@@ -217,29 +231,34 @@ export const Games = () => {
   };
 
   const handleNewGame = useCallback(() => {
+    if (offline) {
+      createPack();
+      return;
+    }
     if (starterpack) {
       (connector as ControllerConnector)?.controller.openStarterPack(
         starterpack.id.toString(),
       );
     }
-  }, [connector, starterpack]);
+  }, [connector, starterpack, offline]);
 
   const onProfileClick = useCallback(() => {
+    if (offline) return;
     (connector as never as ControllerConnector)?.controller.openProfile(
       "inventory",
     );
-  }, [connector]);
+  }, [connector, offline]);
 
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Header */}
       <AppHeader
-        moonrocks={balance}
-        username={username}
+        moonrocks={displayMoonrocks}
+        username={displayUsername}
         showBack={true}
         backPath="/"
-        onMint={() => mint(tokenAddress)}
-        onProfileClick={onProfileClick}
+        onMint={offline ? undefined : () => mint(tokenAddress)}
+        onProfileClick={offline ? undefined : onProfileClick}
       />
 
       {/* Content */}
@@ -248,7 +267,7 @@ export const Games = () => {
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
             <p className="text-white font-secondary text-sm tracking-widest uppercase">
-              Play Now
+              {offline ? "Free Play" : "Play Now"}
             </p>
             <button
               type="button"
@@ -256,7 +275,7 @@ export const Games = () => {
               onClick={handleNewGame}
             >
               <MoonrockIcon size="sm" />
-              Purchase
+              {offline ? "New Pack" : "Purchase"}
             </button>
           </div>
 

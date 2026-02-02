@@ -22,6 +22,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { useEntitiesContext } from "@/contexts";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
+import { isOfflineMode } from "@/offline/mode";
 import { OrbType } from "@/models/orb";
 
 // Initial game values for optimistic rendering
@@ -58,6 +59,7 @@ export const Game = () => {
   const { connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { pack, game, setPackId, setGameId } = useEntitiesContext();
+  const offline = isOfflineMode();
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
@@ -119,11 +121,11 @@ export const Game = () => {
 
   // Fetch username from controller
   useEffect(() => {
-    if (!connector) return;
+    if (!connector || offline) return;
     (connector as never as ControllerConnector).controller
       .username()
       ?.then((name) => setUsername(name));
-  }, [connector]);
+  }, [connector, offline]);
 
   // Set pack/game IDs from URL params
   useEffect(() => {
@@ -496,7 +498,7 @@ export const Game = () => {
       <GameHeader
         moonrocks={pack?.moonrocks ?? 100}
         chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
-        username={username}
+        username={offline ? "Offline" : username}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}

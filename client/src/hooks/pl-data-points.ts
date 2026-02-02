@@ -4,9 +4,11 @@ import {
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
+import { isOfflineMode } from "@/offline/mode";
+import { selectPLDataPoints, useOfflineStore } from "@/offline/store";
 import { PLDataPoint, type RawPLDataPoint } from "@/models";
 
 const ENTITIES_LIMIT = 10_000;
@@ -43,6 +45,12 @@ export function usePLDataPoints({
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = isOfflineMode();
+  const offlinePoints = useMemo(
+    () => selectPLDataPoints(offlineState, packId, gameId),
+    [offlineState, packId, gameId],
+  );
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
@@ -164,7 +172,7 @@ export function usePLDataPoints({
   }, []);
 
   return {
-    dataPoints,
+    dataPoints: offline ? offlinePoints : dataPoints,
     isReady,
   };
 }

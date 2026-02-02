@@ -4,9 +4,11 @@ import {
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
+import { isOfflineMode } from "@/offline/mode";
+import { selectPulls, useOfflineStore } from "@/offline/store";
 import { OrbPulled, type RawOrbPulled } from "@/models";
 
 const ENTITIES_LIMIT = 10_000;
@@ -33,6 +35,12 @@ export function usePulls({
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = isOfflineMode();
+  const offlinePulls = useMemo(
+    () => selectPulls(offlineState, packId, gameId),
+    [offlineState, packId, gameId],
+  );
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
@@ -138,8 +146,8 @@ export function usePulls({
   }, []);
 
   return {
-    pulls,
+    pulls: offline ? offlinePulls : pulls,
     isReady,
-    initialFetchComplete,
+    initialFetchComplete: offline ? true : initialFetchComplete,
   };
 }

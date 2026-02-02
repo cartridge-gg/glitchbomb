@@ -16,6 +16,7 @@ import {
   getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
+import { isOfflineMode } from "@/offline/mode";
 import Router from "@/routes";
 
 const provider = jsonRpcProvider({
@@ -91,10 +92,11 @@ const options: ControllerOptions = {
 const connectors = [new ControllerConnector(options) as never as Connector];
 
 function App() {
+  const offline = isOfflineMode();
   return (
     <>
       <StarknetConfig
-        autoConnect
+        autoConnect={!offline}
         chains={[chains[DEFAULT_CHAIN_ID]]}
         connectors={connectors}
         explorer={voyager}

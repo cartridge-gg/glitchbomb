@@ -2,14 +2,28 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback } from "react";
 import { CallData, uint256 } from "starknet";
 import { getGameAddress, getTokenAddress, getVrfAddress } from "@/config";
+import { isOfflineMode } from "@/offline/mode";
+import {
+  buy as offlineBuy,
+  buyAndExit as offlineBuyAndExit,
+  burn as offlineBurn,
+  cashOutAction as offlineCashOut,
+  enter as offlineEnter,
+  exit as offlineExit,
+  pull as offlinePull,
+  refresh as offlineRefresh,
+  start as offlineStart,
+} from "@/offline/store";
 
 export const useActions = () => {
   const { account } = useAccount();
   const { chain } = useNetwork();
+  const offline = isOfflineMode();
 
   const start = useCallback(
     async (packId: number) => {
       try {
+        if (offline) return offlineStart(packId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -28,12 +42,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const pull = useCallback(
     async (packId: number, gameId: number) => {
       try {
+        if (offline) return offlinePull(packId, gameId);
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
@@ -61,12 +76,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const cashOut = useCallback(
     async (packId: number, gameId: number) => {
       try {
+        if (offline) return offlineCashOut(packId, gameId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -85,12 +101,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const enter = useCallback(
     async (packId: number, gameId: number) => {
       try {
+        if (offline) return offlineEnter(packId, gameId);
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
@@ -118,12 +135,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const buy = useCallback(
     async (packId: number, gameId: number, indices: number[]) => {
       try {
+        if (offline) return offlineBuy(packId, gameId, indices);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -143,12 +161,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const exit = useCallback(
     async (packId: number, gameId: number) => {
       try {
+        if (offline) return offlineExit(packId, gameId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -167,12 +186,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const buyAndExit = useCallback(
     async (packId: number, gameId: number, indices: number[]) => {
       try {
+        if (offline) return offlineBuyAndExit(packId, gameId, indices);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         const calls = [];
@@ -207,12 +227,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const refresh = useCallback(
     async (packId: number, gameId: number) => {
       try {
+        if (offline) return offlineRefresh();
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
@@ -240,12 +261,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const burn = useCallback(
     async (packId: number, gameId: number, bagIndex: number) => {
       try {
+        if (offline) return offlineBurn();
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -265,12 +287,13 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   const mint = useCallback(
     async (tokenAddress?: string) => {
       try {
+        if (offline) return false;
         if (!account?.address) return false;
         const address = tokenAddress || getTokenAddress(chain.id);
         await account.execute([
@@ -289,7 +312,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id],
+    [account, chain.id, offline],
   );
 
   return {
