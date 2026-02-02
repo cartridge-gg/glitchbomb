@@ -20,7 +20,6 @@ export interface PLGraphProps {
   mode?: "delta" | "absolute"; // delta = value is change per point, absolute = value is total at each point
   title?: string; // Custom title (default: "P/L")
   baseline?: number; // The baseline value (default: 0 for delta, 100 for absolute)
-  showHeader?: boolean;
 }
 
 // Map variant to actual color
@@ -45,7 +44,6 @@ export const PLGraph = ({
   mode = "delta",
   title = "P/L",
   baseline: baselineProp,
-  showHeader = true,
 }: PLGraphProps) => {
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -356,26 +354,6 @@ export const PLGraph = ({
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      {/* Header: stats and net value */}
-      {showHeader && (
-        <div className="flex items-center justify-between">
-          <div className="font-secondary text-green-700 text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest uppercase">
-            {title}:{" "}
-            <span className="font-secondary text-green-700">
-              {stats.wins}/{stats.losses}
-            </span>
-          </div>
-          <div
-            className={`font-secondary text-[clamp(0.75rem,1.8svh,1.125rem)] tracking-widest ${
-              stats.netPL >= 0 ? "text-green-700" : "text-red-400"
-            }`}
-          >
-            {stats.netPL >= 0 ? "+" : ""}
-            {stats.netPL}
-          </div>
-        </div>
-      )}
-
       {/* Graph container */}
       <div className="relative w-full h-[clamp(80px,16svh,160px)]">
         {/* Y-axis labels as pills */}
@@ -397,6 +375,16 @@ export const PLGraph = ({
               {label.value}
             </span>
           ))}
+        </div>
+        <div className="absolute right-0 top-0 z-10">
+          <span
+            className={`font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full ${
+              stats.netPL >= 0 ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {stats.netPL >= 0 ? "+" : ""}
+            {stats.netPL}
+          </span>
         </div>
 
         {/* Graph area */}
