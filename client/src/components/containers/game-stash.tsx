@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { OrbDisplay } from "@/components/elements";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Orb, OrbPulled } from "@/models";
+import type { Orb } from "@/models";
 
 export interface GameStashProps {
   orbs: Orb[];
-  pulls: OrbPulled[];
-  onClose: () => void;
+  discards?: boolean[];
 }
 
-type TabType = "orbs" | "logs";
+type TabType = "orbs" | "list";
 
 // Grid icon for orbs tab
 const GridIcon = ({ className }: { className?: string }) => (
@@ -27,7 +25,7 @@ const GridIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// List icon for logs tab
+// List icon for list tab
 const ListIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -67,26 +65,41 @@ const TabButton = ({
   </button>
 );
 
-const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
+const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
-      {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide">
-        Orbs in your bag that can be pulled
-      </p>
-
       {/* Orbs grid */}
-      <div className="flex flex-col">
+      <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
-          <div className="grid grid-cols-3 gap-6 py-4 justify-items-center">
-            {orbs.map((orb, index) => (
-              <div key={index} className="flex flex-col items-center gap-4">
-                <OrbDisplay orb={orb} size="lg" />
-                <p className="text-green-500 text-2xs font-secondary uppercase tracking-wide">
-                  {orb.name()}
-                </p>
-              </div>
-            ))}
+          <div className="flex justify-center w-full">
+            <div className="grid grid-cols-3 gap-6 py-4 place-items-center">
+              {orbs.map((orb, index) => {
+                const isDiscarded = Boolean(discards?.[index]);
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex flex-col items-center gap-4",
+                      isDiscarded && "opacity-40 grayscale",
+                    )}
+                  >
+                    <OrbDisplay
+                      orb={orb}
+                      size="lg"
+                      className={isDiscarded ? "opacity-70" : undefined}
+                    />
+                    <p
+                      className={cn(
+                        "text-green-500 text-2xs font-secondary uppercase tracking-wide text-center",
+                        isDiscarded && "text-green-700/70",
+                      )}
+                    >
+                      {orb.name()}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -100,43 +113,45 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   );
 };
 
-const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
-  // Sort by id descending (most recent first)
-  const sortedPulls = [...pulls].sort((a, b) => b.id - a.id);
-
+const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
-      {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide">
-        History of orbs you've pulled
-      </p>
+      {/* Orbs list */}
+      <div className="flex flex-col gap-2 py-4 w-full">
+        {orbs.length > 0 ? (
+          orbs.map((orb, index) => {
+            const isDiscarded = Boolean(discards?.[index]);
+            return (
+              <div
+                key={`${orb.value}-${index}`}
+                className={cn(
+                  "flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full",
+                  isDiscarded && "opacity-40 grayscale",
+                )}
+              >
+                {/* Orb icon */}
+                <OrbDisplay
+                  orb={orb}
+                  size="sm"
+                  className={isDiscarded ? "opacity-70" : undefined}
+                />
 
-      {/* Logs list */}
-      <div className="flex flex-col gap-2 py-2">
-        {sortedPulls.length > 0 ? (
-          sortedPulls.map((pull) => (
-            <div
-              key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-              className="flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30"
-            >
-              {/* Orb icon */}
-              <OrbDisplay orb={pull.orb} size="sm" />
-
-              {/* Orb info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-primary text-sm tracking-wide">
-                  {pull.orb.name()}
-                </h3>
-                <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
-                  {pull.orb.description()}
-                </p>
+                {/* Orb info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-primary text-sm tracking-wide">
+                    {orb.name()}
+                  </h3>
+                  <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
+                    {orb.description()}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
-              No orbs pulled yet
+              No orbs in your bag yet
             </p>
           </div>
         )}
@@ -145,61 +160,56 @@ const LogsTab = ({ pulls }: { pulls: OrbPulled[] }) => {
   );
 };
 
-export const GameStash = ({ orbs, pulls, onClose }: GameStashProps) => {
+export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
+  const description =
+    activeTab === "orbs"
+      ? "Orbs in your bag that can be pulled"
+      : "List view of the orbs in your bag";
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] max-w-[420px] mx-auto px-4 h-full min-h-0">
-      <div className="flex-1 min-h-0 flex flex-col justify-center">
-        <div
-          className="flex flex-col gap-[clamp(8px,2svh,16px)] max-h-full overflow-y-auto"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
-                YOUR STASH
-              </h1>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
-              <TabButton
-                active={activeTab === "orbs"}
-                onClick={() => setActiveTab("orbs")}
-              >
-                <GridIcon className="w-6 h-6" />
-              </TabButton>
-              <TabButton
-                active={activeTab === "logs"}
-                onClick={() => setActiveTab("logs")}
-              >
-                <ListIcon className="w-6 h-6" />
-              </TabButton>
-            </div>
+    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] w-full max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex flex-col gap-0">
+          {/* Header */}
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
+              YOUR STASH
+            </h1>
           </div>
 
+          <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
+            {description}
+          </p>
+
+          {/* Tabs */}
+          <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full mt-2">
+            <TabButton
+              active={activeTab === "orbs"}
+              onClick={() => setActiveTab("orbs")}
+            >
+              <GridIcon className="w-6 h-6" />
+            </TabButton>
+            <TabButton
+              active={activeTab === "list"}
+              onClick={() => setActiveTab("list")}
+            >
+              <ListIcon className="w-6 h-6" />
+            </TabButton>
+          </div>
+        </div>
+
+        <div
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
           {/* Tab Content */}
           {activeTab === "orbs" ? (
-            <OrbsTab orbs={orbs} />
+            <OrbsTab orbs={orbs} discards={discards} />
           ) : (
-            <LogsTab pulls={pulls} />
+            <ListTab orbs={orbs} discards={discards} />
           )}
         </div>
-      </div>
-
-      {/* Action button */}
-      <div className="flex items-stretch gap-3 w-full pt-2 pb-[clamp(6px,1.1svh,12px)]">
-        <Button
-          variant="secondary"
-          gradient="green"
-          wrapperClassName="flex-1"
-          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest transition-all duration-200 hover:bg-green-950 hover:brightness-110"
-          onClick={onClose}
-        >
-          ← BACK
-        </Button>
       </div>
     </div>
   );

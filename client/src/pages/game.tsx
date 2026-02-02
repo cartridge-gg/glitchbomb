@@ -7,7 +7,7 @@ import {
   GameOver,
   GameScene,
   GameShop,
-  GameStash,
+  StashModal,
 } from "@/components/containers";
 import {
   CashOutChoice,
@@ -61,6 +61,9 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
+  const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
+    null,
+  );
   const [currentOrb, setCurrentOrb] = useState<
     | {
         variant:
@@ -150,6 +153,9 @@ export const Game = () => {
     } else if (game?.shop && game.shop.length === 0) {
       // Shop cleared - reset exiting shop loading state
       setIsExitingShop(false);
+    }
+    if (!game?.shop || game.shop.length === 0) {
+      setShopBalanceOverride(null);
     }
   }, [game?.shop]);
 
@@ -363,144 +369,137 @@ export const Game = () => {
           bag={game.pullables}
           onConfirm={handleBuyAndExit}
           isLoading={isExitingShop}
+          onBalanceChange={setShopBalanceOverride}
         />
       );
     }
 
-    // Priority 3: Overlay screens
-    switch (overlay) {
-      case "stash":
-        return (
-          <GameStash
-            orbs={game.pullables}
-            pulls={pulls}
-            onClose={closeOverlay}
-          />
-        );
+    // Check if milestone reached or cashout confirmation
+    const milestoneReached = game.points >= game.milestone;
+    const showCashoutChoice = overlay === "cashout";
 
-      default: {
-        // Check if milestone reached or cashout confirmation
-        const milestoneReached = game.points >= game.milestone;
-        const showCashoutChoice = overlay === "cashout";
-
-        // Main gameplay view - inlined to prevent remount on re-render
-        return (
-          <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
-            {showCashoutChoice ? (
-              <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
-                <GameStats
-                  points={game.points}
-                  milestone={game.milestone}
-                  health={game.health}
-                  level={game.level}
-                />
-                <PLChartTabs
-                  data={plData}
-                  pulls={pulls}
-                  mode="absolute"
-                  title="POTENTIAL"
-                />
-                <div className="mt-[clamp(6px,2.2svh,18px)]">
-                  <CashOutChoice
-                    moonrocks={pack.moonrocks}
-                    points={game.points}
-                    onConfirm={handleCashOut}
-                    onCancel={closeOverlay}
-                    isConfirming={isCashingOut}
-                  />
-                </div>
-              </div>
-            ) : milestoneReached ? (
-              <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
-                <GameStats
-                  points={game.points}
-                  milestone={game.milestone}
-                  health={game.health}
-                  level={game.level}
-                />
-                <PLChartTabs
-                  data={plData}
-                  pulls={pulls}
-                  mode="absolute"
-                  title="POTENTIAL"
-                />
-                <MilestoneChoice
-                  moonrocks={pack.moonrocks}
-                  points={game.points}
-                  onCashOut={handleCashOut}
-                  onEnterShop={handleEnterShop}
-                  isEnteringShop={isEnteringShop}
-                  isCashingOut={isCashingOut}
-                  nextCurseLabel={nextCurseLabel}
-                />
-              </div>
-            ) : (
-              <div className="flex flex-1 flex-col">
-                <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
-                  <GameStats
-                    points={game.points}
-                    milestone={game.milestone}
-                    health={game.health}
-                    level={game.level}
-                  />
-                  <PLChartTabs
-                    data={plData}
-                    pulls={pulls}
-                    mode="absolute"
-                    title="POTENTIAL"
-                  />
-                  <GameScene
-                    className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] flex-none"
-                    lives={game.health}
-                    bombs={distribution.bombs}
-                    orbs={game.pullables.length}
-                    multiplier={game.multiplier}
-                    values={distribution}
-                    hasCurse={hasCurse}
-                    curseLabel={curseLabel}
-                    orb={currentOrb}
-                    onPull={handlePull}
-                  />
-                </div>
-                <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
-                  <GradientBorder color="yellow" className="flex-1">
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
-                      onClick={openCashout}
-                    >
-                      CASH OUT
-                    </button>
-                  </GradientBorder>
-                  <GradientBorder color="green" className="flex-1">
-                    <button
-                      type="button"
-                      className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                      onClick={openStash}
-                    >
-                      <BagIcon className="w-5 h-5" />
-                      ORBS
-                    </button>
-                  </GradientBorder>
-                </div>
-              </div>
-            )}
+    // Main gameplay view - inlined to prevent remount on re-render
+    return (
+      <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
+        {showCashoutChoice ? (
+          <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
+            <GameStats
+              points={game.points}
+              milestone={game.milestone}
+              health={game.health}
+              level={game.level}
+            />
+            <PLChartTabs
+              data={plData}
+              pulls={pulls}
+              mode="absolute"
+              title="POTENTIAL"
+            />
+            <div className="mt-[clamp(6px,2.2svh,18px)]">
+              <CashOutChoice
+                moonrocks={pack.moonrocks}
+                points={game.points}
+                onConfirm={handleCashOut}
+                onCancel={closeOverlay}
+                isConfirming={isCashingOut}
+              />
+            </div>
           </div>
-        );
-      }
-    }
+        ) : milestoneReached ? (
+          <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
+            <GameStats
+              points={game.points}
+              milestone={game.milestone}
+              health={game.health}
+              level={game.level}
+            />
+            <PLChartTabs
+              data={plData}
+              pulls={pulls}
+              mode="absolute"
+              title="POTENTIAL"
+            />
+            <MilestoneChoice
+              moonrocks={pack.moonrocks}
+              points={game.points}
+              onCashOut={handleCashOut}
+              onEnterShop={handleEnterShop}
+              isEnteringShop={isEnteringShop}
+              isCashingOut={isCashingOut}
+              nextCurseLabel={nextCurseLabel}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-1 flex-col">
+            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+              <GameStats
+                points={game.points}
+                milestone={game.milestone}
+                health={game.health}
+                level={game.level}
+              />
+              <PLChartTabs
+                data={plData}
+                pulls={pulls}
+                mode="absolute"
+                title="POTENTIAL"
+              />
+              <GameScene
+                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                lives={game.health}
+                bombs={distribution.bombs}
+                orbs={game.pullables.length}
+                multiplier={game.multiplier}
+                values={distribution}
+                hasCurse={hasCurse}
+                curseLabel={curseLabel}
+                orb={currentOrb}
+                onPull={handlePull}
+              />
+            </div>
+            <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+              <GradientBorder color="yellow" className="flex-1">
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
+                  onClick={openCashout}
+                >
+                  CASH OUT
+                </button>
+              </GradientBorder>
+              <GradientBorder color="green" className="flex-1">
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                  onClick={openStash}
+                >
+                  <BagIcon className="w-5 h-5" />
+                  ORBS
+                </button>
+              </GradientBorder>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="absolute inset-0 flex flex-col min-h-0">
       <GameHeader
         moonrocks={pack?.moonrocks ?? 100}
-        chips={game?.chips ?? INITIAL_GAME_VALUES.chips}
+        chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
       </div>
+      <StashModal
+        open={overlay === "stash"}
+        onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
+        orbs={game?.bag ?? []}
+        discards={game?.discards ?? []}
+      />
     </div>
   );
 };

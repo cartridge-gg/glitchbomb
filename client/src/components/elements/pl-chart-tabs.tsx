@@ -198,11 +198,10 @@ export const PLChartTabs = ({
   baseline,
 }: PLChartTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("chart");
-
   return (
     <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-green-950 rounded-xl">
+      <div className="flex gap-1 p-1 bg-green-950 rounded-xl [@media(max-height:720px)]:hidden">
         <TabButton
           active={activeTab === "chart"}
           onClick={() => setActiveTab("chart")}
@@ -228,7 +227,7 @@ export const PLChartTabs = ({
         <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
       ) : (
         <div
-          className="h-[clamp(84px,16svh,140px)] overflow-y-auto"
+          className="h-[clamp(80px,16svh,160px)] overflow-y-auto"
           style={{
             scrollbarWidth: "none",
             maskImage:

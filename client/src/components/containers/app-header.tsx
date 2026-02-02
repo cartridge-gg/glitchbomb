@@ -22,7 +22,6 @@ export const AppHeader = ({
   username,
   showBack = true,
   backPath = "/",
-  onMint,
   onProfileClick,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
@@ -62,19 +61,13 @@ export const AppHeader = ({
 
       {/* Right: Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
-        {/* Moonrocks button with yellow gradient border */}
-        <GradientBorder color="yellow">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
-            onClick={onMint}
-          >
-            <MoonrockIcon className="w-5 h-5 text-yellow-400" />
-            <span className="font-secondary text-sm tracking-widest text-yellow-400">
-              {Math.floor(moonrocks).toLocaleString()}
-            </span>
-          </button>
-        </GradientBorder>
+        {/* Moonrocks display */}
+        <div className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg bg-[#302A10]">
+          <MoonrockIcon className="w-5 h-5 text-yellow-400" />
+          <span className="font-secondary text-sm tracking-widest text-yellow-400">
+            {Math.floor(moonrocks).toLocaleString()}
+          </span>
+        </div>
         {username && (
           <GradientBorder color="green">
             <Profile

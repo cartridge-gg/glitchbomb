@@ -17,7 +17,11 @@ export const GameStats = ({
   level,
   className = "",
 }: GameStatsProps) => {
-  const goalProgress = Math.min((points / milestone) * 100, 100);
+  const goalProgress = Math.min(
+    milestone > 0 ? (points / milestone) * 100 : 0,
+    100,
+  );
+  const goalDisplayProgress = goalProgress === 0 ? 3 : goalProgress;
   const healthProgress = (health / maxHealth) * 100;
 
   return (
@@ -85,10 +89,10 @@ export const GameStats = ({
           </div>
         </div>
         {/* Goal Progress Bar */}
-        <div className="w-full h-[clamp(6px,1.4svh,12px)] bg-green-950/50 rounded-full overflow-hidden">
+        <div className="w-full h-[clamp(6px,1.4svh,12px)] bg-green-950 rounded-full overflow-hidden">
           <div
             className="h-full bg-green-600 rounded-full transition-all duration-300"
-            style={{ width: `${goalProgress}%` }}
+            style={{ width: `${goalDisplayProgress}%` }}
           />
         </div>
       </div>
