@@ -8,7 +8,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type WheelEventHandler,
 } from "react";
 
 export interface PLDataPoint {
@@ -298,6 +297,65 @@ export const PLGraph = ({
     });
   }, []);
 
+  const applyPanDelta = useCallback(
+    (deltaX: number, deltaY: number, rect: DOMRect) => {
+      const current = viewBoxRef.current;
+      const shiftX = (deltaX / rect.width) * current.width;
+      const shiftY = (deltaY / rect.height) * current.height;
+      scheduleViewBox(
+        clampViewBox({
+          x: current.x + shiftX,
+          y: current.y + shiftY,
+          width: current.width,
+          height: current.height,
+        }),
+      );
+    },
+    [clampViewBox, scheduleViewBox],
+  );
+
+  const applyZoomAt = useCallback(
+    (zoomFactor: number, pointerX: number, pointerY: number, rect: DOMRect) => {
+      const current = viewBoxRef.current;
+      const nextWidth = clamp(
+        current.width / zoomFactor,
+        minViewWidth,
+        maxViewWidth,
+      );
+      const nextHeight = clamp(
+        current.height / zoomFactor,
+        minViewHeight,
+        maxViewHeight,
+      );
+      if (nextWidth === current.width && nextHeight === current.height) return;
+
+      const pointerXRatio = pointerX / rect.width;
+      const pointerYRatio = pointerY / rect.height;
+      const pointerXInView = current.x + pointerXRatio * current.width;
+      const pointerYInView = current.y + pointerYRatio * current.height;
+      const nextX = pointerXInView - pointerXRatio * nextWidth;
+      const nextY = pointerYInView - pointerYRatio * nextHeight;
+
+      scheduleViewBox(
+        clampViewBox({
+          x: nextX,
+          y: nextY,
+          width: nextWidth,
+          height: nextHeight,
+        }),
+      );
+    },
+    [
+      clamp,
+      clampViewBox,
+      maxViewHeight,
+      maxViewWidth,
+      minViewHeight,
+      minViewWidth,
+      scheduleViewBox,
+    ],
+  );
+
   const unitPerPx =
     baseViewHeight / Math.max(containerSize.height, baseViewHeight);
   const pointRadius = 4 * unitPerPx;
@@ -354,6 +412,40 @@ export const PLGraph = ({
     };
   }, []);
 
+  const handleWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      const target = interactionRef.current;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      // Prevent page scroll/zoom while interacting with the graph.
+      event.preventDefault();
+
+      if (event.ctrlKey || event.metaKey) {
+        const zoomFactor = Math.exp(-event.deltaY * 0.002);
+        applyZoomAt(
+          zoomFactor,
+          event.clientX - rect.left,
+          event.clientY - rect.top,
+          rect,
+        );
+        return;
+      }
+
+      applyPanDelta(event.deltaX, event.deltaY, rect);
+    },
+    [applyPanDelta, applyZoomAt],
+  );
+
+  useEffect(() => {
+    const target = interactionRef.current;
+    if (!target) return;
+    const listener = (event: WheelEvent) => handleWheelEvent(event);
+    target.addEventListener("wheel", listener, { passive: false });
+    return () => target.removeEventListener("wheel", listener);
+  }, [handleWheelEvent]);
+
   if (data.length === 0) {
     return null;
   }
@@ -365,46 +457,6 @@ export const PLGraph = ({
       width: baseViewWidth,
       height: baseViewHeight,
     });
-  };
-
-  const handleWheel: WheelEventHandler<HTMLDivElement> = (event) => {
-    event.preventDefault();
-    const target = interactionRef.current;
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
-    const pointerX = event.clientX - rect.left;
-    const pointerY = event.clientY - rect.top;
-    const direction = event.deltaY < 0 ? 1 : -1;
-    const zoomFactor = direction > 0 ? 1.12 : 0.9;
-
-    const current = viewBoxRef.current;
-    const nextWidth = clamp(
-      current.width / zoomFactor,
-      minViewWidth,
-      maxViewWidth,
-    );
-    const nextHeight = clamp(
-      current.height / zoomFactor,
-      minViewHeight,
-      maxViewHeight,
-    );
-    if (nextWidth === current.width && nextHeight === current.height) return;
-
-    const pointerXRatio = pointerX / rect.width;
-    const pointerYRatio = pointerY / rect.height;
-    const pointerXInView = current.x + pointerXRatio * current.width;
-    const pointerYInView = current.y + pointerYRatio * current.height;
-    const nextX = pointerXInView - pointerXRatio * nextWidth;
-    const nextY = pointerYInView - pointerYRatio * nextHeight;
-
-    scheduleViewBox(
-      clampViewBox({
-        x: nextX,
-        y: nextY,
-        width: nextWidth,
-        height: nextHeight,
-      }),
-    );
   };
 
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
@@ -550,7 +602,6 @@ export const PLGraph = ({
             ref={interactionRef}
             className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             style={{ touchAction: "none" }}
-            onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
