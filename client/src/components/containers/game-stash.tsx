@@ -141,7 +141,7 @@ export const GameStash = ({ orbs }: GameStashProps) => {
   return (
     <div className="flex flex-col gap-[clamp(8px,2svh,16px)] w-full max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
       <div className="flex-1 min-h-0 flex flex-col">
-        <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
+        <div className="flex flex-col gap-[clamp(2px,0.6svh,6px)]">
           {/* Header */}
           <div className="flex items-center justify-between w-full">
               <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
