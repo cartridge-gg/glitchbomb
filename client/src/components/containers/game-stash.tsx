@@ -67,11 +67,6 @@ const TabButton = ({
 const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
-      {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
-        Orbs in your bag that can be pulled
-      </p>
-
       {/* Orbs grid */}
       <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
@@ -102,11 +97,6 @@ const OrbsTab = ({ orbs }: { orbs: Orb[] }) => {
 const ListTab = ({ orbs }: { orbs: Orb[] }) => {
   return (
     <>
-      {/* Subtitle */}
-      <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
-        List view of the orbs in your bag
-      </p>
-
       {/* Orbs list */}
       <div className="flex flex-col gap-2 py-4 w-full">
         {orbs.length > 0 ? (
@@ -143,6 +133,10 @@ const ListTab = ({ orbs }: { orbs: Orb[] }) => {
 
 export const GameStash = ({ orbs }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
+  const description =
+    activeTab === "orbs"
+      ? "Orbs in your bag that can be pulled"
+      : "List view of the orbs in your bag";
 
   return (
     <div className="flex flex-col gap-[clamp(8px,2svh,16px)] w-full max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
@@ -150,14 +144,18 @@ export const GameStash = ({ orbs }: GameStashProps) => {
         <div className="flex flex-col gap-[clamp(4px,1svh,8px)]">
           {/* Header */}
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
-              YOUR STASH
-            </h1>
-          </div>
+              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
+                YOUR STASH
+              </h1>
+            </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full">
-            <TabButton
+            <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
+              {description}
+            </p>
+
+            {/* Tabs */}
+            <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full">
+              <TabButton
               active={activeTab === "orbs"}
               onClick={() => setActiveTab("orbs")}
             >
