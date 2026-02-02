@@ -241,21 +241,8 @@ export const PLGraph = ({
     setView({ scale: 1, x: 0, y: 0 });
   };
 
-  const handleWheelEvent = useCallback(
-    (event: WheelEvent) => {
-      event.preventDefault();
-      const target = zoomRef.current;
-      if (!target) return;
-      const rect = target.getBoundingClientRect();
-      const pointerX = event.clientX - rect.left;
-      const pointerY = event.clientY - rect.top;
-      const zoomFactor =
-        event.ctrlKey || event.metaKey
-          ? Math.exp(-event.deltaY * 0.002)
-          : event.deltaY < 0
-            ? 1.12
-            : 0.9;
-
+  const applyZoomAt = useCallback(
+    (zoomFactor: number, pointerX: number, pointerY: number) => {
       setView((prev) => {
         const nextScale = Math.min(
           zoomMax,
@@ -271,6 +258,26 @@ export const PLGraph = ({
     [zoomMax, zoomMin],
   );
 
+  const handleWheelEvent = useCallback(
+    (event: WheelEvent) => {
+      event.preventDefault();
+      const target = zoomRef.current;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left;
+      const pointerY = event.clientY - rect.top;
+      const zoomFactor =
+        event.ctrlKey || event.metaKey
+          ? Math.exp(-event.deltaY * 0.002)
+          : event.deltaY < 0
+            ? 1.12
+            : 0.9;
+
+      applyZoomAt(zoomFactor, pointerX, pointerY);
+    },
+    [applyZoomAt],
+  );
+
   useEffect(() => {
     const target = zoomRef.current;
     if (!target) return;
@@ -278,6 +285,33 @@ export const PLGraph = ({
     target.addEventListener("wheel", listener, { passive: false });
     return () => target.removeEventListener("wheel", listener);
   }, [handleWheelEvent]);
+
+  useEffect(() => {
+    const target = zoomRef.current as unknown as HTMLElement | null;
+    if (!target) return;
+    let lastScale = 1;
+    const onGestureStart = (event: Event) => {
+      event.preventDefault();
+      const scale = (event as unknown as { scale?: number }).scale ?? 1;
+      lastScale = scale;
+    };
+    const onGestureChange = (event: Event) => {
+      event.preventDefault();
+      const scale = (event as unknown as { scale?: number }).scale ?? 1;
+      const delta = scale / lastScale;
+      lastScale = scale;
+      const rect = target.getBoundingClientRect();
+      applyZoomAt(delta, rect.width / 2, rect.height / 2);
+    };
+    target.addEventListener("gesturestart", onGestureStart, { passive: false });
+    target.addEventListener("gesturechange", onGestureChange, {
+      passive: false,
+    });
+    return () => {
+      target.removeEventListener("gesturestart", onGestureStart);
+      target.removeEventListener("gesturechange", onGestureChange);
+    };
+  }, [applyZoomAt]);
 
   if (data.length === 0) {
     return null;
