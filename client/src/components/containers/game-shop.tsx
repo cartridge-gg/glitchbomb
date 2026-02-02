@@ -143,6 +143,7 @@ export const GameShop = ({
   className,
   onConfirm,
   isLoading = false,
+  onBalanceChange,
   ...props
 }: GameShopProps) => {
   // Store quantities per orb index
