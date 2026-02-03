@@ -48,7 +48,7 @@ export const BombTracker = ({
   const minSlots = 8;
   let keyCounter = 0;
   const slotClasses = size === "lg" ? "h-8 w-8" : "h-6 w-6";
-  const emptySlotClasses = size === "lg" ? "h-5 w-5" : "h-4 w-4";
+  const emptySlotClasses = size === "lg" ? "h-4 w-4" : "h-3 w-3";
   const slots: Array<{
     variant: "simple" | "double" | "triple";
     enabled: boolean;
