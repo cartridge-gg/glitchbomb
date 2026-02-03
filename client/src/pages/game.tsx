@@ -413,7 +413,7 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <div className="mt-[clamp(6px,2.2svh,18px)]">
+            <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0">
               <CashOutChoice
                 moonrocks={pack.moonrocks}
                 points={game.points}
@@ -437,15 +437,17 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <MilestoneChoice
-              moonrocks={pack.moonrocks}
-              points={game.points}
-              onCashOut={handleCashOut}
-              onEnterShop={handleEnterShop}
-              isEnteringShop={isEnteringShop}
-              isCashingOut={isCashingOut}
-              nextCurseLabel={nextCurseLabel}
-            />
+            <div className="flex-1 min-h-0">
+              <MilestoneChoice
+                moonrocks={pack.moonrocks}
+                points={game.points}
+                onCashOut={handleCashOut}
+                onEnterShop={handleEnterShop}
+                isEnteringShop={isEnteringShop}
+                isCashingOut={isCashingOut}
+                nextCurseLabel={nextCurseLabel}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex flex-1 flex-col">
