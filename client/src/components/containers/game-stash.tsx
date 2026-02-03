@@ -88,7 +88,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
       {/* Orbs list */}
-      <div className="flex flex-col gap-2 py-4 w-full">
+      <div className="flex flex-col gap-1 py-4 w-full">
         {orbs.length > 0 ? (
           orbs.map((orb, index) => {
             const isDiscarded = Boolean(discards?.[index]);
