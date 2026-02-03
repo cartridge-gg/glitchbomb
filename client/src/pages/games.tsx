@@ -201,7 +201,7 @@ export const Games = () => {
       });
     }
 
-    return games;
+    return games.sort((a, b) => b.packId - a.packId);
   }, [packs, getGameForPack]);
 
   const handlePlay = async (
