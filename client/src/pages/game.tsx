@@ -413,7 +413,7 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0">
+            <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
               <CashOutChoice
                 moonrocks={pack.moonrocks}
                 points={game.points}
@@ -437,7 +437,7 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 flex items-center justify-center">
               <MilestoneChoice
                 moonrocks={pack.moonrocks}
                 points={game.points}
