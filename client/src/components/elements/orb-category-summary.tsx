@@ -152,7 +152,7 @@ export const OrbCategorySummary = ({
                 >
                   <span
                     className="font-secondary"
-                    style={{ color: hexToRgba(config.color, 0.4) }}
+                    style={{ color: hexToRgba(config.color, 0.25) }}
                   >
                     X
                   </span>
