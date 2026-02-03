@@ -131,12 +131,11 @@ export const GameScene = ({
       {/* Distribution */}
       <div
         className={cn(
-          "absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
+          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
           phase === 0 && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
           phase === 3 && "opacity-100",
         )}
-        style={{ top: `calc(50% + ${sceneOffsetY}px)` }}
       >
         <Distribution
           values={values}
