@@ -106,7 +106,7 @@ export const GameStats = ({
       {/* Right - Goal */}
       <div className="flex-1 flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span className="text-green-600 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
+          <span className="text-green-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
             Goal
           </span>
           <div className="flex items-center gap-1">
