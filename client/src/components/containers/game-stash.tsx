@@ -96,7 +96,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
               <div
                 key={`${orb.value}-${index}`}
                 className={cn(
-                  "flex items-center gap-3 px-2 py-1.5 rounded-md border border-green-900 bg-green-950/30 w-full",
+                  "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
                   isDiscarded && "opacity-25",
                 )}
               >
