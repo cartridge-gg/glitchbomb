@@ -93,15 +93,17 @@ export const GameStats = ({
           className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
           style={{ backgroundColor: "rgba(9, 38, 4, 0.8)" }}
         >
-          <div
-            className="h-full bg-green-400 rounded-full transition-all duration-300"
-            style={{
-              width: `${goalDisplayProgress}%`,
-              minWidth: "10px",
-              borderRadius: "9999px",
-              boxShadow: "0 0 10px rgba(54, 248, 24, 0.4)",
-            }}
-          />
+          <div className="w-full h-full p-[2px]">
+            <div
+              className="h-full bg-green-400 rounded-full transition-all duration-300"
+              style={{
+                width: `${goalDisplayProgress}%`,
+                minWidth: "10px",
+                borderRadius: "9999px",
+                boxShadow: "0 0 10px rgba(54, 248, 24, 0.4)",
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
