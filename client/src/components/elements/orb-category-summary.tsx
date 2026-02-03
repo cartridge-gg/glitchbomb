@@ -175,7 +175,7 @@ export const OrbCategorySummary = ({
                     color: config.color,
                   }}
                 >
-                  <span style={{ color: "#F5F5F5" }}>x</span>
+                  <span style={{ color: `${config.color}B3` }}>x</span>
                   {count}
                 </div>
               </div>
