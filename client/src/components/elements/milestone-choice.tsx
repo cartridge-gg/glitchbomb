@@ -1,4 +1,5 @@
 import { ChipIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 export interface MilestoneChoiceProps {
@@ -55,7 +56,7 @@ export const MilestoneChoice = ({
             </span>
           </div>
           {/* Separator */}
-          <div className="h-px bg-yellow-100 opacity-5" />
+          <CardDivider className="bg-yellow-100" />
           {/* Content */}
           <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <div className="flex items-center justify-center gap-1">
@@ -96,7 +97,7 @@ export const MilestoneChoice = ({
               </span>
             </div>
             {/* Separator */}
-            <div className="h-px bg-orange-100 opacity-5" />
+            <CardDivider className="bg-orange-100" />
             {/* Content */}
             <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
               <div className="flex items-center gap-2">
@@ -127,7 +128,7 @@ export const MilestoneChoice = ({
                 </span>
               </div>
               {/* Separator */}
-              <div className="h-px bg-orange-100 opacity-5" />
+              <CardDivider className="bg-orange-100" />
               {/* Content */}
               <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
                 <div className="flex items-center gap-2">

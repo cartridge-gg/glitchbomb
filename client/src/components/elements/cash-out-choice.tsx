@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, MoonrockIcon } from "@/components/icons";
+import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 export interface CashOutChoiceProps {
@@ -48,7 +49,7 @@ export const CashOutChoice = ({
             </span>
           </div>
           {/* Separator */}
-          <div className="h-px bg-yellow-500" />
+          <CardDivider className="bg-yellow-100" />
           {/* Content */}
           <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <div className="flex items-center justify-center gap-1">
@@ -85,7 +86,7 @@ export const CashOutChoice = ({
               Go Back
             </span>
           </div>
-          <div className="h-px bg-green-100 opacity-10" />
+          <CardDivider className="bg-green-100" />
           <div className="flex-1 flex items-center justify-center gap-2 py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <ArrowLeftIcon
               size="sm"
