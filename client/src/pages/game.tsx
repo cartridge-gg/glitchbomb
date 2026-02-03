@@ -300,7 +300,7 @@ export const Game = () => {
       return (
         <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)]">
               <GameStats
                 points={INITIAL_GAME_VALUES.points}
                 milestone={INITIAL_GAME_VALUES.milestone}
@@ -327,7 +327,7 @@ export const Game = () => {
             <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)] opacity-50">
               <BombTracker details={bombDetails} size="lg" />
             </div>
-            <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
+            <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)] opacity-50 pointer-events-none">
               <Button
                 variant="secondary"
                 gradient="green"
@@ -400,7 +400,7 @@ export const Game = () => {
     return (
       <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
         {showCashoutChoice ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
+          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
               milestone={game.milestone}
@@ -424,7 +424,7 @@ export const Game = () => {
             </div>
           </div>
         ) : milestoneReached ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
+          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
               milestone={game.milestone}
@@ -451,7 +451,7 @@ export const Game = () => {
           </div>
         ) : (
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 min-h-0 flex-col gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col gap-[clamp(6px,2svh,18px)]">
               <GameStats
                 points={game.points}
                 milestone={game.milestone}
@@ -480,7 +480,7 @@ export const Game = () => {
             <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
               <BombTracker details={bombDetails} size="lg" />
             </div>
-            <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+            <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
               <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"

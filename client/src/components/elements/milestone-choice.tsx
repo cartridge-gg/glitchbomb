@@ -32,7 +32,7 @@ export const MilestoneChoice = ({
   const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
   return (
-    <div className="flex flex-col justify-center gap-[clamp(6px,1.4svh,10px)] w-full h-full">
+    <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full h-full">
       {/* Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
@@ -41,7 +41,7 @@ export const MilestoneChoice = ({
         disabled={isLoading}
         isLoading={isCashingOut}
         className="flex-1"
-        contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(6px,1.4svh,10px)]"
+        contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
@@ -58,7 +58,7 @@ export const MilestoneChoice = ({
           {/* Separator */}
           <CardDivider className="bg-yellow-100" />
           {/* Content */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+          <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <div className="flex items-center justify-center gap-1">
               <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
               <span className={`text-yellow-400 ${rewardValueClass}`}>
@@ -80,11 +80,11 @@ export const MilestoneChoice = ({
         disabled={isLoading}
         isLoading={isEnteringShop}
         className="flex-1"
-        contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(6px,1.4svh,10px)]"
+        contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
-        <div className="flex gap-[clamp(6px,1.4svh,10px)] w-full h-full">
+        <div className="flex gap-[clamp(8px,2.2svh,18px)] w-full h-full">
           {/* Reward Inner Card */}
           <div
             className="flex-1 flex flex-col rounded-lg overflow-hidden"
@@ -99,7 +99,7 @@ export const MilestoneChoice = ({
             {/* Separator */}
             <CardDivider className="bg-orange-100" />
             {/* Content */}
-            <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+            <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
               <div className="flex items-center gap-2">
                 <ChipIcon
                   size="md"
@@ -130,7 +130,7 @@ export const MilestoneChoice = ({
               {/* Separator */}
               <CardDivider className="bg-orange-100" />
               {/* Content */}
-              <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+              <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
                 <div className="flex items-center gap-2">
                   <GlitchBombIcon className="w-[clamp(16px,3.6svh,22px)] h-[clamp(16px,3.6svh,22px)] text-red-400" />
                   <span className="text-red-400 font-secondary text-[clamp(0.7rem,2.1svh,0.95rem)] text-center leading-tight">
