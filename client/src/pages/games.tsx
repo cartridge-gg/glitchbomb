@@ -1,16 +1,26 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { LoadingSpinner } from "@/components/elements";
-import { MoonrockIcon, SparkleIcon } from "@/components/icons";
+import { LoadingSpinner, TabBar } from "@/components/elements";
+import {
+  ControllerIcon,
+  MoonrockIcon,
+  SparkleIcon,
+} from "@/components/icons";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
+import { isOfflineMode, setOfflineMode } from "@/offline/mode";
+import {
+  createPack,
+  selectTotalMoonrocks,
+  useOfflineStore,
+} from "@/offline/store";
 
 interface GameCardProps {
   gameId: number;
@@ -90,11 +100,17 @@ const GameCard = ({
 
 export const Games = () => {
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { starterpack, config } = useEntitiesContext();
   const { start, mint } = useActions();
   const { packs } = usePacks();
+  const offlineState = useOfflineStore();
+  const [mode, setMode] = useState<"onchain" | "offline">(() =>
+    isOfflineMode() ? "offline" : "onchain",
+  );
+  const offline = mode === "offline";
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
   const pendingNavigationRef = useRef<{
@@ -121,6 +137,13 @@ export const Games = () => {
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContracts, tokenBalances, tokenAddress]);
+  const offlineMoonrocks = useMemo(
+    () => selectTotalMoonrocks(offlineState),
+    [offlineState],
+  );
+  const displayMoonrocks = offline ? offlineMoonrocks : balance;
+  const displayUsername = username;
+  const isLoggedIn = !!account && !!username;
 
   // Fetch username
   useEffect(() => {
@@ -178,7 +201,7 @@ export const Games = () => {
       });
     }
 
-    return games;
+    return games.sort((a, b) => b.packId - a.packId);
   }, [packs, getGameForPack]);
 
   const handlePlay = async (
@@ -217,12 +240,16 @@ export const Games = () => {
   };
 
   const handleNewGame = useCallback(() => {
+    if (offline) {
+      createPack();
+      return;
+    }
     if (starterpack) {
       (connector as ControllerConnector)?.controller.openStarterPack(
         starterpack.id.toString(),
       );
     }
-  }, [connector, starterpack]);
+  }, [connector, starterpack, offline]);
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
@@ -230,25 +257,64 @@ export const Games = () => {
     );
   }, [connector]);
 
+  const persistMode = useCallback(
+    (nextMode: "onchain" | "offline") => {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (nextMode === "offline") {
+          params.set("offline", "1");
+        } else {
+          params.delete("offline");
+        }
+        setSearchParams(params, { replace: true });
+        setOfflineMode(nextMode === "offline");
+      }
+    },
+    [setSearchParams],
+  );
+
+  const handleModeChange = useCallback(
+    (nextMode: "onchain" | "offline") => {
+      if (nextMode === "offline" && !isLoggedIn) return;
+      persistMode(nextMode);
+      setMode(nextMode);
+    },
+    [isLoggedIn, persistMode],
+  );
+
+  useEffect(() => {
+    if (isLoggedIn || mode !== "offline") return;
+    persistMode("onchain");
+    setMode("onchain");
+  }, [isLoggedIn, mode, persistMode]);
+
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Header */}
       <AppHeader
-        moonrocks={balance}
-        username={username}
+        moonrocks={displayMoonrocks}
+        username={displayUsername}
         showBack={true}
         backPath="/"
-        onMint={() => mint(tokenAddress)}
+        onMint={offline ? undefined : () => mint(tokenAddress)}
         onProfileClick={onProfileClick}
       />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pt-24 pb-16 overflow-y-auto">
         <div className="flex flex-col gap-6 w-full max-w-[500px]">
+          <TabBar
+            items={[
+              { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
+              { id: "offline", label: "Offline", Icon: MoonrockIcon },
+            ]}
+            active={mode}
+            onChange={handleModeChange}
+          />
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
             <p className="text-white font-secondary text-sm tracking-widest uppercase">
-              Play Now
+              {offline ? "Offline Mode" : "Play Now"}
             </p>
             <button
               type="button"
@@ -256,7 +322,7 @@ export const Games = () => {
               onClick={handleNewGame}
             >
               <MoonrockIcon size="sm" />
-              Purchase
+              {offline ? "Play Offline for Free" : "Purchase"}
             </button>
           </div>
 

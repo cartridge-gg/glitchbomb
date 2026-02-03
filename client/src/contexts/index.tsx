@@ -10,10 +10,13 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { NAMESPACE } from "@/constants";
+import { useOfflineMode } from "@/offline/mode";
+import { selectGame, useOfflineStore } from "@/offline/store";
 import {
   CONFIG,
   Config,
@@ -82,7 +85,7 @@ const getGameQuery = (packId: number, gameId: number) => {
     .includeHashedKeys();
 };
 
-export function EntitiesProvider({ children }: { children: React.ReactNode }) {
+function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
   const account = useAccount();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
@@ -312,6 +315,72 @@ export function EntitiesProvider({ children }: { children: React.ReactNode }) {
       {children}
     </EntitiesContext.Provider>
   );
+}
+
+function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
+  const offlineState = useOfflineStore();
+  const [packId, setPackIdState] = useState<number>(0);
+  const [gameId, setGameIdState] = useState<number>(0);
+
+  const pack = useMemo(() => {
+    const raw = offlineState.packs[packId];
+    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks) : undefined;
+  }, [offlineState.packs, packId]);
+
+  const game = useMemo(() => {
+    if (!packId || !gameId) return undefined;
+    return selectGame(offlineState, packId, gameId);
+  }, [offlineState, packId, gameId]);
+
+  const config = useMemo(
+    () => new Config("0", "0x0", "0x0", "0x0"),
+    [],
+  );
+  const starterpack = useMemo(
+    () => new Starterpack("0", true, 0, 0n, "0x0"),
+    [],
+  );
+
+  const refresh = useCallback(async () => {}, []);
+
+  const setPackId = useCallback(
+    (id: number) => {
+      if (id !== packId) {
+        setGameIdState(0);
+      }
+      setPackIdState(id);
+    },
+    [packId],
+  );
+
+  const setGameId = useCallback((id: number) => {
+    setGameIdState(id);
+  }, []);
+
+  const value: EntitiesContextType = {
+    pack,
+    game,
+    starterpack,
+    config,
+    status: "success",
+    refresh,
+    setGameId,
+    setPackId,
+  };
+
+  return (
+    <EntitiesContext.Provider value={value}>
+      {children}
+    </EntitiesContext.Provider>
+  );
+}
+
+export function EntitiesProvider({ children }: { children: React.ReactNode }) {
+  const offline = useOfflineMode();
+  if (offline) {
+    return <OfflineEntitiesProvider>{children}</OfflineEntitiesProvider>;
+  }
+  return <OnchainEntitiesProvider>{children}</OnchainEntitiesProvider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

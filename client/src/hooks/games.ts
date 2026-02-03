@@ -8,6 +8,8 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
+import { useOfflineMode } from "@/offline/mode";
+import { selectGame, useOfflineStore } from "@/offline/store";
 import { Game, type RawGame } from "@/models";
 
 const ENTITIES_LIMIT = 10_000;
@@ -36,6 +38,8 @@ const getGamesQuery = (keys: PackGameKey[]) => {
 
 export function useGames(keys: PackGameKey[]) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = useOfflineMode();
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
 
@@ -99,15 +103,20 @@ export function useGames(keys: PackGameKey[]) {
   // Helper to get game by pack ID
   const getGameForPack = useCallback(
     (packId: number, gameId: number): Game | undefined => {
+      if (offline) return selectGame(offlineState, packId, gameId);
       return games.find(
         (game) => game.pack_id === packId && game.id === gameId,
       );
     },
-    [games],
+    [games, offline, offlineState],
   );
 
   return {
-    games,
+    games: offline
+      ? keys
+          .map((key) => selectGame(offlineState, key.packId, key.gameId))
+          .filter((game): game is Game => !!game)
+      : games,
     getGameForPack,
   };
 }
