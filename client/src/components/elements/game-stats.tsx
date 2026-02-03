@@ -14,7 +14,7 @@ const ProgressBar = ({
   glowColor,
 }: ProgressBarProps) => (
   <div
-    className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
+    className="w-full h-[clamp(10px,2svh,18px)] rounded-full overflow-hidden"
     style={{ backgroundColor: trackColor }}
   >
     <div className="w-full h-full p-[3px]">
