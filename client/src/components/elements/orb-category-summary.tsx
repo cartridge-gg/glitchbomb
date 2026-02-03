@@ -172,7 +172,7 @@ export const OrbCategorySummary = ({
                   style={{
                     backgroundColor: darkenHex(config.color, 0.6),
                     border: `2px solid ${config.color}`,
-                    color: "#040603",
+                    color: config.color,
                   }}
                 >
                   <span style={{ color: "#F5F5F5" }}>x</span>
