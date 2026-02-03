@@ -1,5 +1,37 @@
 import { HeartIcon } from "@/components/icons";
 
+interface ProgressBarProps {
+  progress: number;
+  trackColor: string;
+  fillColor: string;
+  glowColor: string;
+}
+
+const ProgressBar = ({
+  progress,
+  trackColor,
+  fillColor,
+  glowColor,
+}: ProgressBarProps) => (
+  <div
+    className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
+    style={{ backgroundColor: trackColor }}
+  >
+    <div className="w-full h-full p-[2px]">
+      <div
+        className="h-full rounded-full transition-all duration-300"
+        style={{
+          width: `${progress}%`,
+          minWidth: "10px",
+          borderRadius: "9999px",
+          backgroundColor: fillColor,
+          boxShadow: `0 0 10px ${glowColor}`,
+        }}
+      />
+    </div>
+  </div>
+);
+
 export interface GameStatsProps {
   points: number;
   milestone: number;
@@ -48,16 +80,12 @@ export const GameStats = ({
           </div>
         </div>
         {/* Health Bar */}
-        <div className="w-full h-[clamp(6px,1.4svh,12px)] bg-pink-950/50 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${healthProgress}%`,
-              background: "linear-gradient(90deg, #FF0080 0%, #FF40A0 100%)",
-              boxShadow: "0 0 8px rgba(255, 0, 128, 0.5)",
-            }}
-          />
-        </div>
+        <ProgressBar
+          progress={healthProgress}
+          trackColor="rgba(26, 0, 13, 0.65)"
+          fillColor="#FF40A0"
+          glowColor="rgba(255, 0, 128, 0.5)"
+        />
       </div>
 
       {/* Center - Points & Level */}
@@ -89,22 +117,12 @@ export const GameStats = ({
           </div>
         </div>
         {/* Goal Progress Bar */}
-        <div
-          className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
-          style={{ backgroundColor: "rgba(9, 38, 4, 0.8)" }}
-        >
-          <div className="w-full h-full p-[2px]">
-            <div
-              className="h-full bg-green-400 rounded-full transition-all duration-300"
-              style={{
-                width: `${goalDisplayProgress}%`,
-                minWidth: "10px",
-                borderRadius: "9999px",
-                boxShadow: "0 0 10px rgba(54, 248, 24, 0.4)",
-              }}
-            />
-          </div>
-        </div>
+        <ProgressBar
+          progress={goalDisplayProgress}
+          trackColor="rgba(9, 38, 4, 0.8)"
+          fillColor="#36F818"
+          glowColor="rgba(54, 248, 24, 0.4)"
+        />
       </div>
     </div>
   );
