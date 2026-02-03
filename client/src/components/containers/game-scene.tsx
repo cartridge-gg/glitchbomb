@@ -257,7 +257,7 @@ export const GameScene = ({
       </div>
 
       {/* Outcome */}
-      <div className="absolute inset-x-0 flex justify-center top-[65%]">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <AnimatePresence>
           {phase === 2 && (
             <motion.div
