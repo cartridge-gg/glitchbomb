@@ -54,7 +54,7 @@ const useViewportSize = () => {
   return size;
 };
 
-const gameSceneVariants = cva("relative", {
+const gameSceneVariants = cva("relative w-full h-full", {
   variants: {
     variant: {
       default: "",
