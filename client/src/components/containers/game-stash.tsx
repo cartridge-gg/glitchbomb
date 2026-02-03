@@ -57,7 +57,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                     key={index}
                     className={cn(
                       "flex flex-col items-center",
-                      isDiscarded && "opacity-50",
+                      isDiscarded && "opacity-25",
                     )}
                   >
                     <OrbDisplay orb={orb} size="sm" />
@@ -92,15 +92,11 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                 key={`${orb.value}-${index}`}
                 className={cn(
                   "flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full",
-                  isDiscarded && "opacity-40 grayscale",
+                  isDiscarded && "opacity-25",
                 )}
               >
                 {/* Orb icon */}
-                <OrbDisplay
-                  orb={orb}
-                  size="sm"
-                  className={isDiscarded ? "opacity-70" : undefined}
-                />
+                <OrbDisplay orb={orb} size="sm" />
 
                 {/* Orb info */}
                 <div className="flex-1 min-w-0">
