@@ -36,6 +36,12 @@ const valueSizeMap = {
   lg: "-bottom-2 text-base px-4 py-0.5",
 };
 
+const valueSizeCompactMap = {
+  sm: "text-[9px] px-1.5 py-0 leading-none",
+  md: "text-[10px] px-2 py-0 leading-none",
+  lg: "text-xs px-2.5 py-0 leading-none",
+};
+
 const valuePositionMap = {
   bottom: {
     sm: "left-1/2 -translate-x-1/2",
@@ -179,7 +185,9 @@ export const OrbDisplay = ({
         <div
           className={cn(
             "absolute z-30 rounded-full flex items-center justify-center",
-            valueSizeMap[size ?? "md"],
+            valuePosition === "top-right"
+              ? valueSizeCompactMap[size ?? "md"]
+              : valueSizeMap[size ?? "md"],
             valuePositionMap[valuePosition][size ?? "md"],
           )}
           style={{ backgroundColor: color }}
