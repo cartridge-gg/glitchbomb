@@ -55,10 +55,10 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center py-2 rounded-lg transition-all",
+      "flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all",
       active
-        ? "bg-green-800 text-green-400"
-        : "text-green-900 hover:text-green-700",
+        ? "bg-green-900/70 text-green-400"
+        : "text-green-700/60 hover:text-green-500",
     )}
   >
     {children}
@@ -72,30 +72,22 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
       <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
           <div className="flex justify-center w-full">
-            <div className="grid grid-cols-3 gap-6 py-4 place-items-center">
+            <div className="grid grid-cols-6 gap-3 py-3 place-items-center">
               {orbs.map((orb, index) => {
                 const isDiscarded = Boolean(discards?.[index]);
                 return (
                   <div
                     key={index}
                     className={cn(
-                      "flex flex-col items-center gap-4",
-                      isDiscarded && "opacity-40 grayscale",
+                      "flex flex-col items-center",
+                      isDiscarded && "opacity-50",
                     )}
                   >
                     <OrbDisplay
                       orb={orb}
-                      size="lg"
-                      className={isDiscarded ? "opacity-70" : undefined}
+                      size="sm"
                     />
-                    <p
-                      className={cn(
-                        "text-green-500 text-2xs font-secondary uppercase tracking-wide text-center",
-                        isDiscarded && "text-green-700/70",
-                      )}
-                    >
-                      {orb.name()}
-                    </p>
+                    <span className="sr-only">{orb.name()}</span>
                   </div>
                 );
               })}
@@ -168,19 +160,21 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
       : "List view of the orbs in your bag";
 
   return (
-    <div className="flex flex-col gap-[clamp(8px,2svh,16px)] w-full max-w-[420px] mx-auto px-4 py-[clamp(6px,1.6svh,12px)] h-full min-h-0 text-left">
+    <div className="flex flex-col gap-[clamp(6px,1.6svh,12px)] w-full max-w-[420px] mx-auto px-5 py-[clamp(8px,2svh,16px)] h-full min-h-0 text-left">
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex flex-col gap-0">
           {/* Header */}
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)] text-left">
-              YOUR STASH
+            <h1 className="text-green-400 font-secondary text-[clamp(1.05rem,3svh,1.25rem)] tracking-wide text-left">
+              Your orbs
             </h1>
           </div>
 
-          <p className="text-green-600 font-secondary text-sm tracking-wide text-left w-full">
-            {description}
-          </p>
+          {activeTab === "list" && (
+            <p className="text-green-600 font-secondary text-xs tracking-wide text-left w-full">
+              {description}
+            </p>
+          )}
 
           {/* Tabs */}
           <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full mt-2">
@@ -188,13 +182,13 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
               active={activeTab === "orbs"}
               onClick={() => setActiveTab("orbs")}
             >
-              <GridIcon className="w-6 h-6" />
+              <GridIcon className="w-4 h-4" />
             </TabButton>
             <TabButton
               active={activeTab === "list"}
               onClick={() => setActiveTab("list")}
             >
-              <ListIcon className="w-6 h-6" />
+              <ListIcon className="w-4 h-4" />
             </TabButton>
           </div>
         </div>
