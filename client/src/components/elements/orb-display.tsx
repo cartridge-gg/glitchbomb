@@ -36,6 +36,19 @@ const valueSizeMap = {
   lg: "-bottom-2 text-base px-4 py-0.5",
 };
 
+const valuePositionMap = {
+  bottom: {
+    sm: "left-1/2 -translate-x-1/2",
+    md: "left-1/2 -translate-x-1/2",
+    lg: "left-1/2 -translate-x-1/2",
+  },
+  "top-right": {
+    sm: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+    md: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+    lg: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+  },
+};
+
 const glowSizeMap = {
   sm: 4,
   md: 8,
@@ -93,12 +106,14 @@ export interface OrbDisplayProps
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
   bombTierIcons?: boolean;
+  valuePosition?: "bottom" | "top-right";
 }
 
 export const OrbDisplay = ({
   orb,
   size = "md",
   bombTierIcons = false,
+  valuePosition = "bottom",
   className,
   ...props
 }: OrbDisplayProps) => {
@@ -163,8 +178,9 @@ export const OrbDisplay = ({
       {displayValue && (
         <div
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-30 rounded-full flex items-center justify-center",
+            "absolute z-30 rounded-full flex items-center justify-center",
             valueSizeMap[size ?? "md"],
+            valuePositionMap[valuePosition][size ?? "md"],
           )}
           style={{ backgroundColor: color }}
         >
