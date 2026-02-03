@@ -154,10 +154,7 @@ export const GameScene = ({
           phase === 3 && "opacity-100 z-20",
         )}
       >
-        <div
-          className="relative"
-          style={{ transform: `translateY(${sceneOffsetY}px)` }}
-        >
+        <div className="relative">
           <Puller
             onClick={onPull}
             variant={
