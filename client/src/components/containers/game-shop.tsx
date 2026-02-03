@@ -82,7 +82,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       transition={{ duration: 0.2 }}
     >
       {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="md" />
+      <OrbDisplay orb={orb} size="md" valuePosition="top-right" />
 
       {/* Title and description */}
       <div className="flex-1 min-w-0">
@@ -108,10 +108,10 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
-            initial={{ scale: 1.3, color: "#4ade80" }}
-            animate={{ scale: 1, color: "#ffedd5" }}
+            initial={{ scale: 1.3 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="font-secondary text-sm"
+            className="font-secondary text-sm text-orange-100"
           >
             {price}
           </motion.span>
