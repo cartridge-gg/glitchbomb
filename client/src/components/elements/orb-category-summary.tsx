@@ -1,13 +1,6 @@
-import {
-  BagIcon,
-  OrbBombIcon,
-  OrbChipIcon,
-  OrbHealthIcon,
-  OrbMoonrockIcon,
-  OrbMultiplierIcon,
-  OrbPointIcon,
-} from "@/components/icons";
-import type { Orb } from "@/models";
+import { BagIcon } from "@/components/icons";
+import { Orb, OrbType } from "@/models";
+import { OrbDisplay } from "./orb-display";
 
 export interface OrbCategorySummaryProps {
   orbs: Orb[];
@@ -23,12 +16,8 @@ type OrbCategory =
   | "moonrock";
 
 interface CategoryConfig {
-  icon: React.ComponentType<{
-    className?: string;
-    style?: React.CSSProperties;
-  }>;
+  orb: Orb;
   color: string;
-  bgColor: string;
 }
 
 const darkenHex = (color: string, factor: number) => {
@@ -51,34 +40,28 @@ const hexToRgba = (color: string, alpha: number) => {
 
 const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   bomb: {
-    icon: OrbBombIcon,
+    orb: new Orb(OrbType.Bomb1),
     color: "#FF1E00",
-    bgColor: "rgba(255, 30, 0, 0.2)",
   },
   point: {
-    icon: OrbPointIcon,
+    orb: new Orb(OrbType.Point5),
     color: "#36F818",
-    bgColor: "rgba(54, 248, 24, 0.2)",
   },
   multiplier: {
-    icon: OrbMultiplierIcon,
+    orb: new Orb(OrbType.Multiplier50),
     color: "#FFF121",
-    bgColor: "rgba(255, 241, 33, 0.2)",
   },
   health: {
-    icon: OrbHealthIcon,
+    orb: new Orb(OrbType.Health1),
     color: "#FE5578",
-    bgColor: "rgba(254, 85, 120, 0.2)",
   },
   chip: {
-    icon: OrbChipIcon,
+    orb: new Orb(OrbType.Chips15),
     color: "#FFF121",
-    bgColor: "rgba(255, 241, 33, 0.2)",
   },
   moonrock: {
-    icon: OrbMoonrockIcon,
+    orb: new Orb(OrbType.Moonrock15),
     color: "#7487FF",
-    bgColor: "rgba(116, 135, 255, 0.2)",
   },
 };
 
@@ -153,39 +136,14 @@ export const OrbCategorySummary = ({
         {categoriesToShow.length > 0 ? (
           categoriesToShow.map((category) => {
             const config = categoryConfig[category];
-            const Icon = config.icon;
             const count = categoryCounts[category];
 
             return (
               <div key={category} className="relative flex-shrink-0">
-                {/* Orb circle */}
-                <div
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
-                  style={{
-                    backgroundColor: config.bgColor,
-                    border: `2px solid ${config.color}`,
-                  }}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: "url(/assets/orb.png)",
-                      backgroundSize: "110%",
-                      backgroundPosition: "center",
-                      opacity: 0.25,
-                    }}
-                  />
-                  <Icon
-                    className="relative z-10 w-9 h-9"
-                    style={{
-                      color: config.color,
-                      filter: `drop-shadow(0 0 4px ${config.color})`,
-                    }}
-                  />
-                </div>
+                <OrbDisplay orb={config.orb} size="sm" showValue={false} />
                 {/* Count pill */}
                 <div
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[10px] font-bold font-secondary"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0 rounded-full text-[10px] font-bold font-secondary"
                   style={{
                     backgroundColor: darkenHex(config.color, 0.6),
                     border: `2px solid ${config.color}`,

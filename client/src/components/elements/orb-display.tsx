@@ -119,6 +119,7 @@ export interface OrbDisplayProps
   orb: Orb;
   bombTierIcons?: boolean;
   valuePosition?: "bottom" | "top-right";
+  showValue?: boolean;
 }
 
 export const OrbDisplay = ({
@@ -126,6 +127,7 @@ export const OrbDisplay = ({
   size = "md",
   bombTierIcons = false,
   valuePosition = "bottom",
+  showValue = true,
   className,
   ...props
 }: OrbDisplayProps) => {
@@ -187,7 +189,7 @@ export const OrbDisplay = ({
         />
       </div>
       {/* Value pill - outside the clipped area */}
-      {displayValue && (
+      {showValue && displayValue && (
         <div
           className={cn(
             "absolute z-30 rounded-full flex items-center justify-center",
