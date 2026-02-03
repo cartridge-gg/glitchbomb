@@ -49,7 +49,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
       <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
           <div className="flex justify-center w-full">
-            <div className="grid grid-cols-6 gap-3 py-3 place-items-center">
+            <div className="grid grid-cols-6 gap-3 pt-2 pb-3 place-items-center">
               {orbs.map((orb, index) => {
                 const isDiscarded = Boolean(discards?.[index]);
                 return (
