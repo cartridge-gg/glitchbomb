@@ -41,6 +41,14 @@ const darkenHex = (color: string, factor: number) => {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
 
+const hexToRgba = (color: string, alpha: number) => {
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  const r = parseInt(color.slice(1, 3), 16);
+  const g = parseInt(color.slice(3, 5), 16);
+  const b = parseInt(color.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   bomb: {
     icon: OrbBombIcon,
@@ -152,14 +160,23 @@ export const OrbCategorySummary = ({
               <div key={category} className="relative flex-shrink-0">
                 {/* Orb circle */}
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
                   style={{
                     backgroundColor: config.bgColor,
                     border: `2px solid ${config.color}`,
                   }}
                 >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: "url(/assets/orb.png)",
+                      backgroundSize: "110%",
+                      backgroundPosition: "center",
+                      opacity: 0.25,
+                    }}
+                  />
                   <Icon
-                    className="w-9 h-9"
+                    className="relative z-10 w-9 h-9"
                     style={{
                       color: config.color,
                       filter: `drop-shadow(0 0 4px ${config.color})`,
@@ -177,7 +194,7 @@ export const OrbCategorySummary = ({
                 >
                   <span
                     className="font-secondary"
-                    style={{ color: `${config.color}66` }}
+                    style={{ color: hexToRgba(config.color, 0.4) }}
                   >
                     X
                   </span>
