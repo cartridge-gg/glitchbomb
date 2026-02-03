@@ -10,8 +10,8 @@ import {
   StashModal,
 } from "@/components/containers";
 import {
-  CashOutChoice,
   BombTracker,
+  CashOutChoice,
   GameStats,
   MilestoneChoice,
   PLChartTabs,
@@ -448,10 +448,10 @@ export const Game = () => {
             />
           </div>
         ) : (
-            <div className="flex flex-1 flex-col">
-              <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
-                <GameStats
-                  points={game.points}
+          <div className="flex flex-1 flex-col">
+            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+              <GameStats
+                points={game.points}
                 milestone={game.milestone}
                 health={game.health}
                 level={game.level}

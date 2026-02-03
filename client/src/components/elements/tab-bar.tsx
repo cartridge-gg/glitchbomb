@@ -26,12 +26,7 @@ export const TabBar = <T extends string>({
   iconClassName,
   labelClassName,
 }: TabBarProps<T>) => (
-  <div
-    className={cn(
-      "flex gap-[1px] p-0",
-      className,
-    )}
-  >
+  <div className={cn("flex gap-[1px] p-0", className)}>
     {items.map((item) => {
       const isActive = item.id === active;
       const Icon = item.Icon;
@@ -43,9 +38,7 @@ export const TabBar = <T extends string>({
           onClick={() => onChange(item.id)}
           className={cn(
             "group flex-1 flex items-center justify-center gap-2 rounded-none transition-colors py-2 first:rounded-l-lg last:rounded-r-lg",
-            isActive
-              ? "bg-green-950"
-              : "bg-green-1000 hover:bg-green-950/80",
+            isActive ? "bg-green-950" : "bg-green-1000 hover:bg-green-950/80",
             buttonClassName,
           )}
         >
