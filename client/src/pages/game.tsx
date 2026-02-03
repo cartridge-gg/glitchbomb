@@ -300,7 +300,7 @@ export const Game = () => {
       return (
         <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
               <GameStats
                 points={INITIAL_GAME_VALUES.points}
                 milestone={INITIAL_GAME_VALUES.milestone}
@@ -314,7 +314,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] h-full flex-none"
+                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
                 lives={INITIAL_GAME_VALUES.health}
                 bombs={INITIAL_GAME_VALUES.distribution.bombs}
                 orbs={INITIAL_GAME_VALUES.orbsCount}
@@ -449,7 +449,7 @@ export const Game = () => {
           </div>
         ) : (
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 flex-col gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col gap-[clamp(4px,1.2svh,10px)]">
               <GameStats
                 points={game.points}
                 milestone={game.milestone}
@@ -463,7 +463,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-none"
+                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
                 lives={game.health}
                 bombs={distribution.bombs}
                 orbs={game.pullables.length}
