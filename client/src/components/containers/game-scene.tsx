@@ -259,14 +259,14 @@ export const GameScene = ({
       {/* Outcome */}
       <div
         className="absolute top-1/2 left-1/2"
-        style={{ transform: "translate(-50%, -50%) translateY(120px)" }}
+        style={{ transform: "translate(-50%, -50%)" }}
       >
         <AnimatePresence>
           {phase === 2 && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.5, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -10 }}
+              initial={{ opacity: 0, scale: 0.5, y: 140 }}
+              animate={{ opacity: 1, scale: 1, y: 120 }}
+              exit={{ opacity: 0, scale: 0.8, y: 110 }}
               transition={{
                 type: "spring",
                 stiffness: 400,
