@@ -37,9 +37,9 @@ const valueSizeMap = {
 };
 
 const valueSizeCompactMap = {
-  sm: "text-[10px] px-1.5 py-0 leading-none",
-  md: "text-[11px] px-2 py-0 leading-none",
-  lg: "text-[13px] px-2.5 py-0 leading-none",
+  sm: "text-xs px-2 py-0.5 leading-none",
+  md: "text-sm px-2.5 py-0.5 leading-none",
+  lg: "text-base px-3 py-0.5 leading-none",
 };
 
 const valuePositionMap = {
