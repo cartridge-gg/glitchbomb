@@ -87,10 +87,12 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       {/* Title/rarity and description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className="text-white font-secondary text-sm tracking-wide">
+          <h3 className="text-white font-secondary text-sm tracking-wide flex-1 min-w-0">
             {getOrbTypeName(orb)}
           </h3>
-          {!orb.isBomb() && <RarityPill rarity={orb.rarity()} />}
+          {!orb.isBomb() && (
+            <RarityPill rarity={orb.rarity()} className="ml-auto" />
+          )}
         </div>
         <p className="text-white/60 font-secondary text-xs tracking-wide">
           {getOrbShortDescription(orb)}
