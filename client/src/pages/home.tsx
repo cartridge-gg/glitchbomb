@@ -9,8 +9,6 @@ import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts";
 import { useActions } from "@/hooks/actions";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { isOfflineMode } from "@/offline/mode";
-import { selectTotalMoonrocks, useOfflineStore } from "@/offline/store";
 
 export const Home = () => {
   const { mint } = useActions();
@@ -20,8 +18,6 @@ export const Home = () => {
   const { config } = useEntitiesContext();
   const navigate = useNavigate();
   const [username, setUsername] = useState<string>();
-  const offlineState = useOfflineStore();
-  const offline = isOfflineMode();
 
   // Use token address from Config (blockchain state) if available, fallback to manifest
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -43,11 +39,6 @@ export const Home = () => {
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContracts, tokenBalances, tokenAddress]);
-  const offlineMoonrocks = useMemo(
-    () => selectTotalMoonrocks(offlineState),
-    [offlineState],
-  );
-
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
       "inventory",
@@ -60,26 +51,24 @@ export const Home = () => {
 
   // Fetch username
   useEffect(() => {
-    if (!connector || offline) return;
+    if (!connector) return;
     (connector as never as ControllerConnector).controller
       .username()
       ?.then((name) => setUsername(name));
-  }, [connector, offline]);
+  }, [connector]);
 
-  const isLoggedIn = offline || (!!account && !!username);
-  const displayUsername = offline ? "Offline" : username;
-  const displayMoonrocks = offline ? offlineMoonrocks : balance;
+  const isLoggedIn = !!account && !!username;
 
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Header */}
       {isLoggedIn && (
         <AppHeader
-          moonrocks={displayMoonrocks}
-          username={displayUsername}
+          moonrocks={balance}
+          username={username}
           showBack={false}
-          onMint={offline ? undefined : () => mint(tokenAddress)}
-          onProfileClick={offline ? undefined : onProfileClick}
+          onMint={() => mint(tokenAddress)}
+          onProfileClick={onProfileClick}
         />
       )}
 
