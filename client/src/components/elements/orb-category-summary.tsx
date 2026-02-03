@@ -171,11 +171,12 @@ export const OrbCategorySummary = ({
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold font-secondary"
                   style={{
                     backgroundColor: darkenHex(config.color, 0.6),
-                    border: `1px solid ${config.color}`,
+                    border: `2px solid ${config.color}`,
                     color: "#040603",
                   }}
                 >
-                  x{count}
+                  <span style={{ color: "#F5F5F5" }}>x</span>
+                  {count}
                 </div>
               </div>
             );
