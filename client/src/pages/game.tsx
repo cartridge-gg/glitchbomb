@@ -477,10 +477,10 @@ export const Game = () => {
                 onPull={handlePull}
               />
             </div>
-            <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
+            <div className="flex items-center justify-center pb-[clamp(0px,0.2svh,2px)]">
               <BombTracker details={bombDetails} size="lg" />
             </div>
-            <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+            <div className="pt-[clamp(2px,0.4svh,4px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
               <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"
