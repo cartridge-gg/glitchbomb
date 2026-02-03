@@ -89,11 +89,16 @@ export const GameStats = ({
           </div>
         </div>
         {/* Goal Progress Bar */}
-        <div className="w-full h-[clamp(8px,1.6svh,14px)] bg-green-950/70 rounded-full overflow-hidden">
+        <div
+          className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
+          style={{ backgroundColor: "rgba(9, 38, 4, 0.8)" }}
+        >
           <div
             className="h-full bg-green-400 rounded-full transition-all duration-300"
             style={{
               width: `${goalDisplayProgress}%`,
+              minWidth: "10px",
+              borderRadius: "9999px",
               boxShadow: "0 0 10px rgba(54, 248, 24, 0.4)",
             }}
           />
