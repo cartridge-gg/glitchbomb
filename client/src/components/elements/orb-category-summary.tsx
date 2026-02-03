@@ -151,7 +151,7 @@ export const OrbCategorySummary = ({
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary"
                   style={{
                     backgroundColor: darkenHex(config.color, 0.6),
-                    border: `2px solid ${config.color}`,
+                    border: `1.5px solid ${config.color}`,
                     color: config.color,
                   }}
                 >
