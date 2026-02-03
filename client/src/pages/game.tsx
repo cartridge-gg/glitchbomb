@@ -480,7 +480,7 @@ export const Game = () => {
             <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)]">
               <BombTracker details={bombDetails} size="lg" />
             </div>
-            <div className="pt-[clamp(12px,2.2svh,20px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+            <div className="pt-[clamp(12px,2.2svh,20px)] pb-[clamp(10px,2svh,18px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
               <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"
