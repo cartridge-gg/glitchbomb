@@ -58,6 +58,16 @@ export const Home = () => {
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
 
+  const onOfflineClick = useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem("gb_offline_mode", "1");
+    } catch {
+      // Ignore storage errors, still attempt to navigate with query flag.
+    }
+    window.location.href = "/games?offline=1";
+  }, []);
+
   // Fetch username
   useEffect(() => {
     if (!connector || offline) return;
@@ -105,6 +115,13 @@ export const Home = () => {
           ) : (
             <div className="flex flex-col items-center gap-4 w-full">
               <Connect highlight onClick={onConnectClick} />
+              <Button
+                variant="default"
+                className="h-12 w-full font-secondary uppercase text-sm tracking-widest"
+                onClick={onOfflineClick}
+              >
+                Play Offline
+              </Button>
               <Button
                 variant="secondary"
                 className="h-10 w-full font-secondary uppercase text-sm tracking-widest"
