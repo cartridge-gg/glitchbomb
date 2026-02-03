@@ -55,13 +55,18 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all",
-      active
-        ? "bg-green-900/70 text-green-400"
-        : "text-green-700/60 hover:text-green-500",
+      "group flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all",
+      active ? "bg-green-900/70" : "hover:bg-green-900/30",
     )}
   >
-    {children}
+    <span
+      className={cn(
+        "transition-colors",
+        active ? "text-green-400" : "text-green-600/70 group-hover:text-green-500",
+      )}
+    >
+      {children}
+    </span>
   </button>
 );
 
