@@ -11,6 +11,7 @@ import {
 } from "@/components/containers";
 import {
   CashOutChoice,
+  BombTracker,
   GameStats,
   MilestoneChoice,
   PLChartTabs,
@@ -259,6 +260,20 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
+  const bombDetails = useMemo(
+    () =>
+      game
+        ? game.bombs()
+        : {
+            simple: {
+              total: INITIAL_GAME_VALUES.distribution.bombs,
+              count: INITIAL_GAME_VALUES.distribution.bombs,
+            },
+            double: { total: 0, count: 0 },
+            triple: { total: 0, count: 0 },
+          },
+    [game],
+  );
   const hasStickyBomb = useMemo(
     () => game?.bag?.some((orb) => orb.value === OrbType.StickyBomb) ?? false,
     [game?.bag],
@@ -308,6 +323,9 @@ export const Game = () => {
                 hasCurse={false}
                 onPull={() => {}} // No-op while loading
               />
+            </div>
+            <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)] opacity-50">
+              <BombTracker details={bombDetails} />
             </div>
             <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
               <Button
@@ -430,10 +448,10 @@ export const Game = () => {
             />
           </div>
         ) : (
-          <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
-              <GameStats
-                points={game.points}
+            <div className="flex flex-1 flex-col">
+              <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+                <GameStats
+                  points={game.points}
                 milestone={game.milestone}
                 health={game.health}
                 level={game.level}
@@ -456,6 +474,9 @@ export const Game = () => {
                 orb={currentOrb}
                 onPull={handlePull}
               />
+            </div>
+            <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)]">
+              <BombTracker details={bombDetails} />
             </div>
             <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
               <GradientBorder color="yellow" className="flex-1">
