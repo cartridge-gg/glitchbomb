@@ -28,7 +28,7 @@ export const TabBar = <T extends string>({
 }: TabBarProps<T>) => (
   <div
     className={cn(
-      "flex gap-[2px] p-0",
+      "flex gap-[1px] p-0",
       className,
     )}
   >
