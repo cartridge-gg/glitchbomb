@@ -73,16 +73,28 @@ export const CashOutChoice = ({
         className="flex-1"
         contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(6px,1.4svh,10px)]"
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
-        innerClassName="py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)] gap-[clamp(4px,1.2svh,10px)]"
+        innerClassName="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
+        hideInner
       >
-        <div className="flex items-center gap-2">
-          <ArrowLeftIcon
-            size="sm"
-            className="text-green-400 w-[clamp(14px,3svh,18px)] h-[clamp(14px,3svh,18px)]"
-          />
-          <span className="text-green-400 font-secondary text-[clamp(0.75rem,2svh,1rem)] tracking-wider">
-            CANCEL
-          </span>
+        <div
+          className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+        >
+          <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
+            <span className="text-green-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
+              Go Back
+            </span>
+          </div>
+          <div className="h-px bg-green-100 opacity-10" />
+          <div className="flex-1 flex items-center justify-center gap-2 py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+            <ArrowLeftIcon
+              size="sm"
+              className="text-green-400 w-[clamp(14px,3svh,18px)] h-[clamp(14px,3svh,18px)]"
+            />
+            <span className="text-green-400 font-secondary text-[clamp(0.75rem,2svh,1rem)] tracking-wider">
+              CANCEL
+            </span>
+          </div>
         </div>
       </InfoCard>
     </div>
