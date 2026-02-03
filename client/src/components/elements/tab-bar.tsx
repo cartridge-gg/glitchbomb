@@ -54,7 +54,10 @@ export const TabBar = <T extends string>({
           {item.label ? (
             <span
               className={cn(
-                "font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest",
+                "font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest transition-colors",
+                isActive
+                  ? "text-green-400"
+                  : "text-green-600 opacity-70 group-hover:text-green-500 group-hover:opacity-100",
                 labelClassName,
               )}
             >
