@@ -82,7 +82,7 @@ export const GameStats = ({
         {/* Health Bar */}
         <ProgressBar
           progress={healthProgress}
-          trackColor="rgba(26, 0, 13, 0.65)"
+          trackColor="rgba(9, 38, 4, 0.8)"
           fillColor="#FF40A0"
           glowColor="rgba(255, 0, 128, 0.5)"
         />
