@@ -20,7 +20,7 @@ export interface BombTrackerProps
 }
 
 const bombTrackerVariants = cva(
-  "select-none flex items-center w-full gap-[2px]",
+  "select-none flex items-center w-full gap-[1px]",
   {
     variants: {
       variant: {
@@ -45,6 +45,7 @@ export const BombTracker = ({
   className,
   ...props
 }: BombTrackerProps) => {
+  const minSlots = 8;
   let keyCounter = 0;
   const slotClasses = size === "lg" ? "h-8 w-8" : "h-6 w-6";
   const emptySlotClasses = size === "lg" ? "h-5 w-5" : "h-4 w-4";
@@ -66,6 +67,9 @@ export const BombTracker = ({
   pushSlots(details.simple, "simple");
   pushSlots(details.double, "double");
   pushSlots(details.triple, "triple");
+  while (slots.length < minSlots) {
+    slots.push({ variant: "simple", enabled: false });
+  }
 
   const EmptySlot = ({ className }: { className?: string }) => (
     <svg
