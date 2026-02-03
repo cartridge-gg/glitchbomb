@@ -135,6 +135,7 @@ export const Games = () => {
   );
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
   const displayUsername = offline ? "Offline" : username;
+  const isLoggedIn = !!account && !!username;
 
   // Fetch username
   useEffect(() => {
@@ -242,6 +243,16 @@ export const Games = () => {
     }
   }, [connector, starterpack, offline]);
 
+  const onOfflineClick = useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem("gb_offline_mode", "1");
+    } catch {
+      // Ignore storage errors, still attempt to navigate with query flag.
+    }
+    window.location.href = "/games?offline=1";
+  }, []);
+
   const onProfileClick = useCallback(() => {
     if (offline) return;
     (connector as never as ControllerConnector)?.controller.openProfile(
@@ -277,6 +288,15 @@ export const Games = () => {
               <MoonrockIcon size="sm" />
               {offline ? "New Pack" : "Purchase"}
             </button>
+            {!offline && isLoggedIn && (
+              <button
+                type="button"
+                className="flex items-center justify-center gap-2 h-10 px-6 rounded-lg font-secondary uppercase text-xs tracking-[0.2em] transition-all duration-200 hover:brightness-110 bg-[#0A2518] text-green-400/90"
+                onClick={onOfflineClick}
+              >
+                Play Offline for Free
+              </button>
+            )}
           </div>
 
           {/* Game list */}
