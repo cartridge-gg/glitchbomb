@@ -120,6 +120,7 @@ export interface OrbDisplayProps
   bombTierIcons?: boolean;
   valuePosition?: "bottom" | "top-right";
   showValue?: boolean;
+  glowScale?: number;
 }
 
 export const OrbDisplay = ({
@@ -128,13 +129,14 @@ export const OrbDisplay = ({
   bombTierIcons = false,
   valuePosition = "bottom",
   showValue = true,
+  glowScale = 1,
   className,
   ...props
 }: OrbDisplayProps) => {
   const Icon = getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
   const displayValue = getOrbDisplayValue(orb);
-  const glowSize = glowSizeMap[size ?? "md"];
+  const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (
     <div

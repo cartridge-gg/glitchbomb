@@ -140,7 +140,12 @@ export const OrbCategorySummary = ({
 
             return (
               <div key={category} className="relative flex-shrink-0">
-                <OrbDisplay orb={config.orb} size="sm" showValue={false} />
+                <OrbDisplay
+                  orb={config.orb}
+                  size="xs"
+                  showValue={false}
+                  glowScale={0.35}
+                />
                 {/* Count pill */}
                 <div
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0 rounded-full text-[10px] font-bold font-secondary"
