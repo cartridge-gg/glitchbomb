@@ -55,8 +55,8 @@ const TabButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      "group flex-1 flex items-center justify-center py-1.5 rounded-lg transition-colors text-green-600/70 hover:text-green-500",
-      active ? "bg-green-900/70 text-green-400" : "hover:bg-green-900/30",
+      "group flex-1 flex items-center justify-center py-1.5 rounded-lg transition-colors",
+      active ? "bg-green-900/70" : "hover:bg-green-900/30",
     )}
   >
     {children}
@@ -153,6 +153,11 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
     activeTab === "orbs"
       ? "Orbs in your bag that can be pulled"
       : "List view of the orbs in your bag";
+  const tabIconClass = (active: boolean) =>
+    cn(
+      "w-4 h-4 transition-colors",
+      active ? "text-green-400" : "text-green-600/70 group-hover:text-green-500",
+    );
 
   return (
     <div className="flex flex-col gap-[clamp(6px,1.6svh,12px)] w-full max-w-[420px] mx-auto px-5 py-[clamp(8px,2svh,16px)] h-full min-h-0 text-left">
@@ -177,13 +182,13 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
               active={activeTab === "orbs"}
               onClick={() => setActiveTab("orbs")}
             >
-              <GridIcon className="w-4 h-4" />
+              <GridIcon className={tabIconClass(activeTab === "orbs")} />
             </TabButton>
             <TabButton
               active={activeTab === "list"}
               onClick={() => setActiveTab("list")}
             >
-              <ListIcon className="w-4 h-4" />
+              <ListIcon className={tabIconClass(activeTab === "list")} />
             </TabButton>
           </div>
         </div>
