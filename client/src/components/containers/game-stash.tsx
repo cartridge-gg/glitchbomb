@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { OrbDisplay, TabBar, type TabBarItem } from "@/components/elements";
+import {
+  OrbDisplay,
+  RarityPill,
+  TabBar,
+  type TabBarItem,
+} from "@/components/elements";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 
@@ -110,10 +115,13 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
 
                 {/* Orb info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase">
-                    {orb.name()}
-                  </h3>
-                  <p className="text-green-600 font-secondary text-[10px] tracking-[0.2em]">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase">
+                      {orb.name()}
+                    </h3>
+                    <RarityPill rarity={orb.rarity()} />
+                  </div>
+                  <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">
                     {orb.description()}
                   </p>
                 </div>
