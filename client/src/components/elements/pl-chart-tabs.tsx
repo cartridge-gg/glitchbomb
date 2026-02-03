@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { TabBar, type TabBarItem } from "./tab-bar";
 import type { OrbPulled } from "@/models";
 import { type PLDataPoint, PLGraph } from "./pl-graph";
+import { TabBar, type TabBarItem } from "./tab-bar";
 
 export interface PLChartTabsProps {
   data: PLDataPoint[];
