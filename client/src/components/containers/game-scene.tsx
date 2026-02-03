@@ -97,7 +97,6 @@ export const GameScene = ({
   const badgeOffsetX = 104;
   const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
   const fireIconSize = Math.round(badgeSizePx * 0.4);
-  const sceneOffsetY = Math.round(clamp(4, viewportHeight * 0.02, 36));
 
   // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
