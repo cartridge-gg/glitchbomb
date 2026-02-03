@@ -325,7 +325,7 @@ export const Game = () => {
               />
             </div>
             <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)] opacity-50">
-              <BombTracker details={bombDetails} />
+              <BombTracker details={bombDetails} size="lg" />
             </div>
             <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
               <Button
@@ -476,7 +476,7 @@ export const Game = () => {
               />
             </div>
             <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)]">
-              <BombTracker details={bombDetails} />
+              <BombTracker details={bombDetails} size="lg" />
             </div>
             <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
               <GradientBorder color="yellow" className="flex-1">
