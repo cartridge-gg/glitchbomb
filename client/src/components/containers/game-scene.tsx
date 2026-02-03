@@ -257,7 +257,10 @@ export const GameScene = ({
       </div>
 
       {/* Outcome */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[75%]">
+      <div
+        className="absolute top-1/2 left-1/2"
+        style={{ transform: "translate(-50%, -50%) translateY(75%)" }}
+      >
         <AnimatePresence>
           {phase === 2 && (
             <motion.div
