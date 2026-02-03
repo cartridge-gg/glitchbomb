@@ -25,7 +25,7 @@ export const CashOutChoice = ({
   const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
   return (
-    <div className="flex flex-col gap-[clamp(6px,1.4svh,10px)] w-full h-full">
+    <div className="flex flex-col justify-center gap-[clamp(6px,1.4svh,10px)] w-full h-full">
       {/* Confirm Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
