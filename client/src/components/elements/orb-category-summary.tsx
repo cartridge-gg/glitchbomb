@@ -148,7 +148,7 @@ export const OrbCategorySummary = ({
                 />
                 {/* Count pill */}
                 <div
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0 rounded-full text-[10px] font-bold font-secondary"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary"
                   style={{
                     backgroundColor: darkenHex(config.color, 0.6),
                     border: `2px solid ${config.color}`,
