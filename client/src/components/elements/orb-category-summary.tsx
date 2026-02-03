@@ -160,9 +160,9 @@ export const OrbCategorySummary = ({
                 <div
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold font-secondary"
                   style={{
-                    backgroundColor: config.bgColor.replace(", 0.2)", ", 0.8)"),
+                    backgroundColor: config.color,
                     border: `1px solid ${config.color}`,
-                    color: config.color,
+                    color: "#040603",
                   }}
                 >
                   x{count}
