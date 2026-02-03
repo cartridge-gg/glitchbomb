@@ -60,7 +60,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                       isDiscarded && "opacity-25",
                     )}
                   >
-                    <OrbDisplay orb={orb} size="sm" />
+                    <OrbDisplay orb={orb} size="sm" bombTierIcons />
                     <span className="sr-only">{orb.name()}</span>
                   </div>
                 );
@@ -96,7 +96,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                 )}
               >
                 {/* Orb icon */}
-                <OrbDisplay orb={orb} size="sm" />
+                <OrbDisplay orb={orb} size="sm" bombTierIcons />
 
                 {/* Orb info */}
                 <div className="flex-1 min-w-0">

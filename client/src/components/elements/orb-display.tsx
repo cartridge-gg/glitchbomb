@@ -1,5 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import {
+  Bomb1xIcon,
+  Bomb2xIcon,
+  Bomb3xIcon,
   BombOrbIcon,
   OrbChipIcon,
   OrbHealthIcon,
@@ -9,6 +12,7 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
+import { OrbType } from "@/models/orb";
 
 const orbDisplayVariants = cva(
   "relative rounded-full flex items-center justify-center shrink-0",
@@ -39,9 +43,16 @@ const glowSizeMap = {
 };
 
 // Get the icon component for an orb type
-const getOrbIcon = (orb: Orb) => {
+const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
   // PointBomb4 should show a bomb icon
-  if (orb.isBomb()) return BombOrbIcon;
+  if (orb.isBomb()) {
+    if (useBombTierIcons) {
+      if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
+      if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
+      if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
+    }
+    return BombOrbIcon;
+  }
   if (orb.isPoint()) return OrbPointIcon;
   if (orb.isMultiplier()) return OrbMultiplierIcon;
   if (orb.isHealth()) return OrbHealthIcon;
@@ -81,15 +92,17 @@ export interface OrbDisplayProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
+  bombTierIcons?: boolean;
 }
 
 export const OrbDisplay = ({
   orb,
   size = "md",
+  bombTierIcons = false,
   className,
   ...props
 }: OrbDisplayProps) => {
-  const Icon = getOrbIcon(orb);
+  const Icon = getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
   const displayValue = getOrbDisplayValue(orb);
   const glowSize = glowSizeMap[size ?? "md"];
