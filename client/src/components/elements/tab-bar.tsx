@@ -28,7 +28,7 @@ export const TabBar = <T extends string>({
 }: TabBarProps<T>) => (
   <div
     className={cn(
-      "flex gap-[1px] p-1 bg-green-800/60 rounded-xl shadow-[0_6px_24px_rgba(0,0,0,0.35)]",
+      "flex gap-[1px] p-1 bg-green-900 rounded-xl shadow-[0_6px_24px_rgba(0,0,0,0.35)]",
       className,
     )}
   >
@@ -44,8 +44,8 @@ export const TabBar = <T extends string>({
           className={cn(
             "group flex-1 flex items-center justify-center gap-2 rounded-none transition-colors py-2 first:rounded-l-lg last:rounded-r-lg",
             isActive
-              ? "bg-green-900/70"
-              : "bg-green-950/90 hover:bg-green-900/50",
+              ? "bg-green-950"
+              : "bg-green-1000 hover:bg-green-950/80",
             buttonClassName,
           )}
         >
