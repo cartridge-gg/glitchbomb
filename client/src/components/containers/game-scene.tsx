@@ -257,10 +257,7 @@ export const GameScene = ({
       </div>
 
       {/* Outcome */}
-      <div
-        className="absolute left-1/2"
-        style={{ top: "calc(50% + 120px)", transform: "translate(-50%, -50%)" }}
-      >
+      <div className="absolute inset-x-0 flex justify-center top-[65%]">
         <AnimatePresence>
           {phase === 2 && (
             <motion.div
