@@ -28,3 +28,4 @@ export * from "./rarity-pill";
 export * from "./recent-pulls";
 export * from "./score";
 export * from "./tag";
+export * from "./tab-bar";

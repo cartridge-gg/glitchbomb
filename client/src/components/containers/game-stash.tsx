@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OrbDisplay } from "@/components/elements";
+import { OrbDisplay, TabBar, type TabBarItem } from "@/components/elements";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 
@@ -40,27 +40,6 @@ const ListIcon = ({ className }: { className?: string }) => (
     <circle cx="5" cy="18" r="2" fill="currentColor" />
     <rect x="10" y="17" width="11" height="2" rx="1" fill="currentColor" />
   </svg>
-);
-
-const TabButton = ({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={cn(
-      "group flex-1 flex items-center justify-center py-1.5 rounded-lg transition-colors",
-      active ? "bg-green-900/70" : "hover:bg-green-900/30",
-    )}
-  >
-    {children}
-  </button>
 );
 
 const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
@@ -151,15 +130,12 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
   const description =
     activeTab === "orbs"
-      ? "Orbs in your bag that can be pulled"
+      ? "Grid view of the orbs in your bag"
       : "List view of the orbs in your bag";
-  const tabIconClass = (active: boolean) =>
-    cn(
-      "w-4 h-4 transition-colors",
-      active
-        ? "text-green-400"
-        : "text-green-600 opacity-70 group-hover:text-green-500 group-hover:opacity-100",
-    );
+  const tabItems: Array<TabBarItem<TabType>> = [
+    { id: "orbs", Icon: GridIcon },
+    { id: "list", Icon: ListIcon },
+  ];
 
   return (
     <div className="flex flex-col gap-[clamp(6px,1.6svh,12px)] w-full max-w-[420px] mx-auto px-5 py-[clamp(8px,2svh,16px)] h-full min-h-0 text-left">
@@ -172,27 +148,17 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
             </h1>
           </div>
 
-          {activeTab === "list" && (
-            <p className="text-green-600 font-secondary text-xs tracking-wide text-left w-full">
-              {description}
-            </p>
-          )}
+          <p className="text-green-600 font-secondary text-xs tracking-wide text-left w-full">
+            {description}
+          </p>
 
           {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-green-950 rounded-xl w-full mt-2">
-            <TabButton
-              active={activeTab === "orbs"}
-              onClick={() => setActiveTab("orbs")}
-            >
-              <GridIcon className={tabIconClass(activeTab === "orbs")} />
-            </TabButton>
-            <TabButton
-              active={activeTab === "list"}
-              onClick={() => setActiveTab("list")}
-            >
-              <ListIcon className={tabIconClass(activeTab === "list")} />
-            </TabButton>
-          </div>
+          <TabBar
+            items={tabItems}
+            active={activeTab}
+            onChange={setActiveTab}
+            className="w-full mt-2"
+          />
         </div>
 
         <div

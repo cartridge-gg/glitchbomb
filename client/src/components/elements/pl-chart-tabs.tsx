@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { TabBar, type TabBarItem } from "./tab-bar";
 import type { OrbPulled } from "@/models";
 import { type PLDataPoint, PLGraph } from "./pl-graph";
 
@@ -52,29 +53,6 @@ const LogsIcon = ({ className }: { className?: string }) => (
     <rect x="3" y="14" width="16" height="2" rx="1" fill="currentColor" />
     <rect x="3" y="19" width="10" height="2" rx="1" fill="currentColor" />
   </svg>
-);
-
-const TabButton = ({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={cn(
-      "flex-1 flex items-center justify-center gap-2 py-[clamp(4px,1svh,8px)] rounded-lg transition-all",
-      active
-        ? "bg-green-800 text-green-400"
-        : "text-green-900 hover:text-green-700",
-    )}
-  >
-    {children}
-  </button>
 );
 
 // Get category name for an orb
@@ -198,29 +176,22 @@ export const PLChartTabs = ({
   baseline,
 }: PLChartTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("chart");
+  const tabItems: Array<TabBarItem<TabType>> = [
+    { id: "chart", label: "P/L", Icon: ChartIcon },
+    { id: "logs", label: "HISTORY", Icon: LogsIcon },
+  ];
+
   return (
     <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-green-950 rounded-xl [@media(max-height:720px)]:hidden">
-        <TabButton
-          active={activeTab === "chart"}
-          onClick={() => setActiveTab("chart")}
-        >
-          <ChartIcon className="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]" />
-          <span className="font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest">
-            P/L
-          </span>
-        </TabButton>
-        <TabButton
-          active={activeTab === "logs"}
-          onClick={() => setActiveTab("logs")}
-        >
-          <LogsIcon className="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]" />
-          <span className="font-secondary text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-widest">
-            HISTORY
-          </span>
-        </TabButton>
-      </div>
+      <TabBar
+        items={tabItems}
+        active={activeTab}
+        onChange={setActiveTab}
+        className="[@media(max-height:720px)]:hidden"
+        buttonClassName="py-[clamp(4px,1svh,8px)]"
+        iconClassName="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]"
+      />
 
       {/* Tab Content */}
       {activeTab === "chart" ? (
