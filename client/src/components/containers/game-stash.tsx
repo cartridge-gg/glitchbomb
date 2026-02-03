@@ -146,7 +146,7 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
           {/* Header */}
           <div className="flex items-center justify-between w-full">
             <h1 className="text-green-400 font-secondary text-[clamp(1.05rem,3svh,1.25rem)] tracking-wide text-left">
-              Your orbs
+              {`Your orbs (${orbs.length})`}
             </h1>
           </div>
 
