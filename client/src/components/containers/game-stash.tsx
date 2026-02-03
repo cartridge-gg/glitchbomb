@@ -96,7 +96,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
               <div
                 key={`${orb.value}-${index}`}
                 className={cn(
-                  "flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full",
+                  "flex items-center gap-3 px-2 py-1.5 rounded-md border border-green-900 bg-green-950/30 w-full",
                   isDiscarded && "opacity-25",
                 )}
               >
@@ -110,10 +110,10 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
 
                 {/* Orb info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-primary text-sm tracking-wide">
+                  <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase">
                     {orb.name()}
                   </h3>
-                  <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
+                  <p className="text-green-600 font-secondary text-[10px] tracking-[0.2em]">
                     {orb.description()}
                   </p>
                 </div>
