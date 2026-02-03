@@ -10,6 +10,7 @@ import {
   StashModal,
 } from "@/components/containers";
 import {
+  BombTracker,
   CashOutChoice,
   GameStats,
   MilestoneChoice,
@@ -259,6 +260,20 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
+  const bombDetails = useMemo(
+    () =>
+      game
+        ? game.bombs()
+        : {
+            simple: {
+              total: INITIAL_GAME_VALUES.distribution.bombs,
+              count: INITIAL_GAME_VALUES.distribution.bombs,
+            },
+            double: { total: 0, count: 0 },
+            triple: { total: 0, count: 0 },
+          },
+    [game],
+  );
   const hasStickyBomb = useMemo(
     () => game?.bag?.some((orb) => orb.value === OrbType.StickyBomb) ?? false,
     [game?.bag],
@@ -285,7 +300,7 @@ export const Game = () => {
       return (
         <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
               <GameStats
                 points={INITIAL_GAME_VALUES.points}
                 milestone={INITIAL_GAME_VALUES.milestone}
@@ -299,7 +314,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
                 lives={INITIAL_GAME_VALUES.health}
                 bombs={INITIAL_GAME_VALUES.distribution.bombs}
                 orbs={INITIAL_GAME_VALUES.orbsCount}
@@ -308,6 +323,9 @@ export const Game = () => {
                 hasCurse={false}
                 onPull={() => {}} // No-op while loading
               />
+            </div>
+            <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)] opacity-50">
+              <BombTracker details={bombDetails} size="lg" />
             </div>
             <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)] opacity-50 pointer-events-none">
               <Button
@@ -382,7 +400,7 @@ export const Game = () => {
     return (
       <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
         {showCashoutChoice ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
+          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
               milestone={game.milestone}
@@ -395,7 +413,7 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <div className="mt-[clamp(6px,2.2svh,18px)]">
+            <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
               <CashOutChoice
                 moonrocks={pack.moonrocks}
                 points={game.points}
@@ -406,7 +424,7 @@ export const Game = () => {
             </div>
           </div>
         ) : milestoneReached ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)] [@media(max-height:720px)]:justify-start">
+          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(4px,1.2svh,10px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
               milestone={game.milestone}
@@ -419,19 +437,21 @@ export const Game = () => {
               mode="absolute"
               title="POTENTIAL"
             />
-            <MilestoneChoice
-              moonrocks={pack.moonrocks}
-              points={game.points}
-              onCashOut={handleCashOut}
-              onEnterShop={handleEnterShop}
-              isEnteringShop={isEnteringShop}
-              isCashingOut={isCashingOut}
-              nextCurseLabel={nextCurseLabel}
-            />
+            <div className="flex-1 min-h-0 flex items-center justify-center">
+              <MilestoneChoice
+                moonrocks={pack.moonrocks}
+                points={game.points}
+                onCashOut={handleCashOut}
+                onEnterShop={handleEnterShop}
+                isEnteringShop={isEnteringShop}
+                isCashingOut={isCashingOut}
+                nextCurseLabel={nextCurseLabel}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+            <div className="flex flex-1 min-h-0 flex-col gap-[clamp(4px,1.2svh,10px)]">
               <GameStats
                 points={game.points}
                 milestone={game.milestone}
@@ -445,7 +465,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
                 lives={game.health}
                 bombs={distribution.bombs}
                 orbs={game.pullables.length}
@@ -457,7 +477,10 @@ export const Game = () => {
                 onPull={handlePull}
               />
             </div>
-            <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
+            <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
+              <BombTracker details={bombDetails} size="lg" />
+            </div>
+            <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(6px,1.6svh,12px)]">
               <GradientBorder color="yellow" className="flex-1">
                 <button
                   type="button"

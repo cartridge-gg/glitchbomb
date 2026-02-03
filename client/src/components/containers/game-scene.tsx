@@ -54,7 +54,7 @@ const useViewportSize = () => {
   return size;
 };
 
-const gameSceneVariants = cva("relative", {
+const gameSceneVariants = cva("relative w-full h-full", {
   variants: {
     variant: {
       default: "",
@@ -148,77 +148,81 @@ export const GameScene = ({
       {/* Puller */}
       <div
         className={cn(
-          "absolute left-1/2 -translate-x-1/2 -translate-y-[51.5%] transition-opacity duration-300",
+          "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
           phase === 3 && "opacity-100 z-20",
         )}
-        style={{ top: `calc(50% + ${sceneOffsetY}px)` }}
       >
-        <Puller
-          onClick={onPull}
-          variant={
-            lives < 2
-              ? "bomb"
-              : lives < 4
-                ? "multiplier"
-                : lives < 5
-                  ? "default"
-                  : "point"
-          }
-          size="md"
-          sizePx={pullerSizePx}
-          orbs={orbs}
-          bombs={bombs}
-        />
-        {hasCurse && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute z-30"
-                  style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
-                >
-                  <div style={{ width: badgeSizePx, height: badgeSizePx }}>
-                    <Multiplier
-                      count={3}
-                      cornerRadius={50}
-                      className="h-full w-full [&_p]:opacity-0"
-                      electricGradient="linear-gradient(180deg, #F89149CC 0%, #D10D07CC 100%)"
-                      electricBorderGradient="linear-gradient(180deg, #F89149 0%, #D10D07 100%)"
-                      electricColor="#F89149"
-                      contentOpacity={0.55}
-                      borderWidthMin={1.25}
-                      borderWidthMax={2.5}
-                    />
-                    <div className="absolute inset-0 z-20 flex items-center justify-center">
-                      <FireIcon
-                        style={{ width: fireIconSize, height: fireIconSize }}
+        <div
+          className="relative"
+          style={{ transform: `translateY(${sceneOffsetY}px)` }}
+        >
+          <Puller
+            onClick={onPull}
+            variant={
+              lives < 2
+                ? "bomb"
+                : lives < 4
+                  ? "multiplier"
+                  : lives < 5
+                    ? "default"
+                    : "point"
+            }
+            size="md"
+            sizePx={pullerSizePx}
+            orbs={orbs}
+            bombs={bombs}
+          />
+          {hasCurse && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="absolute z-30"
+                    style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
+                  >
+                    <div style={{ width: badgeSizePx, height: badgeSizePx }}>
+                      <Multiplier
+                        count={3}
+                        cornerRadius={50}
+                        className="h-full w-full [&_p]:opacity-0"
+                        electricGradient="linear-gradient(180deg, #F89149CC 0%, #D10D07CC 100%)"
+                        electricBorderGradient="linear-gradient(180deg, #F89149 0%, #D10D07 100%)"
+                        electricColor="#F89149"
+                        contentOpacity={0.55}
+                        borderWidthMin={1.25}
+                        borderWidthMax={2.5}
                       />
+                      <div className="absolute inset-0 z-20 flex items-center justify-center">
+                        <FireIcon
+                          style={{ width: fireIconSize, height: fireIconSize }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-[#1A120A] text-orange-100 font-secondary text-[10px] tracking-[0.25em] uppercase border border-orange-500/50"
-              >
-                {curseLabel ?? "Random Curse"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        {/* Multiplier Badge - top right of puller */}
-        <div
-          className="absolute z-30"
-          style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
-        >
-          <div style={{ width: badgeSizePx, height: badgeSizePx }}>
-            <Multiplier
-              count={multiplier}
-              cornerRadius={50}
-              className="h-full w-full"
-            />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-[#1A120A] text-orange-100 font-secondary text-[10px] tracking-[0.25em] uppercase border border-orange-500/50"
+                >
+                  {curseLabel ?? "Random Curse"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {/* Multiplier Badge - top right of puller */}
+          <div
+            className="absolute z-30"
+            style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
+          >
+            <div style={{ width: badgeSizePx, height: badgeSizePx }}>
+              <Multiplier
+                count={multiplier}
+                cornerRadius={50}
+                className="h-full w-full"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -253,7 +257,7 @@ export const GameScene = ({
       </div>
 
       {/* Outcome */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 translate-y-[25%]">
         <AnimatePresence>
           {phase === 2 && (
             <motion.div

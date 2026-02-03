@@ -82,24 +82,26 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       transition={{ duration: 0.2 }}
     >
       {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="md" />
+      <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
 
-      {/* Title and description */}
+      {/* Title/rarity and description */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-white font-primary text-sm tracking-wide">
-          {getOrbTypeName(orb)}
-        </h3>
-        <p className="text-green-600 font-secondary text-xs tracking-wide">
+        <div className="flex items-center gap-2">
+          <h3 className="text-white font-secondary text-sm tracking-wide flex-1 min-w-0">
+            {getOrbTypeName(orb)}
+          </h3>
+          {!orb.isBomb() && (
+            <RarityPill rarity={orb.rarity()} className="ml-auto" />
+          )}
+        </div>
+        <p className="text-white/60 font-secondary text-xs tracking-wide">
           {getOrbShortDescription(orb)}
         </p>
       </div>
 
-      {/* Rarity pill */}
-      <RarityPill rarity={orb.rarity()} className="self-start mt-3" />
-
       {/* Price and add button */}
       <div
-        className="flex items-center rounded-lg overflow-hidden"
+        className="flex items-center rounded-lg overflow-hidden min-w-[128px] justify-between"
         style={{
           backgroundColor: "rgba(0, 15, 0, 0.6)",
         }}
@@ -108,10 +110,10 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
-            initial={{ scale: 1.3, color: "#4ade80" }}
-            animate={{ scale: 1, color: "#ffedd5" }}
+            initial={{ scale: 1.3 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="font-secondary text-sm"
+            className="font-secondary text-sm text-orange-100"
           >
             {price}
           </motion.span>

@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { OrbDisplay, TabBar, type TabBarItem } from "@/components/elements";
+import {
+  OrbDisplay,
+  RarityPill,
+  TabBar,
+  type TabBarItem,
+} from "@/components/elements";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 
@@ -49,7 +54,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
       <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
           <div className="flex justify-center w-full">
-            <div className="grid grid-cols-6 gap-3 py-3 place-items-center">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pt-4 pb-3 place-items-center">
               {orbs.map((orb, index) => {
                 const isDiscarded = Boolean(discards?.[index]);
                 return (
@@ -57,10 +62,15 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                     key={index}
                     className={cn(
                       "flex flex-col items-center",
-                      isDiscarded && "opacity-50",
+                      isDiscarded && "opacity-25",
                     )}
                   >
-                    <OrbDisplay orb={orb} size="sm" />
+                    <OrbDisplay
+                      orb={orb}
+                      size="sm"
+                      bombTierIcons
+                      valuePosition="top-right"
+                    />
                     <span className="sr-only">{orb.name()}</span>
                   </div>
                 );
@@ -83,7 +93,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
       {/* Orbs list */}
-      <div className="flex flex-col gap-2 py-4 w-full">
+      <div className="flex flex-col gap-1 py-4 w-full">
         {orbs.length > 0 ? (
           orbs.map((orb, index) => {
             const isDiscarded = Boolean(discards?.[index]);
@@ -91,23 +101,29 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
               <div
                 key={`${orb.value}-${index}`}
                 className={cn(
-                  "flex items-center gap-3 p-2 rounded-lg border border-green-900 bg-green-950/30 w-full",
-                  isDiscarded && "opacity-40 grayscale",
+                  "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
+                  isDiscarded && "opacity-25",
                 )}
               >
                 {/* Orb icon */}
                 <OrbDisplay
                   orb={orb}
-                  size="sm"
-                  className={isDiscarded ? "opacity-70" : undefined}
+                  size="xs"
+                  bombTierIcons
+                  valuePosition="top-right"
                 />
 
                 {/* Orb info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-primary text-sm tracking-wide">
-                    {orb.name()}
-                  </h3>
-                  <p className="text-green-600 font-secondary text-2xs tracking-wider uppercase">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase flex-1 min-w-0">
+                      {orb.name()}
+                    </h3>
+                    {!orb.isBomb() && (
+                      <RarityPill rarity={orb.rarity()} className="ml-auto" />
+                    )}
+                  </div>
+                  <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">
                     {orb.description()}
                   </p>
                 </div>
@@ -128,10 +144,6 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
 
 export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
-  const description =
-    activeTab === "orbs"
-      ? "Grid view of the orbs in your bag"
-      : "List view of the orbs in your bag";
   const tabItems: Array<TabBarItem<TabType>> = [
     { id: "orbs", Icon: GridIcon },
     { id: "list", Icon: ListIcon },
@@ -144,13 +156,9 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
           {/* Header */}
           <div className="flex items-center justify-between w-full">
             <h1 className="text-green-400 font-secondary text-[clamp(1.05rem,3svh,1.25rem)] tracking-wide text-left">
-              Your orbs
+              {`Your orbs (${orbs.length})`}
             </h1>
           </div>
-
-          <p className="text-green-600 font-secondary text-xs tracking-wide text-left w-full">
-            {description}
-          </p>
 
           {/* Tabs */}
           <TabBar
