@@ -67,8 +67,14 @@ export const BombTracker = ({
   pushSlots(details.simple, "simple");
   pushSlots(details.double, "double");
   pushSlots(details.triple, "triple");
-  while (slots.length < minSlots) {
-    slots.push({ variant: "simple", enabled: false });
+  const targetSlots = Math.max(minSlots, slots.length);
+  const padCount = targetSlots - slots.length;
+  if (padCount > 0) {
+    const padStart = Math.floor(padCount / 2);
+    const padEnd = padCount - padStart;
+    const emptySlot = { variant: "simple" as const, enabled: false };
+    slots.unshift(...Array.from({ length: padStart }, () => emptySlot));
+    slots.push(...Array.from({ length: padEnd }, () => emptySlot));
   }
 
   const EmptySlot = ({ className }: { className?: string }) => (
