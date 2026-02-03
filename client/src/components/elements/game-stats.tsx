@@ -17,7 +17,7 @@ const ProgressBar = ({
     className="w-full h-[clamp(8px,1.6svh,14px)] rounded-full overflow-hidden"
     style={{ backgroundColor: trackColor }}
   >
-    <div className="w-full h-full p-[2px]">
+    <div className="w-full h-full p-[3px]">
       <div
         className="h-full rounded-full transition-all duration-300"
         style={{
