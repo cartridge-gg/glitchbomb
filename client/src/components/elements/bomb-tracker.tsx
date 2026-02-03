@@ -52,6 +52,7 @@ export const BombTracker = ({
   const slots: Array<{
     variant: "simple" | "double" | "triple";
     enabled: boolean;
+    isPadding?: boolean;
   }> = [];
 
   const pushSlots = (
@@ -60,7 +61,7 @@ export const BombTracker = ({
   ) => {
     for (let index = 0; index < detail.total; index += 1) {
       const enabled = index >= detail.total - detail.count;
-      slots.push({ variant, enabled });
+      slots.push({ variant, enabled, isPadding: false });
     }
   };
 
@@ -72,7 +73,11 @@ export const BombTracker = ({
   if (padCount > 0) {
     const padStart = Math.floor(padCount / 2);
     const padEnd = padCount - padStart;
-    const emptySlot = { variant: "simple" as const, enabled: false };
+    const emptySlot = {
+      variant: "simple" as const,
+      enabled: false,
+      isPadding: true,
+    };
     slots.unshift(...Array.from({ length: padStart }, () => emptySlot));
     slots.push(...Array.from({ length: padEnd }, () => emptySlot));
   }
@@ -111,12 +116,19 @@ export const BombTracker = ({
 
         return (
           <div key={key} className="flex-1 min-w-0 flex justify-center">
-            {slot.enabled ? (
+            {slot.isPadding ? (
+              <EmptySlot className={emptySlotClasses} />
+            ) : slot.enabled ? (
               <Icon
                 className={cn("transition-opacity duration-300", slotClasses)}
               />
             ) : (
-              <EmptySlot className={emptySlotClasses} />
+              <Icon
+                className={cn(
+                  "transition-opacity duration-300 opacity-25",
+                  slotClasses,
+                )}
+              />
             )}
           </div>
         );
