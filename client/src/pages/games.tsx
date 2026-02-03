@@ -15,7 +15,7 @@ import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { isOfflineMode, setOfflineMode } from "@/offline/mode";
+import { setOfflineMode, useOfflineMode } from "@/offline/mode";
 import {
   createPack,
   selectTotalMoonrocks,
@@ -107,10 +107,7 @@ export const Games = () => {
   const { start, mint } = useActions();
   const { packs } = usePacks();
   const offlineState = useOfflineStore();
-  const [mode, setMode] = useState<"onchain" | "offline">(() =>
-    isOfflineMode() ? "offline" : "onchain",
-  );
-  const offline = mode === "offline";
+  const offlineMode = useOfflineMode();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
   const pendingNavigationRef = useRef<{
@@ -141,9 +138,12 @@ export const Games = () => {
     () => selectTotalMoonrocks(offlineState),
     [offlineState],
   );
+  const isLoggedIn = !!account && !!username;
+  const canUseOffline = isLoggedIn;
+  const offline = offlineMode && canUseOffline;
+  const mode: "onchain" | "offline" = offline ? "offline" : "onchain";
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
   const displayUsername = username;
-  const isLoggedIn = !!account && !!username;
 
   // Fetch username
   useEffect(() => {
@@ -275,18 +275,16 @@ export const Games = () => {
 
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
-      if (nextMode === "offline" && !isLoggedIn) return;
+      if (nextMode === "offline" && !canUseOffline) return;
       persistMode(nextMode);
-      setMode(nextMode);
     },
-    [isLoggedIn, persistMode],
+    [canUseOffline, persistMode],
   );
 
   useEffect(() => {
-    if (isLoggedIn || mode !== "offline") return;
+    if (canUseOffline || !offlineMode) return;
     persistMode("onchain");
-    setMode("onchain");
-  }, [isLoggedIn, mode, persistMode]);
+  }, [canUseOffline, offlineMode, persistMode]);
 
   return (
     <div className="absolute inset-0 flex flex-col">
@@ -306,7 +304,9 @@ export const Games = () => {
           <TabBar
             items={[
               { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
-              { id: "offline", label: "Offline", Icon: MoonrockIcon },
+              ...(isLoggedIn
+                ? [{ id: "offline", label: "Offline", Icon: MoonrockIcon }]
+                : []),
             ]}
             active={mode}
             onChange={handleModeChange}
