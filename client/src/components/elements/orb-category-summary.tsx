@@ -177,7 +177,7 @@ export const OrbCategorySummary = ({
                 >
                   <span
                     className="font-secondary"
-                    style={{ color: `${config.color}80` }}
+                    style={{ color: `${config.color}66` }}
                   >
                     X
                   </span>
