@@ -124,10 +124,6 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
 
 export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
-  const description =
-    activeTab === "orbs"
-      ? "Grid view of the orbs in your bag"
-      : "List view of the orbs in your bag";
   const tabItems: Array<TabBarItem<TabType>> = [
     { id: "orbs", Icon: GridIcon },
     { id: "list", Icon: ListIcon },
@@ -143,10 +139,6 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
               Your orbs
             </h1>
           </div>
-
-          <p className="text-green-600 font-secondary text-xs tracking-wide text-left w-full">
-            {description}
-          </p>
 
           {/* Tabs */}
           <TabBar
