@@ -314,7 +314,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] h-full flex-none"
                 lives={INITIAL_GAME_VALUES.health}
                 bombs={INITIAL_GAME_VALUES.distribution.bombs}
                 orbs={INITIAL_GAME_VALUES.orbsCount}
@@ -463,7 +463,7 @@ export const Game = () => {
                 title="POTENTIAL"
               />
               <GameScene
-                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] flex-none"
+                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-none"
                 lives={game.health}
                 bombs={distribution.bombs}
                 orbs={game.pullables.length}
