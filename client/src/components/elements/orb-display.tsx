@@ -149,7 +149,7 @@ export const OrbDisplay = ({
           "overflow-hidden",
         )}
         style={{
-          borderWidth: "2px",
+          borderWidth: "1px",
           borderStyle: "solid",
           borderColor: color,
           transform: "translateZ(0)",
