@@ -31,6 +31,16 @@ interface CategoryConfig {
   bgColor: string;
 }
 
+const darkenHex = (color: string, factor: number) => {
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  const clamp = (value: number) => Math.max(0, Math.min(255, value));
+  const r = clamp(Math.round(parseInt(color.slice(1, 3), 16) * factor));
+  const g = clamp(Math.round(parseInt(color.slice(3, 5), 16) * factor));
+  const b = clamp(Math.round(parseInt(color.slice(5, 7), 16) * factor));
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
 const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   bomb: {
     icon: OrbBombIcon,
@@ -160,7 +170,7 @@ export const OrbCategorySummary = ({
                 <div
                   className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold font-secondary"
                   style={{
-                    backgroundColor: config.color,
+                    backgroundColor: darkenHex(config.color, 0.6),
                     border: `1px solid ${config.color}`,
                     color: "#040603",
                   }}
