@@ -90,7 +90,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           <h3 className="text-white font-secondary text-sm tracking-wide">
             {getOrbTypeName(orb)}
           </h3>
-          <RarityPill rarity={orb.rarity()} />
+          {!orb.isBomb() && <RarityPill rarity={orb.rarity()} />}
         </div>
         <p className="text-white/60 font-secondary text-xs tracking-wide">
           {getOrbShortDescription(orb)}
