@@ -83,10 +83,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                       isDiscarded && "opacity-50",
                     )}
                   >
-                    <OrbDisplay
-                      orb={orb}
-                      size="sm"
-                    />
+                    <OrbDisplay orb={orb} size="sm" />
                     <span className="sr-only">{orb.name()}</span>
                   </div>
                 );
