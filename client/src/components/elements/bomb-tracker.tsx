@@ -19,21 +19,24 @@ export interface BombTrackerProps
   details: BombDetails;
 }
 
-const bombTrackerVariants = cva("select-none flex items-center w-full gap-2", {
-  variants: {
-    variant: {
-      default: "text-red-400",
+const bombTrackerVariants = cva(
+  "select-none flex items-center w-full gap-[2px]",
+  {
+    variants: {
+      variant: {
+        default: "text-red-400",
+      },
+      size: {
+        md: "h-10",
+        lg: "h-12",
+      },
     },
-    size: {
-      md: "h-10",
-      lg: "h-12",
+    defaultVariants: {
+      variant: "default",
+      size: "md",
     },
   },
-  defaultVariants: {
-    variant: "default",
-    size: "md",
-  },
-});
+);
 
 export const BombTracker = ({
   details,
