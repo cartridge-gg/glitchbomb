@@ -28,8 +28,7 @@ export const MilestoneChoice = ({
     "font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none";
   const rewardLabelClass =
     "font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider";
-  const rewardIconClass =
-    "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
+  const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
   return (
     <div className="flex flex-col gap-[clamp(6px,1.4svh,10px)] w-full h-full">
@@ -60,9 +59,7 @@ export const MilestoneChoice = ({
           {/* Content */}
           <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <div className="flex items-center justify-center gap-1">
-              <MoonrockIcon
-                className={`${rewardIconClass} text-yellow-400`}
-              />
+              <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
               <span className={`text-yellow-400 ${rewardValueClass}`}>
                 +{totalMoonrocks}
               </span>
