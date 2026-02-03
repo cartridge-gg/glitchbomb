@@ -84,22 +84,22 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       {/* Orb icon with value */}
       <OrbDisplay orb={orb} size="md" valuePosition="top-right" />
 
-      {/* Title and description */}
+      {/* Title/rarity and description */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-white font-primary text-sm tracking-wide">
-          {getOrbTypeName(orb)}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-white font-primary text-sm tracking-wide">
+            {getOrbTypeName(orb)}
+          </h3>
+          <RarityPill rarity={orb.rarity()} />
+        </div>
         <p className="text-green-600 font-secondary text-xs tracking-wide">
           {getOrbShortDescription(orb)}
         </p>
       </div>
 
-      {/* Rarity pill */}
-      <RarityPill rarity={orb.rarity()} className="self-start mt-3" />
-
       {/* Price and add button */}
       <div
-        className="flex items-center rounded-lg overflow-hidden"
+        className="flex items-center rounded-lg overflow-hidden min-w-[128px] justify-between"
         style={{
           backgroundColor: "rgba(0, 15, 0, 0.6)",
         }}
