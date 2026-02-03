@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 const rarityColors = {
-  common: { border: "rgba(34, 197, 94, 0.3)", text: "#4ade80" },
-  rare: { border: "rgba(96, 165, 250, 0.3)", text: "#93c5fd" },
+  common: { border: "rgba(54, 248, 24, 0.5)", text: "#36F818" },
+  rare: { border: "rgba(116, 135, 255, 0.5)", text: "#7487FF" },
   cosmic: { border: "rgba(192, 132, 252, 0.5)", text: "#d8b4fe" },
 };
 
@@ -21,7 +21,7 @@ export const RarityPill = ({
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-center rounded-md px-2 font-secondary text-2xs tracking-wider uppercase border-2",
+        "inline-flex items-center justify-center rounded-md px-2 font-secondary text-2xs tracking-wider uppercase border",
         className,
       )}
       style={{

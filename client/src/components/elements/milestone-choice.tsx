@@ -1,4 +1,5 @@
 import { ChipIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 export interface MilestoneChoiceProps {
@@ -24,9 +25,14 @@ export const MilestoneChoice = ({
   const totalMoonrocks = moonrocks + points;
   const curseLabel = nextCurseLabel?.trim();
   const showCurse = Boolean(curseLabel);
+  const rewardValueClass =
+    "font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none";
+  const rewardLabelClass =
+    "font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider";
+  const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
   return (
-    <div className="flex flex-col gap-[clamp(6px,1.4svh,10px)] w-full h-full">
+    <div className="flex flex-col justify-center gap-[clamp(6px,1.4svh,10px)] w-full h-full">
       {/* Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
@@ -50,16 +56,16 @@ export const MilestoneChoice = ({
             </span>
           </div>
           {/* Separator */}
-          <div className="h-px bg-yellow-500" />
+          <CardDivider className="bg-yellow-100" />
           {/* Content */}
           <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
             <div className="flex items-center justify-center gap-1">
-              <MoonrockIcon className="w-[clamp(24px,5svh,36px)] h-[clamp(24px,5svh,36px)] text-yellow-400" />
-              <span className="text-yellow-400 font-secondary text-[clamp(1rem,3.8svh,2rem)] leading-none">
+              <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
+              <span className={`text-yellow-400 ${rewardValueClass}`}>
                 +{totalMoonrocks}
               </span>
             </div>
-            <span className="text-yellow-400/70 font-secondary text-[clamp(0.55rem,1.3svh,0.8rem)] tracking-wider">
+            <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
               Moon Rocks
             </span>
           </div>
@@ -91,19 +97,19 @@ export const MilestoneChoice = ({
               </span>
             </div>
             {/* Separator */}
-            <div className="h-px bg-orange-500" />
+            <CardDivider className="bg-orange-100" />
             {/* Content */}
             <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
               <div className="flex items-center gap-2">
                 <ChipIcon
                   size="md"
-                  className="text-orange-400 w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]"
+                  className={`text-orange-400 ${rewardIconClass}`}
                 />
-                <span className="text-orange-400 font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none">
+                <span className={`text-orange-400 ${rewardValueClass}`}>
                   +{points}
                 </span>
               </div>
-              <span className="text-orange-400/70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider">
+              <span className={`text-orange-400/70 ${rewardLabelClass}`}>
                 Gain Chips
               </span>
             </div>
@@ -122,7 +128,7 @@ export const MilestoneChoice = ({
                 </span>
               </div>
               {/* Separator */}
-              <div className="h-px bg-orange-500" />
+              <CardDivider className="bg-orange-100" />
               {/* Content */}
               <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1.2svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
                 <div className="flex items-center gap-2">

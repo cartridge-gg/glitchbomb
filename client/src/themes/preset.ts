@@ -42,6 +42,7 @@ export const preset: Partial<Config> = {
           800: "var(--green-800)",
           900: "var(--green-900)",
           950: "var(--green-950)",
+          1000: "var(--green-1000)",
         },
         yellow: {
           DEFAULT: "var(--yellow-100)",
