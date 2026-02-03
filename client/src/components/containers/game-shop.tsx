@@ -10,7 +10,7 @@ import {
 import { ChipIcon, WarningIcon } from "@/components/icons";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
-import { GameStash } from "./game-stash";
+import { StashModal } from "./stash-modal";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -20,6 +20,7 @@ export interface GameShopProps
   bag: Orb[];
   onConfirm: (indices: number[]) => void;
   isLoading?: boolean;
+  onBalanceChange?: (balance: number) => void;
 }
 
 const gameShopVariants = cva(
@@ -28,7 +29,7 @@ const gameShopVariants = cva(
     variants: {
       variant: {
         default:
-          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(6px,1.1svh,12px)]",
+          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(10px,2.4svh,18px)]",
       },
     },
     defaultVariants: {
@@ -81,24 +82,26 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       transition={{ duration: 0.2 }}
     >
       {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="md" />
+      <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
 
-      {/* Title and description */}
+      {/* Title/rarity and description */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-white font-primary text-sm tracking-wide">
-          {getOrbTypeName(orb)}
-        </h3>
-        <p className="text-green-600 font-secondary text-xs tracking-wide">
+        <div className="flex items-center gap-2">
+          <h3 className="text-white font-secondary text-sm tracking-wide flex-1 min-w-0">
+            {getOrbTypeName(orb)}
+          </h3>
+          {!orb.isBomb() && (
+            <RarityPill rarity={orb.rarity()} className="ml-auto" />
+          )}
+        </div>
+        <p className="text-white/60 font-secondary text-xs tracking-wide">
           {getOrbShortDescription(orb)}
         </p>
       </div>
 
-      {/* Rarity pill */}
-      <RarityPill rarity={orb.rarity()} className="self-start mt-3" />
-
       {/* Price and add button */}
       <div
-        className="flex items-center rounded-lg overflow-hidden"
+        className="flex items-center rounded-lg overflow-hidden min-w-[128px] justify-between"
         style={{
           backgroundColor: "rgba(0, 15, 0, 0.6)",
         }}
@@ -107,10 +110,10 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
-            initial={{ scale: 1.3, color: "#4ade80" }}
-            animate={{ scale: 1, color: "#ffedd5" }}
+            initial={{ scale: 1.3 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="font-secondary text-sm"
+            className="font-secondary text-sm text-orange-100"
           >
             {price}
           </motion.span>
@@ -142,6 +145,7 @@ export const GameShop = ({
   className,
   onConfirm,
   isLoading = false,
+  onBalanceChange,
   ...props
 }: GameShopProps) => {
   // Store quantities per orb index
@@ -150,8 +154,9 @@ export const GameShop = ({
   const [history, setHistory] = useState<number[]>([]);
   // Confirmation dialog for leaving without buying
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
-  // Show stash overlay
+  // Show stash modal
   const [showStash, setShowStash] = useState(false);
+  const [stashPulse, setStashPulse] = useState(0);
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -215,6 +220,9 @@ export const GameShop = ({
   }, [orbs, history]);
 
   const virtualBalance = balance - totalSpent;
+  useEffect(() => {
+    onBalanceChange?.(virtualBalance);
+  }, [virtualBalance, onBalanceChange]);
 
   // Build basket indices array (with duplicates for quantity)
   const basketIndices = useMemo(() => {
@@ -237,6 +245,7 @@ export const GameShop = ({
         [index]: (prev[index] || 0) + 1,
       }));
       setHistory((prev) => [...prev, index]);
+      setStashPulse((prev) => prev + 1);
     }
   };
 
@@ -260,7 +269,7 @@ export const GameShop = ({
 
   // Combine existing bag with pending purchases for display
   const displayBag = useMemo(() => {
-    const existingOrbs = bag.filter((orb) => !orb.isBomb() && !orb.isNone());
+    const existingOrbs = bag.filter((orb) => !orb.isNone());
     const pendingOrbs = basketIndices.map((index) => orbs[index]);
     return [...existingOrbs, ...pendingOrbs];
   }, [bag, basketIndices, orbs]);
@@ -279,17 +288,6 @@ export const GameShop = ({
     setShowExitConfirmation(false);
     onConfirm([]);
   };
-
-  // Show stash screen
-  if (showStash) {
-    return (
-      <GameStash
-        orbs={displayBag}
-        pulls={[]}
-        onClose={() => setShowStash(false)}
-      />
-    );
-  }
 
   // Show exit confirmation screen
   if (showExitConfirmation) {
@@ -372,18 +370,25 @@ export const GameShop = ({
               );
             })}
           </div>
-
-          {/* Your Orbs section - clickable category summary */}
-          <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)]">
-            <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
-              Your Orbs
-            </h2>
-            <OrbCategorySummary
-              orbs={displayBag}
-              onClick={() => setShowStash(true)}
-            />
-          </div>
         </div>
+      </div>
+
+      {/* Your Orbs section - clickable category summary */}
+      <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)] shrink-0">
+        <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
+          Your Orbs
+        </h2>
+        <motion.div
+          key={stashPulse}
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.02, 1] }}
+          transition={{ duration: 0.25 }}
+        >
+          <OrbCategorySummary
+            orbs={displayBag}
+            onClick={() => setShowStash(true)}
+          />
+        </motion.div>
       </div>
 
       {/* Action buttons */}
@@ -410,6 +415,12 @@ export const GameShop = ({
           {isLoading ? <LoadingSpinner size="sm" /> : "CONTINUE"}
         </Button>
       </div>
+
+      <StashModal
+        open={showStash}
+        onOpenChange={setShowStash}
+        orbs={displayBag}
+      />
     </div>
   );
 };

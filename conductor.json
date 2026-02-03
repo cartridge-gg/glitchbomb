@@ -1,0 +1,7 @@
+{
+    "scripts": {
+        "setup": "pnpm i",
+        "run": "pnpm dev",
+        "archive": "rm -rf node_modules"
+    }
+}

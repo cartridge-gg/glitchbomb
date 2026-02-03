@@ -9,7 +9,11 @@ export const PointsProgress = ({
   milestone,
   className = "",
 }: PointsProgressProps) => {
-  const progress = Math.min((points / milestone) * 100, 100);
+  const progress = Math.min(
+    milestone > 0 ? (points / milestone) * 100 : 0,
+    100,
+  );
+  const displayProgress = progress === 0 ? 3 : progress;
 
   return (
     <div className={`flex items-center gap-6 ${className}`}>
@@ -34,7 +38,7 @@ export const PointsProgress = ({
         <div className="w-full h-5 bg-green-950 rounded-sm overflow-hidden">
           <div
             className="h-full bg-green-700 rounded-l-sm transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${displayProgress}%` }}
           />
         </div>
       </div>

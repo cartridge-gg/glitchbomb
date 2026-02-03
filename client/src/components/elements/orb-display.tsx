@@ -1,5 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import {
+  Bomb1xIcon,
+  Bomb2xIcon,
+  Bomb3xIcon,
   BombOrbIcon,
   OrbChipIcon,
   OrbHealthIcon,
@@ -9,12 +12,14 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
+import { OrbType } from "@/models/orb";
 
 const orbDisplayVariants = cva(
   "relative rounded-full flex items-center justify-center shrink-0",
   {
     variants: {
       size: {
+        xs: "w-10 h-10",
         sm: "w-12 h-12",
         md: "w-16 h-16",
         lg: "w-20 h-20",
@@ -27,21 +32,52 @@ const orbDisplayVariants = cva(
 );
 
 const valueSizeMap = {
+  xs: "-bottom-1 text-[11px] px-1.5 py-px",
   sm: "-bottom-1 text-xs px-2 py-px",
   md: "-bottom-1.5 text-sm px-3 py-px",
   lg: "-bottom-2 text-base px-4 py-0.5",
 };
 
+const valueSizeCompactMap = {
+  xs: "text-xs px-2 py-0.5 leading-none",
+  sm: "text-xs px-2 py-0.5 leading-none",
+  md: "text-sm px-2.5 py-0.5 leading-none",
+  lg: "text-base px-3 py-0.5 leading-none",
+};
+
+const valuePositionMap = {
+  bottom: {
+    xs: "left-1/2 -translate-x-1/2",
+    sm: "left-1/2 -translate-x-1/2",
+    md: "left-1/2 -translate-x-1/2",
+    lg: "left-1/2 -translate-x-1/2",
+  },
+  "top-right": {
+    xs: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+    sm: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+    md: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+    lg: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
+  },
+};
+
 const glowSizeMap = {
+  xs: 3,
   sm: 4,
   md: 8,
   lg: 12,
 };
 
 // Get the icon component for an orb type
-const getOrbIcon = (orb: Orb) => {
+const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
   // PointBomb4 should show a bomb icon
-  if (orb.isBomb()) return BombOrbIcon;
+  if (orb.isBomb()) {
+    if (useBombTierIcons) {
+      if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
+      if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
+      if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
+    }
+    return BombOrbIcon;
+  }
   if (orb.isPoint()) return OrbPointIcon;
   if (orb.isMultiplier()) return OrbMultiplierIcon;
   if (orb.isHealth()) return OrbHealthIcon;
@@ -81,18 +117,26 @@ export interface OrbDisplayProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
+  bombTierIcons?: boolean;
+  valuePosition?: "bottom" | "top-right";
+  showValue?: boolean;
+  glowScale?: number;
 }
 
 export const OrbDisplay = ({
   orb,
   size = "md",
+  bombTierIcons = false,
+  valuePosition = "bottom",
+  showValue = true,
+  glowScale = 1,
   className,
   ...props
 }: OrbDisplayProps) => {
-  const Icon = getOrbIcon(orb);
+  const Icon = getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
   const displayValue = getOrbDisplayValue(orb);
-  const glowSize = glowSizeMap[size ?? "md"];
+  const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (
     <div
@@ -107,7 +151,7 @@ export const OrbDisplay = ({
           "overflow-hidden",
         )}
         style={{
-          borderWidth: "2px",
+          borderWidth: "1px",
           borderStyle: "solid",
           borderColor: color,
           transform: "translateZ(0)",
@@ -147,11 +191,14 @@ export const OrbDisplay = ({
         />
       </div>
       {/* Value pill - outside the clipped area */}
-      {displayValue && (
+      {showValue && displayValue && (
         <div
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-30 rounded-full flex items-center justify-center",
-            valueSizeMap[size ?? "md"],
+            "absolute z-30 rounded-full flex items-center justify-center",
+            valuePosition === "top-right"
+              ? valueSizeCompactMap[size ?? "md"]
+              : valueSizeMap[size ?? "md"],
+            valuePositionMap[valuePosition][size ?? "md"],
           )}
           style={{ backgroundColor: color }}
         >

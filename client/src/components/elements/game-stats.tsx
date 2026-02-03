@@ -1,5 +1,37 @@
 import { HeartIcon } from "@/components/icons";
 
+interface ProgressBarProps {
+  progress: number;
+  trackColor: string;
+  fillColor: string;
+  glowColor: string;
+}
+
+const ProgressBar = ({
+  progress,
+  trackColor,
+  fillColor,
+  glowColor,
+}: ProgressBarProps) => (
+  <div
+    className="w-full h-[clamp(10px,2svh,18px)] rounded-full overflow-hidden"
+    style={{ backgroundColor: trackColor }}
+  >
+    <div className="w-full h-full p-[3px]">
+      <div
+        className="h-full rounded-full transition-all duration-300"
+        style={{
+          width: `${progress}%`,
+          minWidth: "10px",
+          borderRadius: "9999px",
+          backgroundColor: fillColor,
+          boxShadow: `0 0 10px ${glowColor}`,
+        }}
+      />
+    </div>
+  </div>
+);
+
 export interface GameStatsProps {
   points: number;
   milestone: number;
@@ -17,12 +49,16 @@ export const GameStats = ({
   level,
   className = "",
 }: GameStatsProps) => {
-  const goalProgress = Math.min((points / milestone) * 100, 100);
+  const goalProgress = Math.min(
+    milestone > 0 ? (points / milestone) * 100 : 0,
+    100,
+  );
+  const goalDisplayProgress = goalProgress === 0 ? 3 : goalProgress;
   const healthProgress = (health / maxHealth) * 100;
 
   return (
     <div
-      className={`flex items-center gap-[clamp(8px,2svh,16px)] ${className}`}
+      className={`flex items-center gap-[clamp(10px,2.8svh,48px)] ${className}`}
     >
       {/* Left - Health */}
       <div className="flex-1 flex flex-col gap-1">
@@ -44,16 +80,12 @@ export const GameStats = ({
           </div>
         </div>
         {/* Health Bar */}
-        <div className="w-full h-[clamp(6px,1.4svh,12px)] bg-pink-950/50 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${healthProgress}%`,
-              background: "linear-gradient(90deg, #FF0080 0%, #FF40A0 100%)",
-              boxShadow: "0 0 8px rgba(255, 0, 128, 0.5)",
-            }}
-          />
-        </div>
+        <ProgressBar
+          progress={healthProgress}
+          trackColor="rgba(9, 38, 4, 0.8)"
+          fillColor="#FF40A0"
+          glowColor="rgba(255, 0, 128, 0.5)"
+        />
       </div>
 
       {/* Center - Points & Level */}
@@ -74,7 +106,7 @@ export const GameStats = ({
       {/* Right - Goal */}
       <div className="flex-1 flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span className="text-green-600 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
+          <span className="text-green-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
             Goal
           </span>
           <div className="flex items-center gap-1">
@@ -85,12 +117,12 @@ export const GameStats = ({
           </div>
         </div>
         {/* Goal Progress Bar */}
-        <div className="w-full h-[clamp(6px,1.4svh,12px)] bg-green-950/50 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-green-600 rounded-full transition-all duration-300"
-            style={{ width: `${goalProgress}%` }}
-          />
-        </div>
+        <ProgressBar
+          progress={goalDisplayProgress}
+          trackColor="rgba(9, 38, 4, 0.8)"
+          fillColor="#36F818"
+          glowColor="rgba(54, 248, 24, 0.4)"
+        />
       </div>
     </div>
   );

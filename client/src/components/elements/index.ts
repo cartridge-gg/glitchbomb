@@ -1,6 +1,7 @@
 export * from "./action";
 export * from "./balance";
 export * from "./bomb-tracker";
+export * from "./card-divider";
 export * from "./cash-out-choice";
 export * from "./connect";
 export * from "./counter";
@@ -27,4 +28,5 @@ export * from "./puller";
 export * from "./rarity-pill";
 export * from "./recent-pulls";
 export * from "./score";
+export * from "./tab-bar";
 export * from "./tag";

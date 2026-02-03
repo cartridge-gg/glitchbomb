@@ -87,14 +87,32 @@ export const InfoCard = ({
         <div
           className={`flex-1 flex flex-col items-center justify-center gap-3 w-full ${innerClassName}`}
         >
-          {isLoading ? <LoadingSpinner size="md" /> : children}
+          {isLoading ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <LoadingSpinner size="md" />
+              </div>
+              <div className="opacity-0 w-full">{children}</div>
+            </div>
+          ) : (
+            children
+          )}
         </div>
       ) : (
         <div
           className={`flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4 ${innerClassName}`}
           style={{ backgroundColor: styles.innerBg }}
         >
-          {isLoading ? <LoadingSpinner size="md" /> : children}
+          {isLoading ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <LoadingSpinner size="md" />
+              </div>
+              <div className="opacity-0 w-full">{children}</div>
+            </div>
+          ) : (
+            children
+          )}
         </div>
       )}
     </>

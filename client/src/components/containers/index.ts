@@ -6,3 +6,4 @@ export * from "./game-over";
 export * from "./game-scene";
 export * from "./game-shop";
 export * from "./game-stash";
+export * from "./stash-modal";

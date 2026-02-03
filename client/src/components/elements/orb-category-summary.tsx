@@ -1,13 +1,6 @@
-import {
-  BagIcon,
-  OrbBombIcon,
-  OrbChipIcon,
-  OrbHealthIcon,
-  OrbMoonrockIcon,
-  OrbMultiplierIcon,
-  OrbPointIcon,
-} from "@/components/icons";
-import type { Orb } from "@/models";
+import { BagIcon } from "@/components/icons";
+import { Orb, OrbType } from "@/models";
+import { OrbDisplay } from "./orb-display";
 
 export interface OrbCategorySummaryProps {
   orbs: Orb[];
@@ -23,44 +16,52 @@ type OrbCategory =
   | "moonrock";
 
 interface CategoryConfig {
-  icon: React.ComponentType<{
-    className?: string;
-    style?: React.CSSProperties;
-  }>;
+  orb: Orb;
   color: string;
-  bgColor: string;
 }
+
+const darkenHex = (color: string, factor: number) => {
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  const clamp = (value: number) => Math.max(0, Math.min(255, value));
+  const r = clamp(Math.round(parseInt(color.slice(1, 3), 16) * factor));
+  const g = clamp(Math.round(parseInt(color.slice(3, 5), 16) * factor));
+  const b = clamp(Math.round(parseInt(color.slice(5, 7), 16) * factor));
+  const toHex = (value: number) => value.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+const hexToRgba = (color: string, alpha: number) => {
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  const r = parseInt(color.slice(1, 3), 16);
+  const g = parseInt(color.slice(3, 5), 16);
+  const b = parseInt(color.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   bomb: {
-    icon: OrbBombIcon,
+    orb: new Orb(OrbType.Bomb1),
     color: "#FF1E00",
-    bgColor: "rgba(255, 30, 0, 0.2)",
   },
   point: {
-    icon: OrbPointIcon,
+    orb: new Orb(OrbType.Point5),
     color: "#36F818",
-    bgColor: "rgba(54, 248, 24, 0.2)",
   },
   multiplier: {
-    icon: OrbMultiplierIcon,
+    orb: new Orb(OrbType.Multiplier50),
     color: "#FFF121",
-    bgColor: "rgba(255, 241, 33, 0.2)",
   },
   health: {
-    icon: OrbHealthIcon,
+    orb: new Orb(OrbType.Health1),
     color: "#FE5578",
-    bgColor: "rgba(254, 85, 120, 0.2)",
   },
   chip: {
-    icon: OrbChipIcon,
+    orb: new Orb(OrbType.Chips15),
     color: "#FFF121",
-    bgColor: "rgba(255, 241, 33, 0.2)",
   },
   moonrock: {
-    icon: OrbMoonrockIcon,
+    orb: new Orb(OrbType.Moonrock15),
     color: "#7487FF",
-    bgColor: "rgba(116, 135, 255, 0.2)",
   },
 };
 
@@ -135,36 +136,32 @@ export const OrbCategorySummary = ({
         {categoriesToShow.length > 0 ? (
           categoriesToShow.map((category) => {
             const config = categoryConfig[category];
-            const Icon = config.icon;
             const count = categoryCounts[category];
 
             return (
               <div key={category} className="relative flex-shrink-0">
-                {/* Orb circle */}
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: config.bgColor,
-                    border: `2px solid ${config.color}`,
-                  }}
-                >
-                  <Icon
-                    className="w-9 h-9"
-                    style={{
-                      color: config.color,
-                      filter: `drop-shadow(0 0 4px ${config.color})`,
-                    }}
-                  />
-                </div>
+                <OrbDisplay
+                  orb={config.orb}
+                  size="xs"
+                  showValue={false}
+                  glowScale={0.7}
+                />
                 {/* Count pill */}
                 <div
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold font-secondary"
+                  className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary"
                   style={{
-                    backgroundColor: config.color,
-                    color: "#000",
+                    backgroundColor: darkenHex(config.color, 0.35),
+                    border: `1px solid ${config.color}`,
+                    color: config.color,
                   }}
                 >
-                  x{count}
+                  <span
+                    className="font-secondary"
+                    style={{ color: hexToRgba(config.color, 0.25) }}
+                  >
+                    X
+                  </span>
+                  {count}
                 </div>
               </div>
             );

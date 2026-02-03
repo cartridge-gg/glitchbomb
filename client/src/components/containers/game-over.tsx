@@ -29,7 +29,7 @@ export const GameOver = ({
 
   return (
     <div className="flex flex-col max-w-[420px] w-full mx-auto px-4 min-h-full">
-      <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(4px,1.2svh,10px)]">
+      <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)]">
         {/* Title Section */}
         <div className="flex flex-col items-center gap-0">
           <h1
@@ -51,7 +51,7 @@ export const GameOver = ({
             variant={cashedOut ? "green" : "red"}
             label={`You Earned${cashedOut ? "!" : ""}`}
             className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
-            innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(6px,1.4svh,12px)]"
+            innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
           >
             <MoonrockIcon
               className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}

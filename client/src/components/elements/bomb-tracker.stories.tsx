@@ -20,7 +20,7 @@ const meta = {
     },
     size: {
       control: { type: "select" },
-      options: ["md"],
+      options: ["md", "lg"],
       description: "Size variant of the bomb tracker",
     },
   },
@@ -37,7 +37,7 @@ export const Default: Story = {
       triple: { total: 1, count: 1 },
     },
     variant: "default",
-    size: "md",
+    size: "lg",
   },
 };
 
@@ -49,7 +49,7 @@ export const OnlySimple: Story = {
       triple: { total: 0, count: 0 },
     },
     variant: "default",
-    size: "md",
+    size: "lg",
   },
 };
 
@@ -61,7 +61,7 @@ export const Mixed: Story = {
       triple: { total: 1, count: 1 },
     },
     variant: "default",
-    size: "md",
+    size: "lg",
   },
 };
 
@@ -73,7 +73,7 @@ export const PartiallyUsed: Story = {
       triple: { total: 1, count: 0 },
     },
     variant: "default",
-    size: "md",
+    size: "lg",
   },
 };
 
@@ -85,6 +85,6 @@ export const AllUsed: Story = {
       triple: { total: 1, count: 0 },
     },
     variant: "default",
-    size: "md",
+    size: "lg",
   },
 };
