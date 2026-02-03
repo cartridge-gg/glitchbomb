@@ -156,7 +156,9 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const tabIconClass = (active: boolean) =>
     cn(
       "w-4 h-4 transition-colors",
-      active ? "text-green-400" : "text-green-600/70 group-hover:text-green-500",
+      active
+        ? "text-green-400"
+        : "text-green-600 opacity-70 group-hover:text-green-500 group-hover:opacity-100",
     );
 
   return (
