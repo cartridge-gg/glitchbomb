@@ -19,6 +19,7 @@ const orbDisplayVariants = cva(
   {
     variants: {
       size: {
+        xs: "w-10 h-10",
         sm: "w-12 h-12",
         md: "w-16 h-16",
         lg: "w-20 h-20",
@@ -31,12 +32,14 @@ const orbDisplayVariants = cva(
 );
 
 const valueSizeMap = {
+  xs: "-bottom-1 text-[11px] px-1.5 py-px",
   sm: "-bottom-1 text-xs px-2 py-px",
   md: "-bottom-1.5 text-sm px-3 py-px",
   lg: "-bottom-2 text-base px-4 py-0.5",
 };
 
 const valueSizeCompactMap = {
+  xs: "text-xs px-2 py-0.5 leading-none",
   sm: "text-xs px-2 py-0.5 leading-none",
   md: "text-sm px-2.5 py-0.5 leading-none",
   lg: "text-base px-3 py-0.5 leading-none",
@@ -44,11 +47,13 @@ const valueSizeCompactMap = {
 
 const valuePositionMap = {
   bottom: {
+    xs: "left-1/2 -translate-x-1/2",
     sm: "left-1/2 -translate-x-1/2",
     md: "left-1/2 -translate-x-1/2",
     lg: "left-1/2 -translate-x-1/2",
   },
   "top-right": {
+    xs: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
     sm: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
     md: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
     lg: "top-0 right-0 translate-x-1/3 -translate-y-1/3",
@@ -56,6 +61,7 @@ const valuePositionMap = {
 };
 
 const glowSizeMap = {
+  xs: 3,
   sm: 4,
   md: 8,
   lg: 12,

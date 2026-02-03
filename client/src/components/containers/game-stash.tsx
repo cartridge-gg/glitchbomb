@@ -103,7 +103,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                 {/* Orb icon */}
                 <OrbDisplay
                   orb={orb}
-                  size="sm"
+                  size="xs"
                   bombTierIcons
                   valuePosition="top-right"
                 />
