@@ -58,7 +58,7 @@ export const GameStats = ({
 
   return (
     <div
-      className={`flex items-center gap-[clamp(8px,2svh,16px)] ${className}`}
+      className={`flex items-center gap-[clamp(10px,2.8svh,48px)] ${className}`}
     >
       {/* Left - Health */}
       <div className="flex-1 flex flex-col gap-1">

@@ -182,7 +182,7 @@ export const PLChartTabs = ({
   ];
 
   return (
-    <div className={cn("flex flex-col gap-[clamp(8px,2svh,16px)]", className)}>
+    <div className={cn("flex flex-col gap-[clamp(10px,2.8svh,24px)]", className)}>
       {/* Tabs */}
       <TabBar
         items={tabItems}
