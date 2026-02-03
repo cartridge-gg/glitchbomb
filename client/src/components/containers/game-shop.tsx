@@ -82,7 +82,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
       transition={{ duration: 0.2 }}
     >
       {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="md" valuePosition="top-right" />
+      <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
 
       {/* Title/rarity and description */}
       <div className="flex-1 min-w-0">
