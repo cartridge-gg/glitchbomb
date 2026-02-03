@@ -15,7 +15,7 @@ import {
   useState,
 } from "react";
 import { NAMESPACE } from "@/constants";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
 import {
   CONFIG,
@@ -376,7 +376,8 @@ function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function EntitiesProvider({ children }: { children: React.ReactNode }) {
-  if (isOfflineMode()) {
+  const offline = useOfflineMode();
+  if (offline) {
     return <OfflineEntitiesProvider>{children}</OfflineEntitiesProvider>;
   }
   return <OnchainEntitiesProvider>{children}</OnchainEntitiesProvider>;

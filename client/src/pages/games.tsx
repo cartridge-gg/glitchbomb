@@ -1,7 +1,7 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { LoadingSpinner, TabBar } from "@/components/elements";
 import {
@@ -15,7 +15,7 @@ import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { isOfflineMode } from "@/offline/mode";
+import { isOfflineMode, setOfflineMode } from "@/offline/mode";
 import {
   createPack,
   selectTotalMoonrocks,
@@ -100,6 +100,7 @@ const GameCard = ({
 
 export const Games = () => {
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { starterpack, config } = useEntitiesContext();
@@ -256,35 +257,36 @@ export const Games = () => {
     );
   }, [connector]);
 
+  const persistMode = useCallback(
+    (nextMode: "onchain" | "offline") => {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (nextMode === "offline") {
+          params.set("offline", "1");
+        } else {
+          params.delete("offline");
+        }
+        setSearchParams(params, { replace: true });
+        setOfflineMode(nextMode === "offline");
+      }
+    },
+    [setSearchParams],
+  );
+
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
       if (nextMode === "offline" && !isLoggedIn) return;
-      if (typeof window !== "undefined") {
-        try {
-          window.localStorage.setItem(
-            "gb_offline_mode",
-            nextMode === "offline" ? "1" : "0",
-          );
-        } catch {
-          // Ignore storage errors.
-        }
-      }
+      persistMode(nextMode);
       setMode(nextMode);
     },
-    [isLoggedIn],
+    [isLoggedIn, persistMode],
   );
 
   useEffect(() => {
     if (isLoggedIn || mode !== "offline") return;
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem("gb_offline_mode", "0");
-      } catch {
-        // Ignore storage errors.
-      }
-    }
+    persistMode("onchain");
     setMode("onchain");
-  }, [isLoggedIn, mode]);
+  }, [isLoggedIn, mode, persistMode]);
 
   return (
     <div className="absolute inset-0 flex flex-col">

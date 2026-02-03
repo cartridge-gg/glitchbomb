@@ -8,7 +8,7 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
 import { Game, type RawGame } from "@/models";
 
@@ -39,7 +39,7 @@ const getGamesQuery = (keys: PackGameKey[]) => {
 export function useGames(keys: PackGameKey[]) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
-  const offline = isOfflineMode();
+  const offline = useOfflineMode();
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
 

@@ -2,7 +2,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback } from "react";
 import { CallData, uint256 } from "starknet";
 import { getGameAddress, getTokenAddress, getVrfAddress } from "@/config";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import {
   buy as offlineBuy,
   buyAndExit as offlineBuyAndExit,
@@ -18,7 +18,7 @@ import {
 export const useActions = () => {
   const { account } = useAccount();
   const { chain } = useNetwork();
-  const offline = isOfflineMode();
+  const offline = useOfflineMode();
 
   const start = useCallback(
     async (packId: number) => {

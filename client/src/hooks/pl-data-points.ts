@@ -7,7 +7,7 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import { selectPLDataPoints, useOfflineStore } from "@/offline/store";
 import { PLDataPoint, type RawPLDataPoint } from "@/models";
 
@@ -46,7 +46,7 @@ export function usePLDataPoints({
 }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
-  const offline = isOfflineMode();
+  const offline = useOfflineMode();
   const offlinePoints = useMemo(
     () => selectPLDataPoints(offlineState, packId, gameId),
     [offlineState, packId, gameId],

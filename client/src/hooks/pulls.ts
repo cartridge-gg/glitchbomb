@@ -7,7 +7,7 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import { selectPulls, useOfflineStore } from "@/offline/store";
 import { OrbPulled, type RawOrbPulled } from "@/models";
 
@@ -36,7 +36,7 @@ export function usePulls({
 }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
-  const offline = isOfflineMode();
+  const offline = useOfflineMode();
   const offlinePulls = useMemo(
     () => selectPulls(offlineState, packId, gameId),
     [offlineState, packId, gameId],

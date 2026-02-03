@@ -11,7 +11,7 @@ import { addAddressPadding } from "starknet";
 import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts";
-import { isOfflineMode } from "@/offline/mode";
+import { useOfflineMode } from "@/offline/mode";
 import { selectPacks, useOfflineStore } from "@/offline/store";
 import { Pack, type RawPack } from "@/models";
 import { useTokens } from "./tokens";
@@ -40,7 +40,7 @@ export function usePacks() {
   const { address } = useAccount();
   const { chain } = useNetwork();
   const offlineState = useOfflineStore();
-  const offline = isOfflineMode();
+  const offline = useOfflineMode();
   const offlinePacks = useMemo(
     () => selectPacks(offlineState),
     [offlineState],
