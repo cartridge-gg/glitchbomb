@@ -20,7 +20,7 @@ import {
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { OrbType } from "@/models/orb";

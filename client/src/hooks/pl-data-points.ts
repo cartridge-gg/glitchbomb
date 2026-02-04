@@ -4,10 +4,12 @@ import {
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { PLDataPoint, type RawPLDataPoint } from "@/models";
+import { useOfflineMode } from "@/offline/mode";
+import { selectPLDataPoints, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
@@ -43,9 +45,25 @@ export function usePLDataPoints({
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = useOfflineMode();
+  const offlinePoints = useMemo(
+    () => selectPLDataPoints(offlineState, packId, gameId),
+    [offlineState, packId, gameId],
+  );
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePLDataPoints] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Skip if invalid IDs (not yet loaded)
   const isReady = packId > 0 && gameId > 0;
@@ -89,16 +107,13 @@ export function usePLDataPoints({
   );
 
   useEffect(() => {
-    if (!client || !fetchKey) return;
+    if (offline || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
     if (isNewGame) {
       // Cancel existing subscription
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
       // Reset data points when switching to a new game
       setDataPoints([]);
       currentKeyRef.current = fetchKey;
@@ -150,21 +165,12 @@ export function usePLDataPoints({
     return () => {
       clearTimeout(retryTimeout);
       clearTimeout(retryTimeout2);
+      cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate]);
-
-  // Cleanup subscription on unmount
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
-    };
-  }, []);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
-    dataPoints,
+    dataPoints: offline ? offlinePoints : dataPoints,
     isReady,
   };
 }

@@ -10,8 +10,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addAddressPadding } from "starknet";
 import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { Pack, type RawPack } from "@/models";
+import { useOfflineMode } from "@/offline/mode";
+import { selectPacks, useOfflineStore } from "@/offline/store";
 import { useTokens } from "./tokens";
 
 const ENTITIES_LIMIT = 10_000;
@@ -37,8 +39,21 @@ export function usePacks() {
   const { client } = useEntitiesContext();
   const { address } = useAccount();
   const { chain } = useNetwork();
+  const offlineState = useOfflineStore();
+  const offline = useOfflineMode();
+  const offlinePacks = useMemo(() => selectPacks(offlineState), [offlineState]);
   const [packs, setPacks] = useState<Pack[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePacks] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   const { tokenBalances: balances } = useTokens({
     accountAddresses: address ? [addAddressPadding(address)] : [],
@@ -81,6 +96,7 @@ export function usePacks() {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
+    if (offline) return;
     if (!client || !packIds.length) return;
 
     // Cancel existing subscriptions
@@ -96,19 +112,17 @@ export function usePacks() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, packIds, onUpdate]);
+  }, [client, packIds, onUpdate, offline]);
 
   useEffect(() => {
     refresh();
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-      }
+      cancelSubscription();
     };
-  }, [refresh]);
+  }, [refresh, offline, cancelSubscription]);
 
   return {
-    packs,
+    packs: offline ? offlinePacks : packs,
   };
 }

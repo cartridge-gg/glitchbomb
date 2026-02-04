@@ -4,10 +4,12 @@ import {
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { OrbPulled, type RawOrbPulled } from "@/models";
+import { useOfflineMode } from "@/offline/mode";
+import { selectPulls, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
@@ -33,10 +35,26 @@ export function usePulls({
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = useOfflineMode();
+  const offlinePulls = useMemo(
+    () => selectPulls(offlineState, packId, gameId),
+    [offlineState, packId, gameId],
+  );
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePulls] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Skip if invalid IDs (not yet loaded)
   const isReady = packId > 0 && gameId > 0;
@@ -77,16 +95,13 @@ export function usePulls({
   );
 
   useEffect(() => {
-    if (!client || !fetchKey) return;
+    if (offline || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
     if (isNewGame) {
       // Cancel existing subscription
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
       // Reset pulls when switching to a new game
       setPulls([]);
       setInitialFetchComplete(false);
@@ -123,23 +138,13 @@ export function usePulls({
     }
 
     return () => {
-      // Cleanup handled in separate effect
+      cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate]);
-
-  // Cleanup subscription on unmount
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
-    };
-  }, []);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
-    pulls,
+    pulls: offline ? offlinePulls : pulls,
     isReady,
-    initialFetchComplete,
+    initialFetchComplete: offline ? true : initialFetchComplete,
   };
 }

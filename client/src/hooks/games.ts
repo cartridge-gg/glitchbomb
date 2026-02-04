@@ -7,8 +7,10 @@ import {
 import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { Game, type RawGame } from "@/models";
+import { useOfflineMode } from "@/offline/mode";
+import { selectGame, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
@@ -36,8 +38,20 @@ const getGamesQuery = (keys: PackGameKey[]) => {
 
 export function useGames(keys: PackGameKey[]) {
   const { client } = useEntitiesContext();
+  const offlineState = useOfflineStore();
+  const offline = useOfflineMode();
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[useGames] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Create a stable key string for dependency comparison
   const keysString = useMemo(
@@ -69,6 +83,7 @@ export function useGames(keys: PackGameKey[]) {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
+    if (offline) return;
     if (!client || !keys.length) return;
 
     // Cancel existing subscriptions
@@ -84,30 +99,33 @@ export function useGames(keys: PackGameKey[]) {
       subscriptionRef.current = response;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, keysString, onUpdate]);
+  }, [client, keysString, onUpdate, offline]);
 
   useEffect(() => {
     refresh();
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-      }
+      cancelSubscription();
     };
-  }, [refresh]);
+  }, [refresh, offline, cancelSubscription]);
 
   // Helper to get game by pack ID
   const getGameForPack = useCallback(
     (packId: number, gameId: number): Game | undefined => {
+      if (offline) return selectGame(offlineState, packId, gameId);
       return games.find(
         (game) => game.pack_id === packId && game.id === gameId,
       );
     },
-    [games],
+    [games, offline, offlineState],
   );
 
   return {
-    games,
+    games: offline
+      ? keys
+          .map((key) => selectGame(offlineState, key.packId, key.gameId))
+          .filter((game): game is Game => !!game)
+      : games,
     getGameForPack,
   };
 }
