@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/containers";
 import { Connect } from "@/components/elements";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 

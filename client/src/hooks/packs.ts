@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addAddressPadding } from "starknet";
 import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useOfflineMode } from "@/offline/mode";
 import { selectPacks, useOfflineStore } from "@/offline/store";
 import { Pack, type RawPack } from "@/models";

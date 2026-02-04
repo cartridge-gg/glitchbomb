@@ -10,7 +10,7 @@ import {
   SparkleIcon,
 } from "@/components/icons";
 import { getTokenAddress } from "@/config";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";

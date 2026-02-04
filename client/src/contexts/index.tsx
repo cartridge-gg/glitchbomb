@@ -5,15 +5,7 @@ import {
 } from "@dojoengine/sdk";
 import * as torii from "@dojoengine/torii-wasm";
 import { useAccount } from "@starknet-react/core";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
@@ -31,22 +23,7 @@ import {
   STARTERPACK,
   Starterpack,
 } from "@/models";
-
-interface EntitiesContextType {
-  client?: torii.ToriiClient;
-  pack?: Pack;
-  game?: Game;
-  config?: Config;
-  starterpack?: Starterpack;
-  status: "loading" | "error" | "success";
-  refresh: () => Promise<void>;
-  setGameId: (id: number) => void;
-  setPackId: (id: number) => void;
-}
-
-const EntitiesContext = createContext<EntitiesContextType | undefined>(
-  undefined,
-);
+import { EntitiesContext, type EntitiesContextType } from "./entities-context";
 
 const getEntityQuery = (namespace: string) => {
   const config: `${string}-${string}` = `${namespace}-${CONFIG}`;
@@ -85,7 +62,7 @@ const getGameQuery = (packId: number, gameId: number) => {
     .includeHashedKeys();
 };
 
-function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
+function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   const account = useAccount();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
@@ -131,6 +108,7 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
     },
     [gameId],
   );
+
   const [config, setConfig] = useState<Config>();
   const [starterpack, setStarterpack] = useState<Starterpack>();
   const [status, setStatus] = useState<"loading" | "error" | "success">(
@@ -139,16 +117,17 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize Torii client
   useEffect(() => {
+    if (!enabled || client) return;
     const getClient = async () => {
       const toriiUrl = import.meta.env.VITE_SEPOLIA_TORII_URL;
-      const client = await new torii.ToriiClient({
+      const nextClient = await new torii.ToriiClient({
         toriiUrl: toriiUrl,
         worldAddress: "0x0",
       });
-      setClient(client);
+      setClient(nextClient);
     };
     getClient();
-  }, []);
+  }, [enabled, client]);
 
   // Handler for entity updates (packs)
   const onEntityUpdate = useCallback(
@@ -188,7 +167,7 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
 
   // Refresh function to fetch and subscribe to data
   const refreshEntities = useCallback(async () => {
-    if (!client || !account) return;
+    if (!enabled || !client || !account) return;
 
     // Cancel existing subscriptions
     entitiesSubscriptionRef.current = null;
@@ -211,11 +190,11 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
       .then((response) => {
         entitiesSubscriptionRef.current = response;
       });
-  }, [client, account, onEntityUpdate]);
+  }, [enabled, client, account, onEntityUpdate]);
 
   // Refresh function to fetch and subscribe to data
   const refreshPack = useCallback(async () => {
-    if (!client || !account || !packId || !gameId) return;
+    if (!enabled || !client || !account || !packId || !gameId) return;
 
     // Cancel existing subscriptions
     packSubscriptionRef.current = null;
@@ -234,11 +213,11 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
       .then((response) => {
         entitiesSubscriptionRef.current = response;
       });
-  }, [client, account, onEntityUpdate, packId, gameId]);
+  }, [enabled, client, account, onEntityUpdate, packId, gameId]);
 
   // Refresh function to fetch and subscribe to data
   const refreshGame = useCallback(async () => {
-    if (!client || !account || !packId || !gameId) return;
+    if (!enabled || !client || !account || !packId || !gameId) return;
 
     // Cancel existing subscriptions
     gameSubscriptionRef.current = null;
@@ -257,7 +236,7 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
       .then((response) => {
         gameSubscriptionRef.current = response;
       });
-  }, [client, account, onEntityUpdate, packId, gameId]);
+  }, [enabled, client, account, onEntityUpdate, packId, gameId]);
 
   const refresh = useCallback(async () => {
     await refreshEntities();
@@ -267,6 +246,7 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
 
   // Initial fetch and subscription setup
   useEffect(() => {
+    if (!enabled) return;
     if (
       entitiesSubscriptionRef.current &&
       !!pack &&
@@ -296,9 +276,9 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
         gameSubscriptionRef.current.cancel();
       }
     };
-  }, [refresh, packId, gameId, pack, game]);
+  }, [enabled, refresh, packId, gameId, pack, game]);
 
-  const value: EntitiesContextType = {
+  return {
     client,
     pack,
     game,
@@ -309,15 +289,9 @@ function OnchainEntitiesProvider({ children }: { children: React.ReactNode }) {
     setGameId,
     setPackId,
   };
-
-  return (
-    <EntitiesContext.Provider value={value}>
-      {children}
-    </EntitiesContext.Provider>
-  );
 }
 
-function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
+function useOfflineEntitiesValue(): EntitiesContextType {
   const offlineState = useOfflineStore();
   const [packId, setPackIdState] = useState<number>(0);
   const [gameId, setGameIdState] = useState<number>(0);
@@ -332,10 +306,7 @@ function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
     return selectGame(offlineState, packId, gameId);
   }, [offlineState, packId, gameId]);
 
-  const config = useMemo(
-    () => new Config("0", "0x0", "0x0", "0x0"),
-    [],
-  );
+  const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0"), []);
   const starterpack = useMemo(
     () => new Starterpack("0", true, 0, 0n, "0x0"),
     [],
@@ -357,7 +328,7 @@ function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
     setGameIdState(id);
   }, []);
 
-  const value: EntitiesContextType = {
+  return {
     pack,
     game,
     starterpack,
@@ -367,29 +338,17 @@ function OfflineEntitiesProvider({ children }: { children: React.ReactNode }) {
     setGameId,
     setPackId,
   };
+}
+
+export function EntitiesProvider({ children }: { children: ReactNode }) {
+  const offline = useOfflineMode();
+  const onchainValue = useOnchainEntitiesValue(!offline);
+  const offlineValue = useOfflineEntitiesValue();
+  const value = offline ? offlineValue : onchainValue;
 
   return (
     <EntitiesContext.Provider value={value}>
       {children}
     </EntitiesContext.Provider>
   );
-}
-
-export function EntitiesProvider({ children }: { children: React.ReactNode }) {
-  const offline = useOfflineMode();
-  if (offline) {
-    return <OfflineEntitiesProvider>{children}</OfflineEntitiesProvider>;
-  }
-  return <OnchainEntitiesProvider>{children}</OnchainEntitiesProvider>;
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function useEntitiesContext() {
-  const context = useContext(EntitiesContext);
-  if (!context) {
-    throw new Error(
-      "useEntitiesContext must be used within a EntitiesProvider",
-    );
-  }
-  return context;
 }

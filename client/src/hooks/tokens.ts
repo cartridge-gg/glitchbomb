@@ -8,7 +8,7 @@ import type {
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addAddressPadding, num } from "starknet";
-import { useEntitiesContext } from "@/contexts";
+import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { equal } from "@/helpers";
 
 const CONTRACT_LIMIT = 1_000;
