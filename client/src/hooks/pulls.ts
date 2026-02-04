@@ -85,7 +85,7 @@ export function usePulls({
   );
 
   useEffect(() => {
-    if (!client || !fetchKey) return;
+    if (offline || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
@@ -131,19 +131,12 @@ export function usePulls({
     }
 
     return () => {
-      // Cleanup handled in separate effect
-    };
-  }, [client, fetchKey, packId, gameId, onUpdate]);
-
-  // Cleanup subscription on unmount
-  useEffect(() => {
-    return () => {
       if (subscriptionRef.current) {
         subscriptionRef.current.cancel();
         subscriptionRef.current = null;
       }
     };
-  }, []);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline]);
 
   return {
     pulls: offline ? offlinePulls : pulls,

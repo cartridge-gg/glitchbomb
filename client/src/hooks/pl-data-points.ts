@@ -97,7 +97,7 @@ export function usePLDataPoints({
   );
 
   useEffect(() => {
-    if (!client || !fetchKey) return;
+    if (offline || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
@@ -158,18 +158,12 @@ export function usePLDataPoints({
     return () => {
       clearTimeout(retryTimeout);
       clearTimeout(retryTimeout2);
-    };
-  }, [client, fetchKey, packId, gameId, onUpdate]);
-
-  // Cleanup subscription on unmount
-  useEffect(() => {
-    return () => {
       if (subscriptionRef.current) {
         subscriptionRef.current.cancel();
         subscriptionRef.current = null;
       }
     };
-  }, []);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline]);
 
   return {
     dataPoints: offline ? offlinePoints : dataPoints,

@@ -89,6 +89,7 @@ export function usePacks() {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
+    if (offline) return;
     if (!client || !packIds.length) return;
 
     // Cancel existing subscriptions
@@ -104,7 +105,7 @@ export function usePacks() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, packIds, onUpdate]);
+  }, [client, packIds, onUpdate, offline]);
 
   useEffect(() => {
     refresh();
@@ -114,7 +115,7 @@ export function usePacks() {
         subscriptionRef.current.cancel();
       }
     };
-  }, [refresh]);
+  }, [refresh, offline]);
 
   return {
     packs: offline ? offlinePacks : packs,

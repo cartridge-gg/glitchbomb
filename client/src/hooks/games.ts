@@ -73,6 +73,7 @@ export function useGames(keys: PackGameKey[]) {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
+    if (offline) return;
     if (!client || !keys.length) return;
 
     // Cancel existing subscriptions
@@ -88,7 +89,7 @@ export function useGames(keys: PackGameKey[]) {
       subscriptionRef.current = response;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, keysString, onUpdate]);
+  }, [client, keysString, onUpdate, offline]);
 
   useEffect(() => {
     refresh();
@@ -98,7 +99,7 @@ export function useGames(keys: PackGameKey[]) {
         subscriptionRef.current.cancel();
       }
     };
-  }, [refresh]);
+  }, [refresh, offline]);
 
   // Helper to get game by pack ID
   const getGameForPack = useCallback(
