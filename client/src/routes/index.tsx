@@ -57,7 +57,7 @@ function RouterView() {
         style={
           {
             "--safe-area-bottom": safeArea.bottom,
-            "--safe-area-bottom-fallback": "6px",
+            "--safe-area-bottom-fallback": "0px",
           } as CSSProperties
         }
         aria-hidden="true"
