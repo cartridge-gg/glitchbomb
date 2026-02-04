@@ -42,6 +42,16 @@ export function useGames(keys: PackGameKey[]) {
   const offline = useOfflineMode();
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[useGames] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Create a stable key string for dependency comparison
   const keysString = useMemo(
@@ -95,11 +105,9 @@ export function useGames(keys: PackGameKey[]) {
     refresh();
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-      }
+      cancelSubscription();
     };
-  }, [refresh, offline]);
+  }, [refresh, offline, cancelSubscription]);
 
   // Helper to get game by pack ID
   const getGameForPack = useCallback(

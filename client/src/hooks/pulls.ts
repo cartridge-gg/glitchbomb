@@ -45,6 +45,16 @@ export function usePulls({
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePulls] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Skip if invalid IDs (not yet loaded)
   const isReady = packId > 0 && gameId > 0;
@@ -91,10 +101,7 @@ export function usePulls({
     const isNewGame = currentKeyRef.current !== fetchKey;
     if (isNewGame) {
       // Cancel existing subscription
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
       // Reset pulls when switching to a new game
       setPulls([]);
       setInitialFetchComplete(false);
@@ -131,12 +138,9 @@ export function usePulls({
     }
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate, offline]);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
     pulls: offline ? offlinePulls : pulls,

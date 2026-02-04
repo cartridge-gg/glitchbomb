@@ -5,7 +5,15 @@ import {
 } from "@dojoengine/sdk";
 import * as torii from "@dojoengine/torii-wasm";
 import { useAccount } from "@starknet-react/core";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type MutableRefObject,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { NAMESPACE } from "@/constants";
 import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
@@ -68,6 +76,19 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
   const packSubscriptionRef = useRef<torii.Subscription | null>(null);
   const gameSubscriptionRef = useRef<torii.Subscription | null>(null);
+  const cancelSubscription = useCallback(
+    (ref: MutableRefObject<torii.Subscription | null>, label: string) => {
+      if (!ref.current) return;
+      try {
+        ref.current.cancel();
+      } catch (error) {
+        console.warn(`[EntitiesProvider] ${label} cancel failed`, error);
+      } finally {
+        ref.current = null;
+      }
+    },
+    [],
+  );
   const [packId, setPackIdState] = useState<number>(0);
   const [gameId, setGameIdState] = useState<number>(0);
   const [pack, setPack] = useState<Pack>();
@@ -78,14 +99,8 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     (id: number) => {
       if (id !== packId) {
         // Cancel existing subscriptions when switching packs
-        if (packSubscriptionRef.current) {
-          packSubscriptionRef.current.cancel();
-          packSubscriptionRef.current = null;
-        }
-        if (gameSubscriptionRef.current) {
-          gameSubscriptionRef.current.cancel();
-          gameSubscriptionRef.current = null;
-        }
+        cancelSubscription(packSubscriptionRef, "pack");
+        cancelSubscription(gameSubscriptionRef, "game");
         setPack(undefined);
         setGame(undefined);
       }
@@ -98,10 +113,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     (id: number) => {
       if (id !== gameId) {
         // Cancel existing game subscription when switching games
-        if (gameSubscriptionRef.current) {
-          gameSubscriptionRef.current.cancel();
-          gameSubscriptionRef.current = null;
-        }
+        cancelSubscription(gameSubscriptionRef, "game");
         setGame(undefined);
       }
       setGameIdState(id);
@@ -266,17 +278,19 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       });
 
     return () => {
-      if (entitiesSubscriptionRef.current) {
-        entitiesSubscriptionRef.current.cancel();
-      }
-      if (packSubscriptionRef.current) {
-        packSubscriptionRef.current.cancel();
-      }
-      if (gameSubscriptionRef.current) {
-        gameSubscriptionRef.current.cancel();
-      }
+      cancelSubscription(entitiesSubscriptionRef, "entities");
+      cancelSubscription(packSubscriptionRef, "pack");
+      cancelSubscription(gameSubscriptionRef, "game");
     };
-  }, [enabled, refresh, packId, gameId, pack, game]);
+  }, [
+    enabled,
+    refresh,
+    packId,
+    gameId,
+    pack,
+    game,
+    cancelSubscription,
+  ]);
 
   return {
     client,

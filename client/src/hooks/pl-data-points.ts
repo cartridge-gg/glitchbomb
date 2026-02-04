@@ -54,6 +54,16 @@ export function usePLDataPoints({
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const currentKeyRef = useRef<string | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePLDataPoints] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   // Skip if invalid IDs (not yet loaded)
   const isReady = packId > 0 && gameId > 0;
@@ -103,10 +113,7 @@ export function usePLDataPoints({
     const isNewGame = currentKeyRef.current !== fetchKey;
     if (isNewGame) {
       // Cancel existing subscription
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
       // Reset data points when switching to a new game
       setDataPoints([]);
       currentKeyRef.current = fetchKey;
@@ -158,12 +165,9 @@ export function usePLDataPoints({
     return () => {
       clearTimeout(retryTimeout);
       clearTimeout(retryTimeout2);
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-        subscriptionRef.current = null;
-      }
+      cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate, offline]);
+  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
     dataPoints: offline ? offlinePoints : dataPoints,

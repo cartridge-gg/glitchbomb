@@ -47,6 +47,16 @@ export function usePacks() {
   );
   const [packs, setPacks] = useState<Pack[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
+  const cancelSubscription = useCallback(() => {
+    if (!subscriptionRef.current) return;
+    try {
+      subscriptionRef.current.cancel();
+    } catch (error) {
+      console.warn("[usePacks] cancel failed", error);
+    } finally {
+      subscriptionRef.current = null;
+    }
+  }, []);
 
   const { tokenBalances: balances } = useTokens({
     accountAddresses: address ? [addAddressPadding(address)] : [],
@@ -111,11 +121,9 @@ export function usePacks() {
     refresh();
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.cancel();
-      }
+      cancelSubscription();
     };
-  }, [refresh, offline]);
+  }, [refresh, offline, cancelSubscription]);
 
   return {
     packs: offline ? offlinePacks : packs,
