@@ -4,6 +4,16 @@ export const OFFLINE_MODE_ENV =
   import.meta.env.VITE_OFFLINE_MODE === "true";
 
 const OFFLINE_EVENT = "gb-offline-mode";
+let offlineModeState = OFFLINE_MODE_ENV ? true : false;
+
+function loadStoredMode(): boolean {
+  if (typeof window === "undefined") return offlineModeState;
+  try {
+    return window.localStorage.getItem("gb_offline_mode") === "1";
+  } catch {
+    return offlineModeState;
+  }
+}
 
 export function isOfflineMode(): boolean {
   if (OFFLINE_MODE_ENV) return true;
@@ -12,18 +22,12 @@ export function isOfflineMode(): boolean {
   if (!path.startsWith("/games") && !path.startsWith("/play")) {
     return false;
   }
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("offline") === "1" || params.get("offline") === "true") {
-    return true;
-  }
-  try {
-    return window.localStorage.getItem("gb_offline_mode") === "1";
-  } catch {
-    return false;
-  }
+  return offlineModeState || loadStoredMode();
 }
 
 export function setOfflineMode(enabled: boolean) {
+  if (OFFLINE_MODE_ENV) return;
+  offlineModeState = enabled;
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem("gb_offline_mode", enabled ? "1" : "0");
@@ -35,7 +39,10 @@ export function setOfflineMode(enabled: boolean) {
 
 export function subscribeOfflineMode(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
-  const handler = () => callback();
+  const handler = () => {
+    offlineModeState = loadStoredMode();
+    callback();
+  };
   window.addEventListener(OFFLINE_EVENT, handler);
   window.addEventListener("storage", handler);
   return () => {

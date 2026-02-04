@@ -1,7 +1,7 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { LoadingSpinner, TabBar } from "@/components/elements";
 import {
@@ -100,7 +100,6 @@ const GameCard = ({
 
 export const Games = () => {
   const navigate = useNavigate();
-  const [, setSearchParams] = useSearchParams();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { starterpack, config } = useEntitiesContext();
@@ -257,34 +256,18 @@ export const Games = () => {
     );
   }, [connector]);
 
-  const persistMode = useCallback(
-    (nextMode: "onchain" | "offline") => {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (nextMode === "offline") {
-          params.set("offline", "1");
-        } else {
-          params.delete("offline");
-        }
-        setSearchParams(params, { replace: true });
-        setOfflineMode(nextMode === "offline");
-      }
-    },
-    [setSearchParams],
-  );
-
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
       if (nextMode === "offline" && !canUseOffline) return;
-      persistMode(nextMode);
+      setOfflineMode(nextMode === "offline");
     },
-    [canUseOffline, persistMode],
+    [canUseOffline],
   );
 
   useEffect(() => {
     if (canUseOffline || !offlineMode) return;
-    persistMode("onchain");
-  }, [canUseOffline, offlineMode, persistMode]);
+    setOfflineMode(false);
+  }, [canUseOffline, offlineMode]);
 
   return (
     <div className="absolute inset-0 flex flex-col">
