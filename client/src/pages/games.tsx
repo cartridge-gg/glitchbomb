@@ -15,7 +15,7 @@ import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { setOfflineMode, useOfflineMode } from "@/offline/mode";
+import { isOfflineMode, setOfflineMode } from "@/offline/mode";
 import {
   createPack,
   selectTotalMoonrocks,
@@ -98,6 +98,8 @@ const GameCard = ({
   );
 };
 
+type GameMode = "onchain" | "offline";
+
 export const Games = () => {
   const navigate = useNavigate();
   const { chain } = useNetwork();
@@ -106,7 +108,9 @@ export const Games = () => {
   const { start, mint } = useActions();
   const { packs } = usePacks();
   const offlineState = useOfflineStore();
-  const offlineMode = useOfflineMode();
+  const [mode, setMode] = useState<GameMode>(() =>
+    isOfflineMode() ? "offline" : "onchain",
+  );
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
   const pendingNavigationRef = useRef<{
@@ -139,8 +143,7 @@ export const Games = () => {
   );
   const isConnected = !!account?.address;
   const canUseOffline = isConnected;
-  const offline = offlineMode && canUseOffline;
-  const mode: "onchain" | "offline" = offline ? "offline" : "onchain";
+  const offline = mode === "offline" && canUseOffline;
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
   const displayUsername = username;
 
@@ -256,18 +259,22 @@ export const Games = () => {
     );
   }, [connector]);
 
+  useEffect(() => {
+    if (canUseOffline || mode !== "offline") return;
+    setMode("onchain");
+  }, [canUseOffline, mode]);
+
+  useEffect(() => {
+    setOfflineMode(mode === "offline" && canUseOffline);
+  }, [mode, canUseOffline]);
+
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
       if (nextMode === "offline" && !canUseOffline) return;
-      setOfflineMode(nextMode === "offline");
+      setMode(nextMode);
     },
     [canUseOffline],
   );
-
-  useEffect(() => {
-    if (canUseOffline || !offlineMode) return;
-    setOfflineMode(false);
-  }, [canUseOffline, offlineMode]);
 
   return (
     <div className="absolute inset-0 flex flex-col">
