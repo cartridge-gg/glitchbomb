@@ -262,16 +262,14 @@ export const Games = () => {
   useEffect(() => {
     if (canUseOffline || mode !== "offline") return;
     setMode("onchain");
+    setOfflineMode(false);
   }, [canUseOffline, mode]);
-
-  useEffect(() => {
-    setOfflineMode(mode === "offline" && canUseOffline);
-  }, [mode, canUseOffline]);
 
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
       if (nextMode === "offline" && !canUseOffline) return;
       setMode(nextMode);
+      setOfflineMode(nextMode === "offline");
     },
     [canUseOffline],
   );
