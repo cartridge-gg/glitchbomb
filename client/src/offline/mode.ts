@@ -19,7 +19,7 @@ export function isOfflineMode(): boolean {
   if (OFFLINE_MODE_ENV) return true;
   if (typeof window === "undefined") return false;
   const path = window.location.pathname || "";
-  if (!path.startsWith("/games") && !path.startsWith("/play")) {
+  if (!path.includes("/games") && !path.includes("/play")) {
     return false;
   }
   return offlineModeState || loadStoredMode();
