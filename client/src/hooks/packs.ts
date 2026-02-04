@@ -11,9 +11,9 @@ import { addAddressPadding } from "starknet";
 import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { Pack, type RawPack } from "@/models";
 import { useOfflineMode } from "@/offline/mode";
 import { selectPacks, useOfflineStore } from "@/offline/store";
-import { Pack, type RawPack } from "@/models";
 import { useTokens } from "./tokens";
 
 const ENTITIES_LIMIT = 10_000;
@@ -41,10 +41,7 @@ export function usePacks() {
   const { chain } = useNetwork();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
-  const offlinePacks = useMemo(
-    () => selectPacks(offlineState),
-    [offlineState],
-  );
+  const offlinePacks = useMemo(() => selectPacks(offlineState), [offlineState]);
   const [packs, setPacks] = useState<Pack[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(() => {

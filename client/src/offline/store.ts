@@ -1,9 +1,6 @@
 import { useSyncExternalStore } from "react";
-import { Pack, Game, Orb, OrbPulled, PLDataPoint } from "@/models";
-import {
-  DEFAULT_GAMES_COUNT,
-  DEFAULT_MOONROCKS,
-} from "./constants";
+import { Game, Orb, OrbPulled, Pack, PLDataPoint } from "@/models";
+import { DEFAULT_GAMES_COUNT, DEFAULT_MOONROCKS } from "./constants";
 import {
   buyFromShop,
   cashOut,
@@ -74,7 +71,9 @@ function setState(updater: (prev: OfflineState) => OfflineState) {
   const next = updater(state);
   state = next;
   persist(state);
-  listeners.forEach((listener) => listener());
+  listeners.forEach((listener) => {
+    listener();
+  });
 }
 
 export function getOfflineState(): OfflineState {
@@ -100,7 +99,11 @@ function ensurePack(prev: OfflineState, packId: number): OfflinePack {
   return pack;
 }
 
-function ensureGame(prev: OfflineState, packId: number, gameId: number): OfflineGame {
+function ensureGame(
+  prev: OfflineState,
+  packId: number,
+  gameId: number,
+): OfflineGame {
   const game = prev.games[keyFor(packId, gameId)];
   if (!game) throw new Error("Game not found");
   return game;
@@ -274,7 +277,11 @@ export function enter(packId: number, gameId: number): boolean {
   }
 }
 
-export function buy(packId: number, gameId: number, indices: number[]): boolean {
+export function buy(
+  packId: number,
+  gameId: number,
+  indices: number[],
+): boolean {
   try {
     setState((prev) => {
       const game = ensureGame(prev, packId, gameId);
@@ -363,7 +370,11 @@ export function selectPacks(source: OfflineState = state): Pack[] {
   );
 }
 
-export function selectGame(source: OfflineState, packId: number, gameId: number) {
+export function selectGame(
+  source: OfflineState,
+  packId: number,
+  gameId: number,
+) {
   const game = source.games[keyFor(packId, gameId)];
   if (!game) return undefined;
   return toGameModel(game);

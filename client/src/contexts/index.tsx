@@ -15,8 +15,6 @@ import {
   useState,
 } from "react";
 import { NAMESPACE } from "@/constants";
-import { useOfflineMode } from "@/offline/mode";
-import { selectGame, useOfflineStore } from "@/offline/store";
 import {
   CONFIG,
   Config,
@@ -31,6 +29,8 @@ import {
   STARTERPACK,
   Starterpack,
 } from "@/models";
+import { useOfflineMode } from "@/offline/mode";
+import { selectGame, useOfflineStore } from "@/offline/store";
 import { EntitiesContext, type EntitiesContextType } from "./entities-context";
 
 const getEntityQuery = (namespace: string) => {
@@ -106,7 +106,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       }
       setPackIdState(id);
     },
-    [packId],
+    [packId, cancelSubscription],
   );
 
   const setGameId = useCallback(
@@ -118,7 +118,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       }
       setGameIdState(id);
     },
-    [gameId],
+    [gameId, cancelSubscription],
   );
 
   const [config, setConfig] = useState<Config>();
@@ -282,15 +282,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       cancelSubscription(packSubscriptionRef, "pack");
       cancelSubscription(gameSubscriptionRef, "game");
     };
-  }, [
-    enabled,
-    refresh,
-    packId,
-    gameId,
-    pack,
-    game,
-    cancelSubscription,
-  ]);
+  }, [enabled, refresh, packId, gameId, pack, game, cancelSubscription]);
 
   return {
     client,

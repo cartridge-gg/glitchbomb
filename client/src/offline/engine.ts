@@ -9,7 +9,7 @@ import {
   SUPP_MULTIPLIER,
 } from "./constants";
 import { milestoneCost, milestoneValue } from "./milestone";
-import { ORB_IDS, initialOrbs, shopOrbs } from "./orbs";
+import { initialOrbs, ORB_IDS, shopOrbs } from "./orbs";
 import { Random } from "./random";
 import type { OfflineGame, OfflineShopState } from "./types";
 
@@ -52,7 +52,10 @@ export function cloneGame(game: OfflineGame): OfflineGame {
   };
 }
 
-export function startGame(game: OfflineGame): { game: OfflineGame; cost: number } {
+export function startGame(game: OfflineGame): {
+  game: OfflineGame;
+  cost: number;
+} {
   const next = cloneGame(game);
   next.bag = initialOrbs();
   next.discards = next.bag.map(() => false);
@@ -60,7 +63,10 @@ export function startGame(game: OfflineGame): { game: OfflineGame; cost: number 
   return { game: next, cost };
 }
 
-export function cashOut(game: OfflineGame): { game: OfflineGame; earnings: number } {
+export function cashOut(game: OfflineGame): {
+  game: OfflineGame;
+  earnings: number;
+} {
   assertNotOver(game);
   assertNotInShop(game);
   const next = cloneGame(game);
@@ -91,10 +97,7 @@ export function enterShop(
   return { game: next, shop: next.shop };
 }
 
-export function buyFromShop(
-  game: OfflineGame,
-  indices: number[],
-): OfflineGame {
+export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
   assertNotOver(game);
   assertInShop(game);
 
@@ -129,9 +132,10 @@ export function buyFromShop(
   return next;
 }
 
-export function exitShop(
-  game: OfflineGame,
-): { game: OfflineGame; cost: number } {
+export function exitShop(game: OfflineGame): {
+  game: OfflineGame;
+  cost: number;
+} {
   assertNotOver(game);
   assertInShop(game);
 

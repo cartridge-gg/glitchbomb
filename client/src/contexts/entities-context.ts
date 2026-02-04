@@ -1,5 +1,5 @@
-import { createContext } from "react";
 import type * as torii from "@dojoengine/torii-wasm";
+import { createContext } from "react";
 import type { Config, Game, Pack, Starterpack } from "@/models";
 
 export interface EntitiesContextType {

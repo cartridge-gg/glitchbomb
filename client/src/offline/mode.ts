@@ -1,10 +1,9 @@
 import { useSyncExternalStore } from "react";
 
-export const OFFLINE_MODE_ENV =
-  import.meta.env.VITE_OFFLINE_MODE === "true";
+export const OFFLINE_MODE_ENV = import.meta.env.VITE_OFFLINE_MODE === "true";
 
 const OFFLINE_EVENT = "gb-offline-mode";
-let offlineModeState = OFFLINE_MODE_ENV ? true : false;
+let offlineModeState = OFFLINE_MODE_ENV;
 
 function loadStoredMode(): boolean {
   if (typeof window === "undefined") return offlineModeState;

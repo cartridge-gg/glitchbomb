@@ -4,9 +4,9 @@ import { CallData, uint256 } from "starknet";
 import { getGameAddress, getTokenAddress, getVrfAddress } from "@/config";
 import { useOfflineMode } from "@/offline/mode";
 import {
+  burn as offlineBurn,
   buy as offlineBuy,
   buyAndExit as offlineBuyAndExit,
-  burn as offlineBurn,
   cashOutAction as offlineCashOut,
   enter as offlineEnter,
   exit as offlineExit,

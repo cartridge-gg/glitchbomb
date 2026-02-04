@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { LoadingSpinner, TabBar } from "@/components/elements";
-import {
-  ControllerIcon,
-  MoonrockIcon,
-  SparkleIcon,
-} from "@/components/icons";
+import { ControllerIcon, MoonrockIcon, SparkleIcon } from "@/components/icons";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";

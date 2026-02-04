@@ -8,9 +8,9 @@ import type * as torii from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { Game, type RawGame } from "@/models";
 import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
-import { Game, type RawGame } from "@/models";
 
 const ENTITIES_LIMIT = 10_000;
 
