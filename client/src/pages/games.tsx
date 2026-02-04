@@ -138,8 +138,8 @@ export const Games = () => {
     () => selectTotalMoonrocks(offlineState),
     [offlineState],
   );
-  const isLoggedIn = !!account && !!username;
-  const canUseOffline = isLoggedIn;
+  const isConnected = !!account?.address;
+  const canUseOffline = isConnected;
   const offline = offlineMode && canUseOffline;
   const mode: "onchain" | "offline" = offline ? "offline" : "onchain";
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
@@ -304,7 +304,7 @@ export const Games = () => {
           <TabBar
             items={[
               { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
-              ...(isLoggedIn
+              ...(isConnected
                 ? [{ id: "offline", label: "Offline", Icon: MoonrockIcon }]
                 : []),
             ]}
