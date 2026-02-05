@@ -283,8 +283,8 @@ export const Games = () => {
       />
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-4 pt-24 pb-16 overflow-y-auto">
-        <div className="flex flex-col gap-6 w-full max-w-[500px]">
+      <div className="flex-1 flex flex-col items-center px-4 pt-2 md:pt-24 pb-16 overflow-hidden">
+        <div className="flex flex-col gap-6 w-full max-w-[500px] min-h-0">
           <TabBar
             items={[
               { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
@@ -294,6 +294,7 @@ export const Games = () => {
             ]}
             active={mode}
             onChange={handleModeChange}
+            buttonClassName="flex-1 px-0"
           />
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
@@ -311,23 +312,28 @@ export const Games = () => {
           </div>
 
           {/* Game list */}
-          <div className="flex flex-col gap-3">
-            {gameList.map((game) => (
-              <GameCard
-                key={`${game.packId}-${game.gameId}`}
-                gameId={game.gameId}
-                pullCount={game.pullCount}
-                bagSize={game.bagSize}
-                level={game.level}
-                hasStarted={!game.hasNoGame}
-                isOver={game.isOver}
-                isLoading={loadingGameId === `${game.packId}-${game.gameId}`}
-                onPlay={() =>
-                  handlePlay(game.packId, game.gameId, game.hasNoGame)
-                }
-                onView={() => handleView(game.packId, game.gameId)}
-              />
-            ))}
+          <div
+            className="flex-1 min-h-0 overflow-y-auto"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <div className="flex flex-col gap-3">
+              {gameList.map((game) => (
+                <GameCard
+                  key={`${game.packId}-${game.gameId}`}
+                  gameId={game.gameId}
+                  pullCount={game.pullCount}
+                  bagSize={game.bagSize}
+                  level={game.level}
+                  hasStarted={!game.hasNoGame}
+                  isOver={game.isOver}
+                  isLoading={loadingGameId === `${game.packId}-${game.gameId}`}
+                  onPlay={() =>
+                    handlePlay(game.packId, game.gameId, game.hasNoGame)
+                  }
+                  onView={() => handleView(game.packId, game.gameId)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
