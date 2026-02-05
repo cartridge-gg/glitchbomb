@@ -190,7 +190,7 @@ export const PLChartTabs = ({
         items={tabItems}
         active={activeTab}
         onChange={setActiveTab}
-        className="[@media(max-height:720px)]:hidden"
+        className="[@media(max-height:1000px)]:hidden"
         buttonClassName="py-[clamp(4px,1svh,8px)]"
         iconClassName="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]"
       />

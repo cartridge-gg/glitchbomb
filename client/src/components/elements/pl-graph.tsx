@@ -45,6 +45,7 @@ export const PLGraph = ({
   title = "P/L",
   baseline: baselineProp,
 }: PLGraphProps) => {
+  const interactionEnabled = false;
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
@@ -279,14 +280,16 @@ export const PLGraph = ({
   );
 
   useEffect(() => {
+    if (!interactionEnabled) return;
     const target = zoomRef.current;
     if (!target) return;
     const listener = (event: WheelEvent) => handleWheelEvent(event);
     target.addEventListener("wheel", listener, { passive: false });
     return () => target.removeEventListener("wheel", listener);
-  }, [handleWheelEvent]);
+  }, [handleWheelEvent, interactionEnabled]);
 
   useEffect(() => {
+    if (!interactionEnabled) return;
     const target = zoomRef.current as unknown as HTMLElement | null;
     if (!target) return;
     let lastScale = 1;
@@ -311,13 +314,14 @@ export const PLGraph = ({
       target.removeEventListener("gesturestart", onGestureStart);
       target.removeEventListener("gesturechange", onGestureChange);
     };
-  }, [applyZoomAt]);
+  }, [applyZoomAt, interactionEnabled]);
 
   if (data.length === 0) {
     return null;
   }
 
   const handlePointerDown: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!interactionEnabled) return;
     if (event.button !== 0) return;
     const target = event.currentTarget;
     target.setPointerCapture(event.pointerId);
@@ -332,6 +336,7 @@ export const PLGraph = ({
   };
 
   const handlePointerMove: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!interactionEnabled) return;
     if (!isPanningRef.current) return;
     event.preventDefault();
     const deltaX = event.clientX - panRef.current.startX;
@@ -344,6 +349,7 @@ export const PLGraph = ({
   };
 
   const handlePointerUp: PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!interactionEnabled) return;
     if (!isPanningRef.current) return;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
@@ -395,14 +401,14 @@ export const PLGraph = ({
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
             ref={zoomRef}
-            className={`absolute inset-0 ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
-            style={{ touchAction: "none" }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            onDoubleClick={resetView}
+            className={`absolute inset-0 ${interactionEnabled ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
+            style={{ touchAction: interactionEnabled ? "none" : "auto" }}
+            onPointerDown={interactionEnabled ? handlePointerDown : undefined}
+            onPointerMove={interactionEnabled ? handlePointerMove : undefined}
+            onPointerUp={interactionEnabled ? handlePointerUp : undefined}
+            onPointerLeave={interactionEnabled ? handlePointerUp : undefined}
+            onPointerCancel={interactionEnabled ? handlePointerUp : undefined}
+            onDoubleClick={interactionEnabled ? resetView : undefined}
           >
             <div
               className="absolute inset-0"
