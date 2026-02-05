@@ -85,6 +85,10 @@ export const Puller = memo(function Puller({
   bombs: _bombs = 0,
   sizePx,
   style,
+  onHoverStart,
+  onHoverEnd,
+  onPointerUp,
+  onPointerCancel,
   ...props
 }: PullerProps) {
   void _orbs;
@@ -92,6 +96,8 @@ export const Puller = memo(function Puller({
   // Get color based on variant
   const color = VARIANT_COLORS[variant || "default"];
   const controls = useAnimationControls();
+  const [hoverEnabled, setHoverEnabled] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
 
   // Rainbow animation effect - only depends on variant, not controls
@@ -111,6 +117,23 @@ export const Puller = memo(function Puller({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variant]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setHoverEnabled(media.matches);
+    update();
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    if (!hoverEnabled) setIsHovering(false);
+  }, [hoverEnabled]);
+
   // Get current color for rainbow variant
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
@@ -127,10 +150,26 @@ export const Puller = memo(function Puller({
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}
-      whileHover={{ scale: 1.02 }}
+      whileHover={hoverEnabled ? { scale: 1.02 } : undefined}
       whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
       style={mergedStyle}
+      onHoverStart={(event) => {
+        onHoverStart?.(event);
+        setIsHovering(true);
+      }}
+      onHoverEnd={(event) => {
+        onHoverEnd?.(event);
+        setIsHovering(false);
+      }}
+      onPointerUp={(event) => {
+        onPointerUp?.(event);
+        if (event.pointerType !== "mouse") setIsHovering(false);
+      }}
+      onPointerCancel={(event) => {
+        onPointerCancel?.(event);
+        if (event.pointerType !== "mouse") setIsHovering(false);
+      }}
       {...props}
     >
       <div className="absolute inset-0 rounded-full overflow-hidden">
@@ -165,7 +204,10 @@ export const Puller = memo(function Puller({
 
         {/* 2b. Hover glow */}
         <div
-          className="puller-glow absolute inset-0 rounded-full pointer-events-none opacity-0 scale-[0.94] transition-[opacity,transform] duration-700 ease-out group-hover:opacity-100 group-hover:scale-100"
+          className={cn(
+            "puller-glow absolute inset-0 rounded-full pointer-events-none transition-[opacity,transform] duration-700 ease-out",
+            isHovering ? "opacity-100 scale-100" : "opacity-0 scale-[0.94]",
+          )}
           style={{
             background: `radial-gradient(circle at 30% 25%, color-mix(in srgb, ${currentColor.cssVar} 75%, transparent) 0%, color-mix(in srgb, ${currentColor.cssVar} 35%, transparent) 38%, transparent 72%)`,
           }}
