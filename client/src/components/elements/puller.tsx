@@ -8,7 +8,7 @@ import { memo, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
-  "select-none relative rounded-full overflow-hidden cursor-pointer outline-none border-none",
+  "group select-none relative rounded-full overflow-hidden cursor-pointer outline-none border-none",
   {
     variants: {
       variant: {
@@ -127,6 +127,7 @@ export const Puller = memo(function Puller({
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}
+      whileHover={{ scale: 1.03, boxShadow: "0px 0px 70px 40px #000000" }}
       whileTap={{ scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 10 }}
       style={mergedStyle}
@@ -161,6 +162,15 @@ export const Puller = memo(function Puller({
             }}
           />
         )}
+
+        {/* 2b. Hover glow */}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(circle at 30% 25%, color-mix(in srgb, ${currentColor.cssVar} 45%, transparent) 0%, transparent 55%)`,
+            boxShadow: `inset 0 0 22px color-mix(in srgb, ${currentColor.cssVar} 35%, transparent)`,
+          }}
+        />
 
         {/* 3. Glass filter */}
         <div
