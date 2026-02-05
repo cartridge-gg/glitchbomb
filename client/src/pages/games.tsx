@@ -289,7 +289,7 @@ export const Games = () => {
             items={[
               { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
               ...(isConnected
-                ? [{ id: "offline", label: "Offline", Icon: MoonrockIcon }]
+                ? [{ id: "offline", label: "Practice", Icon: MoonrockIcon }]
                 : []),
             ]}
             active={mode}
@@ -299,7 +299,7 @@ export const Games = () => {
           {/* Purchase New Game Card */}
           <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
             <p className="text-white font-secondary text-sm tracking-widest uppercase">
-              {offline ? "Offline Mode" : "Play Now"}
+              {offline ? "Practice Mode" : "Play Now"}
             </p>
             <button
               type="button"
@@ -307,7 +307,7 @@ export const Games = () => {
               onClick={handleNewGame}
             >
               <MoonrockIcon size="sm" />
-              {offline ? "Play Offline for Free" : "Purchase"}
+              {offline ? "Play Practice for Free" : "Purchase"}
             </button>
           </div>
 
