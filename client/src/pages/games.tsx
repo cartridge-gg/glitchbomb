@@ -99,7 +99,7 @@ type GameMode = "onchain" | "offline";
 export const Games = () => {
   const navigate = useNavigate();
   const { chain } = useNetwork();
-  const { account, connector } = useAccount();
+  const { address, connector } = useAccount();
   const { starterpack, config } = useEntitiesContext();
   const { start, mint } = useActions();
   const { packs } = usePacks();
@@ -117,7 +117,7 @@ export const Games = () => {
   // Token balance
   const tokenAddress = config?.token || getTokenAddress(chain.id);
   const { tokenBalances, tokenContracts } = useTokens({
-    accountAddresses: account?.address ? [account?.address] : [],
+    accountAddresses: address ? [address] : [],
     contractAddresses: [tokenAddress],
   });
 
@@ -137,7 +137,7 @@ export const Games = () => {
     () => selectTotalMoonrocks(offlineState),
     [offlineState],
   );
-  const isConnected = !!account?.address;
+  const isConnected = !!address;
   const canUseOffline = isConnected;
   const offline = mode === "offline" && canUseOffline;
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
