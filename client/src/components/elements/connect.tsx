@@ -36,7 +36,7 @@ export const Connect = ({
       variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      Connect
+      Login
     </Button>
   );
 };
