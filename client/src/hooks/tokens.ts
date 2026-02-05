@@ -82,6 +82,7 @@ export function useTokens(
     null,
   );
   const subscriptionRef = useRef<Subscription | null>(null);
+  const wasOfflineRef = useRef(offline);
 
   const cancelSubscription = useCallback(() => {
     if (!subscriptionRef.current) return;
@@ -159,6 +160,13 @@ export function useTokens(
       fetchBalances();
     }
   }, [contracts, fetchBalances, request]);
+
+  useEffect(() => {
+    if (wasOfflineRef.current && !offline) {
+      fetchBalances();
+    }
+    wasOfflineRef.current = offline;
+  }, [offline, fetchBalances]);
 
   const refetch = useCallback(async () => {
     fetchBalances();
