@@ -60,43 +60,50 @@ export const Home = () => {
   const isLoggedIn = !!account && !!username;
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Header */}
+    <div className="absolute inset-0">
+      {/* Header overlay so hero stays centered to full viewport */}
       {isLoggedIn && (
-        <AppHeader
-          moonrocks={balance}
-          username={username}
-          showBack={false}
-          onMint={() => mint(tokenAddress)}
-          onProfileClick={onProfileClick}
-        />
+        <div className="absolute inset-x-0 top-0 z-10">
+          <AppHeader
+            moonrocks={balance}
+            username={username}
+            showBack={false}
+            onMint={() => mint(tokenAddress)}
+            onProfileClick={onProfileClick}
+          />
+        </div>
       )}
 
       {/* Main content - centered */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
-        <div className="flex flex-col items-center gap-6">
-          <h1 className="uppercase text-center">
-            <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
+      <div className="flex h-full flex-col items-center justify-center px-4">
+        <div className="inline-grid grid-cols-1 justify-items-center gap-8">
+          <h1 className="m-0 text-center uppercase leading-[0.9]">
+            <strong className="block text-green-400 text-6xl md:text-7xl font-glitch font-thin tracking-tight">
               Glitch
             </strong>
-            <br />
-            <span className="text-white text-6xl md:text-8xl">Bomb</span>
+            <span className="block text-white text-7xl md:text-8xl tracking-tight">
+              Bomb
+            </span>
           </h1>
 
           {isLoggedIn ? (
             <Button
               variant="default"
-              className="h-12 w-full font-secondary uppercase text-sm tracking-widest"
+              className="h-12 w-full px-10 font-secondary uppercase text-sm tracking-widest"
               onClick={() => navigate("/games")}
             >
               PLAY
             </Button>
           ) : (
-            <div className="flex flex-col items-center gap-4 w-full">
-              <Connect highlight onClick={onConnectClick} />
+            <div className="grid w-full grid-cols-1 gap-3">
+              <Connect
+                highlight
+                className="h-12 w-full px-10"
+                onClick={onConnectClick}
+              />
               <Button
                 variant="secondary"
-                className="h-10 w-full font-secondary uppercase text-sm tracking-widest"
+                className="h-11 w-full px-10 font-secondary uppercase text-sm tracking-widest"
                 disabled
               >
                 Play
