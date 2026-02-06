@@ -106,8 +106,16 @@ export const Puller = memo(function Puller({
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
   const glowX = useMotionValue(DEFAULT_GLOW_POSITION.x);
   const glowY = useMotionValue(DEFAULT_GLOW_POSITION.y);
-  const smoothGlowX = useSpring(glowX, { stiffness: 280, damping: 28, mass: 0.35 });
-  const smoothGlowY = useSpring(glowY, { stiffness: 280, damping: 28, mass: 0.35 });
+  const smoothGlowX = useSpring(glowX, {
+    stiffness: 280,
+    damping: 28,
+    mass: 0.35,
+  });
+  const smoothGlowY = useSpring(glowY, {
+    stiffness: 280,
+    damping: 28,
+    mass: 0.35,
+  });
 
   // Rainbow animation effect - only depends on variant, not controls
   useEffect(() => {
