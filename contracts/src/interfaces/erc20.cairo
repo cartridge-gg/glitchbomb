@@ -18,5 +18,6 @@ pub trait IERC20<T> {
         ref self: T, sender: ContractAddress, recipient: ContractAddress, amount: u256,
     ) -> bool;
 
+    fn mint(ref self: T, recipient: ContractAddress, amount: u256);
     fn total_supply(self: @T) -> u256;
 }
