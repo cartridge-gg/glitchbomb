@@ -71,7 +71,7 @@ const getGameQuery = (packId: number, gameId: number) => {
 };
 
 function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
-  const account = useAccount();
+  const { address: accountAddress } = useAccount();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
   const packSubscriptionRef = useRef<torii.Subscription | null>(null);
@@ -179,10 +179,10 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
 
   // Refresh function to fetch and subscribe to data
   const refreshEntities = useCallback(async () => {
-    if (!enabled || !client || !account) return;
+    if (!enabled || !client || !accountAddress) return;
 
     // Cancel existing subscriptions
-    entitiesSubscriptionRef.current = null;
+    cancelSubscription(entitiesSubscriptionRef, "entities");
 
     // Create queries
     const query = getEntityQuery(NAMESPACE);
@@ -202,14 +202,14 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       .then((response) => {
         entitiesSubscriptionRef.current = response;
       });
-  }, [enabled, client, account, onEntityUpdate]);
+  }, [enabled, client, accountAddress, onEntityUpdate, cancelSubscription]);
 
   // Refresh function to fetch and subscribe to data
   const refreshPack = useCallback(async () => {
-    if (!enabled || !client || !account || !packId || !gameId) return;
+    if (!enabled || !client || !accountAddress || !packId || !gameId) return;
 
     // Cancel existing subscriptions
-    packSubscriptionRef.current = null;
+    cancelSubscription(packSubscriptionRef, "pack");
 
     // Fetch initial data
     const query = getPackQuery(packId).build();
@@ -223,16 +223,24 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     client
       .onEntityUpdated(query.clause, [], onEntityUpdate)
       .then((response) => {
-        entitiesSubscriptionRef.current = response;
+        packSubscriptionRef.current = response;
       });
-  }, [enabled, client, account, onEntityUpdate, packId, gameId]);
+  }, [
+    enabled,
+    client,
+    accountAddress,
+    onEntityUpdate,
+    packId,
+    gameId,
+    cancelSubscription,
+  ]);
 
   // Refresh function to fetch and subscribe to data
   const refreshGame = useCallback(async () => {
-    if (!enabled || !client || !account || !packId || !gameId) return;
+    if (!enabled || !client || !accountAddress || !packId || !gameId) return;
 
     // Cancel existing subscriptions
-    gameSubscriptionRef.current = null;
+    cancelSubscription(gameSubscriptionRef, "game");
 
     // Fetch initial data
     const query = getGameQuery(packId, gameId).build();
@@ -248,7 +256,15 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       .then((response) => {
         gameSubscriptionRef.current = response;
       });
-  }, [enabled, client, account, onEntityUpdate, packId, gameId]);
+  }, [
+    enabled,
+    client,
+    accountAddress,
+    onEntityUpdate,
+    packId,
+    gameId,
+    cancelSubscription,
+  ]);
 
   const refresh = useCallback(async () => {
     await refreshEntities();
@@ -259,14 +275,6 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   // Initial fetch and subscription setup
   useEffect(() => {
     if (!enabled) return;
-    if (
-      entitiesSubscriptionRef.current &&
-      !!pack &&
-      pack.id === packId &&
-      !!game &&
-      game.id === gameId
-    )
-      return;
     setStatus("loading");
     refresh()
       .then(() => {
@@ -282,7 +290,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       cancelSubscription(packSubscriptionRef, "pack");
       cancelSubscription(gameSubscriptionRef, "game");
     };
-  }, [enabled, refresh, packId, gameId, pack, game, cancelSubscription]);
+  }, [enabled, refresh, cancelSubscription]);
 
   return {
     client,
