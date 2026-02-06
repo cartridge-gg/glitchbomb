@@ -6,6 +6,8 @@ import {
   useMotionTemplate,
   useMotionValue,
   useSpring,
+  useTime,
+  useTransform,
 } from "framer-motion";
 import { memo, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -107,15 +109,28 @@ export const Puller = memo(function Puller({
   const glowX = useMotionValue(DEFAULT_GLOW_POSITION.x);
   const glowY = useMotionValue(DEFAULT_GLOW_POSITION.y);
   const smoothGlowX = useSpring(glowX, {
-    stiffness: 280,
-    damping: 28,
-    mass: 0.35,
+    stiffness: 90,
+    damping: 22,
+    mass: 1.15,
   });
   const smoothGlowY = useSpring(glowY, {
-    stiffness: 280,
-    damping: 28,
-    mass: 0.35,
+    stiffness: 90,
+    damping: 22,
+    mass: 1.15,
   });
+  const time = useTime();
+  const aliveDriftX = useTransform(time, (t) =>
+    isHovering ? Math.sin(t / 820) * 2.2 : 0,
+  );
+  const aliveDriftY = useTransform(time, (t) =>
+    isHovering ? Math.cos(t / 980) * 1.8 : 0,
+  );
+  const glowCenterX = useTransform(() =>
+    Math.min(100, Math.max(0, smoothGlowX.get() + aliveDriftX.get())),
+  );
+  const glowCenterY = useTransform(() =>
+    Math.min(100, Math.max(0, smoothGlowY.get() + aliveDriftY.get())),
+  );
 
   // Rainbow animation effect - only depends on variant, not controls
   useEffect(() => {
@@ -158,7 +173,7 @@ export const Puller = memo(function Puller({
   // Get current color for rainbow variant
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
-  const glowBackground = useMotionTemplate`radial-gradient(circle at ${smoothGlowX}% ${smoothGlowY}%, color-mix(in srgb, ${currentColor.cssVar} 75%, transparent) 0%, color-mix(in srgb, ${currentColor.cssVar} 35%, transparent) 38%, transparent 72%)`;
+  const glowBackground = useMotionTemplate`radial-gradient(circle at ${glowCenterX}% ${glowCenterY}%, color-mix(in srgb, ${currentColor.cssVar} 75%, transparent) 0%, color-mix(in srgb, ${currentColor.cssVar} 35%, transparent) 38%, transparent 72%)`;
   const defaultSizePx =
     size === "lg" ? 233 : size === "sm" ? 150 : size === "xs" ? 130 : 180;
   const resolvedSizePx = sizePx ?? defaultSizePx;
