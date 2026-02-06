@@ -184,7 +184,8 @@ pub mod PlayableComponent {
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            let caller = starknet::get_caller_address();
+            collection.assert_is_owner(caller, pack_id.into());
 
             // [Check] Game is not over
             let mut game = store.game(pack_id, game_id);
@@ -204,6 +205,10 @@ pub mod PlayableComponent {
             let mut pack = store.pack(pack_id);
             pack.earn(earnings);
             store.set_pack(@pack);
+
+            // [Interaction] Mint moonrocks token to caller
+            let token = store.config().token();
+            token.mint(caller, earnings.into());
         }
 
         fn enter(
