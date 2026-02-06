@@ -1,11 +1,15 @@
 import { useSyncExternalStore } from "react";
 
-export const OFFLINE_MODE_ENV = import.meta.env.VITE_OFFLINE_MODE === "true";
+export const ONCHAIN_GAMES_ENABLED =
+  import.meta.env.VITE_ENABLE_ONCHAIN_GAMES !== "false";
+export const OFFLINE_MODE_ENV =
+  import.meta.env.VITE_OFFLINE_MODE === "true" || !ONCHAIN_GAMES_ENABLED;
 
 const OFFLINE_EVENT = "gb-offline-mode";
 let offlineModeState = OFFLINE_MODE_ENV;
 
 function loadStoredMode(): boolean {
+  if (OFFLINE_MODE_ENV) return true;
   if (typeof window === "undefined") return offlineModeState;
   try {
     return window.localStorage.getItem("gb_offline_mode") === "1";
@@ -21,6 +25,10 @@ export function isOfflineMode(): boolean {
 }
 
 export function setOfflineMode(enabled: boolean) {
+  if (!ONCHAIN_GAMES_ENABLED) {
+    offlineModeState = true;
+    return;
+  }
   if (OFFLINE_MODE_ENV) return;
   offlineModeState = enabled;
   if (typeof window === "undefined") return;

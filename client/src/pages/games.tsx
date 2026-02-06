@@ -3,7 +3,7 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { LoadingSpinner, TabBar } from "@/components/elements";
+import { LoadingSpinner, TabBar, type TabBarItem } from "@/components/elements";
 import { ControllerIcon, MoonrockIcon, SparkleIcon } from "@/components/icons";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
@@ -11,7 +11,11 @@ import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
 import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { isOfflineMode, setOfflineMode } from "@/offline/mode";
+import {
+  ONCHAIN_GAMES_ENABLED,
+  isOfflineMode,
+  setOfflineMode,
+} from "@/offline/mode";
 import {
   createPack,
   selectTotalMoonrocks,
@@ -105,7 +109,7 @@ export const Games = () => {
   const { packs } = usePacks();
   const offlineState = useOfflineStore();
   const [mode, setMode] = useState<GameMode>(() =>
-    isOfflineMode() ? "offline" : "onchain",
+    !ONCHAIN_GAMES_ENABLED || isOfflineMode() ? "offline" : "onchain",
   );
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
@@ -138,8 +142,19 @@ export const Games = () => {
     [offlineState],
   );
   const isConnected = !!account?.address;
-  const canUseOffline = isConnected;
-  const offline = mode === "offline" && canUseOffline;
+  const canUseOnchain = ONCHAIN_GAMES_ENABLED;
+  const canUseOffline = isConnected || !canUseOnchain;
+  const offline = !canUseOnchain || (mode === "offline" && canUseOffline);
+  const modeItems = useMemo<TabBarItem<GameMode>[]>(() => {
+    return [
+      ...(canUseOnchain
+        ? [{ id: "onchain", label: "On-Chain", Icon: ControllerIcon }]
+        : []),
+      ...(canUseOffline
+        ? [{ id: "offline", label: "Practice", Icon: MoonrockIcon }]
+        : []),
+    ];
+  }, [canUseOnchain, canUseOffline]);
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
   const displayUsername = username;
 
@@ -256,18 +271,25 @@ export const Games = () => {
   }, [connector]);
 
   useEffect(() => {
-    if (canUseOffline || mode !== "offline") return;
+    if (!canUseOnchain || canUseOffline || mode !== "offline") return;
     setMode("onchain");
     setOfflineMode(false);
-  }, [canUseOffline, mode]);
+  }, [canUseOffline, canUseOnchain, mode]);
+
+  useEffect(() => {
+    if (canUseOnchain || mode === "offline") return;
+    setMode("offline");
+    setOfflineMode(true);
+  }, [canUseOnchain, mode]);
 
   const handleModeChange = useCallback(
     (nextMode: "onchain" | "offline") => {
+      if (nextMode === "onchain" && !canUseOnchain) return;
       if (nextMode === "offline" && !canUseOffline) return;
       setMode(nextMode);
       setOfflineMode(nextMode === "offline");
     },
-    [canUseOffline],
+    [canUseOffline, canUseOnchain],
   );
 
   return (
@@ -286,12 +308,7 @@ export const Games = () => {
       <div className="flex-1 flex flex-col items-center px-4 pt-2 md:pt-24 pb-16 overflow-hidden">
         <div className="flex flex-col gap-6 w-full max-w-[500px] min-h-0">
           <TabBar
-            items={[
-              { id: "onchain", label: "On-Chain", Icon: ControllerIcon },
-              ...(isConnected
-                ? [{ id: "offline", label: "Practice", Icon: MoonrockIcon }]
-                : []),
-            ]}
+            items={modeItems}
             active={mode}
             onChange={handleModeChange}
             buttonClassName="flex-1 px-0"
