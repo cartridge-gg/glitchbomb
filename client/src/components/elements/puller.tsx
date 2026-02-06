@@ -3,6 +3,9 @@ import {
   type HTMLMotionProps,
   motion,
   useAnimationControls,
+  useMotionTemplate,
+  useMotionValue,
+  useSpring,
 } from "framer-motion";
 import { memo, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -68,6 +71,7 @@ const RAINBOW_SEQUENCE = [
   VARIANT_COLORS.point,
   VARIANT_COLORS.moonrock,
 ] as const;
+const DEFAULT_GLOW_POSITION = { x: 30, y: 25 } as const;
 
 export interface PullerProps
   extends Omit<HTMLMotionProps<"button">, "ref">,
@@ -87,6 +91,7 @@ export const Puller = memo(function Puller({
   style,
   onHoverStart,
   onHoverEnd,
+  onPointerMove,
   onPointerUp,
   onPointerCancel,
   ...props
@@ -99,6 +104,10 @@ export const Puller = memo(function Puller({
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
+  const glowX = useMotionValue(DEFAULT_GLOW_POSITION.x);
+  const glowY = useMotionValue(DEFAULT_GLOW_POSITION.y);
+  const smoothGlowX = useSpring(glowX, { stiffness: 280, damping: 28, mass: 0.35 });
+  const smoothGlowY = useSpring(glowY, { stiffness: 280, damping: 28, mass: 0.35 });
 
   // Rainbow animation effect - only depends on variant, not controls
   useEffect(() => {
@@ -131,12 +140,17 @@ export const Puller = memo(function Puller({
   }, []);
 
   useEffect(() => {
-    if (!hoverEnabled) setIsHovering(false);
-  }, [hoverEnabled]);
+    if (!hoverEnabled) {
+      setIsHovering(false);
+      glowX.set(DEFAULT_GLOW_POSITION.x);
+      glowY.set(DEFAULT_GLOW_POSITION.y);
+    }
+  }, [hoverEnabled, glowX, glowY]);
 
   // Get current color for rainbow variant
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
+  const glowBackground = useMotionTemplate`radial-gradient(circle at ${smoothGlowX}% ${smoothGlowY}%, color-mix(in srgb, ${currentColor.cssVar} 75%, transparent) 0%, color-mix(in srgb, ${currentColor.cssVar} 35%, transparent) 38%, transparent 72%)`;
   const defaultSizePx =
     size === "lg" ? 233 : size === "sm" ? 150 : size === "xs" ? 130 : 180;
   const resolvedSizePx = sizePx ?? defaultSizePx;
@@ -161,14 +175,34 @@ export const Puller = memo(function Puller({
       onHoverEnd={(event) => {
         onHoverEnd?.(event);
         setIsHovering(false);
+        glowX.set(DEFAULT_GLOW_POSITION.x);
+        glowY.set(DEFAULT_GLOW_POSITION.y);
+      }}
+      onPointerMove={(event) => {
+        onPointerMove?.(event);
+        if (!hoverEnabled || event.pointerType !== "mouse") return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        glowX.set(Math.min(100, Math.max(0, x)));
+        glowY.set(Math.min(100, Math.max(0, y)));
       }}
       onPointerUp={(event) => {
         onPointerUp?.(event);
-        if (event.pointerType !== "mouse") setIsHovering(false);
+        if (event.pointerType !== "mouse") {
+          setIsHovering(false);
+          glowX.set(DEFAULT_GLOW_POSITION.x);
+          glowY.set(DEFAULT_GLOW_POSITION.y);
+        }
       }}
       onPointerCancel={(event) => {
         onPointerCancel?.(event);
-        if (event.pointerType !== "mouse") setIsHovering(false);
+        if (event.pointerType !== "mouse") {
+          setIsHovering(false);
+          glowX.set(DEFAULT_GLOW_POSITION.x);
+          glowY.set(DEFAULT_GLOW_POSITION.y);
+        }
       }}
       {...props}
     >
@@ -203,13 +237,13 @@ export const Puller = memo(function Puller({
         )}
 
         {/* 2b. Hover glow */}
-        <div
+        <motion.div
           className={cn(
             "puller-glow absolute inset-0 rounded-full pointer-events-none transition-[opacity,transform] duration-700 ease-out",
             isHovering ? "opacity-100 scale-100" : "opacity-0 scale-[0.94]",
           )}
           style={{
-            background: `radial-gradient(circle at 30% 25%, color-mix(in srgb, ${currentColor.cssVar} 75%, transparent) 0%, color-mix(in srgb, ${currentColor.cssVar} 35%, transparent) 38%, transparent 72%)`,
+            background: glowBackground,
           }}
         />
 
