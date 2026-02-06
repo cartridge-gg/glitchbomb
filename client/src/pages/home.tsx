@@ -76,12 +76,12 @@ export const Home = () => {
 
       {/* Main content - centered */}
       <div className="flex h-full flex-col items-center justify-center px-4">
-        <div className="flex w-full flex-col items-center gap-8">
+        <div className="inline-grid grid-cols-1 justify-items-center gap-8">
           <h1 className="m-0 text-center uppercase leading-[0.9]">
-            <strong className="block text-green-400 text-6xl sm:text-7xl md:text-8xl font-glitch font-thin tracking-tight">
+            <strong className="block text-green-400 text-6xl md:text-7xl font-glitch font-thin tracking-tight">
               Glitch
             </strong>
-            <span className="block text-white text-7xl sm:text-8xl md:text-9xl tracking-tight">
+            <span className="block text-white text-7xl md:text-8xl tracking-tight">
               Bomb
             </span>
           </h1>
@@ -89,21 +89,21 @@ export const Home = () => {
           {isLoggedIn ? (
             <Button
               variant="default"
-              className="h-12 min-w-44 px-10 font-secondary uppercase text-sm tracking-widest"
+              className="h-12 w-full px-10 font-secondary uppercase text-sm tracking-widest"
               onClick={() => navigate("/games")}
             >
               PLAY
             </Button>
           ) : (
-            <div className="flex flex-col items-center gap-3">
+            <div className="grid w-full grid-cols-1 gap-3">
               <Connect
                 highlight
-                className="h-12 min-w-44 w-auto px-10"
+                className="h-12 w-full px-10"
                 onClick={onConnectClick}
               />
               <Button
                 variant="secondary"
-                className="h-11 min-w-44 px-10 font-secondary uppercase text-sm tracking-widest"
+                className="h-11 w-full px-10 font-secondary uppercase text-sm tracking-widest"
                 disabled
               >
                 Play
