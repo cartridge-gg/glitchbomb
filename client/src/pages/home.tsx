@@ -60,22 +60,24 @@ export const Home = () => {
   const isLoggedIn = !!account && !!username;
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Header */}
+    <div className="absolute inset-0">
+      {/* Header overlay so hero stays centered to full viewport */}
       {isLoggedIn && (
-        <AppHeader
-          moonrocks={balance}
-          username={username}
-          showBack={false}
-          onMint={() => mint(tokenAddress)}
-          onProfileClick={onProfileClick}
-        />
+        <div className="absolute inset-x-0 top-0 z-10">
+          <AppHeader
+            moonrocks={balance}
+            username={username}
+            showBack={false}
+            onMint={() => mint(tokenAddress)}
+            onProfileClick={onProfileClick}
+          />
+        </div>
       )}
 
       {/* Main content - centered */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
-        <div className="flex flex-col items-center gap-6">
-          <h1 className="uppercase text-center">
+      <div className="flex h-full flex-col items-center justify-center px-4">
+        <div className="flex w-full max-w-xs flex-col items-center gap-6">
+          <h1 className="m-0 w-full text-center uppercase leading-none">
             <strong className="text-green-400 text-5xl md:text-7xl font-glitch font-thin">
               Glitch
             </strong>
