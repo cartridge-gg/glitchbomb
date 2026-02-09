@@ -38,7 +38,10 @@ body {
   min-height: 100svh;
   min-height: 100dvh;
   width: 100%;
-  background-color: var(--safe-area-top, var(--black-100));
+  background-color: var(
+    --safe-area-bottom,
+    var(--safe-area-top, var(--black-100))
+  );
 }
 
 .safe-area-bar {
