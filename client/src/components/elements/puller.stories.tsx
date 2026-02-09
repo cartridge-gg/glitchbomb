@@ -47,6 +47,10 @@ const meta = {
       control: "boolean",
       description: "Disable the button",
     },
+    isLoading: {
+      control: "boolean",
+      description: "Show pull-pending pulse state",
+    },
   },
   args: {
     orbs: 5,
@@ -133,6 +137,14 @@ export const Disabled: Story = {
     variant: "default",
     size: "md",
     disabled: true,
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    variant: "point",
+    size: "md",
+    isLoading: true,
   },
 };
 

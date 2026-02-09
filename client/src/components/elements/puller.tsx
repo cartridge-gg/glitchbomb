@@ -81,6 +81,7 @@ export interface PullerProps
   orbs?: number;
   bombs?: number;
   sizePx?: number;
+  isLoading?: boolean;
 }
 
 export const Puller = memo(function Puller({
@@ -90,7 +91,9 @@ export const Puller = memo(function Puller({
   orbs: _orbs = 0,
   bombs: _bombs = 0,
   sizePx,
+  isLoading = false,
   style,
+  disabled,
   onHoverStart,
   onHoverEnd,
   onPointerMove,
@@ -170,6 +173,13 @@ export const Puller = memo(function Puller({
     }
   }, [hoverEnabled, glowX, glowY]);
 
+  useEffect(() => {
+    if (!isLoading) return;
+    setIsHovering(false);
+    glowX.set(DEFAULT_GLOW_POSITION.x);
+    glowY.set(DEFAULT_GLOW_POSITION.y);
+  }, [isLoading, glowX, glowY]);
+
   // Get current color for rainbow variant
   const currentColor =
     variant === "rainbow" ? RAINBOW_SEQUENCE[currentColorIndex] : color;
@@ -179,6 +189,8 @@ export const Puller = memo(function Puller({
   const resolvedSizePx = sizePx ?? defaultSizePx;
   const labelFontSize = Math.round(resolvedSizePx * 0.19);
   const labelLineHeight = Math.round(labelFontSize * 0.86);
+  const loadingLabelFontSize = Math.round(resolvedSizePx * 0.16);
+  const loadingLabelLineHeight = Math.round(loadingLabelFontSize * 0.9);
   const mergedStyle = {
     boxShadow: "0px 0px 50px 30px #000000",
     ...(sizePx ? { width: resolvedSizePx, height: resolvedSizePx } : {}),
@@ -187,10 +199,23 @@ export const Puller = memo(function Puller({
   return (
     <motion.button
       className={cn(pullerVariants({ variant, size, className }))}
-      whileHover={hoverEnabled ? { scale: 1.02 } : undefined}
-      whileTap={{ scale: 0.9 }}
-      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      whileHover={hoverEnabled && !isLoading ? { scale: 1.02 } : undefined}
+      whileTap={!isLoading ? { scale: 0.9 } : undefined}
+      animate={isLoading ? { scale: [1, 1.02, 1] } : undefined}
+      transition={
+        isLoading
+          ? {
+              scale: {
+                duration: 1.2,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              },
+            }
+          : { type: "spring", stiffness: 400, damping: 10 }
+      }
       style={mergedStyle}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading}
       onHoverStart={(event) => {
         onHoverStart?.(event);
         setIsHovering(true);
@@ -269,6 +294,48 @@ export const Puller = memo(function Puller({
             background: glowBackground,
           }}
         />
+        {isLoading && (
+          <>
+            <motion.div
+              className="absolute inset-[6%] rounded-full pointer-events-none border"
+              animate={{
+                scale: [0.96, 1.03, 0.96],
+                opacity: [0.22, 0.58, 0.22],
+              }}
+              transition={{
+                duration: 1.25,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+              style={{
+                borderColor: `color-mix(in srgb, ${currentColor.cssVar} 68%, transparent)`,
+              }}
+            />
+            <motion.div
+              className="absolute inset-[3%] rounded-full pointer-events-none"
+              animate={{
+                rotate: [0, 360],
+                opacity: [0.2, 0.34, 0.2],
+              }}
+              transition={{
+                rotate: {
+                  duration: 2.4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                },
+                opacity: {
+                  duration: 1.25,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                },
+              }}
+              style={{
+                background: `conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, ${currentColor.cssVar} 72%, transparent) 58deg, transparent 132deg, transparent 216deg, color-mix(in srgb, ${currentColor.cssVar} 58%, transparent) 290deg, transparent 360deg)`,
+                mixBlendMode: "screen",
+              }}
+            />
+          </>
+        )}
 
         {/* 3. Glass filter */}
         <div
@@ -291,20 +358,36 @@ export const Puller = memo(function Puller({
 
       {/* 5. Content */}
       <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 bg-transparent flex flex-col items-center gap-0">
-        <p
+        <motion.p
           className="text-center font-[900]"
+          animate={isLoading ? { opacity: [0.58, 1, 0.58] } : { opacity: 1 }}
+          transition={
+            isLoading
+              ? {
+                  duration: 1.4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }
+              : { duration: 0.2 }
+          }
           style={{
             color: currentColor.cssVar,
-            fontSize: `${labelFontSize}px`,
-            lineHeight: `${labelLineHeight}px`,
+            fontSize: `${isLoading ? loadingLabelFontSize : labelFontSize}px`,
+            lineHeight: `${isLoading ? loadingLabelLineHeight : labelLineHeight}px`,
             filter: `drop-shadow(0 0 20px color-mix(in srgb, ${currentColor.cssVar} 80%, transparent))`,
             transition: "color 0.5s ease-in-out, filter 0.5s ease-in-out",
           }}
         >
-          PULL
-          <br />
-          ORB
-        </p>
+          {isLoading ? (
+            "PULLING"
+          ) : (
+            <>
+              PULL
+              <br />
+              ORB
+            </>
+          )}
+        </motion.p>
         {/* <div
           className="flex items-center justify-center"
           style={{
