@@ -84,6 +84,7 @@ export const Game = () => {
   const [isEnteringShop, setIsEnteringShop] = useState(false);
   const [isExitingShop, setIsExitingShop] = useState(false);
   const [isCashingOut, setIsCashingOut] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
 
   const { dataPoints } = usePLDataPoints({
     packId: pack?.id ?? 0,
@@ -142,6 +143,7 @@ export const Game = () => {
       setOverlay("none");
       setIsEnteringShop(false);
       setIsExitingShop(false);
+      setIsPulling(false);
     }
   }, [setPackId, setGameId, searchParams]);
 
@@ -159,6 +161,14 @@ export const Game = () => {
       setShopBalanceOverride(null);
     }
   }, [game?.shop]);
+
+  useEffect(() => {
+    if (!isPulling) return;
+    const timer = setTimeout(() => {
+      setIsPulling(false);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [isPulling]);
 
   // Initialize lastPullIdRef when initial fetch completes
   useEffect(() => {
@@ -194,6 +204,7 @@ export const Game = () => {
         variant: latestPull.orb.outcomeVariant(),
         content: latestPull.orb.outcome(),
       });
+      setIsPulling(false);
 
       // Update the last seen pull id
       lastPullIdRef.current = latestPull.id;
@@ -208,11 +219,14 @@ export const Game = () => {
   }, [pulls]);
 
   // Memoize callbacks to prevent unnecessary re-renders
-  const handlePull = useCallback(() => {
-    if (pack && game) {
-      pull(pack.id, game.id);
+  const handlePull = useCallback(async () => {
+    if (!pack || !game || isPulling) return;
+    setIsPulling(true);
+    const success = await pull(pack.id, game.id);
+    if (!success) {
+      setIsPulling(false);
     }
-  }, [pull, pack, game]);
+  }, [pull, pack, game, isPulling]);
 
   const closeOverlay = useCallback(() => setOverlay("none"), []);
 
@@ -474,6 +488,7 @@ export const Game = () => {
                 hasCurse={hasCurse}
                 curseLabel={curseLabel}
                 orb={currentOrb}
+                pullLoading={isPulling}
                 onPull={handlePull}
               />
             </div>

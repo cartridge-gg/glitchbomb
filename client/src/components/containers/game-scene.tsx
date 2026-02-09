@@ -32,6 +32,7 @@ export interface GameSceneProps
     variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
     content: string;
   };
+  pullLoading?: boolean;
   onPull: () => void;
 }
 
@@ -74,6 +75,7 @@ export const GameScene = ({
   hasCurse = false,
   curseLabel,
   orb,
+  pullLoading = false,
   variant,
   className,
   onPull,
@@ -168,6 +170,7 @@ export const GameScene = ({
             sizePx={pullerSizePx}
             orbs={orbs}
             bombs={bombs}
+            isLoading={pullLoading}
           />
           {hasCurse && (
             <TooltipProvider>
