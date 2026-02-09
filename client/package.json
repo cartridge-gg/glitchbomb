@@ -12,6 +12,7 @@
     "format": "biome check --write .",
     "test": "jest --passWithNoTests",
     "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "storybook:build": "storybook build",
     "storybook:serve": "storybook build --quiet && http-server -c-1 storybook-static --port 6001 --silent"
   },

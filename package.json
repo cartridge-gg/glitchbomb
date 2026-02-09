@@ -23,7 +23,7 @@
     "storybook": "cd client && pnpm storybook",
     "storybook:build": "cd client && pnpm storybook:build",
     "storybook:serve": "cd client && pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6001 --silent",
-    "build-storybook": "cd client && pnpm build-storybook"
+    "build-storybook": "cd client && pnpm storybook:build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
