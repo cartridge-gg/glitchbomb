@@ -36,5 +36,5 @@ disable_multicall = true
   "0x03eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43", # Starterpack Registry
   "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Owner
   "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Fee Receiver
-  "0xF4240",                                                            # Entry Price: 1,000,000
+  "0x5F5E100",                                                          # Entry Price: 100,000,000
 ]
