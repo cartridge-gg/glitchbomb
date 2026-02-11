@@ -83,7 +83,7 @@ pub mod setup {
             ContractDefTrait::new(@NAMESPACE(), @SETUP_NAME())
                 .with_owner_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(
-                    array![0, 0, 0, OWNER().into(), OWNER().into(), 1000000].span(),
+                    array![0, 0, 0, OWNER().into(), OWNER().into(), 2000000].span(),
                 ),
             ContractDefTrait::new(@NAMESPACE(), @PLAY_NAME())
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())

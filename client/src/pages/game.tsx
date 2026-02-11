@@ -373,7 +373,7 @@ export const Game = () => {
     // Game over (terminal state) - both view mode and immediate game over
     if (game.over) {
       const cashedOut = game.health > 0;
-      // When cashed out, points were converted to moonrocks (game.points is now 0)
+      // When cashed out, points were converted using the payout curve (game.points is now 0)
       // Calculate from the final P/L value (last data point before cash out)
       // When died (health = 0), no moonrocks earned
       const lastPLValue =

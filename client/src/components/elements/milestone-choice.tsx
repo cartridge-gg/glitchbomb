@@ -1,10 +1,11 @@
 import { ChipIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { cashOutPayout } from "@/helpers/payout";
 import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 export interface MilestoneChoiceProps {
   moonrocks: number; // Current pack moonrocks
-  points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
+  points: number; // Current game points (will become chips on continue, mapped through payout curve on cash out)
   nextCurseLabel?: string; // Optional label if the next level has a known curse
   onCashOut: () => void;
   onEnterShop: () => void;
@@ -22,7 +23,7 @@ export const MilestoneChoice = ({
   nextCurseLabel,
 }: MilestoneChoiceProps) => {
   const isLoading = isEnteringShop || isCashingOut;
-  const totalMoonrocks = moonrocks + points;
+  const totalMoonrocks = moonrocks + cashOutPayout(points);
   const curseLabel = nextCurseLabel?.trim();
   const showCurse = Boolean(curseLabel);
   const rewardValueClass =

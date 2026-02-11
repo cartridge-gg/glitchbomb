@@ -107,7 +107,8 @@ pub mod PlayableComponent {
             store.set_pack(@pack);
 
             // [Event] Emit PLDataPoint after level cost
-            store.pl_data_point(1, pack_id, game_id, pack.moonrocks + game.points, 0);
+            let potential = pack.moonrocks + GameTrait::cash_out_payout(game.points);
+            store.pl_data_point(1, pack_id, game_id, potential, 0);
 
             // [Interaction] Update token metadata
             collection.update(pack_id.into());
@@ -143,7 +144,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // Calculate potential moonrocks and PL id base
-            let potential_moonrocks = pack.moonrocks + game.points;
+            let potential_moonrocks = pack.moonrocks + GameTrait::cash_out_payout(game.points);
             let pl_base_id: u32 = 2 + (game.pull_count.into() - orbs.len()) * 2;
 
             // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
@@ -311,7 +312,7 @@ pub mod PlayableComponent {
             // Use a high base id to avoid collision with pull events
             // pl_id = 2 + pull_count * 2 + level_offset
             let pl_id: u32 = 2 + (game.pull_count.into() * 2) + (game.level.into() - 1);
-            let potential = pack.moonrocks + game.points;
+            let potential = pack.moonrocks + GameTrait::cash_out_payout(game.points);
             store.pl_data_point(pl_id, pack_id, game_id, potential, 0);
         }
 

@@ -1,7 +1,7 @@
 use starknet::testing::{set_contract_address, set_transaction_hash};
 use starterpack::interface::IStarterpackImplementationDispatcherTrait;
 use crate::interfaces::erc20::IERC20DispatcherTrait;
-use crate::models::game::AssertTrait;
+use crate::models::game::{AssertTrait, GameTrait};
 use crate::store::StoreTrait;
 use crate::systems::play::IPlayDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
@@ -82,4 +82,35 @@ fn test_play_cash_out_mints_moonrocks() {
 
     let balance_after = systems.token.balance_of(context.player);
     assert(balance_after == 10_u16.into(), 'Token: wrong minted amount');
+}
+
+#[test]
+fn test_play_cash_out_applies_curve() {
+    // [Setup] Mint one token
+    let (world, systems, context) = spawn_game();
+    set_contract_address(systems.registry.contract_address);
+    systems.starterpack.on_issue(context.player, 0, 1);
+
+    // [Action] Open pack
+    let pack_id: u64 = 1;
+    let game_id: u8 = 1;
+    set_contract_address(context.player);
+    systems.play.start(pack_id);
+
+    // [Setup] Force deterministic points directly in game state
+    let store = StoreTrait::new(world);
+    let mut game = store.game(pack_id, game_id);
+    game.earn_points(120);
+    set_contract_address(systems.play.contract_address);
+    store.set_game(@game);
+    set_contract_address(context.player);
+
+    // [Action] Cash out
+    systems.play.cash_out(pack_id, game_id);
+
+    // [Assert] Curve payout is applied (120 points -> 111 moonrocks)
+    let pack_after = store.pack(pack_id);
+    assert(pack_after.moonrocks == 201, 'Pack: wrong moonrocks');
+    let balance_after = systems.token.balance_of(context.player);
+    assert(balance_after == 111_u16.into(), 'Token: wrong minted amount');
 }

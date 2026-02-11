@@ -8,7 +8,7 @@ export class OrbPulled {
   game_id: number;
   id: number;
   orb: Orb;
-  potential_moonrocks: number; // pack.moonrocks + game.points (what you'd cash out)
+  potential_moonrocks: number; // pack.moonrocks + cash-out payout(game.points)
 
   constructor(
     pack_id: number,
