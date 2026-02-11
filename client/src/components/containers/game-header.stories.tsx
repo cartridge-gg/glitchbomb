@@ -20,6 +20,10 @@ const meta = {
       control: { type: "number" },
       description: "Token balance (moonrocks)",
     },
+    potentialMoonrocks: {
+      control: { type: "number" },
+      description: "Potential moonrocks while game is in progress",
+    },
     chips: {
       control: { type: "number" },
       description: "In-game chips balance",
@@ -31,6 +35,7 @@ const meta = {
   },
   args: {
     moonrocks: 1500,
+    potentialMoonrocks: 1548,
     chips: 36,
     username: "Player1",
   },
@@ -41,4 +46,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
+};
+
+export const WithCurrentBalanceOnly: Story = {
+  args: {
+    potentialMoonrocks: undefined,
+  },
 };
