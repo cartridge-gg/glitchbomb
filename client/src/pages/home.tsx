@@ -396,9 +396,9 @@ export const Home = () => {
                           }
                         >
                           {/* Icon container */}
-                          <div className="shrink-0 flex items-center justify-center rounded bg-white/[0.04] p-2">
+                          <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
                             <OrbBombIcon
-                              size="sm"
+                              size="lg"
                               className="text-green-400"
                             />
                           </div>
