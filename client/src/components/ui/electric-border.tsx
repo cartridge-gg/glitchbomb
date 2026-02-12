@@ -16,6 +16,7 @@ export interface ElectricBorderProps
   safetyMargin?: number;
   contentOpacity?: number;
   glowOpacity?: number;
+  noiseFrequency?: number;
 }
 
 export const ElectricBorder = ({
@@ -32,6 +33,7 @@ export const ElectricBorder = ({
   safetyMargin = 2,
   contentOpacity = 1,
   glowOpacity = 0.2,
+  noiseFrequency = 1,
   className,
   ...props
 }: ElectricBorderProps) => {
@@ -72,6 +74,7 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
+        noiseFrequency,
       );
       borderFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
@@ -86,6 +89,7 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
+        noiseFrequency,
       );
       contentFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,
@@ -112,6 +116,7 @@ export const ElectricBorder = ({
     animationFrames,
     cornerRadius,
     aspectRatio,
+    noiseFrequency,
   ]);
 
   return (

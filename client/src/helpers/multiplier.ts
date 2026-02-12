@@ -246,6 +246,7 @@ export const MultiplierMath = {
     animationFrames: number,
     cornerRadius: number,
     aspectRatio: number = 1,
+    noiseFrequency: number = 1,
   ): string {
     const outerPoints: string[] = [];
     const innerPoints: string[] = [];
@@ -254,7 +255,7 @@ export const MultiplierMath = {
 
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle = t * Math.PI * 2;
+      const angle = t * Math.PI * 2 * noiseFrequency;
 
       const noiseValue = periodicNoise(
         angle,
@@ -317,13 +318,14 @@ export const MultiplierMath = {
     animationFrames: number,
     cornerRadius: number,
     aspectRatio: number = 1,
+    noiseFrequency: number = 1,
   ): string {
     const points: string[] = [];
     const outerSize = 50 - safetyMargin;
 
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle = t * Math.PI * 2;
+      const angle = t * Math.PI * 2 * noiseFrequency;
 
       const noiseValue = periodicNoise(
         angle,

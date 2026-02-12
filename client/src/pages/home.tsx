@@ -380,6 +380,7 @@ export const Home = () => {
                         borderWidth={2}
                         safetyMargin={1}
                         noisePoints={200}
+                        noiseFrequency={6}
                         glowOpacity={0}
                         className="rounded-md"
                       >
