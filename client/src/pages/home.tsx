@@ -354,7 +354,7 @@ export const Home = () => {
 
             {/* Active Game Card with Electric Border + slide animation */}
             {activeGame && (
-              <div className="overflow-hidden rounded-xl">
+              <div className="overflow-hidden rounded-lg">
                 <div
                   key={`${activeGame.packId}-${activeGame.gameId}`}
                   className={
@@ -370,16 +370,16 @@ export const Home = () => {
                     gradient="linear-gradient(0deg, rgba(54,248,24,0.08), rgba(54,248,24,0.15))"
                     borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                     seed={42 + activeGameIndex}
-                    cornerRadius={12}
+                    cornerRadius={8}
                     noiseAmplitude={0.2}
                     borderWidth={2.5}
                     safetyMargin={1.5}
                     noisePoints={128}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   >
                     <button
                       type="button"
-                      className="w-full p-4 flex items-start gap-4"
+                      className="w-full p-3 flex items-center gap-3"
                       onClick={() =>
                         handlePlay(
                           activeGame.packId,
@@ -388,53 +388,56 @@ export const Home = () => {
                         )
                       }
                     >
-                      <OrbBombIcon
-                        size="xl"
-                        className="text-green-400 shrink-0"
-                      />
+                      {/* Icon container */}
+                      <div className="shrink-0 flex items-center justify-center rounded bg-white/[0.04] p-2">
+                        <OrbBombIcon size="sm" className="text-green-400" />
+                      </div>
+
+                      {/* 2x2 grid */}
                       <div className="flex-1 min-w-0">
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                          <div>
-                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                          <div className="flex flex-col gap-1">
+                            <p className="text-green-400/25 font-secondary text-sm leading-none">
                               Game ID
                             </p>
-                            <p className="text-green-400 font-body text-sm">
+                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
                               #{activeGame.gameId}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
+                          <div className="flex flex-col gap-1">
+                            <p className="text-green-400/25 font-secondary text-sm leading-none">
                               Expires In
                             </p>
-                            <p className="text-green-400 font-body text-sm">
+                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
                               --
                             </p>
                           </div>
-                          <div>
-                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
+                          <div className="flex flex-col gap-1">
+                            <p className="text-green-400/25 font-secondary text-sm leading-none">
                               Level
                             </p>
-                            <p className="text-green-400 font-body text-sm">
-                              {activeGame.level}
+                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                              L{activeGame.level}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
+                          <div className="flex flex-col gap-1">
+                            <p className="text-green-400/25 font-secondary text-sm leading-none">
                               Max Payout
                             </p>
-                            <p className="text-green-400 font-body text-sm">
+                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
                               {activeGame.points}
                             </p>
                           </div>
                         </div>
                       </div>
+
                       {loadingGameId ===
                       `${activeGame.packId}-${activeGame.gameId}` ? (
                         <LoadingSpinner size="sm" />
                       ) : (
                         <ArrowRightIcon
-                          size="sm"
-                          className="text-green-400 mt-1 shrink-0"
+                          size="xs"
+                          className="text-green-400 shrink-0"
                         />
                       )}
                     </button>
