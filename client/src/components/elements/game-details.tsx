@@ -5,7 +5,7 @@ import {
   MAX_REWARD,
   PAYOUT_TIERS,
 } from "@/constants";
-import { MoonrockIcon } from "@/components/icons";
+
 import { PayoutChart } from "./payout-chart";
 
 export interface GameDetailsProps {
@@ -83,11 +83,7 @@ export const GameDetails = ({
           <DetailRow label="Reward Multiplier" value="1X" />
           <DetailRow label="Break Even" value={`${BREAK_EVEN_TIER}+`} />
           <DetailRow label="Expires In" value="24HRS" />
-          <DetailRow
-            isLast
-            label="Maximum Reward"
-            value={`${MAX_REWARD}`}
-          />
+          <DetailRow isLast label="Maximum Reward" value={`${MAX_REWARD}`} />
         </div>
       </div>
 
