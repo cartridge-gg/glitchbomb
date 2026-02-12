@@ -58,6 +58,9 @@ export const ElectricBorder = ({
   }, []);
 
   const clipPathAnimation = useMemo(() => {
+    // Scale frequency by aspect ratio so wider elements get more jagged edges
+    const effectiveFrequency = noiseFrequency * Math.max(aspectRatio, 1);
+
     const borderFrames: string[] = [];
     const contentFrames: string[] = [];
 
@@ -74,7 +77,7 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
-        noiseFrequency,
+        effectiveFrequency,
       );
       borderFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
@@ -89,7 +92,7 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
-        noiseFrequency,
+        effectiveFrequency,
       );
       contentFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,
