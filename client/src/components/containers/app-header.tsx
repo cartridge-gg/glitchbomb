@@ -54,11 +54,15 @@ export const AppHeader = ({
         </button>
       </div>
 
-      {/* Center: GlitchBomb icon - only on md+ screens */}
-      <GlitchBombIcon
-        size="xl"
-        className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
-      />
+      {/* Center: full Glitch Bomb wordmark - only on md+ screens */}
+      <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-baseline gap-2 uppercase leading-none pointer-events-none">
+        <span className="font-glitch text-green-400 text-2xl tracking-tight">
+          Glitch
+        </span>
+        <span className="font-primary text-white text-2xl tracking-tight">
+          Bomb
+        </span>
+      </div>
 
       {/* Spacer to push right content */}
       <div className="flex-1" />
