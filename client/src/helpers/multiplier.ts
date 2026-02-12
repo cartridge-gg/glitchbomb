@@ -253,9 +253,27 @@ export const MultiplierMath = {
     const outerSize = 50 - safetyMargin;
     const innerSize = 50 - safetyMargin - borderWidth;
 
+    // Compute pixel-space speed at each sample to weight noise angles.
+    // Tangent = (-ny, nx); pixel speed = sqrt(ny^2*ar^2 + nx^2).
+    // This makes the noise advance faster on physically longer edges
+    // so visual frequency is uniform everywhere.
+    const speeds = new Array<number>(noisePoints);
+    let totalSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle = t * Math.PI * 2 * noiseFrequency;
+      const n = roundedSquareNormal(t, outerSize, cornerRadius);
+      speeds[i] = Math.sqrt(
+        n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2,
+      );
+      totalSpeed += speeds[i];
+    }
+
+    let cumSpeed = 0;
+    for (let i = 0; i < noisePoints; i++) {
+      const t = i / noisePoints;
+      const angle =
+        (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      cumSpeed += speeds[i];
 
       const noiseValue = periodicNoise(
         angle,
@@ -280,9 +298,6 @@ export const MultiplierMath = {
         innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
       } else {
         // Correct displacement and border width for aspect ratio.
-        // clip-path % maps X to width, Y to height — d% creates d%*W px
-        // horizontally but d%*H px vertically. Dividing by normalMag
-        // equalizes pixel displacement on all edges.
         const ar = aspectRatio;
         const normalMag = Math.sqrt(
           (normal.nx * ar) ** 2 + normal.ny ** 2,
@@ -333,9 +348,24 @@ export const MultiplierMath = {
     const points: string[] = [];
     const outerSize = 50 - safetyMargin;
 
+    // Pixel-weighted noise angles (same as ring)
+    const speeds = new Array<number>(noisePoints);
+    let totalSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle = t * Math.PI * 2 * noiseFrequency;
+      const n = roundedSquareNormal(t, outerSize, cornerRadius);
+      speeds[i] = Math.sqrt(
+        n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2,
+      );
+      totalSpeed += speeds[i];
+    }
+
+    let cumSpeed = 0;
+    for (let i = 0; i < noisePoints; i++) {
+      const t = i / noisePoints;
+      const angle =
+        (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      cumSpeed += speeds[i];
 
       const noiseValue = periodicNoise(
         angle,
