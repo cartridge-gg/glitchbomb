@@ -53,10 +53,10 @@ const valuePositionMap = {
     lg: "left-1/2 -translate-x-1/2",
   },
   "top-right": {
-    xs: "top-1/2 right-0 -translate-y-1/2",
-    sm: "top-1/2 right-0 -translate-y-1/2",
-    md: "top-1/2 right-0 -translate-y-1/2",
-    lg: "top-1/2 right-0 -translate-y-1/2",
+    xs: "top-0 right-0",
+    sm: "top-0 right-0",
+    md: "top-0 right-0",
+    lg: "top-0 right-0",
   },
 };
 
