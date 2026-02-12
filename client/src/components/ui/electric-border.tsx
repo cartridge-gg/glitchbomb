@@ -85,6 +85,7 @@ export const ElectricBorder = ({
         safetyMargin,
         animationFrames,
         cornerRadius,
+        aspectRatio,
       );
       contentFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,

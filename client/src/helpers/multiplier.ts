@@ -223,6 +223,61 @@ function roundedSquareNormal(
   return { nx: 0, ny: -1 };
 }
 
+/**
+ * Computes sample t-values and noise angles that are uniformly spaced in
+ * pixel space rather than percentage space. On a wide element, top/bottom
+ * edges are physically longer so they get proportionally more sample points,
+ * giving uniform visual noise frequency on all edges.
+ */
+function computePixelWeightedSamples(
+  noisePoints: number,
+  size: number,
+  cornerRadius: number,
+  aspectRatio: number,
+): { tValues: number[]; angles: number[] } {
+  // Oversample the perimeter for accurate arc-length integration
+  const N = noisePoints * 4;
+  const arcLengths = new Array<number>(N + 1);
+  arcLengths[0] = 0;
+  let prevPt = roundedSquarePoint(0, size, cornerRadius);
+
+  for (let j = 1; j <= N; j++) {
+    const tJ = j / N;
+    const pt = roundedSquarePoint(tJ, size, cornerRadius);
+    // Distance in pixel space: x% maps to width, y% maps to height
+    const dx = (pt.x - prevPt.x) * aspectRatio;
+    const dy = pt.y - prevPt.y;
+    arcLengths[j] = arcLengths[j - 1] + Math.sqrt(dx * dx + dy * dy);
+    prevPt = pt;
+  }
+
+  const totalArc = arcLengths[N];
+  const tValues: number[] = [];
+  const angles: number[] = [];
+
+  for (let i = 0; i < noisePoints; i++) {
+    const targetArc = (i / noisePoints) * totalArc;
+
+    // Binary search for the segment containing targetArc
+    let lo = 0,
+      hi = N;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (arcLengths[mid] < targetArc) lo = mid + 1;
+      else hi = mid;
+    }
+
+    // Linear interpolation within the segment
+    const idx = Math.max(0, lo - 1);
+    const segLen = arcLengths[idx + 1] - arcLengths[idx];
+    const frac = segLen > 0 ? (targetArc - arcLengths[idx]) / segLen : 0;
+    tValues.push((idx + frac) / N);
+    angles.push((targetArc / totalArc) * Math.PI * 2);
+  }
+
+  return { tValues, angles };
+}
+
 export const MultiplierMath = {
   /**
    * Generates a ring-shaped clip-path (border)
@@ -253,9 +308,23 @@ export const MultiplierMath = {
     const outerSize = 50 - safetyMargin;
     const innerSize = 50 - safetyMargin - borderWidth;
 
+    // For non-square elements, distribute points uniformly in pixel space
+    // so noise frequency looks the same on all edges
+    const samples =
+      aspectRatio !== 1
+        ? computePixelWeightedSamples(
+            noisePoints,
+            outerSize,
+            cornerRadius,
+            aspectRatio,
+          )
+        : null;
+
     for (let i = 0; i < noisePoints; i++) {
-      const t = i / noisePoints; // Parameter [0, 1] that traverses the perimeter
-      const angle = t * Math.PI * 2; // For periodic noise
+      const t = samples ? samples.tValues[i] : i / noisePoints;
+      const angle = samples
+        ? samples.angles[i]
+        : (i / noisePoints) * Math.PI * 2;
 
       // Generate periodic noise ONCE for this point
       const noiseValue = periodicNoise(
@@ -272,34 +341,40 @@ export const MultiplierMath = {
       const outerPoint = roundedSquarePoint(t, outerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      // Apply SAME displacement to both polygons to maintain constant border width
-      const outerX = outerPoint.x + normal.nx * displacement;
-      const outerY = outerPoint.y + normal.ny * displacement;
-      outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
-
       if (aspectRatio === 1) {
         // Square element: use two concentric rounded squares (original behavior)
+        const outerX = outerPoint.x + normal.nx * displacement;
+        const outerY = outerPoint.y + normal.ny * displacement;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+
         const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
         const innerX = innerPoint.x + normal.nx * displacement;
         const innerY = innerPoint.y + normal.ny * displacement;
         innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
       } else {
-        // Non-square element: offset inner points from outer along normal,
-        // correcting for aspect ratio so border looks visually uniform.
-        // In clip-path %, X maps to element width, Y to height.
-        // A normal displacement of d% creates d%*W pixels in X, d%*H in Y.
-        // To get uniform visual thickness, scale border offset per-axis:
-        //   adjustedBorder = borderWidth / sqrt((nx*ar)^2 + ny^2)
+        // Non-square element: correct displacement amplitude for aspect ratio
+        // so visual pixel displacement is uniform on all edges.
         const ar = aspectRatio;
         const normalMag = Math.sqrt(
           (normal.nx * ar) ** 2 + normal.ny ** 2,
         );
+        const adjustedDisplacement =
+          normalMag > 0 ? displacement / normalMag : displacement;
         const adjustedBorder =
           normalMag > 0 ? borderWidth / normalMag : borderWidth;
+
+        const outerX = outerPoint.x + normal.nx * adjustedDisplacement;
+        const outerY = outerPoint.y + normal.ny * adjustedDisplacement;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+
         const innerX =
-          outerPoint.x - normal.nx * adjustedBorder + normal.nx * displacement;
+          outerPoint.x -
+          normal.nx * adjustedBorder +
+          normal.nx * adjustedDisplacement;
         const innerY =
-          outerPoint.y - normal.ny * adjustedBorder + normal.ny * displacement;
+          outerPoint.y -
+          normal.ny * adjustedBorder +
+          normal.ny * adjustedDisplacement;
         innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
       }
     }
@@ -327,14 +402,28 @@ export const MultiplierMath = {
     safetyMargin: number,
     animationFrames: number,
     cornerRadius: number,
+    aspectRatio: number = 1,
   ): string {
     const points: string[] = [];
     // Content uses the same radius as the OUTER polygon of the border
     const outerSize = 50 - safetyMargin;
 
+    // For non-square elements, distribute points uniformly in pixel space
+    const samples =
+      aspectRatio !== 1
+        ? computePixelWeightedSamples(
+            noisePoints,
+            outerSize,
+            cornerRadius,
+            aspectRatio,
+          )
+        : null;
+
     for (let i = 0; i < noisePoints; i++) {
-      const t = i / noisePoints; // Parameter [0, 1] that traverses the perimeter
-      const angle = t * Math.PI * 2; // For periodic noise
+      const t = samples ? samples.tValues[i] : i / noisePoints;
+      const angle = samples
+        ? samples.angles[i]
+        : (i / noisePoints) * Math.PI * 2;
 
       // Use the SAME periodic noise as the ring
       const noiseValue = periodicNoise(
@@ -351,10 +440,22 @@ export const MultiplierMath = {
       const point = roundedSquarePoint(t, outerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      // Apply noise displacement along the normal (perpendicular to border)
-      const x = point.x + normal.nx * displacement;
-      const y = point.y + normal.ny * displacement;
-      points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      // Apply noise displacement along the normal, corrected for aspect ratio
+      if (aspectRatio === 1) {
+        const x = point.x + normal.nx * displacement;
+        const y = point.y + normal.ny * displacement;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      } else {
+        const ar = aspectRatio;
+        const normalMag = Math.sqrt(
+          (normal.nx * ar) ** 2 + normal.ny ** 2,
+        );
+        const adjustedDisplacement =
+          normalMag > 0 ? displacement / normalMag : displacement;
+        const x = point.x + normal.nx * adjustedDisplacement;
+        const y = point.y + normal.ny * adjustedDisplacement;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      }
     }
 
     return `polygon(${points.join(",")})`;
