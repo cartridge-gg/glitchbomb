@@ -356,14 +356,14 @@ export const Home = () => {
                     >
                       <ElectricBorder
                         color="#36F818"
-                        gradient="linear-gradient(0deg, rgba(54,248,24,0.24), rgba(54,248,24,0.24))"
+                        gradient="linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,1))"
                         borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                         seed={42 + idx}
                         cornerRadius={3}
-                        noiseAmplitude={0.5}
-                        borderWidth={2.5}
-                        safetyMargin={2}
-                        noisePoints={48}
+                        noiseAmplitude={0.12}
+                        borderWidth={2}
+                        safetyMargin={1}
+                        noisePoints={200}
                         glowOpacity={0}
                         className="rounded-md"
                       >
