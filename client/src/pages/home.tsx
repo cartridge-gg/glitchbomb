@@ -327,10 +327,10 @@ export const Home = () => {
           </div>
 
           {currentOngoingGame ? (
-            <div className="relative rounded-lg">
-              <div className="pointer-events-none absolute -inset-[3px] rounded-xl bg-[radial-gradient(circle_at_15%_20%,rgba(248,145,73,0.35),transparent_50%),radial-gradient(circle_at_85%_80%,rgba(209,13,7,0.3),transparent_55%)] animate-pulse" />
-              <div className="pointer-events-none absolute -inset-[1px] rounded-[10px] bg-[linear-gradient(180deg,#F89149_0%,#D10D07_45%,#F89149_100%)]" />
-              <div className="relative rounded-lg border border-[#F89149]/50 bg-black/55 p-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)]">
+            <div className="relative overflow-hidden rounded-lg p-[1.5px] shadow-[0_0_14px_rgba(248,145,73,0.35)]">
+              <div className="pointer-events-none absolute inset-0 bg-[conic-gradient(from_0deg,#F89149,#FFD078,#D10D07,#F89149)] animate-[spin_2.2s_linear_infinite]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.28),transparent_42%),radial-gradient(circle_at_85%_80%,rgba(248,145,73,0.35),transparent_46%)] mix-blend-screen opacity-70 animate-pulse" />
+              <div className="relative rounded-[7px] bg-black/70 p-3 shadow-[inset_0_0_0_1px_rgba(248,145,73,0.25)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#1B0C08]">
                     <BombIcon className="h-5 w-5 text-orange-100" />
