@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { Connect, LoadingSpinner } from "@/components/elements";
 import { ElectricBorder } from "@/components/ui/electric-border";
-import { ArrowRightIcon, OrbBombIcon } from "@/components/icons";
+import { ArrowLeftIcon, ArrowRightIcon, BombIcon, OrbBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
@@ -115,6 +115,8 @@ export const Home = () => {
       hasNoGame: boolean;
       points: number;
       multiplier: number;
+      health: number;
+      moonrocks: number;
     }> = [];
 
     for (const pack of packs) {
@@ -130,6 +132,8 @@ export const Home = () => {
         hasNoGame: pack.game_count === 0,
         points: game?.points ?? 0,
         multiplier: game?.multiplier ?? 1,
+        health: game?.health ?? 0,
+        moonrocks: pack.moonrocks ?? 0,
       });
     }
 
@@ -149,15 +153,18 @@ export const Home = () => {
 
   const [activeGameIndex, setActiveGameIndex] = useState(0);
 
+  // Total slides = active games + 1 placeholder "New Game" card
+  const totalSlides = activeGames.length + 1;
+
   // Clamp index when the list changes
   useEffect(() => {
-    if (activeGames.length === 0) return;
     setActiveGameIndex((prev) =>
-      prev >= activeGames.length ? activeGames.length - 1 : prev,
+      prev >= totalSlides ? totalSlides - 1 : prev,
     );
-  }, [activeGames.length]);
+  }, [totalSlides]);
 
   const activeGame = activeGames[activeGameIndex] ?? null;
+  const isOnNewGameCard = activeGameIndex >= activeGames.length;
 
   const handlePrev = useCallback(() => {
     if (activeGameIndex <= 0) return;
@@ -165,9 +172,62 @@ export const Home = () => {
   }, [activeGameIndex]);
 
   const handleNext = useCallback(() => {
-    if (activeGameIndex >= activeGames.length - 1) return;
+    if (activeGameIndex >= totalSlides - 1) return;
     setActiveGameIndex((i) => i + 1);
-  }, [activeGameIndex, activeGames.length]);
+  }, [activeGameIndex, totalSlides]);
+
+  // Drag/swipe carousel state
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<{ x: number; time: number } | null>(null);
+  const didDrag = useRef(false);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (totalSlides <= 1) return;
+      setIsDragging(true);
+      setDragOffset(0);
+      didDrag.current = false;
+      dragStart.current = { x: e.clientX, time: Date.now() };
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [activeGames.length],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStart.current) return;
+      const dx = e.clientX - dragStart.current.x;
+      if (Math.abs(dx) > 5) didDrag.current = true;
+      setDragOffset(dx);
+    },
+    [],
+  );
+
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStart.current) return;
+      const dx = e.clientX - dragStart.current.x;
+      const dt = Date.now() - dragStart.current.time;
+      const velocity = Math.abs(dx) / dt; // px/ms
+
+      const containerWidth = carouselRef.current?.offsetWidth ?? 1;
+      const threshold = containerWidth * 0.2;
+
+      // Snap based on distance or velocity (fast flick)
+      if (dx < -threshold || (dx < 0 && velocity > 0.5)) {
+        setActiveGameIndex((i) => Math.min(i + 1, totalSlides - 1));
+      } else if (dx > threshold || (dx > 0 && velocity > 0.5)) {
+        setActiveGameIndex((i) => Math.max(i - 1, 0));
+      }
+
+      dragStart.current = null;
+      setDragOffset(0);
+      setIsDragging(false);
+    },
+    [totalSlides],
+  );
 
   const handlePlay = async (
     packId: number,
@@ -259,12 +319,9 @@ export const Home = () => {
         onProfileClick={onProfileClick}
       />
 
-      {/* Scrollable content */}
-      <div
-        className="flex-1 flex flex-col items-center px-4 pb-0 overflow-y-auto"
-        style={{ scrollbarWidth: "none" }}
-      >
-        <div className="flex flex-col gap-4 w-full max-w-[500px]">
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
+        <div className="flex flex-col gap-4 w-full max-w-[500px] min-h-0">
           {/* Banner */}
           <button
             type="button"
@@ -312,286 +369,437 @@ export const Home = () => {
                   {activeGames.length}
                 </span>
               </div>
-              {activeGames.length > 1 && (
+              {totalSlides > 1 && (
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="flex items-center justify-center h-12 w-12 rounded-xl bg-green-900 transition-colors hover:brightness-110 disabled:opacity-30"
+                  <Button
+                    variant="secondary"
+                    gradient="green"
+                    className="h-12 w-12 p-0"
                     onClick={handlePrev}
                     disabled={activeGameIndex <= 0}
                     aria-label="Previous game"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-5 w-5"
-                      fill="none"
-                      style={{ transform: "scaleX(-1)" }}
-                    >
-                      <path d="M12.7775 17.4442H14.3328V15.8889H12.7775V17.4442Z" fill="#36F818" />
-                      <path d="M6.55568 15.8885L6.55568 8.11118H11.2224L11.2224 6.55587L5.00024 6.55587L5.00024 17.4447H11.2224V15.8894L6.55568 15.8885Z" fill="#36F818" />
-                      <path d="M12.7775 17.4442L11.2217 17.4439V19H12.7778L12.7775 17.4442Z" fill="#36F818" />
-                      <path d="M18.9995 12.7783V11.2222L17.4434 11.2222V12.7783H18.9995Z" fill="#36F818" />
-                      <path d="M14.3328 15.8889L15.8882 15.8888V14.3335H14.3329L14.3328 15.8889Z" fill="#36F818" />
-                      <path d="M12.7778 5L11.2217 5V6.5561H12.7778V5Z" fill="#36F818" />
-                      <path d="M14.3328 8.11162V6.55631L12.7778 6.5561L12.7775 8.11162H14.3328Z" fill="#36F818" />
-                      <path d="M15.8882 9.66661V8.1113L14.3328 8.11162L14.3329 9.66661H15.8882Z" fill="#36F818" />
-                      <path d="M15.8882 14.3335L17.4432 14.3333L17.4434 12.7783L15.8879 12.778L15.8882 14.3335Z" fill="#36F818" />
-                      <path d="M17.4434 11.2222L17.4437 9.66674L15.8882 9.66661L15.8884 11.222L17.4434 11.2222Z" fill="#36F818" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center h-12 w-12 rounded-xl bg-green-900 transition-colors hover:brightness-110 disabled:opacity-30"
+                    <ArrowLeftIcon size="sm" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    gradient="green"
+                    className="h-12 w-12 p-0"
                     onClick={handleNext}
-                    disabled={activeGameIndex >= activeGames.length - 1}
+                    disabled={activeGameIndex >= totalSlides - 1}
                     aria-label="Next game"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-5 w-5"
-                      fill="none"
-                    >
-                      <path d="M12.7775 17.4442H14.3328V15.8889H12.7775V17.4442Z" fill="#36F818" />
-                      <path d="M6.55568 15.8885L6.55568 8.11118H11.2224L11.2224 6.55587L5.00024 6.55587L5.00024 17.4447H11.2224V15.8894L6.55568 15.8885Z" fill="#36F818" />
-                      <path d="M12.7775 17.4442L11.2217 17.4439V19H12.7778L12.7775 17.4442Z" fill="#36F818" />
-                      <path d="M18.9995 12.7783V11.2222L17.4434 11.2222V12.7783H18.9995Z" fill="#36F818" />
-                      <path d="M14.3328 15.8889L15.8882 15.8888V14.3335H14.3329L14.3328 15.8889Z" fill="#36F818" />
-                      <path d="M12.7778 5L11.2217 5V6.5561H12.7778V5Z" fill="#36F818" />
-                      <path d="M14.3328 8.11162V6.55631L12.7778 6.5561L12.7775 8.11162H14.3328Z" fill="#36F818" />
-                      <path d="M15.8882 9.66661V8.1113L14.3328 8.11162L14.3329 9.66661H15.8882Z" fill="#36F818" />
-                      <path d="M15.8882 14.3335L17.4432 14.3333L17.4434 12.7783L15.8879 12.778L15.8882 14.3335Z" fill="#36F818" />
-                      <path d="M17.4434 11.2222L17.4437 9.66674L15.8882 9.66661L15.8884 11.222L17.4434 11.2222Z" fill="#36F818" />
-                    </svg>
-                  </button>
+                    <ArrowRightIcon size="sm" />
+                  </Button>
                 </div>
               )}
             </div>
 
-            {/* Active Game Cards — horizontal sliding carousel */}
-            {activeGames.length > 0 && (
-              <div className="overflow-hidden rounded-md">
-                <div
-                  className="flex transition-transform duration-300 ease-out"
-                  style={{
-                    transform: `translateX(-${activeGameIndex * 100}%)`,
-                  }}
-                >
-                  {activeGames.map((game, idx) => (
-                    <div
-                      key={`${game.packId}-${game.gameId}`}
-                      className="w-full shrink-0"
+            {/* Game Cards — horizontal sliding carousel */}
+            <div
+              ref={carouselRef}
+              className="overflow-hidden rounded-md touch-pan-y"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            >
+              <div
+                className={`flex ${isDragging ? "" : "transition-transform duration-300 ease-out"}`}
+                style={{
+                  transform: `translateX(calc(-${activeGameIndex * 100}% + ${dragOffset}px))`,
+                }}
+              >
+                {activeGames.map((game, idx) => (
+                  <div
+                    key={`${game.packId}-${game.gameId}`}
+                    className="w-full shrink-0"
+                  >
+                    <ElectricBorder
+                      color="#36F818"
+                      gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
+                      borderGradient="linear-gradient(0deg, #36F818, #81F464)"
+                      seed={42 + idx}
+                      cornerRadius={3}
+                      noiseAmplitude={0.15}
+                      borderWidth={2}
+                      safetyMargin={1}
+                      noisePoints={400}
+                      noiseFrequency={20}
+                      glowOpacity={0}
+                      className="rounded-md"
                     >
-                      <ElectricBorder
-                        color="#36F818"
-                        gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
-                        borderGradient="linear-gradient(0deg, #36F818, #81F464)"
-                        seed={42 + idx}
-                        cornerRadius={3}
-                        noiseAmplitude={0.15}
-                        borderWidth={2}
-                        safetyMargin={1}
-                        noisePoints={400}
-                        noiseFrequency={20}
-                        glowOpacity={0}
-                        className="rounded-md"
+                      <button
+                        type="button"
+                        className="w-full p-3 flex items-center gap-3 text-left"
+                        onClick={() => {
+                          if (didDrag.current) return;
+                          handlePlay(
+                            game.packId,
+                            game.gameId,
+                            game.hasNoGame,
+                          );
+                        }}
                       >
-                        <button
-                          type="button"
-                          className="w-full p-3 flex items-center gap-3 text-left"
-                          onClick={() =>
-                            handlePlay(
-                              game.packId,
-                              game.gameId,
-                              game.hasNoGame,
-                            )
-                          }
-                        >
-                          {/* Icon container */}
-                          <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
-                            <OrbBombIcon
-                              size="lg"
-                              className="text-green-400"
-                            />
-                          </div>
+                        {/* Icon container */}
+                        <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
+                          <BombIcon
+                            size="lg"
+                            className="text-green-400"
+                          />
+                        </div>
 
-                          {/* 2x2 grid */}
-                          <div className="flex-1 min-w-0">
-                            <div className="grid grid-cols-2 gap-x-2 gap-y-2">
-                              <div className="flex flex-col gap-1">
-                                <p
-                                  className="font-secondary text-sm leading-none"
-                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
-                                >
-                                  Game ID
-                                </p>
-                                <p
-                                  className="font-secondary text-sm uppercase leading-none"
-                                  style={{ color: "#36F818" }}
-                                >
-                                  #{game.gameId}
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <p
-                                  className="font-secondary text-sm leading-none"
-                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
-                                >
-                                  Expires In
-                                </p>
-                                <p
-                                  className="font-secondary text-sm uppercase leading-none"
-                                  style={{ color: "#36F818" }}
-                                >
-                                  --
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <p
-                                  className="font-secondary text-sm leading-none"
-                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
-                                >
-                                  Level
-                                </p>
-                                <p
-                                  className="font-secondary text-sm uppercase leading-none"
-                                  style={{ color: "#36F818" }}
-                                >
-                                  L{game.level}
-                                </p>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <p
-                                  className="font-secondary text-sm leading-none"
-                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
-                                >
-                                  Max Payout
-                                </p>
-                                <p
-                                  className="font-secondary text-sm uppercase leading-none"
-                                  style={{ color: "#36F818" }}
-                                >
-                                  {game.points}
-                                </p>
-                              </div>
+                        {/* 2x2 grid */}
+                        <div className="flex-1 min-w-0">
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                            <div className="flex flex-col gap-1">
+                              <p
+                                className="font-secondary text-sm leading-none"
+                                style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                              >
+                                Game ID
+                              </p>
+                              <p
+                                className="font-secondary text-sm uppercase leading-none"
+                                style={{ color: "#36F818" }}
+                              >
+                                #{game.packId}
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <p
+                                className="font-secondary text-sm leading-none"
+                                style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                              >
+                                Expires In
+                              </p>
+                              <p
+                                className="font-secondary text-sm uppercase leading-none"
+                                style={{ color: "#36F818" }}
+                              >
+                                --
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <p
+                                className="font-secondary text-sm leading-none"
+                                style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                              >
+                                Level
+                              </p>
+                              <p
+                                className="font-secondary text-sm uppercase leading-none"
+                                style={{ color: "#36F818" }}
+                              >
+                                L{game.level}
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <p
+                                className="font-secondary text-sm leading-none"
+                                style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                              >
+                                Max Payout
+                              </p>
+                              <p
+                                className="font-secondary text-sm uppercase leading-none"
+                                style={{ color: "#36F818" }}
+                              >
+                                {game.moonrocks + game.points}
+                              </p>
                             </div>
                           </div>
+                        </div>
 
-                          {loadingGameId ===
-                          `${game.packId}-${game.gameId}` ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            <ArrowRightIcon
-                              size="xs"
-                              className="text-green-400 shrink-0"
-                            />
-                          )}
-                        </button>
-                      </ElectricBorder>
-                    </div>
-                  ))}
+                        {loadingGameId ===
+                          `${game.packId}-${game.gameId}` && (
+                          <LoadingSpinner size="sm" />
+                        )}
+                      </button>
+                    </ElectricBorder>
+                  </div>
+                ))}
+
+                {/* New Game placeholder card */}
+                <div key="new-game" className="w-full shrink-0">
+                  <ElectricBorder
+                    color="#FACC15"
+                    gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
+                    borderGradient="linear-gradient(0deg, #FACC15, #FCE360)"
+                    seed={99}
+                    cornerRadius={3}
+                    noiseAmplitude={0.15}
+                    borderWidth={2}
+                    safetyMargin={1}
+                    noisePoints={400}
+                    noiseFrequency={20}
+                    glowOpacity={0}
+                    className="rounded-md"
+                  >
+                    <button
+                      type="button"
+                      className="w-full p-3 flex items-center gap-3 text-left"
+                      onClick={() => {
+                        if (didDrag.current) return;
+                        handleNewGame();
+                      }}
+                    >
+                      {/* Icon container */}
+                      <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
+                        <span
+                          className="font-secondary text-3xl"
+                          style={{ color: "#FACC15" }}
+                        >
+                          +
+                        </span>
+                      </div>
+
+                      {/* 2x2 grid */}
+                      <div className="flex-1 min-w-0">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                            >
+                              Game ID
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FACC15" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                            >
+                              Expires In
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FACC15" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                            >
+                              Level
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FACC15" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                            >
+                              Max Payout
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FACC15" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </ElectricBorder>
                 </div>
               </div>
-            )}
-
-            {gameList.length === 0 && (
-              <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
-                <p className="text-white/60 font-secondary text-sm tracking-widest uppercase">
-                  No games yet
-                </p>
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-green-900 text-green-400"
-                  onClick={handleNewGame}
-                >
-                  Purchase
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Activity Feed — finished games only, sorted by most recent */}
+          {/* Activity Feed — finished games only, grouped by date */}
           {completedGames.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <h2 className="text-white font-secondary text-xs tracking-widest uppercase">
+            <div className="flex flex-col gap-3 min-h-0">
+              <h2 className="text-white font-secondary text-xs tracking-widest uppercase shrink-0">
                 ACTIVITY
               </h2>
               <div
-                className="rounded-xl overflow-hidden"
-                style={{ background: "rgba(1,1,1,0.4)" }}
+                className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto"
+                style={{ scrollbarWidth: "none" }}
               >
-                <div className="px-3 py-2">
-                  <p className="text-white/30 font-secondary text-2xs tracking-widest uppercase">
-                    Recent
-                  </p>
+                {/* Today group */}
+                <div className="flex flex-col gap-2">
+                  {completedGames.slice(0, 2).map((game) => {
+                    const cashedOut = game.health > 0;
+                    return (
+                      <div
+                        key={`today-${game.packId}-${game.gameId}`}
+                        className="flex items-center gap-2"
+                      >
+                        <button
+                          type="button"
+                          className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                          style={{ background: cashedOut ? "#071304" : "#1A0505" }}
+                          onClick={() =>
+                            navigate(
+                              `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                            )
+                          }
+                        >
+                          <BombIcon
+                            size="md"
+                            className="text-white shrink-0"
+                          />
+                          <span
+                            className="font-secondary text-sm tracking-widest text-white"
+                          >
+                            #{game.packId}
+                          </span>
+                          <span
+                            className="font-secondary text-sm tracking-widest text-white"
+                          >
+                            L{game.level}
+                          </span>
+                          <span
+                            className="font-secondary text-sm tracking-widest"
+                            style={{ color: cashedOut ? "#36F818" : "#EF4444" }}
+                          >
+                            {cashedOut
+                              ? `+$${(game.points * 0.01).toFixed(2)}`
+                              : "GLITCHED"}
+                          </span>
+                        </button>
+                        <Button
+                          variant="secondary"
+                          gradient={cashedOut ? "green" : "red"}
+                          className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                          onClick={() =>
+                            navigate(
+                              `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                            )
+                          }
+                          aria-label="View game"
+                        >
+                          <ArrowRightIcon size="sm" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
-                {completedGames.map((game) => (
-                  <button
-                    key={`${game.packId}-${game.gameId}`}
-                    type="button"
-                    className="w-full flex items-center gap-3 px-3 py-3 hover:bg-white/5 transition-colors"
-                    onClick={() =>
-                      navigate(
-                        `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                      )
-                    }
-                  >
-                    <OrbBombIcon
-                      size="md"
-                      className="text-green-600 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0 text-left">
-                      <p className="text-white font-body text-sm uppercase">
-                        Game #{game.gameId}
-                      </p>
+
+                {/* Yesterday group */}
+                {completedGames.length > 2 && (
+                  <>
+                    <p
+                      className="font-secondary text-sm tracking-widest uppercase pt-1"
+                      style={{ color: "#36F818" }}
+                    >
+                      YESTERDAY
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {completedGames.slice(2).map((game) => {
+                        const cashedOut = game.health > 0;
+                        return (
+                          <div
+                            key={`yesterday-${game.packId}-${game.gameId}`}
+                            className="flex items-center gap-2"
+                          >
+                            <button
+                              type="button"
+                              className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                              style={{ background: cashedOut ? "#071304" : "#1A0505" }}
+                              onClick={() =>
+                                navigate(
+                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                )
+                              }
+                            >
+                              <BombIcon
+                                size="md"
+                                className="text-white shrink-0"
+                              />
+                              <span
+                                className="font-secondary text-sm tracking-widest text-white"
+                              >
+                                #{game.packId}
+                              </span>
+                              <span
+                                className="font-secondary text-sm tracking-widest text-white"
+                              >
+                                L{game.level}
+                              </span>
+                              <span
+                                className="font-secondary text-sm tracking-widest"
+                                style={{ color: cashedOut ? "#36F818" : "#EF4444" }}
+                              >
+                                {cashedOut
+                                  ? `+$${(game.points * 0.01).toFixed(2)}`
+                                  : "GLITCHED"}
+                              </span>
+                            </button>
+                            <Button
+                              variant="secondary"
+                              gradient={cashedOut ? "green" : "red"}
+                              className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                              onClick={() =>
+                                navigate(
+                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                )
+                              }
+                              aria-label="View game"
+                            >
+                              <ArrowRightIcon size="sm" />
+                            </Button>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <span className="text-white/60 font-secondary text-xs tracking-widest">
-                      LVL {game.level}
-                    </span>
-                    <span className="text-green-400 font-secondary text-xs tracking-widest">
-                      {game.points > 0 ? `+${game.points}` : game.points}
-                    </span>
-                    <ArrowRightIcon
-                      size="xs"
-                      className="text-white/30 shrink-0"
-                    />
-                  </button>
-                ))}
+                  </>
+                )}
               </div>
             </div>
           )}
 
-          {/* Spacer for footer */}
-          <div className="h-20" />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-black-100 via-black-100 to-transparent pt-6 pb-4 px-4">
+      <div className="shrink-0 pt-4 pb-4 px-4">
         <div className="flex gap-3 w-full max-w-[500px] mx-auto">
           <Button
             variant="secondary"
-            className="flex-1 h-12 font-secondary uppercase text-sm tracking-widest"
+            gradient="green"
+            wrapperClassName="flex-1"
+            className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
             onClick={handlePractice}
           >
             PRACTICE
           </Button>
-          <button
-            type="button"
-            className="flex-1 h-12 rounded-lg font-secondary uppercase text-sm tracking-widest font-bold bg-green-900 text-white hover:brightness-110 transition-all disabled:opacity-50"
+          <Button
+            variant="secondary"
+            gradient={isOnNewGameCard ? "yellow" : "green"}
+            wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-yellow-100" : "!bg-green-900"}`}
+            style={isOnNewGameCard ? { backgroundColor: "#3D3200" } : undefined}
             onClick={() => {
-              if (activeGame) {
+              if (isOnNewGameCard) {
+                handleNewGame();
+              } else if (activeGame) {
                 handlePlay(
                   activeGame.packId,
                   activeGame.gameId,
                   activeGame.hasNoGame,
                 );
-              } else {
-                handleNewGame();
               }
             }}
           >
-            {activeGame ? "CONTINUE" : "NEW GAME"}
-          </button>
+            {isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
+          </Button>
         </div>
       </div>
     </div>
