@@ -360,10 +360,10 @@ export const Home = () => {
                         borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                         seed={42 + idx}
                         cornerRadius={3}
-                        noiseAmplitude={0.2}
+                        noiseAmplitude={0.5}
                         borderWidth={2.5}
-                        safetyMargin={1}
-                        noisePoints={128}
+                        safetyMargin={2}
+                        noisePoints={48}
                         glowOpacity={0}
                         className="rounded-md"
                       >
@@ -390,34 +390,58 @@ export const Home = () => {
                           <div className="flex-1 min-w-0">
                             <div className="grid grid-cols-2 gap-x-2 gap-y-2">
                               <div className="flex flex-col gap-1">
-                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                <p
+                                  className="font-secondary text-sm leading-none"
+                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                                >
                                   Game ID
                                 </p>
-                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                <p
+                                  className="font-secondary text-sm uppercase leading-none"
+                                  style={{ color: "#36F818" }}
+                                >
                                   #{game.gameId}
                                 </p>
                               </div>
                               <div className="flex flex-col gap-1">
-                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                <p
+                                  className="font-secondary text-sm leading-none"
+                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                                >
                                   Expires In
                                 </p>
-                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                <p
+                                  className="font-secondary text-sm uppercase leading-none"
+                                  style={{ color: "#36F818" }}
+                                >
                                   --
                                 </p>
                               </div>
                               <div className="flex flex-col gap-1">
-                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                <p
+                                  className="font-secondary text-sm leading-none"
+                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                                >
                                   Level
                                 </p>
-                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                <p
+                                  className="font-secondary text-sm uppercase leading-none"
+                                  style={{ color: "#36F818" }}
+                                >
                                   L{game.level}
                                 </p>
                               </div>
                               <div className="flex flex-col gap-1">
-                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                <p
+                                  className="font-secondary text-sm leading-none"
+                                  style={{ color: "rgba(54, 248, 24, 0.24)" }}
+                                >
                                   Max Payout
                                 </p>
-                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                <p
+                                  className="font-secondary text-sm uppercase leading-none"
+                                  style={{ color: "#36F818" }}
+                                >
                                   {game.points}
                                 </p>
                               </div>
