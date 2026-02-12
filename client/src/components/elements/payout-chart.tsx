@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { MoonrockIcon } from "@/components/icons";
 import type { PayoutTier } from "@/constants";
 
@@ -36,13 +36,18 @@ export const PayoutChart = ({
   // Max moonrocks for x-axis (extend past last tier)
   const maxMoonrocks = tiers[tiers.length - 1].minMoonrocks + 100;
 
-  const xScale = (moonrocks: number) =>
-    padLeft + (moonrocks / maxMoonrocks) * chartWidth;
+  const xScale = useCallback(
+    (moonrocks: number) => padLeft + (moonrocks / maxMoonrocks) * chartWidth,
+    [maxMoonrocks],
+  );
 
-  const yScale = (payout: number) => {
-    const maxY = maxPayout * 1.15;
-    return padTop + chartHeight - (payout / maxY) * chartHeight;
-  };
+  const yScale = useCallback(
+    (payout: number) => {
+      const maxY = maxPayout * 1.15;
+      return padTop + chartHeight - (payout / maxY) * chartHeight;
+    },
+    [maxPayout],
+  );
 
   // Build step path
   const stepPath = useMemo(() => {
@@ -64,7 +69,7 @@ export const PayoutChart = ({
     parts.push(`L ${xScale(last.minMoonrocks + 100)} ${yScale(last.payout)}`);
 
     return parts.join(" ");
-  }, [tiers]);
+  }, [tiers, xScale, yScale]);
 
   // Fill path (closed polygon for gradient fill under step)
   const fillPath = useMemo(() => {
@@ -87,7 +92,7 @@ export const PayoutChart = ({
     parts.push("Z");
 
     return parts.join(" ");
-  }, [tiers]);
+  }, [tiers, xScale, yScale]);
 
   // Break-even Y position
   const breakEvenY = yScale(entryPrice);
@@ -104,7 +109,7 @@ export const PayoutChart = ({
     labels.push({ value: maxPayout, y: yScale(maxPayout) });
 
     return labels;
-  }, [entryPrice, maxPayout, breakEvenTier, breakEvenY]);
+  }, [entryPrice, maxPayout, breakEvenTier, breakEvenY, yScale]);
 
   // Grid lines
   const verticalGridCount = tiers.length + 1;
