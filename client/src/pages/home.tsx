@@ -372,7 +372,7 @@ export const Home = () => {
                     >
                       <ElectricBorder
                         color="#36F818"
-                        gradient="linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,1))"
+                        gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
                         borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                         seed={42 + idx}
                         cornerRadius={3}
