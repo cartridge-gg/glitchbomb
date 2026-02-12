@@ -138,23 +138,23 @@ export const ElectricBorder = ({
             />
           )}
 
-          {/* Animated border clip-path */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: "var(--electric-border-gradient)",
-              boxShadow: "0 0 8px var(--electric-color)",
-              animation: `${clipPathAnimation.borderName} 2s ease-in-out infinite`,
-            }}
-          />
-
           {/* Content with synchronized clip-path */}
           <div
-            className="absolute inset-0 z-10"
+            className="absolute inset-0"
             style={{
               backgroundImage: "var(--electric-gradient)",
               animation: `${clipPathAnimation.contentName} 2s ease-in-out infinite`,
               opacity: contentOpacity,
+            }}
+          />
+
+          {/* Animated border clip-path (on top of content) */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              backgroundImage: "var(--electric-border-gradient)",
+              boxShadow: "0 0 8px var(--electric-color)",
+              animation: `${clipPathAnimation.borderName} 2s ease-in-out infinite`,
             }}
           />
 
