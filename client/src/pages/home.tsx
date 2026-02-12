@@ -5,11 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { Connect, LoadingSpinner } from "@/components/elements";
 import { ElectricBorder } from "@/components/ui/electric-border";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  OrbBombIcon,
-} from "@/components/icons";
+import { ArrowRightIcon, OrbBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
@@ -317,24 +313,44 @@ export const Home = () => {
                 </span>
               </div>
               {activeGames.length > 1 && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="flex items-center justify-center h-7 w-7 rounded-md bg-white/5 transition-colors hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5"
+                    className="flex items-center justify-center h-12 w-12 rounded-xl bg-green-900 transition-colors hover:brightness-110 disabled:opacity-30"
                     onClick={handlePrev}
                     disabled={activeGameIndex <= 0}
                     aria-label="Previous game"
                   >
-                    <ArrowLeftIcon size="xs" className="text-white/60" />
+                    <svg
+                      viewBox="0 0 16 16"
+                      className="h-5 w-5"
+                      fill="none"
+                    >
+                      <path
+                        d="M8.55 3H9.66V4.11H8.55V3ZM7.44 4.11H8.55V5.22H7.44V4.11ZM6.33 5.22H7.44V6.33H6.33V5.22ZM5.22 6.33H6.33V7.44H5.22V6.33ZM4.11 7.44H5.22V8.55H4.11V7.44ZM5.22 8.55H6.33V9.66H5.22V8.55ZM6.33 9.66H7.44V10.77H6.33V9.66ZM7.44 10.77H8.55V11.88H7.44V10.77ZM8.55 11.88H9.66V13H8.55V11.88ZM10.77 6.33H11.88V9.66H10.77V6.33Z"
+                        fill="currentColor"
+                        className="text-green-400"
+                      />
+                    </svg>
                   </button>
                   <button
                     type="button"
-                    className="flex items-center justify-center h-7 w-7 rounded-md bg-white/5 transition-colors hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5"
+                    className="flex items-center justify-center h-12 w-12 rounded-xl bg-green-900 transition-colors hover:brightness-110 disabled:opacity-30"
                     onClick={handleNext}
                     disabled={activeGameIndex >= activeGames.length - 1}
                     aria-label="Next game"
                   >
-                    <ArrowRightIcon size="xs" className="text-white/60" />
+                    <svg
+                      viewBox="0 0 16 16"
+                      className="h-5 w-5"
+                      fill="none"
+                    >
+                      <path
+                        d="M6.33 3H7.44V4.11H6.33V3ZM7.44 4.11H8.55V5.22H7.44V4.11ZM8.55 5.22H9.66V6.33H8.55V5.22ZM9.66 6.33H10.77V7.44H9.66V6.33ZM10.77 7.44H11.88V8.55H10.77V7.44ZM9.66 8.55H10.77V9.66H9.66V8.55ZM8.55 9.66H9.66V10.77H8.55V9.66ZM7.44 10.77H8.55V11.88H7.44V10.77ZM6.33 11.88H7.44V13H6.33V11.88ZM4.11 6.33H5.22V9.66H4.11V6.33Z"
+                        fill="currentColor"
+                        className="text-green-400"
+                      />
+                    </svg>
                   </button>
                 </div>
               )}
