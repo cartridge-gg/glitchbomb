@@ -1,19 +1,19 @@
 import { type CSSProperties, useEffect, useMemo } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { setOfflineMode } from "@/offline/mode";
-import { Game, Games, Home } from "@/pages";
+import { Game, Home } from "@/pages";
 
 function RouterView() {
   const { pathname } = useLocation();
   const safeArea = useMemo(() => {
     if (pathname.startsWith("/play")) {
-      return {
-        top: "#0C1806",
-        bottom: "var(--black-100)",
-      };
-    }
-    if (pathname.startsWith("/games")) {
       return {
         top: "#0C1806",
         bottom: "var(--black-100)",
@@ -36,7 +36,7 @@ function RouterView() {
   }, [safeArea]);
 
   useEffect(() => {
-    if (pathname.startsWith("/games") || pathname.startsWith("/play")) return;
+    if (pathname.startsWith("/play")) return;
     setOfflineMode(false);
   }, [pathname]);
 
@@ -72,7 +72,7 @@ function RouterView() {
       <div className="relative z-10 h-full">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/games" element={<Games />} />
+          <Route path="/games" element={<Navigate replace to="/" />} />
           <Route path="/play" element={<Game />} />
         </Routes>
       </div>

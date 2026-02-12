@@ -381,16 +381,16 @@ export const Game = () => {
       const moonrocksEarned = cashedOut ? Math.max(0, lastPLValue) : 0;
 
       return (
-        <GameOver
-          level={game.level}
-          moonrocksEarned={moonrocksEarned}
-          plData={plData}
-          pulls={pulls}
-          cashedOut={cashedOut}
-          onPlayAgain={() => navigate("/games")}
-        />
-      );
-    }
+          <GameOver
+            level={game.level}
+            moonrocksEarned={moonrocksEarned}
+            plData={plData}
+            pulls={pulls}
+            cashedOut={cashedOut}
+            onPlayAgain={() => navigate("/")}
+          />
+        );
+      }
 
     // Priority 2: Shop (when shop has items)
     if (game.shop.length > 0) {
