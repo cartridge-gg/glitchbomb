@@ -202,13 +202,31 @@ pub impl GameImpl of GameTrait {
         // [Check] Game state
         self.assert_not_over();
         self.assert_not_shop();
-        // [Effect] Convert points
+        // [Effect] Convert points to tiered payout
         let moonrocks = self.points;
+        let reward = Self::payout(moonrocks);
         self.points = 0;
         // [Effect] Update state
         self.over = true;
-        // [Return] Moonrocks
-        moonrocks
+        // [Return] Tiered reward
+        reward
+    }
+
+    #[inline]
+    fn payout(moonrocks: u16) -> u16 {
+        if moonrocks >= 500 {
+            1600
+        } else if moonrocks >= 400 {
+            400
+        } else if moonrocks >= 300 {
+            100
+        } else if moonrocks >= 200 {
+            25
+        } else if moonrocks >= 100 {
+            5
+        } else {
+            0
+        }
     }
 
     #[inline]
@@ -650,8 +668,32 @@ mod tests {
         game.start();
         game.earn_points(100);
         let cash = game.cash_out();
-        assert_eq!(cash, 100);
+        // 100 moonrocks falls in tier 100-199 → payout 5
+        assert_eq!(cash, 5);
         assert_eq!(game.over, true);
+    }
+
+    #[test]
+    fn test_game_payout_tiers() {
+        // Below 100: no payout
+        assert_eq!(GameTrait::payout(0), 0);
+        assert_eq!(GameTrait::payout(50), 0);
+        assert_eq!(GameTrait::payout(99), 0);
+        // Tier 100-199: payout 5
+        assert_eq!(GameTrait::payout(100), 5);
+        assert_eq!(GameTrait::payout(199), 5);
+        // Tier 200-299: payout 25
+        assert_eq!(GameTrait::payout(200), 25);
+        assert_eq!(GameTrait::payout(299), 25);
+        // Tier 300-399: payout 100 (break even)
+        assert_eq!(GameTrait::payout(300), 100);
+        assert_eq!(GameTrait::payout(399), 100);
+        // Tier 400-499: payout 400
+        assert_eq!(GameTrait::payout(400), 400);
+        assert_eq!(GameTrait::payout(499), 400);
+        // Tier 500+: payout 1600 (max)
+        assert_eq!(GameTrait::payout(500), 1600);
+        assert_eq!(GameTrait::payout(1000), 1600);
     }
 
     #[test]

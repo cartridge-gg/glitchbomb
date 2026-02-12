@@ -72,14 +72,17 @@ fn test_play_cash_out_mints_moonrocks() {
     // [Action] Cash out
     systems.play.cash_out(pack_id, game_id);
 
-    // [Assert] Points are converted and minted to the caller
+    // [Assert] Points are converted via tiered payout and minted to the caller
+    // 10 moonrocks is below the 100 threshold, so tiered payout = 0
     let game_after = store.game(pack_id, game_id);
     game_after.assert_is_over();
     assert(game_after.points == 0, 'Game: points not reset');
 
     let pack_after = store.pack(pack_id);
-    assert(pack_after.moonrocks == 100, 'Pack: wrong moonrocks');
+    // Pack started at 100, spent 10 for level cost, earned 0 (below tier threshold)
+    assert(pack_after.moonrocks == 90, 'Pack: wrong moonrocks');
 
     let balance_after = systems.token.balance_of(context.player);
-    assert(balance_after == 10_u16.into(), 'Token: wrong minted amount');
+    // No tokens minted since payout for <100 moonrocks is 0
+    assert(balance_after == 0_u8.into(), 'Token: wrong minted amount');
 }
