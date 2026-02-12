@@ -376,7 +376,7 @@ export const Home = () => {
                         borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                         seed={42 + idx}
                         cornerRadius={3}
-                        noiseAmplitude={0.12}
+                        noiseAmplitude={0.25}
                         borderWidth={2}
                         safetyMargin={1}
                         noisePoints={200}

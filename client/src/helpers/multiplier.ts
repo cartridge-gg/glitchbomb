@@ -269,27 +269,37 @@ export const MultiplierMath = {
       const outerPoint = roundedSquarePoint(t, outerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      const outerX = outerPoint.x + normal.nx * displacement;
-      const outerY = outerPoint.y + normal.ny * displacement;
-      outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
-
       if (aspectRatio === 1) {
+        const outerX = outerPoint.x + normal.nx * displacement;
+        const outerY = outerPoint.y + normal.ny * displacement;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+
         const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
         const innerX = innerPoint.x + normal.nx * displacement;
         const innerY = innerPoint.y + normal.ny * displacement;
         innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
       } else {
-        // Correct border width for aspect ratio so it looks visually uniform
+        // Correct displacement and border width for aspect ratio.
+        // clip-path % maps X to width, Y to height — d% creates d%*W px
+        // horizontally but d%*H px vertically. Dividing by normalMag
+        // equalizes pixel displacement on all edges.
         const ar = aspectRatio;
         const normalMag = Math.sqrt(
           (normal.nx * ar) ** 2 + normal.ny ** 2,
         );
-        const adjustedBorder =
+        const adjDisp =
+          normalMag > 0 ? displacement / normalMag : displacement;
+        const adjBorder =
           normalMag > 0 ? borderWidth / normalMag : borderWidth;
+
+        const outerX = outerPoint.x + normal.nx * adjDisp;
+        const outerY = outerPoint.y + normal.ny * adjDisp;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+
         const innerX =
-          outerPoint.x - normal.nx * adjustedBorder + normal.nx * displacement;
+          outerPoint.x - normal.nx * adjBorder + normal.nx * adjDisp;
         const innerY =
-          outerPoint.y - normal.ny * adjustedBorder + normal.ny * displacement;
+          outerPoint.y - normal.ny * adjBorder + normal.ny * adjDisp;
         innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
       }
     }
@@ -339,9 +349,21 @@ export const MultiplierMath = {
       const point = roundedSquarePoint(t, outerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      const x = point.x + normal.nx * displacement;
-      const y = point.y + normal.ny * displacement;
-      points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      if (aspectRatio === 1) {
+        const x = point.x + normal.nx * displacement;
+        const y = point.y + normal.ny * displacement;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      } else {
+        const ar = aspectRatio;
+        const normalMag = Math.sqrt(
+          (normal.nx * ar) ** 2 + normal.ny ** 2,
+        );
+        const adjDisp =
+          normalMag > 0 ? displacement / normalMag : displacement;
+        const x = point.x + normal.nx * adjDisp;
+        const y = point.y + normal.ny * adjDisp;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      }
     }
 
     return `polygon(${points.join(",")})`;
