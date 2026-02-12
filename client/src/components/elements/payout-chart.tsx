@@ -94,9 +94,7 @@ export const PayoutChart = ({
 
   // Y-axis labels (a few key values)
   const yLabels = useMemo(() => {
-    const labels: { value: number; y: number }[] = [
-      { value: 0, y: yScale(0) },
-    ];
+    const labels: { value: number; y: number }[] = [{ value: 0, y: yScale(0) }];
 
     if (breakEvenTier) {
       labels.push({ value: entryPrice, y: breakEvenY });

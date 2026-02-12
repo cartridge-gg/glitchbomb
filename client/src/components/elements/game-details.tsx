@@ -1,11 +1,11 @@
-import { MoonrockIcon } from "@/components/icons";
+import { GradientBorder } from "@/components/ui/gradient-border";
 import {
   BREAK_EVEN_TIER,
   ENTRY_PRICE,
   MAX_REWARD,
   PAYOUT_TIERS,
 } from "@/constants";
-import { GradientBorder } from "@/components/ui/gradient-border";
+import { MoonrockIcon } from "@/components/icons";
 import { PayoutChart } from "./payout-chart";
 
 export interface GameDetailsProps {
@@ -30,9 +30,7 @@ const DetailRow = ({ label, value, isLast = false }: DetailRowProps) => (
         {value}
       </span>
     </div>
-    {!isLast && (
-      <div className="h-px bg-green-900/50" />
-    )}
+    {!isLast && <div className="h-px bg-green-900/50" />}
   </>
 );
 
@@ -86,9 +84,9 @@ export const GameDetails = ({
           <DetailRow label="Break Even" value={`${BREAK_EVEN_TIER}+`} />
           <DetailRow label="Expires In" value="24HRS" />
           <DetailRow
+            isLast
             label="Maximum Reward"
             value={`${MAX_REWARD}`}
-            isLast
           />
         </div>
       </div>
