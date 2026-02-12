@@ -63,6 +63,15 @@ export function startGame(game: OfflineGame): {
   return { game: next, cost };
 }
 
+function payout(moonrocks: number): number {
+  if (moonrocks >= 500) return 1600;
+  if (moonrocks >= 400) return 400;
+  if (moonrocks >= 300) return 100;
+  if (moonrocks >= 200) return 25;
+  if (moonrocks >= 100) return 5;
+  return 0;
+}
+
 export function cashOut(game: OfflineGame): {
   game: OfflineGame;
   earnings: number;
@@ -70,7 +79,7 @@ export function cashOut(game: OfflineGame): {
   assertNotOver(game);
   assertNotInShop(game);
   const next = cloneGame(game);
-  const earnings = next.points;
+  const earnings = payout(next.points);
   next.points = 0;
   next.over = true;
   return { game: next, earnings };

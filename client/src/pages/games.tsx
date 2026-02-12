@@ -3,9 +3,10 @@ import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { LoadingSpinner, TabBar } from "@/components/elements";
+import { GameDetails, LoadingSpinner, TabBar } from "@/components/elements";
 import { ControllerIcon, MoonrockIcon, SparkleIcon } from "@/components/icons";
 import { getTokenAddress } from "@/config";
+import { ENTRY_PRICE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
 import { useGames } from "@/hooks/games";
@@ -109,6 +110,7 @@ export const Games = () => {
   );
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const pendingNavigationRef = useRef<{
     packId: number;
     gameId: number;
@@ -242,12 +244,17 @@ export const Games = () => {
       createPack();
       return;
     }
+    setShowDetails(true);
+  }, [offline]);
+
+  const handlePurchase = useCallback(() => {
+    setShowDetails(false);
     if (starterpack) {
       (connector as ControllerConnector)?.controller.openStarterPack(
         starterpack.id.toString(),
       );
     }
-  }, [connector, starterpack, offline]);
+  }, [connector, starterpack]);
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
@@ -269,6 +276,28 @@ export const Games = () => {
     },
     [canUseOffline],
   );
+
+  if (showDetails) {
+    return (
+      <div className="absolute inset-0 flex flex-col">
+        <AppHeader
+          moonrocks={displayMoonrocks}
+          username={displayUsername}
+          showBack={true}
+          backPath="/"
+          onMint={offline ? undefined : () => mint(tokenAddress)}
+          onProfileClick={onProfileClick}
+        />
+        <div className="flex-1 flex flex-col items-center px-4 pt-2 pb-4 overflow-hidden">
+          <GameDetails
+            entryPrice={ENTRY_PRICE}
+            onBack={() => setShowDetails(false)}
+            onPurchase={handlePurchase}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 flex flex-col">
