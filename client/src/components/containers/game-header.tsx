@@ -21,7 +21,7 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
           variant="secondary"
           gradient="green"
           className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
-          onClick={() => navigate("/games")}
+          onClick={() => navigate("/")}
         >
           <ArrowLeftIcon size="sm" />
         </Button>

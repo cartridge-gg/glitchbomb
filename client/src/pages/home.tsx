@@ -1,29 +1,51 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { Connect } from "@/components/elements";
+import { Connect, LoadingSpinner } from "@/components/elements";
+import { ElectricBorder } from "@/components/ui/electric-border";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  OrbBombIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
+import { useGames } from "@/hooks/games";
+import { usePacks } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
+import { isOfflineMode, setOfflineMode } from "@/offline/mode";
+import {
+  createPack,
+  selectTotalMoonrocks,
+  useOfflineStore,
+} from "@/offline/store";
 
 export const Home = () => {
-  const { mint } = useActions();
-  const { chain } = useNetwork();
-  const { account, connector } = useAccount();
-  const { connectAsync, connectors } = useConnect();
-  const { config } = useEntitiesContext();
   const navigate = useNavigate();
+  const { mint, start } = useActions();
+  const { chain } = useNetwork();
+  const { account, address, connector } = useAccount();
+  const { connectAsync, connectors } = useConnect();
+  const { starterpack, config } = useEntitiesContext();
+  const { packs } = usePacks();
+  const offlineState = useOfflineStore();
   const [username, setUsername] = useState<string>();
+  const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
+  const pendingNavigationRef = useRef<{
+    packId: number;
+    gameId: number;
+  } | null>(null);
 
-  // Use token address from Config (blockchain state) if available, fallback to manifest
+  const offline = isOfflineMode();
+
   const tokenAddress = config?.token || getTokenAddress(chain.id);
 
   const { tokenBalances, tokenContracts } = useTokens({
-    accountAddresses: account?.address ? [account?.address] : [],
+    accountAddresses: account?.address ? [account.address] : [],
     contractAddresses: [tokenAddress],
   });
 
@@ -34,11 +56,18 @@ export const Home = () => {
     );
     if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
-      (balance) => BigInt(balance.contract_address) === BigInt(tokenAddress),
+      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
     );
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContracts, tokenBalances, tokenAddress]);
+
+  const offlineMoonrocks = useMemo(
+    () => selectTotalMoonrocks(offlineState),
+    [offlineState],
+  );
+  const displayMoonrocks = offline ? offlineMoonrocks : balance;
+
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
       "inventory",
@@ -49,7 +78,6 @@ export const Home = () => {
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
 
-  // Fetch username
   useEffect(() => {
     if (!connector) return;
     (connector as never as ControllerConnector).controller
@@ -57,44 +85,165 @@ export const Home = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
+  // Build game keys from packs
+  const gameKeys = useMemo(() => {
+    return packs.map((p) => ({
+      packId: p.id,
+      gameId: Math.max(p.game_count, 1),
+    }));
+  }, [packs]);
+
+  const { getGameForPack } = useGames(gameKeys);
+
+  // Navigate when pending game becomes available
+  useEffect(() => {
+    if (!pendingNavigationRef.current) return;
+    const { packId, gameId } = pendingNavigationRef.current;
+    const game = getGameForPack(packId, gameId);
+    if (game) {
+      pendingNavigationRef.current = null;
+      setLoadingGameId(null);
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+    }
+  }, [getGameForPack, navigate]);
+
+  // Build game list
+  const gameList = useMemo(() => {
+    const games: Array<{
+      packId: number;
+      gameId: number;
+      pullCount: number;
+      bagSize: number;
+      level: number;
+      isOver: boolean;
+      hasNoGame: boolean;
+      points: number;
+      multiplier: number;
+    }> = [];
+
+    for (const pack of packs) {
+      const gameId = Math.max(pack.game_count, 1);
+      const game = getGameForPack(pack.id, gameId);
+      games.push({
+        packId: pack.id,
+        gameId,
+        pullCount: game?.pull_count ?? 0,
+        bagSize: game?.bag.length ?? 0,
+        level: game?.level ?? 1,
+        isOver: game?.over ?? false,
+        hasNoGame: pack.game_count === 0,
+        points: game?.points ?? 0,
+        multiplier: game?.multiplier ?? 1,
+      });
+    }
+
+    return games.sort((a, b) => b.packId - a.packId);
+  }, [packs, getGameForPack]);
+
+  // Split into active and completed games
+  const activeGames = useMemo(
+    () => gameList.filter((g) => !g.isOver),
+    [gameList],
+  );
+
+  const completedGames = useMemo(
+    () => gameList.filter((g) => g.isOver),
+    [gameList],
+  );
+
+  const [activeGameIndex, setActiveGameIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<
+    "left" | "right" | null
+  >(null);
+
+  // Clamp index when the list changes
+  useEffect(() => {
+    if (activeGames.length === 0) return;
+    setActiveGameIndex((prev) =>
+      prev >= activeGames.length ? activeGames.length - 1 : prev,
+    );
+  }, [activeGames.length]);
+
+  const activeGame = activeGames[activeGameIndex] ?? null;
+
+  const handlePrev = useCallback(() => {
+    if (activeGameIndex <= 0) return;
+    setSlideDirection("right");
+    setActiveGameIndex((i) => i - 1);
+  }, [activeGameIndex]);
+
+  const handleNext = useCallback(() => {
+    if (activeGameIndex >= activeGames.length - 1) return;
+    setSlideDirection("left");
+    setActiveGameIndex((i) => i + 1);
+  }, [activeGameIndex, activeGames.length]);
+
+  // Reset slide direction after animation completes
+  useEffect(() => {
+    if (!slideDirection) return;
+    const timer = setTimeout(() => setSlideDirection(null), 300);
+    return () => clearTimeout(timer);
+  }, [slideDirection, activeGameIndex]);
+
+  const handlePlay = async (
+    packId: number,
+    gameId: number,
+    hasNoGame: boolean,
+  ) => {
+    const gameKey = `${packId}-${gameId}`;
+    setLoadingGameId(gameKey);
+
+    const existingGame = getGameForPack(packId, gameId);
+    if (existingGame) {
+      navigate(`/play?pack=${packId}&game=${gameId}`);
+      return;
+    }
+
+    pendingNavigationRef.current = { packId, gameId };
+
+    try {
+      if (hasNoGame) {
+        await start(packId);
+      }
+    } catch (error) {
+      console.error(error);
+      pendingNavigationRef.current = null;
+      setLoadingGameId(null);
+    }
+  };
+
+  const handleNewGame = useCallback(() => {
+    if (offline) {
+      createPack();
+      return;
+    }
+    if (starterpack) {
+      (connector as ControllerConnector)?.controller.openStarterPack(
+        starterpack.id.toString(),
+      );
+    }
+  }, [connector, starterpack, offline]);
+
+  const handlePractice = useCallback(() => {
+    setOfflineMode(true);
+    createPack();
+  }, []);
+
   const isLoggedIn = !!account && !!username;
 
-  return (
-    <div className="absolute inset-0">
-      {/* Header overlay so hero stays centered to full viewport */}
-      {isLoggedIn && (
-        <div className="absolute inset-x-0 top-0 z-10">
-          <AppHeader
-            moonrocks={balance}
-            username={username}
-            showBack={false}
-            onMint={() => mint(tokenAddress)}
-            onProfileClick={onProfileClick}
-          />
-        </div>
-      )}
-
-      {/* Main content - centered */}
-      <div className="flex h-full flex-col items-center justify-center px-4">
-        <div className="inline-grid grid-cols-1 justify-items-center gap-8">
-          <h1 className="m-0 text-center uppercase leading-[0.9]">
-            <strong className="block text-green-400 text-6xl md:text-7xl font-glitch font-thin tracking-tight">
-              Glitch
-            </strong>
-            <span className="block text-white text-7xl md:text-8xl tracking-tight">
-              Bomb
-            </span>
-          </h1>
-
-          {isLoggedIn ? (
-            <Button
-              variant="default"
-              className="h-12 w-full px-10 font-secondary uppercase text-sm tracking-widest"
-              onClick={() => navigate("/games")}
-            >
-              PLAY
-            </Button>
-          ) : (
+  if (!isLoggedIn) {
+    return (
+      <div className="absolute inset-0">
+        <div className="flex h-full flex-col items-center justify-center px-4">
+          <div className="inline-grid grid-cols-1 justify-items-center gap-8">
+            <h1 className="m-0 text-center uppercase leading-[0.9]">
+              <strong className="block text-green-400 text-6xl md:text-7xl font-glitch font-thin tracking-tight">
+                Glitch
+              </strong>
+              <span className="block text-white text-7xl md:text-8xl tracking-tight">
+                Bomb
+              </span>
+            </h1>
             <div className="grid w-full grid-cols-1 gap-3">
               <Connect
                 highlight
@@ -109,7 +258,290 @@ export const Home = () => {
                 Play
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 flex flex-col">
+      {/* Header */}
+      <AppHeader
+        moonrocks={displayMoonrocks}
+        username={username}
+        showBack={false}
+        onMint={offline ? undefined : () => mint(tokenAddress)}
+        onProfileClick={onProfileClick}
+      />
+
+      {/* Scrollable content */}
+      <div
+        className="flex-1 flex flex-col items-center px-4 pb-0 overflow-y-auto"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <div className="flex flex-col gap-4 w-full max-w-[500px]">
+          {/* Banner */}
+          <button
+            type="button"
+            className="w-full rounded-xl p-4 flex items-center justify-between"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(89,31,255,0.64) 0%, transparent 100%)",
+            }}
+            onClick={() => {
+              if (activeGame) {
+                handlePlay(
+                  activeGame.packId,
+                  activeGame.gameId,
+                  activeGame.hasNoGame,
+                );
+              } else {
+                handleNewGame();
+              }
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <OrbBombIcon size="xl" className="text-white" />
+              <div className="text-left">
+                <p className="text-green-400 font-body text-xl uppercase leading-tight">
+                  Play
+                </p>
+                <p className="text-white font-body text-2xl uppercase leading-tight">
+                  Nums
+                </p>
+              </div>
+            </div>
+            <div className="bg-yellow-100 text-black-100 font-secondary text-sm tracking-widest uppercase px-5 py-2.5 rounded-lg font-bold">
+              PLAY
+            </div>
+          </button>
+
+          {/* My Games Section */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-white font-secondary text-xs tracking-widest uppercase">
+                  MY GAMES
+                </h2>
+                <span className="text-white/60 font-secondary text-xs tracking-widest bg-white/10 px-2 py-0.5 rounded-full">
+                  {activeGames.length}
+                </span>
+              </div>
+              {activeGames.length > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center h-7 w-7 rounded-md bg-white/5 transition-colors hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5"
+                    onClick={handlePrev}
+                    disabled={activeGameIndex <= 0}
+                    aria-label="Previous game"
+                  >
+                    <ArrowLeftIcon size="xs" className="text-white/60" />
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center h-7 w-7 rounded-md bg-white/5 transition-colors hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5"
+                    onClick={handleNext}
+                    disabled={activeGameIndex >= activeGames.length - 1}
+                    aria-label="Next game"
+                  >
+                    <ArrowRightIcon size="xs" className="text-white/60" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Active Game Card with Electric Border + slide animation */}
+            {activeGame && (
+              <div className="overflow-hidden rounded-xl">
+                <div
+                  key={`${activeGame.packId}-${activeGame.gameId}`}
+                  className={
+                    slideDirection === "left"
+                      ? "animate-slide-in-right"
+                      : slideDirection === "right"
+                        ? "animate-slide-in-left"
+                        : ""
+                  }
+                >
+                  <ElectricBorder
+                    color="#F1721C"
+                    gradient="linear-gradient(0deg, rgba(241,114,28,0.1), rgba(241,114,28,0.2))"
+                    borderGradient="linear-gradient(0deg, #F1721C, #FFAA56)"
+                    seed={42 + activeGameIndex}
+                    cornerRadius={12}
+                    noiseAmplitude={0.2}
+                    borderWidth={2.5}
+                    safetyMargin={1.5}
+                    noisePoints={128}
+                    className="rounded-xl"
+                  >
+                    <button
+                      type="button"
+                      className="w-full p-4 flex items-start gap-4"
+                      onClick={() =>
+                        handlePlay(
+                          activeGame.packId,
+                          activeGame.gameId,
+                          activeGame.hasNoGame,
+                        )
+                      }
+                    >
+                      <OrbBombIcon
+                        size="xl"
+                        className="text-orange-100 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                          <div>
+                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                              Game ID
+                            </p>
+                            <p className="text-orange-100 font-body text-sm">
+                              #{activeGame.gameId}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                              Expires In
+                            </p>
+                            <p className="text-orange-100 font-body text-sm">
+                              --
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                              Level
+                            </p>
+                            <p className="text-orange-100 font-body text-sm">
+                              {activeGame.level}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                              Max Payout
+                            </p>
+                            <p className="text-orange-100 font-body text-sm">
+                              {activeGame.points}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      {loadingGameId ===
+                      `${activeGame.packId}-${activeGame.gameId}` ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        <ArrowRightIcon
+                          size="sm"
+                          className="text-orange-100 mt-1 shrink-0"
+                        />
+                      )}
+                    </button>
+                  </ElectricBorder>
+                </div>
+              </div>
+            )}
+
+            {gameList.length === 0 && (
+              <div className="flex flex-col items-center gap-4 p-6 rounded-xl border border-green-900 bg-green-950/30">
+                <p className="text-white/60 font-secondary text-sm tracking-widest uppercase">
+                  No games yet
+                </p>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 h-10 px-6 rounded-lg font-secondary uppercase text-sm tracking-widest transition-all duration-200 hover:brightness-110 bg-green-900 text-green-400"
+                  onClick={handleNewGame}
+                >
+                  Purchase
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Activity Feed — finished games only, sorted by most recent */}
+          {completedGames.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h2 className="text-white font-secondary text-xs tracking-widest uppercase">
+                ACTIVITY
+              </h2>
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ background: "rgba(1,1,1,0.4)" }}
+              >
+                <div className="px-3 py-2">
+                  <p className="text-white/30 font-secondary text-2xs tracking-widest uppercase">
+                    Recent
+                  </p>
+                </div>
+                {completedGames.map((game) => (
+                  <button
+                    key={`${game.packId}-${game.gameId}`}
+                    type="button"
+                    className="w-full flex items-center gap-3 px-3 py-3 hover:bg-white/5 transition-colors"
+                    onClick={() =>
+                      navigate(
+                        `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                      )
+                    }
+                  >
+                    <OrbBombIcon
+                      size="md"
+                      className="text-green-600 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-white font-body text-sm uppercase">
+                        Game #{game.gameId}
+                      </p>
+                    </div>
+                    <span className="text-white/60 font-secondary text-xs tracking-widest">
+                      LVL {game.level}
+                    </span>
+                    <span className="text-green-400 font-secondary text-xs tracking-widest">
+                      {game.points > 0 ? `+${game.points}` : game.points}
+                    </span>
+                    <ArrowRightIcon
+                      size="xs"
+                      className="text-white/30 shrink-0"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
+
+          {/* Spacer for footer */}
+          <div className="h-20" />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-black-100 via-black-100 to-transparent pt-6 pb-4 px-4">
+        <div className="flex gap-3 w-full max-w-[500px] mx-auto">
+          <Button
+            variant="secondary"
+            className="flex-1 h-12 font-secondary uppercase text-sm tracking-widest"
+            onClick={handlePractice}
+          >
+            PRACTICE
+          </Button>
+          <button
+            type="button"
+            className="flex-1 h-12 rounded-lg font-secondary uppercase text-sm tracking-widest font-bold bg-green-900 text-white hover:brightness-110 transition-all disabled:opacity-50"
+            onClick={() => {
+              if (activeGame) {
+                handlePlay(
+                  activeGame.packId,
+                  activeGame.gameId,
+                  activeGame.hasNoGame,
+                );
+              } else {
+                handleNewGame();
+              }
+            }}
+          >
+            {activeGame ? "CONTINUE" : "NEW GAME"}
+          </button>
         </div>
       </div>
     </div>
