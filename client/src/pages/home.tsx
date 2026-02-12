@@ -356,7 +356,7 @@ export const Home = () => {
                     >
                       <ElectricBorder
                         color="#36F818"
-                        gradient="transparent"
+                        gradient="linear-gradient(0deg, rgba(54,248,24,0.24), rgba(54,248,24,0.24))"
                         borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                         seed={42 + idx}
                         cornerRadius={3}
@@ -365,7 +365,6 @@ export const Home = () => {
                         safetyMargin={1}
                         noisePoints={128}
                         glowOpacity={0}
-                        contentOpacity={0}
                         className="rounded-md"
                       >
                         <button
