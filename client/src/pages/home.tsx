@@ -366,9 +366,9 @@ export const Home = () => {
                   }
                 >
                   <ElectricBorder
-                    color="#F1721C"
-                    gradient="linear-gradient(0deg, rgba(241,114,28,0.1), rgba(241,114,28,0.2))"
-                    borderGradient="linear-gradient(0deg, #F1721C, #FFAA56)"
+                    color="#36F818"
+                    gradient="linear-gradient(0deg, rgba(54,248,24,0.08), rgba(54,248,24,0.15))"
+                    borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                     seed={42 + activeGameIndex}
                     cornerRadius={12}
                     noiseAmplitude={0.2}
@@ -390,39 +390,39 @@ export const Home = () => {
                     >
                       <OrbBombIcon
                         size="xl"
-                        className="text-orange-100 shrink-0"
+                        className="text-green-400 shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                           <div>
-                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
                               Game ID
                             </p>
-                            <p className="text-orange-100 font-body text-sm">
+                            <p className="text-green-400 font-body text-sm">
                               #{activeGame.gameId}
                             </p>
                           </div>
                           <div>
-                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
                               Expires In
                             </p>
-                            <p className="text-orange-100 font-body text-sm">
+                            <p className="text-green-400 font-body text-sm">
                               --
                             </p>
                           </div>
                           <div>
-                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
                               Level
                             </p>
-                            <p className="text-orange-100 font-body text-sm">
+                            <p className="text-green-400 font-body text-sm">
                               {activeGame.level}
                             </p>
                           </div>
                           <div>
-                            <p className="text-orange-100/40 font-secondary text-2xs tracking-widest uppercase">
+                            <p className="text-green-400/40 font-secondary text-2xs tracking-widest uppercase">
                               Max Payout
                             </p>
-                            <p className="text-orange-100 font-body text-sm">
+                            <p className="text-green-400 font-body text-sm">
                               {activeGame.points}
                             </p>
                           </div>
@@ -434,7 +434,7 @@ export const Home = () => {
                       ) : (
                         <ArrowRightIcon
                           size="sm"
-                          className="text-orange-100 mt-1 shrink-0"
+                          className="text-green-400 mt-1 shrink-0"
                         />
                       )}
                     </button>

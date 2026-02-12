@@ -245,6 +245,7 @@ export const MultiplierMath = {
     safetyMargin: number,
     animationFrames: number,
     cornerRadius: number,
+    aspectRatio: number = 1,
   ): string {
     const outerPoints: string[] = [];
     const innerPoints: string[] = [];
@@ -269,7 +270,6 @@ export const MultiplierMath = {
 
       // Get base points and normal vector
       const outerPoint = roundedSquarePoint(t, outerSize, cornerRadius);
-      const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
       // Apply SAME displacement to both polygons to maintain constant border width
@@ -277,9 +277,31 @@ export const MultiplierMath = {
       const outerY = outerPoint.y + normal.ny * displacement;
       outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
 
-      const innerX = innerPoint.x + normal.nx * displacement;
-      const innerY = innerPoint.y + normal.ny * displacement;
-      innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+      if (aspectRatio === 1) {
+        // Square element: use two concentric rounded squares (original behavior)
+        const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
+        const innerX = innerPoint.x + normal.nx * displacement;
+        const innerY = innerPoint.y + normal.ny * displacement;
+        innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+      } else {
+        // Non-square element: offset inner points from outer along normal,
+        // correcting for aspect ratio so border looks visually uniform.
+        // In clip-path %, X maps to element width, Y to height.
+        // A normal displacement of d% creates d%*W pixels in X, d%*H in Y.
+        // To get uniform visual thickness, scale border offset per-axis:
+        //   adjustedBorder = borderWidth / sqrt((nx*ar)^2 + ny^2)
+        const ar = aspectRatio;
+        const normalMag = Math.sqrt(
+          (normal.nx * ar) ** 2 + normal.ny ** 2,
+        );
+        const adjustedBorder =
+          normalMag > 0 ? borderWidth / normalMag : borderWidth;
+        const innerX =
+          outerPoint.x - normal.nx * adjustedBorder + normal.nx * displacement;
+        const innerY =
+          outerPoint.y - normal.ny * adjustedBorder + normal.ny * displacement;
+        innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+      }
     }
 
     // Use evenodd rule to create a hole

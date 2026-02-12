@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +33,26 @@ export const ElectricBorder = ({
   className,
   ...props
 }: ElectricBorderProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [aspectRatio, setAspectRatio] = useState(1);
+
+  // Measure element dimensions to compute aspect ratio for uniform border
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (height > 0) setAspectRatio(width / height);
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const clipPathAnimation = useMemo(() => {
     const borderFrames: string[] = [];
     const contentFrames: string[] = [];
@@ -49,6 +69,7 @@ export const ElectricBorder = ({
         safetyMargin,
         animationFrames,
         cornerRadius,
+        aspectRatio,
       );
       borderFrames.push(
         `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
@@ -87,13 +108,14 @@ export const ElectricBorder = ({
     safetyMargin,
     animationFrames,
     cornerRadius,
+    aspectRatio,
   ]);
 
   return (
     <>
       <style>{clipPathAnimation.keyframes}</style>
 
-      <div className={cn("relative", className)} {...props}>
+      <div ref={containerRef} className={cn("relative", className)} {...props}>
         <div
           className="relative w-full h-full"
           style={
