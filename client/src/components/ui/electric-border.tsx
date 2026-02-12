@@ -15,6 +15,7 @@ export interface ElectricBorderProps
   borderWidth?: number;
   safetyMargin?: number;
   contentOpacity?: number;
+  glowOpacity?: number;
 }
 
 export const ElectricBorder = ({
@@ -30,6 +31,7 @@ export const ElectricBorder = ({
   borderWidth = 2,
   safetyMargin = 2,
   contentOpacity = 1,
+  glowOpacity = 0.2,
   className,
   ...props
 }: ElectricBorderProps) => {
@@ -128,7 +130,12 @@ export const ElectricBorder = ({
           }
         >
           {/* Glow layer */}
-          <div className="absolute inset-0 opacity-20 blur-xl bg-[var(--electric-color)]" />
+          {glowOpacity > 0 && (
+            <div
+              className="absolute inset-0 blur-xl bg-[var(--electric-color)]"
+              style={{ opacity: glowOpacity }}
+            />
+          )}
 
           {/* Animated border clip-path */}
           <div

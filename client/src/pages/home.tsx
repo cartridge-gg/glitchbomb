@@ -152,9 +152,6 @@ export const Home = () => {
   );
 
   const [activeGameIndex, setActiveGameIndex] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<
-    "left" | "right" | null
-  >(null);
 
   // Clamp index when the list changes
   useEffect(() => {
@@ -168,22 +165,13 @@ export const Home = () => {
 
   const handlePrev = useCallback(() => {
     if (activeGameIndex <= 0) return;
-    setSlideDirection("right");
     setActiveGameIndex((i) => i - 1);
   }, [activeGameIndex]);
 
   const handleNext = useCallback(() => {
     if (activeGameIndex >= activeGames.length - 1) return;
-    setSlideDirection("left");
     setActiveGameIndex((i) => i + 1);
   }, [activeGameIndex, activeGames.length]);
-
-  // Reset slide direction after animation completes
-  useEffect(() => {
-    if (!slideDirection) return;
-    const timer = setTimeout(() => setSlideDirection(null), 300);
-    return () => clearTimeout(timer);
-  }, [slideDirection, activeGameIndex]);
 
   const handlePlay = async (
     packId: number,
@@ -352,96 +340,104 @@ export const Home = () => {
               )}
             </div>
 
-            {/* Active Game Card with Electric Border + slide animation */}
-            {activeGame && (
-              <div className="overflow-hidden rounded-lg">
+            {/* Active Game Cards — horizontal sliding carousel */}
+            {activeGames.length > 0 && (
+              <div className="overflow-hidden rounded-md">
                 <div
-                  key={`${activeGame.packId}-${activeGame.gameId}`}
-                  className={
-                    slideDirection === "left"
-                      ? "animate-slide-in-right"
-                      : slideDirection === "right"
-                        ? "animate-slide-in-left"
-                        : ""
-                  }
+                  className="flex transition-transform duration-300 ease-out"
+                  style={{
+                    transform: `translateX(-${activeGameIndex * 100}%)`,
+                  }}
                 >
-                  <ElectricBorder
-                    color="#36F818"
-                    gradient="linear-gradient(0deg, rgba(54,248,24,0.08), rgba(54,248,24,0.15))"
-                    borderGradient="linear-gradient(0deg, #36F818, #81F464)"
-                    seed={42 + activeGameIndex}
-                    cornerRadius={8}
-                    noiseAmplitude={0.2}
-                    borderWidth={2.5}
-                    safetyMargin={1.5}
-                    noisePoints={128}
-                    className="rounded-lg"
-                  >
-                    <button
-                      type="button"
-                      className="w-full p-3 flex items-center gap-3"
-                      onClick={() =>
-                        handlePlay(
-                          activeGame.packId,
-                          activeGame.gameId,
-                          activeGame.hasNoGame,
-                        )
-                      }
+                  {activeGames.map((game, idx) => (
+                    <div
+                      key={`${game.packId}-${game.gameId}`}
+                      className="w-full shrink-0"
                     >
-                      {/* Icon container */}
-                      <div className="shrink-0 flex items-center justify-center rounded bg-white/[0.04] p-2">
-                        <OrbBombIcon size="sm" className="text-green-400" />
-                      </div>
+                      <ElectricBorder
+                        color="#36F818"
+                        gradient="transparent"
+                        borderGradient="linear-gradient(0deg, #36F818, #81F464)"
+                        seed={42 + idx}
+                        cornerRadius={3}
+                        noiseAmplitude={0.2}
+                        borderWidth={2.5}
+                        safetyMargin={1}
+                        noisePoints={128}
+                        glowOpacity={0}
+                        contentOpacity={0}
+                        className="rounded-md"
+                      >
+                        <button
+                          type="button"
+                          className="w-full p-3 flex items-center gap-3"
+                          onClick={() =>
+                            handlePlay(
+                              game.packId,
+                              game.gameId,
+                              game.hasNoGame,
+                            )
+                          }
+                        >
+                          {/* Icon container */}
+                          <div className="shrink-0 flex items-center justify-center rounded bg-white/[0.04] p-2">
+                            <OrbBombIcon
+                              size="sm"
+                              className="text-green-400"
+                            />
+                          </div>
 
-                      {/* 2x2 grid */}
-                      <div className="flex-1 min-w-0">
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-2">
-                          <div className="flex flex-col gap-1">
-                            <p className="text-green-400/25 font-secondary text-sm leading-none">
-                              Game ID
-                            </p>
-                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
-                              #{activeGame.gameId}
-                            </p>
+                          {/* 2x2 grid */}
+                          <div className="flex-1 min-w-0">
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                              <div className="flex flex-col gap-1">
+                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                  Game ID
+                                </p>
+                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                  #{game.gameId}
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                  Expires In
+                                </p>
+                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                  --
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                  Level
+                                </p>
+                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                  L{game.level}
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <p className="text-green-400/25 font-secondary text-sm leading-none">
+                                  Max Payout
+                                </p>
+                                <p className="text-green-400 font-secondary text-sm uppercase leading-none">
+                                  {game.points}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="text-green-400/25 font-secondary text-sm leading-none">
-                              Expires In
-                            </p>
-                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
-                              --
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="text-green-400/25 font-secondary text-sm leading-none">
-                              Level
-                            </p>
-                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
-                              L{activeGame.level}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="text-green-400/25 font-secondary text-sm leading-none">
-                              Max Payout
-                            </p>
-                            <p className="text-green-400 font-secondary text-sm uppercase leading-none">
-                              {activeGame.points}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
 
-                      {loadingGameId ===
-                      `${activeGame.packId}-${activeGame.gameId}` ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        <ArrowRightIcon
-                          size="xs"
-                          className="text-green-400 shrink-0"
-                        />
-                      )}
-                    </button>
-                  </ElectricBorder>
+                          {loadingGameId ===
+                          `${game.packId}-${game.gameId}` ? (
+                            <LoadingSpinner size="sm" />
+                          ) : (
+                            <ArrowRightIcon
+                              size="xs"
+                              className="text-green-400 shrink-0"
+                            />
+                          )}
+                        </button>
+                      </ElectricBorder>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
