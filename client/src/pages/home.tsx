@@ -3,7 +3,7 @@ import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { Connect, LoadingSpinner, Multiplier } from "@/components/elements";
+import { Connect, LoadingSpinner } from "@/components/elements";
 import { ArrowLeftIcon, ArrowRightIcon, BombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { getTokenAddress } from "@/config";
@@ -327,48 +327,48 @@ export const Home = () => {
           </div>
 
           {currentOngoingGame ? (
-            <div className="rounded-lg border-2 border-orange-100 bg-black/40 p-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)]">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 shrink-0 rounded-lg bg-white/5 p-1.5">
-                  <Multiplier
-                    count={currentOngoingGame.multiplier}
-                    className="h-full w-full"
-                    cornerRadius={6}
-                  />
-                </div>
+            <div className="relative rounded-lg">
+              <div className="pointer-events-none absolute -inset-[3px] rounded-xl bg-[radial-gradient(circle_at_15%_20%,rgba(248,145,73,0.35),transparent_50%),radial-gradient(circle_at_85%_80%,rgba(209,13,7,0.3),transparent_55%)] animate-pulse" />
+              <div className="pointer-events-none absolute -inset-[1px] rounded-[10px] bg-[linear-gradient(180deg,#F89149_0%,#D10D07_45%,#F89149_100%)]" />
+              <div className="relative rounded-lg border border-[#F89149]/50 bg-black/55 p-3 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#1B0C08]">
+                    <BombIcon className="h-5 w-5 text-orange-100" />
+                  </div>
 
-                <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs uppercase">
-                  <div>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100/40">
-                      Game ID
-                    </p>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100">
-                      #{currentOngoingGame.gameId}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100/40">
-                      Progress
-                    </p>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100">
-                      {currentOngoingGame.pullCount}/{currentOngoingGame.bagSize}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100/40">
-                      Level
-                    </p>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100">
-                      L{currentOngoingGame.level}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100/40">
-                      Points
-                    </p>
-                    <p className="font-secondary tracking-[0.16em] text-orange-100">
-                      {currentOngoingGame.points}
-                    </p>
+                  <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs uppercase">
+                    <div>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100/40">
+                        Game ID
+                      </p>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100">
+                        #{currentOngoingGame.gameId}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100/40">
+                        Progress
+                      </p>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100">
+                        {currentOngoingGame.pullCount}/{currentOngoingGame.bagSize}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100/40">
+                        Level
+                      </p>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100">
+                        L{currentOngoingGame.level}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100/40">
+                        Points
+                      </p>
+                      <p className="font-secondary tracking-[0.16em] text-orange-100">
+                        {currentOngoingGame.points}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
