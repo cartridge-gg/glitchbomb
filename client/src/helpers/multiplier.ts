@@ -262,17 +262,14 @@ export const MultiplierMath = {
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
       const n = roundedSquareNormal(t, outerSize, cornerRadius);
-      speeds[i] = Math.sqrt(
-        n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2,
-      );
+      speeds[i] = Math.sqrt(n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2);
       totalSpeed += speeds[i];
     }
 
     let cumSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle =
-        (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      const angle = (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
       cumSpeed += speeds[i];
 
       const noiseValue = periodicNoise(
@@ -299,13 +296,9 @@ export const MultiplierMath = {
       } else {
         // Correct displacement and border width for aspect ratio.
         const ar = aspectRatio;
-        const normalMag = Math.sqrt(
-          (normal.nx * ar) ** 2 + normal.ny ** 2,
-        );
-        const adjDisp =
-          normalMag > 0 ? displacement / normalMag : displacement;
-        const adjBorder =
-          normalMag > 0 ? borderWidth / normalMag : borderWidth;
+        const normalMag = Math.sqrt((normal.nx * ar) ** 2 + normal.ny ** 2);
+        const adjDisp = normalMag > 0 ? displacement / normalMag : displacement;
+        const adjBorder = normalMag > 0 ? borderWidth / normalMag : borderWidth;
 
         const outerX = outerPoint.x + normal.nx * adjDisp;
         const outerY = outerPoint.y + normal.ny * adjDisp;
@@ -354,17 +347,14 @@ export const MultiplierMath = {
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
       const n = roundedSquareNormal(t, outerSize, cornerRadius);
-      speeds[i] = Math.sqrt(
-        n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2,
-      );
+      speeds[i] = Math.sqrt(n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2);
       totalSpeed += speeds[i];
     }
 
     let cumSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
       const t = i / noisePoints;
-      const angle =
-        (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      const angle = (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
       cumSpeed += speeds[i];
 
       const noiseValue = periodicNoise(
@@ -385,11 +375,8 @@ export const MultiplierMath = {
         points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
       } else {
         const ar = aspectRatio;
-        const normalMag = Math.sqrt(
-          (normal.nx * ar) ** 2 + normal.ny ** 2,
-        );
-        const adjDisp =
-          normalMag > 0 ? displacement / normalMag : displacement;
+        const normalMag = Math.sqrt((normal.nx * ar) ** 2 + normal.ny ** 2);
+        const adjDisp = normalMag > 0 ? displacement / normalMag : displacement;
         const x = point.x + normal.nx * adjDisp;
         const y = point.y + normal.ny * adjDisp;
         points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);

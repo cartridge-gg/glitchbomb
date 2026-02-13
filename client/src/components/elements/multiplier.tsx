@@ -181,7 +181,7 @@ export const Multiplier = ({
         )}
       >
         <p
-          className="font-secondary tracking-widest select-none"
+          className="font-secondary tracking-widest select-none leading-none"
           style={{ color: resolvedColor }}
         >{`${count}X`}</p>
       </div>
