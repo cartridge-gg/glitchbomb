@@ -48,6 +48,7 @@ export * from "./heart-outline";
 export * from "./home";
 export * from "./list";
 export * from "./moonrock";
+export * from "./nums-logo";
 export * from "./orb";
 export * from "./orb-bomb";
 export * from "./orb-chip";

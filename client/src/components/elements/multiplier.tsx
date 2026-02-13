@@ -1,10 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
+import { ElectricBorder } from "@/components/ui/electric-border";
 import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
-
-const ANIMATION_FRAMES = 60; // Number of animation frames (higher = smoother)
-const CORNER_RADIUS = 8; // Corner radius (equivalent to rounded-lg)
 
 // Bounds for safety margin (in %)
 const SAFETY_MARGIN_MIN = 2;
@@ -32,7 +30,6 @@ export interface MultiplierProps
   electricGradient?: string;
   electricBorderGradient?: string;
   contentOpacity?: number;
-  // Animation constants (optional, with defaults)
   animationFrames?: number;
   cornerRadius?: number;
   safetyMarginMin?: number;
@@ -86,9 +83,8 @@ export const Multiplier = ({
   electricGradient,
   electricBorderGradient,
   contentOpacity,
-  // Constants with defaults
-  animationFrames = ANIMATION_FRAMES,
-  cornerRadius = CORNER_RADIUS,
+  animationFrames = 60,
+  cornerRadius = 8,
   safetyMarginMin = SAFETY_MARGIN_MIN,
   safetyMarginMax = SAFETY_MARGIN_MAX,
   noisePointsMin = NOISE_POINTS_MIN,
@@ -102,7 +98,7 @@ export const Multiplier = ({
   const magnitude: MultiplierMagnitude = useMemo(() => {
     return Math.floor(Math.min(Math.max(1, count), 5)) as MultiplierMagnitude;
   }, [count]);
-  // Dynamic calculation of amplitude and border width
+
   const noiseAmplitude = useMemo(
     () =>
       MultiplierMath.calculateNoiseAmplitude(
@@ -162,116 +158,33 @@ export const Multiplier = ({
   const resolvedBorderGradient = electricBorderGradient ?? cssBorderGradient;
   const resolvedColor = electricColor ?? cssColor;
 
-  // Generates CSS animation with procedural noise
-  const clipPathAnimation = useMemo(() => {
-    const seed = magnitude * 100; // Different seed per magnitude
-    const borderFrames: string[] = [];
-    const contentFrames: string[] = [];
-
-    for (let i = 0; i < animationFrames; i++) {
-      const percentage = (i / (animationFrames - 1)) * 100;
-
-      // Clip-path for border (ring)
-      const ringClipPath = MultiplierMath.generateRingClipPath(
-        i,
-        seed,
-        noiseAmplitude,
-        borderWidth,
-        noisePoints,
-        safetyMargin,
-        animationFrames,
-        cornerRadius,
-      );
-      borderFrames.push(
-        `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
-      );
-
-      // Clip-path for content (same noise, inner polygon only)
-      const contentClipPath = MultiplierMath.generateContentClipPath(
-        i,
-        seed,
-        noiseAmplitude,
-        noisePoints,
-        safetyMargin,
-        animationFrames,
-        cornerRadius,
-      );
-      contentFrames.push(
-        `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,
-      );
-    }
-
-    const borderAnimationName = `electric-border-${magnitude}`;
-    const contentAnimationName = `electric-content-${magnitude}`;
-
-    return {
-      borderName: borderAnimationName,
-      contentName: contentAnimationName,
-      keyframes: `
-        @keyframes ${borderAnimationName} { ${borderFrames.join(" ")} }
-        @keyframes ${contentAnimationName} { ${contentFrames.join(" ")} }
-      `,
-    };
-  }, [
-    magnitude,
-    noiseAmplitude,
-    borderWidth,
-    noisePoints,
-    safetyMargin,
-    animationFrames,
-    cornerRadius,
-  ]);
-
   return (
-    <>
-      {/* Inject keyframes dynamically */}
-      <style>{clipPathAnimation.keyframes}</style>
-
-      <div className={cn(multiplierContainerVariants({ size }), className)}>
-        <div
-          className="relative w-full h-full flex items-center justify-center"
-          style={
-            {
-              "--electric-color": resolvedColor,
-              "--electric-gradient": resolvedGradient,
-              "--electric-border-gradient": resolvedBorderGradient,
-              padding: `${safetyMargin}%`,
-            } as React.CSSProperties
-          }
-        >
-          {/* 1. Glow Layers */}
-          <div className="absolute inset-0 opacity-20 blur-xl bg-[var(--electric-color)]" />
-
-          {/* 2. Electric Border with animated clip-path */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: "var(--electric-border-gradient)",
-              boxShadow: "0 0 8px var(--electric-color)",
-              animation: `${clipPathAnimation.borderName} 2s ease-in-out infinite`,
-            }}
-          />
-
-          {/* 3. Component Content with synchronized clip-path */}
-          <div
-            className={cn(
-              multiplierVariants({ variant, size }),
-              "absolute inset-0 z-10",
-            )}
-            style={{
-              backgroundImage: "var(--electric-gradient)",
-              animation: `${clipPathAnimation.contentName} 2s ease-in-out infinite`,
-              opacity: contentOpacity ?? 1,
-            }}
-            {...props}
-          >
-            <p
-              className="font-secondary tracking-widest select-none"
-              style={{ color: "var(--electric-color)" }}
-            >{`${count}X`}</p>
-          </div>
-        </div>
+    <ElectricBorder
+      color={resolvedColor}
+      gradient={resolvedGradient}
+      borderGradient={resolvedBorderGradient}
+      seed={magnitude * 100}
+      animationFrames={animationFrames}
+      cornerRadius={cornerRadius}
+      noisePoints={noisePoints}
+      noiseAmplitude={noiseAmplitude}
+      borderWidth={borderWidth}
+      safetyMargin={safetyMargin}
+      contentOpacity={contentOpacity}
+      className={cn(multiplierContainerVariants({ size }), className)}
+      {...props}
+    >
+      <div
+        className={cn(
+          multiplierVariants({ variant, size }),
+          "flex items-center justify-center",
+        )}
+      >
+        <p
+          className="font-secondary tracking-widest select-none leading-none"
+          style={{ color: resolvedColor }}
+        >{`${count}X`}</p>
       </div>
-    </>
+    </ElectricBorder>
   );
 };

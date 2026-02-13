@@ -245,18 +245,33 @@ export const MultiplierMath = {
     safetyMargin: number,
     animationFrames: number,
     cornerRadius: number,
+    aspectRatio: number = 1,
+    noiseFrequency: number = 1,
   ): string {
     const outerPoints: string[] = [];
     const innerPoints: string[] = [];
-    // Outer polygon starts further inside to create a margin
     const outerSize = 50 - safetyMargin;
     const innerSize = 50 - safetyMargin - borderWidth;
 
+    // Compute pixel-space speed at each sample to weight noise angles.
+    // Tangent = (-ny, nx); pixel speed = sqrt(ny^2*ar^2 + nx^2).
+    // This makes the noise advance faster on physically longer edges
+    // so visual frequency is uniform everywhere.
+    const speeds = new Array<number>(noisePoints);
+    let totalSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
-      const t = i / noisePoints; // Parameter [0, 1] that traverses the perimeter
-      const angle = t * Math.PI * 2; // For periodic noise
+      const t = i / noisePoints;
+      const n = roundedSquareNormal(t, outerSize, cornerRadius);
+      speeds[i] = Math.sqrt(n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2);
+      totalSpeed += speeds[i];
+    }
 
-      // Generate periodic noise ONCE for this point
+    let cumSpeed = 0;
+    for (let i = 0; i < noisePoints; i++) {
+      const t = i / noisePoints;
+      const angle = (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      cumSpeed += speeds[i];
+
       const noiseValue = periodicNoise(
         angle,
         frameIndex,
@@ -264,22 +279,37 @@ export const MultiplierMath = {
         animationFrames,
       );
 
-      // Calculate displacement: use a fixed reference size (e.g., 10) to keep displacement consistent
       const displacement = noiseValue * noiseAmplitude * 10;
 
-      // Get base points and normal vector
       const outerPoint = roundedSquarePoint(t, outerSize, cornerRadius);
-      const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      // Apply SAME displacement to both polygons to maintain constant border width
-      const outerX = outerPoint.x + normal.nx * displacement;
-      const outerY = outerPoint.y + normal.ny * displacement;
-      outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+      if (aspectRatio === 1) {
+        const outerX = outerPoint.x + normal.nx * displacement;
+        const outerY = outerPoint.y + normal.ny * displacement;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
 
-      const innerX = innerPoint.x + normal.nx * displacement;
-      const innerY = innerPoint.y + normal.ny * displacement;
-      innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+        const innerPoint = roundedSquarePoint(t, innerSize, cornerRadius);
+        const innerX = innerPoint.x + normal.nx * displacement;
+        const innerY = innerPoint.y + normal.ny * displacement;
+        innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+      } else {
+        // Correct displacement and border width for aspect ratio.
+        const ar = aspectRatio;
+        const normalMag = Math.sqrt((normal.nx * ar) ** 2 + normal.ny ** 2);
+        const adjDisp = normalMag > 0 ? displacement / normalMag : displacement;
+        const adjBorder = normalMag > 0 ? borderWidth / normalMag : borderWidth;
+
+        const outerX = outerPoint.x + normal.nx * adjDisp;
+        const outerY = outerPoint.y + normal.ny * adjDisp;
+        outerPoints.push(`${outerX.toFixed(2)}% ${outerY.toFixed(2)}%`);
+
+        const innerX =
+          outerPoint.x - normal.nx * adjBorder + normal.nx * adjDisp;
+        const innerY =
+          outerPoint.y - normal.ny * adjBorder + normal.ny * adjDisp;
+        innerPoints.push(`${innerX.toFixed(2)}% ${innerY.toFixed(2)}%`);
+      }
     }
 
     // Use evenodd rule to create a hole
@@ -305,16 +335,28 @@ export const MultiplierMath = {
     safetyMargin: number,
     animationFrames: number,
     cornerRadius: number,
+    aspectRatio: number = 1,
+    noiseFrequency: number = 1,
   ): string {
     const points: string[] = [];
-    // Content uses the same radius as the OUTER polygon of the border
     const outerSize = 50 - safetyMargin;
 
+    // Pixel-weighted noise angles (same as ring)
+    const speeds = new Array<number>(noisePoints);
+    let totalSpeed = 0;
     for (let i = 0; i < noisePoints; i++) {
-      const t = i / noisePoints; // Parameter [0, 1] that traverses the perimeter
-      const angle = t * Math.PI * 2; // For periodic noise
+      const t = i / noisePoints;
+      const n = roundedSquareNormal(t, outerSize, cornerRadius);
+      speeds[i] = Math.sqrt(n.ny ** 2 * aspectRatio ** 2 + n.nx ** 2);
+      totalSpeed += speeds[i];
+    }
 
-      // Use the SAME periodic noise as the ring
+    let cumSpeed = 0;
+    for (let i = 0; i < noisePoints; i++) {
+      const t = i / noisePoints;
+      const angle = (cumSpeed / totalSpeed) * Math.PI * 2 * noiseFrequency;
+      cumSpeed += speeds[i];
+
       const noiseValue = periodicNoise(
         angle,
         frameIndex,
@@ -322,17 +364,23 @@ export const MultiplierMath = {
         animationFrames,
       );
 
-      // Calculate displacement: use a fixed reference size (e.g., 10) to keep displacement consistent
       const displacement = noiseValue * noiseAmplitude * 10;
 
-      // Get base point and normal vector
       const point = roundedSquarePoint(t, outerSize, cornerRadius);
       const normal = roundedSquareNormal(t, outerSize, cornerRadius);
 
-      // Apply noise displacement along the normal (perpendicular to border)
-      const x = point.x + normal.nx * displacement;
-      const y = point.y + normal.ny * displacement;
-      points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      if (aspectRatio === 1) {
+        const x = point.x + normal.nx * displacement;
+        const y = point.y + normal.ny * displacement;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      } else {
+        const ar = aspectRatio;
+        const normalMag = Math.sqrt((normal.nx * ar) ** 2 + normal.ny ** 2);
+        const adjDisp = normalMag > 0 ? displacement / normalMag : displacement;
+        const x = point.x + normal.nx * adjDisp;
+        const y = point.y + normal.ny * adjDisp;
+        points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      }
     }
 
     return `polygon(${points.join(",")})`;

@@ -387,7 +387,7 @@ export const Game = () => {
           plData={plData}
           pulls={pulls}
           cashedOut={cashedOut}
-          onPlayAgain={() => navigate("/games")}
+          onPlayAgain={() => navigate("/")}
         />
       );
     }

@@ -97,6 +97,7 @@ export const preset: Partial<Config> = {
         body: ["Rubik One", "sans"],
         glitch: ["Rubik Glitch", "sans"],
         secondary: ["VCR OSD Mono", "sans"],
+        primary: ["Pixel Game", "Rubik One", "sans"],
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["IBM Plex Mono", ...defaultTheme.fontFamily.mono],
       },
