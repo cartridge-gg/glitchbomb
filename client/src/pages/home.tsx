@@ -3,7 +3,7 @@ import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
-import { Connect, LoadingSpinner } from "@/components/elements";
+import { LoadingSpinner } from "@/components/elements";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -277,38 +277,16 @@ export const Home = () => {
 
   const isLoggedIn = !!account && !!username;
 
-  if (!isLoggedIn) {
-    return (
-      <div className="absolute inset-0">
-        <div className="flex h-full flex-col items-center justify-center px-4">
-          <div className="inline-grid grid-cols-1 justify-items-center gap-8">
-            <h1 className="m-0 text-center uppercase leading-[0.9]">
-              <strong className="block text-green-400 text-6xl md:text-7xl font-glitch font-thin tracking-tight">
-                Glitch
-              </strong>
-              <span className="block text-white text-7xl md:text-8xl tracking-tight">
-                Bomb
-              </span>
-            </h1>
-            <div className="grid w-full grid-cols-1 gap-3">
-              <Connect
-                highlight
-                className="h-12 w-full px-10"
-                onClick={onConnectClick}
-              />
-              <Button
-                variant="secondary"
-                className="h-11 w-full px-10 font-secondary uppercase text-sm tracking-widest"
-                disabled
-              >
-                Play
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const requireLogin = useCallback(
+    (action: () => void) => {
+      if (!isLoggedIn) {
+        onConnectClick();
+        return;
+      }
+      action();
+    },
+    [isLoggedIn, onConnectClick],
+  );
 
   return (
     <div className="absolute inset-0 flex flex-col">
@@ -319,11 +297,12 @@ export const Home = () => {
         showBack={false}
         onMint={offline ? undefined : () => mint(tokenAddress)}
         onProfileClick={onProfileClick}
+        onConnect={isLoggedIn ? undefined : onConnectClick}
       />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
-        <div className="flex flex-col gap-4 w-full max-w-[500px] min-h-0">
+        <div className="flex flex-col gap-4 w-full max-w-[500px] min-h-0 flex-1 md:flex-initial">
           {/* Banner */}
           <button
             type="button"
@@ -656,7 +635,13 @@ export const Home = () => {
                         className="w-full p-3 flex items-center gap-3 text-left"
                         onClick={() => {
                           if (didDrag.current) return;
-                          handlePlay(game.packId, game.gameId, game.hasNoGame);
+                          requireLogin(() =>
+                            handlePlay(
+                              game.packId,
+                              game.gameId,
+                              game.hasNoGame,
+                            ),
+                          );
                         }}
                       >
                         {/* Icon container */}
@@ -755,7 +740,7 @@ export const Home = () => {
                       className="w-full p-3 flex items-center gap-3 text-left"
                       onClick={() => {
                         if (didDrag.current) return;
-                        handleNewGame();
+                        requireLogin(() => handleNewGame());
                       }}
                     >
                       {/* Icon container */}
@@ -837,142 +822,160 @@ export const Home = () => {
           </div>
 
           {/* Activity Feed — finished games only, grouped by date */}
-          {completedGames.length > 0 && (
-            <div className="flex flex-col gap-3 min-h-0">
-              <h2 className="text-white font-secondary text-xs tracking-widest uppercase shrink-0">
-                ACTIVITY
-              </h2>
-              <div
-                className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto"
-                style={{ scrollbarWidth: "none" }}
-              >
-                {/* Today group */}
-                <div className="flex flex-col gap-2">
-                  {completedGames.slice(0, 2).map((game) => {
-                    const cashedOut = game.health > 0;
-                    return (
-                      <div
-                        key={`today-${game.packId}-${game.gameId}`}
-                        className="flex items-center gap-2"
-                      >
-                        <button
-                          type="button"
-                          className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
-                          style={{
-                            background: cashedOut ? "#071304" : "#1A0505",
-                          }}
-                          onClick={() =>
-                            navigate(
-                              `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                            )
-                          }
-                        >
-                          <BombIcon size="md" className="text-white shrink-0" />
-                          <span className="font-secondary text-sm tracking-widest text-white">
-                            #{game.packId}
-                          </span>
-                          <span className="font-secondary text-sm tracking-widest text-white">
-                            L{game.level}
-                          </span>
-                          <span
-                            className="font-secondary text-sm tracking-widest"
-                            style={{ color: cashedOut ? "#36F818" : "#EF4444" }}
-                          >
-                            {cashedOut
-                              ? `+$${(game.points * 0.01).toFixed(2)}`
-                              : "GLITCHED"}
-                          </span>
-                        </button>
-                        <Button
-                          variant="secondary"
-                          gradient={cashedOut ? "green" : "red"}
-                          className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                          onClick={() =>
-                            navigate(
-                              `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                            )
-                          }
-                          aria-label="View game"
-                        >
-                          <ArrowRightIcon size="sm" />
-                        </Button>
-                      </div>
-                    );
-                  })}
+          <div className="flex flex-col gap-3 min-h-0 flex-1 md:flex-initial">
+            <h2 className="text-white font-secondary text-xs tracking-widest uppercase shrink-0">
+              ACTIVITY
+            </h2>
+            <div
+              className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1 md:flex-initial md:min-h-[300px]"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {completedGames.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p
+                    className="font-secondary text-sm tracking-widest uppercase text-center leading-relaxed"
+                    style={{ color: "#255115" }}
+                  >
+                    YOU HAVE NOT PLAYED
+                    <br />
+                    ANY GAMES YET
+                  </p>
                 </div>
-
-                {/* Yesterday group */}
-                {completedGames.length > 2 && (
-                  <>
-                    <p
-                      className="font-secondary text-sm tracking-widest uppercase pt-1"
-                      style={{ color: "#36F818" }}
-                    >
-                      YESTERDAY
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {completedGames.slice(2).map((game) => {
-                        const cashedOut = game.health > 0;
-                        return (
-                          <div
-                            key={`yesterday-${game.packId}-${game.gameId}`}
-                            className="flex items-center gap-2"
+              ) : (
+                <>
+                  {/* Today group */}
+                  <div className="flex flex-col gap-2">
+                    {completedGames.slice(0, 2).map((game) => {
+                      const cashedOut = game.health > 0;
+                      return (
+                        <div
+                          key={`today-${game.packId}-${game.gameId}`}
+                          className="flex items-center gap-2"
+                        >
+                          <button
+                            type="button"
+                            className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            style={{
+                              background: cashedOut ? "#071304" : "#1A0505",
+                            }}
+                            onClick={() =>
+                              navigate(
+                                `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                              )
+                            }
                           >
-                            <button
-                              type="button"
-                              className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            <BombIcon
+                              size="md"
+                              className="text-white shrink-0"
+                            />
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              #{game.packId}
+                            </span>
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              L{game.level}
+                            </span>
+                            <span
+                              className="font-secondary text-sm tracking-widest"
                               style={{
-                                background: cashedOut ? "#071304" : "#1A0505",
+                                color: cashedOut ? "#36F818" : "#EF4444",
                               }}
-                              onClick={() =>
-                                navigate(
-                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                )
-                              }
                             >
-                              <BombIcon
-                                size="md"
-                                className="text-white shrink-0"
-                              />
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                #{game.packId}
-                              </span>
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                L{game.level}
-                              </span>
-                              <span
-                                className="font-secondary text-sm tracking-widest"
+                              {cashedOut
+                                ? `+$${(game.points * 0.01).toFixed(2)}`
+                                : "GLITCHED"}
+                            </span>
+                          </button>
+                          <Button
+                            variant="secondary"
+                            gradient={cashedOut ? "green" : "red"}
+                            className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                            onClick={() =>
+                              navigate(
+                                `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                              )
+                            }
+                            aria-label="View game"
+                          >
+                            <ArrowRightIcon size="sm" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Yesterday group */}
+                  {completedGames.length > 2 && (
+                    <>
+                      <p
+                        className="font-secondary text-sm tracking-widest uppercase pt-1"
+                        style={{ color: "#36F818" }}
+                      >
+                        YESTERDAY
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {completedGames.slice(2).map((game) => {
+                          const cashedOut = game.health > 0;
+                          return (
+                            <div
+                              key={`yesterday-${game.packId}-${game.gameId}`}
+                              className="flex items-center gap-2"
+                            >
+                              <button
+                                type="button"
+                                className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
                                 style={{
-                                  color: cashedOut ? "#36F818" : "#EF4444",
+                                  background: cashedOut ? "#071304" : "#1A0505",
                                 }}
+                                onClick={() =>
+                                  navigate(
+                                    `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                  )
+                                }
                               >
-                                {cashedOut
-                                  ? `+$${(game.points * 0.01).toFixed(2)}`
-                                  : "GLITCHED"}
-                              </span>
-                            </button>
-                            <Button
-                              variant="secondary"
-                              gradient={cashedOut ? "green" : "red"}
-                              className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                              onClick={() =>
-                                navigate(
-                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                )
-                              }
-                              aria-label="View game"
-                            >
-                              <ArrowRightIcon size="sm" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
+                                <BombIcon
+                                  size="md"
+                                  className="text-white shrink-0"
+                                />
+                                <span className="font-secondary text-sm tracking-widest text-white">
+                                  #{game.packId}
+                                </span>
+                                <span className="font-secondary text-sm tracking-widest text-white">
+                                  L{game.level}
+                                </span>
+                                <span
+                                  className="font-secondary text-sm tracking-widest"
+                                  style={{
+                                    color: cashedOut ? "#36F818" : "#EF4444",
+                                  }}
+                                >
+                                  {cashedOut
+                                    ? `+$${(game.points * 0.01).toFixed(2)}`
+                                    : "GLITCHED"}
+                                </span>
+                              </button>
+                              <Button
+                                variant="secondary"
+                                gradient={cashedOut ? "green" : "red"}
+                                className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                                onClick={() =>
+                                  navigate(
+                                    `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                  )
+                                }
+                                aria-label="View game"
+                              >
+                                <ArrowRightIcon size="sm" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -994,17 +997,19 @@ export const Home = () => {
             wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
             className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-yellow-100" : "!bg-green-900"}`}
             style={isOnNewGameCard ? { backgroundColor: "#3D3200" } : undefined}
-            onClick={() => {
-              if (isOnNewGameCard) {
-                handleNewGame();
-              } else if (activeGame) {
-                handlePlay(
-                  activeGame.packId,
-                  activeGame.gameId,
-                  activeGame.hasNoGame,
-                );
-              }
-            }}
+            onClick={() =>
+              requireLogin(() => {
+                if (isOnNewGameCard) {
+                  handleNewGame();
+                } else if (activeGame) {
+                  handlePlay(
+                    activeGame.packId,
+                    activeGame.gameId,
+                    activeGame.hasNoGame,
+                  );
+                }
+              })
+            }
           >
             {isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
           </Button>

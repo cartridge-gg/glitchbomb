@@ -15,6 +15,7 @@ export interface AppHeaderProps {
   backPath?: string;
   onMint?: () => void;
   onProfileClick?: () => void;
+  onConnect?: () => void;
 }
 
 export const AppHeader = ({
@@ -24,6 +25,7 @@ export const AppHeader = ({
   backPath = "/",
   onMint,
   onProfileClick,
+  onConnect,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -80,7 +82,7 @@ export const AppHeader = ({
             {Math.floor(moonrocks).toLocaleString()}
           </span>
         </button>
-        {username && (
+        {username ? (
           <GradientBorder color="green">
             <Profile
               username={username}
@@ -88,6 +90,16 @@ export const AppHeader = ({
               className="w-auto px-3 md:px-4"
             />
           </GradientBorder>
+        ) : (
+          onConnect && (
+            <Button
+              variant="default"
+              className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
+              onClick={onConnect}
+            >
+              LOG IN
+            </Button>
+          )
         )}
       </div>
     </div>
