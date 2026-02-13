@@ -2,7 +2,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppHeader } from "@/components/containers";
+import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import {
   ArrowRightIcon,
@@ -32,11 +32,13 @@ export const Home = () => {
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { starterpack, config } = useEntitiesContext();
+  const { starterpacks, config } = useEntitiesContext();
   const { packs } = usePacks();
   const offlineState = useOfflineStore();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
+  const [showGameDetails, setShowGameDetails] = useState(false);
+  const [tierIndex, setTierIndex] = useState(0);
   const pendingNavigationRef = useRef<{
     packId: number;
     gameId: number;
@@ -145,7 +147,9 @@ export const Home = () => {
       });
     }
 
-    return games.sort((a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId);
+    return games.sort(
+      (a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId,
+    );
   }, [packs, getGameForPack]);
 
   // Split into active and completed games
@@ -181,8 +185,22 @@ export const Home = () => {
       if (daysAgo < 30) return `${weeksAgo} Weeks Ago`;
 
       const d = new Date(tsMs);
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      if (d.getFullYear() === now.getFullYear()) return monthNames[d.getMonth()];
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      if (d.getFullYear() === now.getFullYear())
+        return monthNames[d.getMonth()];
       return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
     };
 
@@ -351,12 +369,13 @@ export const Home = () => {
       createPack();
       return;
     }
-    if (starterpack) {
+    const selected = starterpacks[tierIndex];
+    if (selected) {
       (connector as ControllerConnector)?.controller.openStarterPack(
-        starterpack.id.toString(),
+        selected.id.toString(),
       );
     }
-  }, [connector, starterpack, offline]);
+  }, [connector, starterpacks, tierIndex, offline]);
 
   const handlePractice = useCallback(() => {
     setOfflineMode(true);
@@ -784,7 +803,10 @@ export const Home = () => {
                 </h2>
                 <span
                   className="font-secondary text-xs tracking-widest px-2 py-0.5 rounded-full"
-                  style={{ color: "#36F818", backgroundColor: "rgba(54, 248, 24, 0.1)" }}
+                  style={{
+                    color: "#36F818",
+                    backgroundColor: "rgba(54, 248, 24, 0.1)",
+                  }}
                 >
                   {activeGames.length}
                 </span>
@@ -959,7 +981,7 @@ export const Home = () => {
                       className="w-full p-3 flex items-center gap-3 text-left"
                       onClick={() => {
                         if (didDrag.current) return;
-                        requireLogin(() => handleNewGame());
+                        requireLogin(() => setShowGameDetails(true));
                       }}
                     >
                       {/* Icon container */}
@@ -1138,41 +1160,95 @@ export const Home = () => {
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 pt-4 pb-4 px-4">
-        <div className="flex gap-3 w-full max-w-[500px] mx-auto">
-          <Button
-            variant="secondary"
-            gradient="green"
-            wrapperClassName="flex-1"
-            className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-            onClick={handlePractice}
-          >
-            PRACTICE
-          </Button>
-          <Button
-            variant="secondary"
-            gradient={isOnNewGameCard ? "yellow" : "green"}
-            wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-yellow-100" : "!bg-green-900"}`}
-            style={isOnNewGameCard ? { backgroundColor: "#3D3200" } : undefined}
-            onClick={() =>
-              requireLogin(() => {
-                if (isOnNewGameCard) {
-                  handleNewGame();
-                } else if (activeGame) {
-                  handlePlay(
-                    activeGame.packId,
-                    activeGame.gameId,
-                    activeGame.hasNoGame,
-                  );
-                }
-              })
-            }
-          >
-            {isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
-          </Button>
+      {!showGameDetails && (
+        <div className="shrink-0 pt-4 pb-4 px-4">
+          <div className="flex gap-3 w-full max-w-[500px] mx-auto">
+            <Button
+              variant="secondary"
+              gradient="green"
+              wrapperClassName="flex-1"
+              className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+              onClick={handlePractice}
+            >
+              PRACTICE
+            </Button>
+            <Button
+              variant="secondary"
+              gradient={isOnNewGameCard ? "yellow" : "green"}
+              wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+              className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-yellow-100" : "!bg-green-900"}`}
+              style={
+                isOnNewGameCard ? { backgroundColor: "#3D3200" } : undefined
+              }
+              onClick={() =>
+                requireLogin(() => {
+                  if (isOnNewGameCard) {
+                    setShowGameDetails(true);
+                  } else if (activeGame) {
+                    handlePlay(
+                      activeGame.packId,
+                      activeGame.gameId,
+                      activeGame.hasNoGame,
+                    );
+                  }
+                })
+              }
+            >
+              {isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Game Details overlay */}
+      {showGameDetails && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col"
+          style={{
+            background: "var(--green-gradient-100)",
+          }}
+        >
+          <AppHeader
+            moonrocks={displayMoonrocks}
+            username={username}
+            showBack={false}
+            onMint={offline ? undefined : () => mint(tokenAddress)}
+            onProfileClick={onProfileClick}
+            onConnect={isLoggedIn ? undefined : onConnectClick}
+          />
+          <div className="flex-1 flex flex-col items-center px-4 min-h-0 animate-slide-up-fade">
+            <div className="w-full max-w-[500px] py-4 flex-1 min-h-0">
+              <GameDetails tierIndex={tierIndex} onTierIndexChange={setTierIndex} />
+            </div>
+          </div>
+          <div className="shrink-0 pt-4 pb-4 px-4">
+            <div className="flex gap-3 w-full max-w-[500px] mx-auto">
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="flex-1"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={() => setShowGameDetails(false)}
+              >
+                BACK
+              </Button>
+              <Button
+                variant="secondary"
+                gradient="yellow"
+                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 !text-yellow-100"
+                style={{ backgroundColor: "#3D3200" }}
+                onClick={() => {
+                  setShowGameDetails(false);
+                  handleNewGame();
+                }}
+              >
+                PURCHASE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

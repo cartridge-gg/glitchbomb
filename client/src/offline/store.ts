@@ -368,7 +368,7 @@ export function resetOfflineState() {
 
 export function selectPacks(source: OfflineState = state): Pack[] {
   return Object.values(source.packs).map(
-    (pack) => new Pack(pack.id, pack.game_count, pack.moonrocks),
+    (pack) => new Pack(pack.id, pack.game_count, pack.moonrocks, pack.entry_cost ?? 2),
   );
 }
 

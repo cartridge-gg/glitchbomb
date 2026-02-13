@@ -12,8 +12,8 @@ pub mod ERRORS {
 #[generate_trait]
 pub impl PackImpl of PackTrait {
     #[inline]
-    fn new(id: u64) -> Pack {
-        Pack { id: id, game_count: 0, moonrocks: DEFAULT_MOONROCKS }
+    fn new(id: u64, entry_cost: u16) -> Pack {
+        Pack { id: id, game_count: 0, moonrocks: DEFAULT_MOONROCKS, entry_cost: entry_cost }
     }
 
     #[inline]
@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_pack_open() {
-        let mut pack = PackTrait::new(1);
+        let mut pack = PackTrait::new(1, 2);
         assert_eq!(pack.open(), 1);
         assert_eq!(pack.open(), 2);
         pack.assert_not_over();
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_pack_is_over() {
-        let mut pack = PackTrait::new(1);
+        let mut pack = PackTrait::new(1, 2);
         for _ in 0..DEFAULT_GAMES_COUNT {
             pack.open();
         }
@@ -86,7 +86,7 @@ mod tests {
 
     #[test]
     fn test_pack_is_not_over() {
-        let mut pack = PackTrait::new(1);
+        let mut pack = PackTrait::new(1, 2);
         for _ in 0..DEFAULT_GAMES_COUNT - 1 {
             pack.open();
         }

@@ -84,6 +84,21 @@ body {
   }
 }
 
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.3s ease-out both;
+}
+
 /* Puller orb rotation animation - CSS for Safari compatibility */
 @keyframes puller-spin {
   from {

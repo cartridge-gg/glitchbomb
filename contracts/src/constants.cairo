@@ -8,6 +8,22 @@ pub const DEFAULT_ENTRY_PRICE: u256 = 2_000_000;
 pub const DEFAULT_GAMES_COUNT: u8 = 5;
 pub const DEFAULT_LEVEL: u8 = 1;
 
+pub const BASE_COST_DOLLARS: u16 = 2;
+pub const NUM_TIERS: u32 = 8;
+
+pub fn COST_TIER_PRICES() -> [u256; 8] {
+    [
+        2_000_000,   // $2
+        5_000_000,   // $5
+        10_000_000,  // $10
+        25_000_000,  // $25
+        50_000_000,  // $50
+        100_000_000, // $100
+        250_000_000, // $250
+        500_000_000, // $500
+    ]
+}
+
 #[inline]
 pub fn NAMESPACE() -> ByteArray {
     "GLITCHBOMB"

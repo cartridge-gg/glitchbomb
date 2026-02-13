@@ -4,6 +4,7 @@ pub mod PlayableComponent {
 
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use starknet::ContractAddress;
+    use crate::constants::BASE_COST_DOLLARS;
     use crate::helpers::random::RandomTrait;
     use crate::interfaces::erc20::IERC20DispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
@@ -51,14 +52,17 @@ pub mod PlayableComponent {
             let starterpack = store.starterpack(starterpack_id);
             starterpack.assert_does_exist();
 
+            // [Setup] Derive entry cost in whole dollars from starterpack price
+            let entry_cost: u16 = (starterpack.price / 1_000_000).try_into().unwrap();
+
             // [Interaction] Mint games
             let collection = self.collection(world);
             while quantity > 0 {
                 // [Interaction] Mint a game
                 let pack_id = collection.mint(recipient, true);
 
-                // [Effect] Create game
-                let pack = PackTrait::new(id: pack_id);
+                // [Effect] Create game with entry cost
+                let pack = PackTrait::new(id: pack_id, entry_cost: entry_cost);
                 store.set_pack(@pack);
                 quantity -= 1;
             }
@@ -207,9 +211,11 @@ pub mod PlayableComponent {
             pack.earn(earnings);
             store.set_pack(@pack);
 
-            // [Interaction] Mint moonrocks token to caller
+            // [Interaction] Mint moonrocks token to caller, scaled by entry cost multiplier
             let token = store.config().token();
-            token.mint(caller, earnings.into());
+            let scaled: u256 = (earnings.into() * pack.entry_cost.into())
+                / BASE_COST_DOLLARS.into();
+            token.mint(caller, scaled);
         }
 
         fn enter(

@@ -122,7 +122,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   );
 
   const [config, setConfig] = useState<Config>();
-  const [starterpack, setStarterpack] = useState<Starterpack>();
+  const [starterpacks, setStarterpacks] = useState<Starterpack[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">(
     "loading",
   );
@@ -158,7 +158,14 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
             `${NAMESPACE}-${STARTERPACK}`
           ] as unknown as RawStarterpack;
           const parsed = Starterpack.parse(model);
-          if (parsed) setStarterpack(parsed);
+          if (parsed) {
+            setStarterpacks((prev) => {
+              const filtered = prev.filter((sp) => sp.id !== parsed.id);
+              return [...filtered, parsed].sort(
+                (a, b) => Number(a.price) - Number(b.price),
+              );
+            });
+          }
         }
         if (entity.models[`${NAMESPACE}-${PACK}`]) {
           const model = entity.models[
@@ -296,7 +303,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     client,
     pack,
     game,
-    starterpack,
+    starterpacks,
     config,
     status,
     refresh,
@@ -312,7 +319,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
 
   const pack = useMemo(() => {
     const raw = offlineState.packs[packId];
-    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks) : undefined;
+    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks, raw.entry_cost ?? 2) : undefined;
   }, [offlineState.packs, packId]);
 
   const game = useMemo(() => {
@@ -321,8 +328,8 @@ function useOfflineEntitiesValue(): EntitiesContextType {
   }, [offlineState, packId, gameId]);
 
   const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0"), []);
-  const starterpack = useMemo(
-    () => new Starterpack("0", true, 0, 0n, "0x0"),
+  const starterpacks = useMemo(
+    () => [new Starterpack("0", true, 0, 2_000_000n, "0x0")],
     [],
   );
 
@@ -345,7 +352,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
   return {
     pack,
     game,
-    starterpack,
+    starterpacks,
     config,
     status: "success",
     refresh,

@@ -31,6 +31,7 @@ pub struct Pack {
     pub id: u64,
     pub game_count: u8,
     pub moonrocks: u16,
+    pub entry_cost: u16,
 }
 
 #[derive(Drop, Serde, IntrospectPacked)]
