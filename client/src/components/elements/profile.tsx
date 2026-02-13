@@ -39,8 +39,8 @@ export const Profile = ({
       variant={highlight ? "default" : "secondary"}
       {...props}
     >
-      <ControllerIcon size="sm" />
-      <span className="truncate font-secondary uppercase text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest font-normal">
+      <ControllerIcon size="sm" className="md:hidden" />
+      <span className="hidden md:inline truncate font-secondary uppercase text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest font-normal">
         {username}
       </span>
     </Button>

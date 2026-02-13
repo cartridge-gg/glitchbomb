@@ -54,11 +54,13 @@ export const AppHeader = ({
         </button>
       </div>
 
-      {/* Center: GlitchBomb icon - only on md+ screens */}
-      <GlitchBombIcon
-        size="xl"
-        className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
-      />
+      {/* GlitchBomb text - only on md+ screens */}
+      <h1 className="hidden md:flex items-center gap-1 uppercase leading-none">
+        <span className="text-green-400 text-2xl font-glitch font-thin tracking-tight">
+          Glitch
+        </span>
+        <span className="text-white text-2xl tracking-tight">Bomb</span>
+      </h1>
 
       {/* Spacer to push right content */}
       <div className="flex-1" />
