@@ -12,6 +12,7 @@ export const size = {
   sm: "h-5 w-5",
   md: "h-6 w-6",
   lg: "h-8 w-8",
+  "lg+": "h-10 w-10",
   xl: "h-12 w-12",
   "2xl": "h-14 w-14",
   "3xl": "h-[72px] w-[72px]",
