@@ -33,7 +33,7 @@ export const GameOver = ({
         {/* Title Section */}
         <div className="flex flex-col items-center gap-0">
           <h1
-            className={`${titleColor} ${titleFont} uppercase text-[clamp(2rem,6svh,3rem)] tracking-wider whitespace-nowrap leading-tight`}
+            className={`${titleColor} ${titleFont} uppercase text-[clamp(2rem,6svh,3rem)] tracking-wider leading-tight text-center ${cashedOut ? "" : "glitch-text"}`}
           >
             {cashedOut ? "CASHED OUT" : "GLITCHED OUT"}
           </h1>
