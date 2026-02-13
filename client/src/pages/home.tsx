@@ -730,12 +730,15 @@ export const Home = () => {
 
           {/* My Games Section */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-white font-secondary text-xs tracking-widest uppercase">
+                <h2 className="text-green-400 font-secondary text-xs tracking-widest uppercase">
                   MY GAMES
                 </h2>
-                <span className="text-white/60 font-secondary text-xs tracking-widest bg-white/10 px-2 py-0.5 rounded-full">
+                <span
+                  className="font-secondary text-xs tracking-widest px-2 py-0.5 rounded-full"
+                  style={{ color: "#36F818", backgroundColor: "rgba(54, 248, 24, 0.1)" }}
+                >
                   {activeGames.length}
                 </span>
               </div>
@@ -991,8 +994,8 @@ export const Home = () => {
           </div>
 
           {/* Activity Feed — finished games only, grouped by date */}
-          <div className="flex flex-col gap-3 min-h-0 flex-1 md:flex-initial">
-            <h2 className="text-white font-secondary text-xs tracking-widest uppercase shrink-0">
+          <div className="flex flex-col gap-4 min-h-0 flex-1 md:flex-initial">
+            <h2 className="text-green-400 font-secondary text-xs tracking-widest uppercase shrink-0 px-1">
               ACTIVITY
             </h2>
             <div

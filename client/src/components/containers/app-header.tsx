@@ -52,12 +52,12 @@ export const AppHeader = ({
           className="md:hidden h-12 w-12 p-0 flex items-center justify-center"
           onClick={showBack ? () => navigate(backPath) : undefined}
         >
-          <GlitchBombIcon size="xl" className="text-white" />
+          <GlitchBombIcon size="xl" className="text-white glitch-icon" />
         </button>
       </div>
 
       {/* GlitchBomb text - only on md+ screens */}
-      <h1 className="hidden md:flex items-center gap-1 uppercase leading-none">
+      <h1 className="hidden md:flex items-center gap-1 uppercase leading-none glitch-text">
         <span className="text-green-400 text-2xl font-glitch font-thin tracking-tight">
           Glitch
         </span>
