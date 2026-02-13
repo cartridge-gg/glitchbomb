@@ -319,7 +319,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
 
   const pack = useMemo(() => {
     const raw = offlineState.packs[packId];
-    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks, raw.entry_cost ?? 2) : undefined;
+    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks, raw.entry_cost ?? 2, raw.created_at ?? 0) : undefined;
   }, [offlineState.packs, packId]);
 
   const game = useMemo(() => {

@@ -23,7 +23,7 @@ export const GameDetails = ({ tierIndex, onTierIndexChange }: GameDetailsProps) 
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
   const stats = [
-    { label: "Cost", value: `$${cost.toFixed(2)}` },
+    { label: "Cost", value: `$${cost.toFixed(2)}`, color: "#FACC15" },
     {
       label: "Reward Multiplier",
       value: `${multiplier % 1 === 0 ? multiplier : multiplier.toFixed(1)}X`,
@@ -83,7 +83,7 @@ export const GameDetails = ({ tierIndex, onTierIndexChange }: GameDetailsProps) 
               </span>
               <span
                 className="font-secondary text-sm"
-                style={{ color: stat.highlight ? valueColor : valueColor }}
+                style={{ color: stat.color ?? valueColor }}
               >
                 {stat.value}
               </span>

@@ -26,6 +26,19 @@ import {
   useOfflineStore,
 } from "@/offline/store";
 
+const PACK_EXPIRY_SECONDS = 86400; // 24 hours
+
+function formatExpiresIn(createdAt: number): string {
+  if (createdAt === 0) return "--";
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = createdAt + PACK_EXPIRY_SECONDS - now;
+  if (remaining <= 0) return "EXPIRED";
+  const hours = Math.floor(remaining / 3600);
+  const minutes = Math.floor((remaining % 3600) / 60);
+  if (hours > 0) return `${hours}H ${minutes}M`;
+  return `${minutes}M`;
+}
+
 export const Home = () => {
   const navigate = useNavigate();
   const { mint, start } = useActions();
@@ -125,6 +138,7 @@ export const Home = () => {
       multiplier: number;
       health: number;
       moonrocks: number;
+      createdAt: number;
       updatedAt: number;
     }> = [];
 
@@ -143,6 +157,7 @@ export const Home = () => {
         multiplier: game?.multiplier ?? 1,
         health: game?.health ?? 0,
         moonrocks: pack.moonrocks ?? 0,
+        createdAt: pack.created_at ?? 0,
         updatedAt: pack.updated_at ?? 0,
       });
     }
@@ -918,7 +933,7 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                --
+                                {formatExpiresIn(game.createdAt)}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">

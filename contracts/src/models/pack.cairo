@@ -1,4 +1,4 @@
-use crate::constants::{DEFAULT_GAMES_COUNT, DEFAULT_MOONROCKS};
+use crate::constants::{DEFAULT_GAMES_COUNT, DEFAULT_MOONROCKS, PACK_EXPIRY_DURATION};
 pub use crate::models::index::Pack;
 
 pub mod ERRORS {
@@ -7,18 +7,30 @@ pub mod ERRORS {
     pub const PACK_IS_OVER: felt252 = 'Pack: is over';
     pub const PACK_NOT_OVER: felt252 = 'Pack: not over';
     pub const PACK_CANNOT_AFFORD: felt252 = 'Pack: not enough moonrocks';
+    pub const PACK_EXPIRED: felt252 = 'Pack: expired';
 }
 
 #[generate_trait]
 pub impl PackImpl of PackTrait {
     #[inline]
-    fn new(id: u64, entry_cost: u16) -> Pack {
-        Pack { id: id, game_count: 0, moonrocks: DEFAULT_MOONROCKS, entry_cost: entry_cost }
+    fn new(id: u64, entry_cost: u16, created_at: u64) -> Pack {
+        Pack {
+            id: id,
+            game_count: 0,
+            moonrocks: DEFAULT_MOONROCKS,
+            entry_cost: entry_cost,
+            created_at: created_at,
+        }
     }
 
     #[inline]
     fn is_over(self: @Pack) -> bool {
         self.game_count >= @DEFAULT_GAMES_COUNT
+    }
+
+    #[inline]
+    fn is_expired(self: @Pack) -> bool {
+        starknet::get_block_timestamp() > *self.created_at + PACK_EXPIRY_DURATION
     }
 
     #[inline]
@@ -57,6 +69,11 @@ pub impl PackAssert of AssertTrait {
     }
 
     #[inline]
+    fn assert_not_expired(self: @Pack) {
+        assert(!self.is_expired(), ERRORS::PACK_EXPIRED);
+    }
+
+    #[inline]
     fn assert_can_afford(self: @Pack, cost: u16) {
         assert(self.moonrocks >= @cost, ERRORS::PACK_CANNOT_AFFORD);
     }
@@ -68,7 +85,7 @@ mod tests {
 
     #[test]
     fn test_pack_open() {
-        let mut pack = PackTrait::new(1, 2);
+        let mut pack = PackTrait::new(1, 2, 0);
         assert_eq!(pack.open(), 1);
         assert_eq!(pack.open(), 2);
         pack.assert_not_over();
@@ -76,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_pack_is_over() {
-        let mut pack = PackTrait::new(1, 2);
+        let mut pack = PackTrait::new(1, 2, 0);
         for _ in 0..DEFAULT_GAMES_COUNT {
             pack.open();
         }
@@ -86,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_pack_is_not_over() {
-        let mut pack = PackTrait::new(1, 2);
+        let mut pack = PackTrait::new(1, 2, 0);
         for _ in 0..DEFAULT_GAMES_COUNT - 1 {
             pack.open();
         }

@@ -10,6 +10,7 @@ pub const DEFAULT_LEVEL: u8 = 1;
 
 pub const BASE_COST_DOLLARS: u16 = 2;
 pub const NUM_TIERS: u32 = 8;
+pub const PACK_EXPIRY_DURATION: u64 = 86400; // 24 hours in seconds
 
 pub fn COST_TIER_PRICES() -> [u256; 8] {
     [

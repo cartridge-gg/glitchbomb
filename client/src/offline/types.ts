@@ -3,6 +3,7 @@ export interface OfflinePack {
   game_count: number;
   moonrocks: number;
   entry_cost?: number;
+  created_at?: number;
 }
 
 export interface OfflineShopState {

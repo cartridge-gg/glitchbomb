@@ -54,6 +54,7 @@ pub mod PlayableComponent {
 
             // [Setup] Derive entry cost in whole dollars from starterpack price
             let entry_cost: u16 = (starterpack.price / 1_000_000).try_into().unwrap();
+            let created_at = starknet::get_block_timestamp();
 
             // [Interaction] Mint games
             let collection = self.collection(world);
@@ -61,8 +62,8 @@ pub mod PlayableComponent {
                 // [Interaction] Mint a game
                 let pack_id = collection.mint(recipient, true);
 
-                // [Effect] Create game with entry cost
-                let pack = PackTrait::new(id: pack_id, entry_cost: entry_cost);
+                // [Effect] Create game with entry cost and timestamp
+                let pack = PackTrait::new(id: pack_id, entry_cost: entry_cost, created_at: created_at);
                 store.set_pack(@pack);
                 quantity -= 1;
             }
@@ -89,9 +90,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Pack is not over
+            // [Check] Pack is not over and not expired
             let mut pack = store.pack(pack_id);
             pack.assert_not_over();
+            pack.assert_not_expired();
 
             // [Check] Previous game is over if exists
             let game = store.game(pack_id, pack.game_count);
@@ -138,8 +140,9 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Effect] Get pack for moonrocks tracking
+            // [Check] Pack not expired + get pack for moonrocks tracking
             let mut pack = store.pack(pack_id);
+            pack.assert_not_expired();
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let config = store.config();
@@ -192,9 +195,11 @@ pub mod PlayableComponent {
             let caller = starknet::get_caller_address();
             collection.assert_is_owner(caller, pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            let pack = store.pack(pack_id);
+            pack.assert_not_expired();
 
             // [Effect] Cash out
             let earnings = game.cash_out();
@@ -231,9 +236,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Effect] Enter shop
             let config = store.config();
@@ -259,9 +265,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Info] Get shop orbs for event emission
             let orbs = GameTrait::get_shop_orbs(game.shop);
@@ -298,9 +305,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Effect] Exit shop and get next level cost (applies level-based curse)
             let cost = game.exit();
