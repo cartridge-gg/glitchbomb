@@ -6,11 +6,13 @@ export class Pack {
   id: number;
   game_count: number;
   moonrocks: number;
+  updated_at: number;
 
-  constructor(id: number, game_count: number, moonrocks: number) {
+  constructor(id: number, game_count: number, moonrocks: number, updated_at = 0) {
     this.id = id;
     this.game_count = game_count;
     this.moonrocks = moonrocks;
+    this.updated_at = updated_at;
   }
 
   static getModelName(): string {
@@ -21,13 +23,13 @@ export class Pack {
     return Pack.parse(data);
   }
 
-  static parse(data: RawPack): Pack {
+  static parse(data: RawPack, updated_at = 0): Pack {
     const props = {
       id: Number(data.id.value),
       game_count: Number(data.game_count.value),
       moonrocks: Number(data.moonrocks.value),
     };
-    return new Pack(props.id, props.game_count, props.moonrocks);
+    return new Pack(props.id, props.game_count, props.moonrocks, updated_at);
   }
 
   static deduplicate(items: Pack[]): Pack[] {

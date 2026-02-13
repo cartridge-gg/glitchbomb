@@ -123,6 +123,7 @@ export const Home = () => {
       multiplier: number;
       health: number;
       moonrocks: number;
+      updatedAt: number;
     }> = [];
 
     for (const pack of packs) {
@@ -140,10 +141,11 @@ export const Home = () => {
         multiplier: game?.multiplier ?? 1,
         health: game?.health ?? 0,
         moonrocks: pack.moonrocks ?? 0,
+        updatedAt: pack.updated_at ?? 0,
       });
     }
 
-    return games.sort((a, b) => b.packId - a.packId);
+    return games.sort((a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId);
   }, [packs, getGameForPack]);
 
   // Split into active and completed games
@@ -156,6 +158,51 @@ export const Home = () => {
     () => gameList.filter((g) => g.isOver),
     [gameList],
   );
+
+  // Group completed games by dynamic date labels using entity timestamps
+  const activityGroups = useMemo(() => {
+    if (completedGames.length === 0) return [];
+
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayMs = startOfToday.getTime();
+    const yesterdayMs = todayMs - 86_400_000;
+
+    const getLabel = (tsMs: number): string => {
+      if (tsMs >= todayMs) return "Today";
+      if (tsMs >= yesterdayMs) return "Yesterday";
+
+      const daysAgo = Math.floor((todayMs - tsMs) / 86_400_000);
+      if (daysAgo < 7) return `${daysAgo} Days Ago`;
+
+      const weeksAgo = Math.floor(daysAgo / 7);
+      if (weeksAgo === 1) return "Last Week";
+      if (daysAgo < 30) return `${weeksAgo} Weeks Ago`;
+
+      const d = new Date(tsMs);
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      if (d.getFullYear() === now.getFullYear()) return monthNames[d.getMonth()];
+      return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    };
+
+    // Preserve insertion order (games are already sorted by most recent first)
+    const grouped: Array<{ label: string; games: typeof completedGames }> = [];
+    const labelIndex: Record<string, number> = {};
+
+    for (const game of completedGames) {
+      const tsMs = game.updatedAt > 0 ? game.updatedAt * 1000 : Date.now();
+      const label = getLabel(tsMs);
+      if (label in labelIndex) {
+        grouped[labelIndex[label]].games.push(game);
+      } else {
+        labelIndex[label] = grouped.length;
+        grouped.push({ label, games: [game] });
+      }
+    }
+
+    return grouped;
+  }, [completedGames]);
 
   const [bannerIndex, setBannerIndex] = useState(0);
   const bannerCount = 2;
@@ -1002,7 +1049,7 @@ export const Home = () => {
               className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1 md:flex-initial md:min-h-[300px]"
               style={{ scrollbarWidth: "none" }}
             >
-              {completedGames.length === 0 ? (
+              {activityGroups.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <p
                     className="font-secondary text-sm tracking-widest uppercase text-center leading-relaxed"
@@ -1015,135 +1062,74 @@ export const Home = () => {
                 </div>
               ) : (
                 <>
-                  {/* Today group */}
-                  <div className="flex flex-col gap-2">
-                    {completedGames.slice(0, 2).map((game) => {
-                      const cashedOut = game.health > 0;
-                      return (
-                        <div
-                          key={`today-${game.packId}-${game.gameId}`}
-                          className="flex items-center gap-2"
+                  {activityGroups.map((group, groupIdx) => (
+                    <div key={group.label} className="flex flex-col gap-2">
+                      {groupIdx > 0 && (
+                        <p
+                          className="font-secondary text-sm tracking-widest uppercase pt-1"
+                          style={{ color: "#36F818" }}
                         >
-                          <button
-                            type="button"
-                            className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
-                            style={{
-                              background: cashedOut ? "#071304" : "#1A0505",
-                            }}
-                            onClick={() =>
-                              navigate(
-                                `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                              )
-                            }
+                          {group.label}
+                        </p>
+                      )}
+                      {group.games.map((game) => {
+                        const cashedOut = game.health > 0;
+                        return (
+                          <div
+                            key={`${group.label}-${game.packId}-${game.gameId}`}
+                            className="flex items-center gap-2"
                           >
-                            <BombIcon
-                              size="md"
-                              className="text-white shrink-0"
-                            />
-                            <span className="font-secondary text-sm tracking-widest text-white">
-                              #{game.packId}
-                            </span>
-                            <span className="font-secondary text-sm tracking-widest text-white">
-                              L{game.level}
-                            </span>
-                            <span
-                              className="font-secondary text-sm tracking-widest"
+                            <button
+                              type="button"
+                              className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
                               style={{
-                                color: cashedOut ? "#36F818" : "#EF4444",
+                                background: cashedOut ? "#071304" : "#1A0505",
                               }}
+                              onClick={() =>
+                                navigate(
+                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                )
+                              }
                             >
-                              {cashedOut
-                                ? `+$${(game.points * 0.01).toFixed(2)}`
-                                : "GLITCHED"}
-                            </span>
-                          </button>
-                          <Button
-                            variant="secondary"
-                            gradient={cashedOut ? "green" : "red"}
-                            className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                            onClick={() =>
-                              navigate(
-                                `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                              )
-                            }
-                            aria-label="View game"
-                          >
-                            <ArrowRightIcon size="sm" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Yesterday group */}
-                  {completedGames.length > 2 && (
-                    <>
-                      <p
-                        className="font-secondary text-sm tracking-widest uppercase pt-1"
-                        style={{ color: "#36F818" }}
-                      >
-                        YESTERDAY
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        {completedGames.slice(2).map((game) => {
-                          const cashedOut = game.health > 0;
-                          return (
-                            <div
-                              key={`yesterday-${game.packId}-${game.gameId}`}
-                              className="flex items-center gap-2"
-                            >
-                              <button
-                                type="button"
-                                className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                              <BombIcon
+                                size="md"
+                                className="text-white shrink-0"
+                              />
+                              <span className="font-secondary text-sm tracking-widest text-white">
+                                #{game.packId}
+                              </span>
+                              <span className="font-secondary text-sm tracking-widest text-white">
+                                L{game.level}
+                              </span>
+                              <span
+                                className="font-secondary text-sm tracking-widest"
                                 style={{
-                                  background: cashedOut ? "#071304" : "#1A0505",
+                                  color: cashedOut ? "#36F818" : "#EF4444",
                                 }}
-                                onClick={() =>
-                                  navigate(
-                                    `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                  )
-                                }
                               >
-                                <BombIcon
-                                  size="md"
-                                  className="text-white shrink-0"
-                                />
-                                <span className="font-secondary text-sm tracking-widest text-white">
-                                  #{game.packId}
-                                </span>
-                                <span className="font-secondary text-sm tracking-widest text-white">
-                                  L{game.level}
-                                </span>
-                                <span
-                                  className="font-secondary text-sm tracking-widest"
-                                  style={{
-                                    color: cashedOut ? "#36F818" : "#EF4444",
-                                  }}
-                                >
-                                  {cashedOut
-                                    ? `+$${(game.points * 0.01).toFixed(2)}`
-                                    : "GLITCHED"}
-                                </span>
-                              </button>
-                              <Button
-                                variant="secondary"
-                                gradient={cashedOut ? "green" : "red"}
-                                className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                                onClick={() =>
-                                  navigate(
-                                    `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                  )
-                                }
-                                aria-label="View game"
-                              >
-                                <ArrowRightIcon size="sm" />
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
+                                {cashedOut
+                                  ? `+$${(game.points * 0.01).toFixed(2)}`
+                                  : "GLITCHED"}
+                              </span>
+                            </button>
+                            <Button
+                              variant="secondary"
+                              gradient={cashedOut ? "green" : "red"}
+                              className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                              onClick={() =>
+                                navigate(
+                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
+                                )
+                              }
+                              aria-label="View game"
+                            >
+                              <ArrowRightIcon size="sm" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </>
               )}
             </div>

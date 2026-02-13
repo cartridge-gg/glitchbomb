@@ -83,7 +83,7 @@ export function usePacks() {
           const model = entity.models[
             `${NAMESPACE}-${Pack.getModelName()}`
           ] as unknown as RawPack;
-          const newPack = Pack.parse(model);
+          const newPack = Pack.parse(model, (entity as torii.Entity).updated_at ?? 0);
           setPacks((prev: Pack[]) => {
             const deduped = prev.filter((pack) => pack.id !== newPack.id);
             return [...deduped, newPack];
