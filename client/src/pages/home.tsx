@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import {
-  ArrowLeftIcon,
   ArrowRightIcon,
   BombIcon,
+  BracketArrowIcon,
   NumsLogoIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -583,7 +583,7 @@ export const Home = () => {
                     disabled={activeGameIndex <= 0}
                     aria-label="Previous game"
                   >
-                    <ArrowLeftIcon size="sm" />
+                    <BracketArrowIcon size="xs" direction="left" />
                   </Button>
                   <Button
                     variant="secondary"
@@ -593,7 +593,7 @@ export const Home = () => {
                     disabled={activeGameIndex >= totalSlides - 1}
                     aria-label="Next game"
                   >
-                    <ArrowRightIcon size="sm" />
+                    <BracketArrowIcon size="xs" direction="right" />
                   </Button>
                 </div>
               )}

@@ -35,6 +35,7 @@ export * from "./bomb-1x";
 export * from "./bomb-2x";
 export * from "./bomb-3x";
 export * from "./bomb-orb";
+export * from "./bracket-arrow";
 export * from "./chip";
 export * from "./controller";
 export * from "./credits";
