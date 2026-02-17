@@ -1041,12 +1041,12 @@ export const Home = () => {
           </div>
 
           {/* Activity Feed — finished games only, grouped by date */}
-          <div className="flex flex-col gap-4 min-h-0 flex-1 md:flex-initial">
+          <div className="flex flex-col gap-4 min-h-0 flex-1">
             <h2 className="text-green-400 font-secondary text-xs tracking-widest uppercase shrink-0 px-1">
               ACTIVITY
             </h2>
             <div
-              className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1 md:flex-initial md:min-h-[300px]"
+              className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1"
               style={{ scrollbarWidth: "none" }}
             >
               {activityGroups.length === 0 ? (

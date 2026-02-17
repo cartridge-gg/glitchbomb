@@ -520,6 +520,47 @@ export const PLGraph = ({
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
+                  {/* Glitch filter for chart lines — red/blue chromatic split */}
+                  <filter
+                    id="glitch-line"
+                    x="-10%"
+                    y="-10%"
+                    width="120%"
+                    height="120%"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feOffset in="SourceGraphic" dx="0" dy="0" result="base" />
+                    <feOffset in="SourceGraphic" dx="-2" dy="0" result="red-shift">
+                      <animate
+                        attributeName="dx"
+                        values="0;0;0;0;0;-3;3;-2;0;0;0;0;0;0;0;0;0;2;-3;2;0;0;0;0;0;0;0;0;0;-2;3;-3;0;0;0;0"
+                        dur="2.5s"
+                        repeatCount="indefinite"
+                      />
+                    </feOffset>
+                    <feOffset in="SourceGraphic" dx="2" dy="0" result="blue-shift">
+                      <animate
+                        attributeName="dx"
+                        values="0;0;0;0;0;3;-3;2;0;0;0;0;0;0;0;0;0;-2;3;-2;0;0;0;0;0;0;0;0;0;2;-3;3;0;0;0;0"
+                        dur="2.5s"
+                        repeatCount="indefinite"
+                      />
+                    </feOffset>
+                    <feColorMatrix
+                      in="red-shift"
+                      type="matrix"
+                      values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0"
+                      result="red-channel"
+                    />
+                    <feColorMatrix
+                      in="blue-shift"
+                      type="matrix"
+                      values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 0.7 0"
+                      result="blue-channel"
+                    />
+                    <feBlend in="red-channel" in2="blue-channel" mode="screen" result="aberration" />
+                    <feBlend in="base" in2="aberration" mode="screen" />
+                  </filter>
                 </defs>
 
                 {/* Lines connecting points */}
@@ -536,6 +577,7 @@ export const PLGraph = ({
                       y2={`${point.y}%`}
                       stroke="#348F1B"
                       strokeWidth="1.5"
+                      filter="url(#glitch-line)"
                       initial={isNew ? { pathLength: 0, opacity: 0 } : false}
                       animate={{ pathLength: 1, opacity: 1 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
