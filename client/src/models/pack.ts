@@ -8,7 +8,12 @@ export class Pack {
   moonrocks: number;
   updated_at: number;
 
-  constructor(id: number, game_count: number, moonrocks: number, updated_at = 0) {
+  constructor(
+    id: number,
+    game_count: number,
+    moonrocks: number,
+    updated_at = 0,
+  ) {
     this.id = id;
     this.game_count = game_count;
     this.moonrocks = moonrocks;

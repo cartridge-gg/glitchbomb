@@ -145,7 +145,9 @@ export const Home = () => {
       });
     }
 
-    return games.sort((a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId);
+    return games.sort(
+      (a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId,
+    );
   }, [packs, getGameForPack]);
 
   // Split into active and completed games
@@ -181,8 +183,22 @@ export const Home = () => {
       if (daysAgo < 30) return `${weeksAgo} Weeks Ago`;
 
       const d = new Date(tsMs);
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      if (d.getFullYear() === now.getFullYear()) return monthNames[d.getMonth()];
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      if (d.getFullYear() === now.getFullYear())
+        return monthNames[d.getMonth()];
       return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
     };
 
@@ -784,7 +800,10 @@ export const Home = () => {
                 </h2>
                 <span
                   className="font-secondary text-xs tracking-widest px-2 py-0.5 rounded-full"
-                  style={{ color: "#36F818", backgroundColor: "rgba(54, 248, 24, 0.1)" }}
+                  style={{
+                    color: "#36F818",
+                    backgroundColor: "rgba(54, 248, 24, 0.1)",
+                  }}
                 >
                   {activeGames.length}
                 </span>
