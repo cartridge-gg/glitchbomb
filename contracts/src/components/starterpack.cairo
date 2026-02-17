@@ -3,6 +3,7 @@ pub mod StarterpackComponent {
     // Imports
 
     use dojo::world::{WorldStorage, WorldStorageTrait};
+    use crate::constants::{COST_TIER_PRICES, NUM_TIERS};
     use crate::interfaces::registry::IStarterpackRegistryDispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
     use crate::models::starterpack::{StarterpackAssert, StarterpackTrait};
@@ -29,27 +30,34 @@ pub mod StarterpackComponent {
             // [Setup] Store
             let mut store = StoreTrait::new(world);
             let config = store.config();
-            // [Interaction] Register starterpack
             let registry = config.registry();
             let payment_token = config.token().contract_address;
+            let play_address = self.play(world).contract_address;
             let reissuable = true;
-            let referral_percentage = 0;
-            let price = config.entry_price.into();
-            let default_id = registry
-                .register(
-                    implementation: self.play(world).contract_address,
-                    referral_percentage: 0,
-                    reissuable: reissuable,
-                    price: price,
-                    payment_token: payment_token,
-                    payment_receiver: None,
-                    metadata: StarterpackTrait::metadata(payment_token),
+            let referral_percentage: u8 = 0;
+            let metadata = StarterpackTrait::metadata(payment_token);
+
+            // [Interaction] Register one starterpack per cost tier
+            let prices = COST_TIER_PRICES();
+            let mut i: u32 = 0;
+            while i < NUM_TIERS {
+                let price: u256 = *prices.span().at(i);
+                let sp_id = registry
+                    .register(
+                        implementation: play_address,
+                        referral_percentage: 0,
+                        reissuable: reissuable,
+                        price: price,
+                        payment_token: payment_token,
+                        payment_receiver: None,
+                        metadata: metadata.clone(),
+                    );
+                let sp = StarterpackTrait::new(
+                    sp_id, reissuable, referral_percentage, price, payment_token,
                 );
-            // [Effect] Create default starterpack
-            let default = StarterpackTrait::new(
-                default_id, reissuable, referral_percentage, price, payment_token,
-            );
-            store.set_starterpack(@default);
+                store.set_starterpack(@sp);
+                i += 1;
+            };
         }
 
         fn update_metadata(

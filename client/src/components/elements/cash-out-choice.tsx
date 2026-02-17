@@ -1,10 +1,11 @@
 import { ArrowLeftIcon, MoonrockIcon } from "@/components/icons";
+import { cashOutPayout } from "@/helpers/payout";
 import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 export interface CashOutChoiceProps {
   moonrocks: number; // Current pack moonrocks
-  points: number; // Current game points (will be added to moonrocks)
+  points: number; // Current game points (mapped through payout curve)
   onConfirm: () => void;
   onCancel: () => void;
   isConfirming?: boolean;
@@ -17,7 +18,7 @@ export const CashOutChoice = ({
   onCancel,
   isConfirming = false,
 }: CashOutChoiceProps) => {
-  const totalMoonrocks = moonrocks + points;
+  const totalMoonrocks = moonrocks + cashOutPayout(points);
   const rewardValueClass =
     "font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none";
   const rewardLabelClass =

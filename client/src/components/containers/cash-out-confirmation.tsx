@@ -1,6 +1,7 @@
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
+import { cashOutPayout } from "@/helpers/payout";
 
 export interface CashOutConfirmationProps {
   moonrocks: number;
@@ -15,7 +16,7 @@ export const CashOutConfirmation = ({
   onConfirm,
   onCancel,
 }: CashOutConfirmationProps) => {
-  const total = moonrocks + points;
+  const total = moonrocks + cashOutPayout(points);
 
   return (
     <div className="flex flex-col gap-8 max-w-[420px] mx-auto px-4 h-full">

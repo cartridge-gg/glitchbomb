@@ -85,6 +85,18 @@ export interface RawPack {
     value: string;
     key: boolean;
   };
+  entry_cost: {
+    type: "primitive";
+    type_name: "u16";
+    value: string;
+    key: boolean;
+  };
+  created_at: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
 }
 
 export interface RawGame {

@@ -12,6 +12,9 @@ use crate::types::orbs::{Orbs, OrbsTrait};
 pub const BASE_MULTIPLIER: u16 = 100;
 pub const SUPP_MULTIPLIER: u16 = 20;
 pub const SHOP_ACTION_COST: u16 = 4;
+pub const CASH_OUT_TIER_1_CAP: u16 = 60;
+pub const CASH_OUT_TIER_2_CAP: u16 = 120;
+pub const CASH_OUT_TIER_3_CAP: u16 = 200;
 
 // Curse bit positions (u8 bitmap)
 pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
@@ -202,8 +205,8 @@ pub impl GameImpl of GameTrait {
         // [Check] Game state
         self.assert_not_over();
         self.assert_not_shop();
-        // [Effect] Convert points
-        let moonrocks = self.points;
+        // [Effect] Convert points into moonrocks using a tiered payout curve
+        let moonrocks = Self::cash_out_payout(self.points);
         self.points = 0;
         // [Effect] Update state
         self.over = true;
@@ -332,6 +335,34 @@ pub impl GameImpl of GameTrait {
         // [Effect] Mark burn as used (bit 31)
         let burn_flag: u128 = TwoPower::pow(BURN_BIT).try_into().unwrap();
         self.shop = self.shop + burn_flag;
+    }
+
+    // Helper: Extract shop orbs from the lower 30 bits
+    #[inline]
+    fn cash_out_payout(points: u16) -> u16 {
+        if points <= CASH_OUT_TIER_1_CAP {
+            return points;
+        }
+
+        let points_u32: u32 = points.into();
+        if points <= CASH_OUT_TIER_2_CAP {
+            // 61..120 => 85% of incremental points above 60
+            let extra: u32 = points_u32 - CASH_OUT_TIER_1_CAP.into();
+            let payout: u32 = CASH_OUT_TIER_1_CAP.into() + (extra * 85 + 99) / 100;
+            return payout.try_into().unwrap();
+        }
+
+        if points <= CASH_OUT_TIER_3_CAP {
+            // 121..200 => 70% of incremental points above 120
+            let extra: u32 = points_u32 - CASH_OUT_TIER_2_CAP.into();
+            let payout: u32 = 111 + (extra * 70 + 99) / 100;
+            return payout.try_into().unwrap();
+        }
+
+        // 200+ => 50% of incremental points above 200
+        let extra: u32 = points_u32 - CASH_OUT_TIER_3_CAP.into();
+        let payout: u32 = 167 + (extra + 1) / 2;
+        payout.try_into().unwrap()
     }
 
     // Helper: Extract shop orbs from the lower 30 bits
@@ -650,8 +681,20 @@ mod tests {
         game.start();
         game.earn_points(100);
         let cash = game.cash_out();
-        assert_eq!(cash, 100);
+        assert_eq!(cash, 94);
+        assert_eq!(game.points, 0);
         assert_eq!(game.over, true);
+    }
+
+    #[test]
+    fn test_cash_out_payout_curve_boundaries() {
+        assert_eq!(GameTrait::cash_out_payout(0), 0);
+        assert_eq!(GameTrait::cash_out_payout(60), 60);
+        assert_eq!(GameTrait::cash_out_payout(61), 61);
+        assert_eq!(GameTrait::cash_out_payout(120), 111);
+        assert_eq!(GameTrait::cash_out_payout(121), 112);
+        assert_eq!(GameTrait::cash_out_payout(200), 167);
+        assert_eq!(GameTrait::cash_out_payout(201), 168);
     }
 
     #[test]

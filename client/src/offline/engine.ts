@@ -1,3 +1,4 @@
+import { cashOutPayout } from "@/helpers/payout";
 import { Orb } from "@/models/orb";
 import {
   BASE_MULTIPLIER,
@@ -70,7 +71,7 @@ export function cashOut(game: OfflineGame): {
   assertNotOver(game);
   assertNotInShop(game);
   const next = cloneGame(game);
-  const earnings = next.points;
+  const earnings = cashOutPayout(next.points);
   next.points = 0;
   next.over = true;
   return { game: next, earnings };

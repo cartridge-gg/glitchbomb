@@ -1,5 +1,6 @@
 // Dojo events for client synchronization
 
+use crate::models::game::GameTrait;
 use crate::models::index::Game;
 use crate::types::orb::Orb;
 
@@ -39,7 +40,7 @@ pub struct OrbPulled {
     #[key]
     pub id: u8,
     pub orb: u8,
-    pub potential_moonrocks: u16 // pack.moonrocks + game.points (what you'd have if you cash out)
+    pub potential_moonrocks: u16 // pack.moonrocks + cash-out payout(game.points)
 }
 
 #[generate_trait]
@@ -51,7 +52,7 @@ pub impl OrbPulledImpl of OrbPulledTrait {
             game_id: *game.id,
             id: id,
             orb: (*orb).into(),
-            potential_moonrocks: pack_moonrocks + *game.points,
+            potential_moonrocks: pack_moonrocks + GameTrait::cash_out_payout(*game.points),
         }
     }
 }

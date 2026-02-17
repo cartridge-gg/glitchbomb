@@ -4,6 +4,7 @@ pub mod PlayableComponent {
 
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use starknet::ContractAddress;
+    use crate::constants::BASE_COST_DOLLARS;
     use crate::helpers::random::RandomTrait;
     use crate::interfaces::erc20::IERC20DispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
@@ -51,14 +52,18 @@ pub mod PlayableComponent {
             let starterpack = store.starterpack(starterpack_id);
             starterpack.assert_does_exist();
 
+            // [Setup] Derive entry cost in whole dollars from starterpack price
+            let entry_cost: u16 = (starterpack.price / 1_000_000).try_into().unwrap();
+            let created_at = starknet::get_block_timestamp();
+
             // [Interaction] Mint games
             let collection = self.collection(world);
             while quantity > 0 {
                 // [Interaction] Mint a game
                 let pack_id = collection.mint(recipient, true);
 
-                // [Effect] Create game
-                let pack = PackTrait::new(id: pack_id);
+                // [Effect] Create game with entry cost and timestamp
+                let pack = PackTrait::new(id: pack_id, entry_cost: entry_cost, created_at: created_at);
                 store.set_pack(@pack);
                 quantity -= 1;
             }
@@ -85,9 +90,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Pack is not over
+            // [Check] Pack is not over and not expired
             let mut pack = store.pack(pack_id);
             pack.assert_not_over();
+            pack.assert_not_expired();
 
             // [Check] Previous game is over if exists
             let game = store.game(pack_id, pack.game_count);
@@ -107,7 +113,8 @@ pub mod PlayableComponent {
             store.set_pack(@pack);
 
             // [Event] Emit PLDataPoint after level cost
-            store.pl_data_point(1, pack_id, game_id, pack.moonrocks + game.points, 0);
+            let potential = pack.moonrocks + GameTrait::cash_out_payout(game.points);
+            store.pl_data_point(1, pack_id, game_id, potential, 0);
 
             // [Interaction] Update token metadata
             collection.update(pack_id.into());
@@ -133,8 +140,9 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Effect] Get pack for moonrocks tracking
+            // [Check] Pack not expired + get pack for moonrocks tracking
             let mut pack = store.pack(pack_id);
+            pack.assert_not_expired();
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let config = store.config();
@@ -143,7 +151,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // Calculate potential moonrocks and PL id base
-            let potential_moonrocks = pack.moonrocks + game.points;
+            let potential_moonrocks = pack.moonrocks + GameTrait::cash_out_payout(game.points);
             let pl_base_id: u32 = 2 + (game.pull_count.into() - orbs.len()) * 2;
 
             // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
@@ -187,9 +195,11 @@ pub mod PlayableComponent {
             let caller = starknet::get_caller_address();
             collection.assert_is_owner(caller, pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            let pack = store.pack(pack_id);
+            pack.assert_not_expired();
 
             // [Effect] Cash out
             let earnings = game.cash_out();
@@ -206,9 +216,11 @@ pub mod PlayableComponent {
             pack.earn(earnings);
             store.set_pack(@pack);
 
-            // [Interaction] Mint moonrocks token to caller
+            // [Interaction] Mint moonrocks token to caller, scaled by entry cost multiplier
             let token = store.config().token();
-            token.mint(caller, earnings.into());
+            let scaled: u256 = (earnings.into() * pack.entry_cost.into())
+                / BASE_COST_DOLLARS.into();
+            token.mint(caller, scaled);
         }
 
         fn enter(
@@ -224,9 +236,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Effect] Enter shop
             let config = store.config();
@@ -252,9 +265,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Info] Get shop orbs for event emission
             let orbs = GameTrait::get_shop_orbs(game.shop);
@@ -291,9 +305,10 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
 
-            // [Check] Game is not over
+            // [Check] Game is not over and pack not expired
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
+            store.pack(pack_id).assert_not_expired();
 
             // [Effect] Exit shop and get next level cost (applies level-based curse)
             let cost = game.exit();
@@ -311,7 +326,7 @@ pub mod PlayableComponent {
             // Use a high base id to avoid collision with pull events
             // pl_id = 2 + pull_count * 2 + level_offset
             let pl_id: u32 = 2 + (game.pull_count.into() * 2) + (game.level.into() - 1);
-            let potential = pack.moonrocks + game.points;
+            let potential = pack.moonrocks + GameTrait::cash_out_payout(game.points);
             store.pl_data_point(pl_id, pack_id, game_id, potential, 0);
         }
 

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { cashOutPayout } from "@/helpers/payout";
 import { Game, Orb, OrbPulled, Pack, PLDataPoint } from "@/models";
 import { DEFAULT_GAMES_COUNT, DEFAULT_MOONROCKS } from "./constants";
 import {
@@ -118,6 +119,7 @@ export function createPack(): number {
       id,
       game_count: 0,
       moonrocks: DEFAULT_MOONROCKS,
+      created_at: Math.floor(Date.now() / 1000),
     };
     return {
       ...prev,
@@ -167,7 +169,8 @@ export function start(packId: number): boolean {
         pack_id: packId,
         game_id: gameId,
         id: 1,
-        potential_moonrocks: updatedPack.moonrocks + started.points,
+        potential_moonrocks:
+          updatedPack.moonrocks + cashOutPayout(started.points),
         orb: 0,
       };
 
@@ -193,7 +196,7 @@ export function pull(packId: number, gameId: number): boolean {
       const seed = createSeed();
       const { game: nextGame, orbs, earnings } = pullOrbs(game, seed);
 
-      const potential = pack.moonrocks + nextGame.points;
+      const potential = pack.moonrocks + cashOutPayout(nextGame.points);
       const previousCount = nextGame.pull_count - orbs.length;
       const baseId = 2 + previousCount * 2;
 
@@ -315,7 +318,7 @@ export function exit(packId: number, gameId: number): boolean {
       };
 
       const plId = 2 + nextGame.pull_count * 2 + (nextGame.level - 1);
-      const potential = updatedPack.moonrocks + nextGame.points;
+      const potential = updatedPack.moonrocks + cashOutPayout(nextGame.points);
       const plPoint: OfflinePLDataPoint = {
         pack_id: packId,
         game_id: gameId,
@@ -366,7 +369,7 @@ export function resetOfflineState() {
 
 export function selectPacks(source: OfflineState = state): Pack[] {
   return Object.values(source.packs).map(
-    (pack) => new Pack(pack.id, pack.game_count, pack.moonrocks),
+    (pack) => new Pack(pack.id, pack.game_count, pack.moonrocks, pack.entry_cost ?? 2, pack.created_at ?? 0),
   );
 }
 

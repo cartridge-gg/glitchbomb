@@ -21,7 +21,8 @@ const meta = {
     },
     points: {
       control: { type: "number" },
-      description: "Current game points (added to moonrocks on cash out)",
+      description:
+        "Current game points (mapped through payout curve on cash out)",
     },
     nextCurseLabel: {
       control: { type: "text" },
