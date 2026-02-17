@@ -406,7 +406,9 @@ export const Home = () => {
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
-        <div className="flex flex-col gap-4 w-full max-w-[500px] min-h-0 flex-1">
+        <div
+          className={`flex flex-col gap-4 w-full max-w-[500px] min-h-0 flex-1 ${activityGroups.length > 0 ? "md:flex-initial" : ""}`}
+        >
           {/* Banner Carousel */}
           <div
             className="overflow-hidden rounded-xl touch-pan-y"
@@ -1060,12 +1062,14 @@ export const Home = () => {
           </div>
 
           {/* Activity Feed — finished games only, grouped by date */}
-          <div className="flex flex-col gap-4 min-h-0 flex-1">
+          <div
+            className={`flex flex-col gap-4 min-h-0 flex-1 ${activityGroups.length > 0 ? "md:flex-initial" : ""}`}
+          >
             <h2 className="text-green-400 font-secondary text-xs tracking-widest uppercase shrink-0 px-1">
               ACTIVITY
             </h2>
             <div
-              className="rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1"
+              className={`rounded-xl border border-green-900 bg-black-100 p-3 flex flex-col gap-3 overflow-y-auto flex-1 ${activityGroups.length > 0 ? "md:flex-initial" : ""}`}
               style={{ scrollbarWidth: "none" }}
             >
               {activityGroups.length === 0 ? (
