@@ -579,26 +579,27 @@ export const PLGraph = ({
                 </defs>
 
                 {/* Lines connecting points */}
-                {graphPoints.map((point, index) => {
-                  if (index === 0) return null;
-                  const prevPoint = graphPoints[index - 1];
-                  const isNew = newPointIds.has(point.id);
-                  return (
-                    <motion.line
-                      key={`line-${point.id}`}
-                      x1={`${prevPoint.x}%`}
-                      y1={`${prevPoint.y}%`}
-                      x2={`${point.x}%`}
-                      y2={`${point.y}%`}
-                      stroke="#348F1B"
-                      strokeWidth="1.5"
-                      filter="url(#glitch-line)"
-                      initial={isNew ? { pathLength: 0, opacity: 0 } : false}
-                      animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    />
-                  );
-                })}
+                <g filter="url(#glitch-line)">
+                  {graphPoints.map((point, index) => {
+                    if (index === 0) return null;
+                    const prevPoint = graphPoints[index - 1];
+                    const isNew = newPointIds.has(point.id);
+                    return (
+                      <motion.line
+                        key={`line-${point.id}`}
+                        x1={`${prevPoint.x}%`}
+                        y1={`${prevPoint.y}%`}
+                        x2={`${point.x}%`}
+                        y2={`${point.y}%`}
+                        stroke="#348F1B"
+                        strokeWidth="1.5"
+                        initial={isNew ? { opacity: 0 } : false}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      />
+                    );
+                  })}
+                </g>
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
