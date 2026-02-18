@@ -8,6 +8,10 @@ pub const DEFAULT_ENTRY_PRICE: u256 = 100_000_000;
 pub const DEFAULT_GAMES_COUNT: u8 = 5;
 pub const DEFAULT_LEVEL: u8 = 1;
 
+pub const MAX_SCORE: u16 = 500;
+pub const REWARD_NUMERATOR: u64 = 488_000_000_000_000;
+pub const MIN_REWARD: u64 = 1;
+
 #[inline]
 pub fn NAMESPACE() -> ByteArray {
     "GLITCHBOMB"

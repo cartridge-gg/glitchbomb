@@ -11,6 +11,7 @@ pub trait ISetup<T> {
     fn set_token(ref self: T, token: ContractAddress);
     fn set_owner(ref self: T, owner: ContractAddress);
     fn set_fee_receiver(ref self: T, fee_receiver: ContractAddress);
+    fn set_target_supply(ref self: T, target_supply: u256);
 }
 
 #[dojo::contract]
@@ -45,6 +46,7 @@ pub mod Setup {
         owner: ContractAddress,
         fee_receiver: ContractAddress,
         entry_price: felt252,
+        target_supply: u256,
     ) {
         // [Setup] World and Store
         let mut world = self.world(@NAMESPACE());
@@ -73,6 +75,7 @@ pub mod Setup {
             owner: owner,
             fee_receiver: fee_receiver,
             entry_price: entry_price,
+            target_supply: target_supply,
         );
         store.set_config(@config);
 
@@ -153,6 +156,19 @@ pub mod Setup {
             config.assert_is_owner(caller);
             // [Effect] Update config
             config.fee_receiver = fee_receiver;
+            store.set_config(@config);
+        }
+
+        fn set_target_supply(ref self: ContractState, target_supply: u256) {
+            // [Setup] World and Store
+            let mut world = self.world(@NAMESPACE());
+            let store = StoreTrait::new(world);
+            // [Check] Caller is allowed
+            let mut config = store.config();
+            let caller = starknet::get_caller_address();
+            config.assert_is_owner(caller);
+            // [Effect] Update config
+            config.target_supply = target_supply;
             store.set_config(@config);
         }
     }

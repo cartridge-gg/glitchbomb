@@ -11,6 +11,7 @@ pub struct Config {
     pub owner: ContractAddress,
     pub fee_receiver: ContractAddress,
     pub entry_price: felt252,
+    pub target_supply: u256,
 }
 
 #[derive(Drop, Serde, IntrospectPacked)]
