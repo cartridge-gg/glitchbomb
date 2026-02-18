@@ -78,8 +78,10 @@ fn test_play_cash_out_mints_moonrocks() {
     assert(game_after.points == 0, 'Game: points not reset');
 
     let pack_after = store.pack(pack_id);
-    assert(pack_after.moonrocks == 100, 'Pack: wrong moonrocks');
+    // Reward curve: score=10 with supply=0, target=1M yields MIN_REWARD=1
+    // Pack: 100 (initial) - 10 (level cost) + 1 (reward) = 91
+    assert(pack_after.moonrocks == 91, 'Pack: wrong moonrocks');
 
     let balance_after = systems.token.balance_of(context.player);
-    assert(balance_after == 10_u16.into(), 'Token: wrong minted amount');
+    assert(balance_after == 1_u16.into(), 'Token: wrong minted amount');
 }

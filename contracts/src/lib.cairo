@@ -59,6 +59,7 @@ pub mod helpers {
     pub mod packer;
     pub mod power;
     pub mod random;
+    pub mod rewarder;
 }
 
 pub mod interfaces {

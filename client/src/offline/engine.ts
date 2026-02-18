@@ -63,6 +63,36 @@ export function startGame(game: OfflineGame): {
   return { game: next, cost };
 }
 
+const MAX_SCORE = 500;
+const REWARD_NUMERATOR = 488_000_000_000_000n;
+const MIN_REWARD = 1n;
+
+function computeReward(score: number, supply: bigint, target: bigint): number {
+  if (supply >= target * 2n) return 0;
+
+  const numerator = REWARD_NUMERATOR;
+  const minReward = MIN_REWARD;
+  const maxScore = BigInt(MAX_SCORE);
+
+  const num =
+    supply <= target
+      ? numerator + (numerator * (target - supply)) / target
+      : numerator - (numerator * (supply - target)) / target;
+
+  const base = maxScore + 3n;
+  const base2 = base * base;
+  const base4 = base2 * base2;
+  const den = base4 * base;
+
+  const s = BigInt(score);
+  const s2 = s * s;
+  const s4 = s2 * s2;
+  const s5 = s4 * s;
+
+  const reward = num / (den - s5) - (num - minReward * den) / den;
+  return Number(reward);
+}
+
 export function cashOut(game: OfflineGame): {
   game: OfflineGame;
   earnings: number;
@@ -70,9 +100,12 @@ export function cashOut(game: OfflineGame): {
   assertNotOver(game);
   assertNotInShop(game);
   const next = cloneGame(game);
-  const earnings = next.points;
+  const score = next.points;
   next.points = 0;
   next.over = true;
+  // Offline mode: assume supply = target (baseline rewards)
+  const target = 1_000_000n;
+  const earnings = computeReward(score, target, target);
   return { game: next, earnings };
 }
 

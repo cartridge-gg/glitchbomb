@@ -5,6 +5,7 @@ pub mod PlayableComponent {
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use starknet::ContractAddress;
     use crate::helpers::random::RandomTrait;
+    use crate::helpers::rewarder::RewarderImpl;
     use crate::interfaces::erc20::IERC20DispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
     use crate::models::game::{BASE_MULTIPLIER, GameAssert, GameTrait, SUPP_MULTIPLIER};
@@ -191,23 +192,33 @@ pub mod PlayableComponent {
             let mut game = store.game(pack_id, game_id);
             game.assert_not_over();
 
-            // [Effect] Cash out
-            let earnings = game.cash_out();
+            // [Effect] Read score before cash_out clears it
+            let score = game.points;
+
+            // [Effect] Cash out (marks over, clears points)
+            game.cash_out();
             store.set_game(@game);
 
             // [Event] Emit GameOver (cash out)
             store.game_over(@game, 1);
 
-            // [Effect] Update pack earnings if exists
-            if (earnings == 0) {
+            // [Effect] Compute reward via curve
+            let config = store.config();
+            let token = config.token();
+            let supply = token.total_supply();
+            let target = config.target_supply;
+            let reward: u64 = RewarderImpl::amount(score, supply, target);
+
+            if reward == 0 {
                 return;
             }
+
+            let earnings: u16 = reward.try_into().unwrap();
             let mut pack = store.pack(pack_id);
             pack.earn(earnings);
             store.set_pack(@pack);
 
             // [Interaction] Mint moonrocks token to caller
-            let token = store.config().token();
             token.mint(caller, earnings.into());
         }
 

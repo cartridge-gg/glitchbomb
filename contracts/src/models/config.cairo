@@ -20,6 +20,7 @@ pub impl ConfigImpl of ConfigTrait {
         owner: ContractAddress,
         fee_receiver: ContractAddress,
         entry_price: felt252,
+        target_supply: u256,
     ) -> Config {
         Config {
             id: id,
@@ -29,6 +30,7 @@ pub impl ConfigImpl of ConfigTrait {
             owner: owner,
             fee_receiver: fee_receiver,
             entry_price: entry_price,
+            target_supply: target_supply,
         }
     }
 
