@@ -13,12 +13,11 @@ import { selectPLDataPoints, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
-const getPLDataPointsQuery = (packId: number, gameId: number) => {
+const getPLDataPointsQuery = (gameId: number) => {
   const modelName: `${string}-${string}` = `${NAMESPACE}-${PLDataPoint.getModelName()}`;
-  // Use keys() to match BOTH pack_id AND game_id (composite key)
   const clauses = new ClauseBuilder().keys(
     [modelName],
-    [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+    [`0x${gameId.toString(16).padStart(16, "0")}`],
     "VariableLen",
   );
   return new ToriiQueryBuilder()
@@ -38,18 +37,16 @@ const getSubscriptionQuery = () => {
 };
 
 export function usePLDataPoints({
-  packId,
   gameId,
 }: {
-  packId: number;
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
   const offlinePoints = useMemo(
-    () => selectPLDataPoints(offlineState, packId, gameId),
-    [offlineState, packId, gameId],
+    () => selectPLDataPoints(offlineState, gameId),
+    [offlineState, gameId],
   );
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
@@ -66,14 +63,13 @@ export function usePLDataPoints({
   }, []);
 
   // Skip if invalid IDs (not yet loaded)
-  const isReady = packId > 0 && gameId > 0;
-  const fetchKey = isReady ? `${packId}-${gameId}` : null;
+  const isReady = gameId > 0;
+  const fetchKey = isReady ? `${gameId}` : null;
 
-  // Create onUpdate that filters by packId/gameId
+  // Create onUpdate that filters by gameId
   const onUpdate = useCallback(
     (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
-      filterPackId?: number,
       filterGameId?: number,
     ) => {
       if (!data || data.error) {
@@ -87,12 +83,9 @@ export function usePLDataPoints({
           ] as unknown as RawPLDataPoint;
           const newPoint = PLDataPoint.parse(model);
 
-          // Filter by packId/gameId if provided
-          if (filterPackId !== undefined && filterGameId !== undefined) {
-            if (
-              Number(newPoint.packId) !== filterPackId ||
-              newPoint.gameId !== filterGameId
-            ) {
+          // Filter by gameId if provided
+          if (filterGameId !== undefined) {
+            if (Number(newPoint.gameId) !== filterGameId) {
               return;
             }
           }
@@ -119,7 +112,7 @@ export function usePLDataPoints({
       currentKeyRef.current = fetchKey;
     }
 
-    const fetchQuery = getPLDataPointsQuery(packId, gameId).build();
+    const fetchQuery = getPLDataPointsQuery(gameId).build();
 
     // Function to fetch data
     const fetchData = () => {
@@ -147,7 +140,7 @@ export function usePLDataPoints({
     const filteredOnUpdate = (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
     ) => {
-      onUpdate(data, packId, gameId);
+      onUpdate(data, gameId);
     };
 
     // Only set up subscription once per game
@@ -167,7 +160,7 @@ export function usePLDataPoints({
       clearTimeout(retryTimeout2);
       cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
+  }, [client, fetchKey, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
     dataPoints: offline ? offlinePoints : dataPoints,

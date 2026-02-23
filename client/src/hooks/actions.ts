@@ -21,9 +21,9 @@ export const useActions = () => {
   const offline = useOfflineMode();
 
   const start = useCallback(
-    async (packId: number) => {
+    async (gameId: number) => {
       try {
-        if (offline) return offlineStart(packId);
+        if (offline) return offlineStart(gameId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -31,7 +31,7 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "start",
             calldata: CallData.compile({
-              packId: packId,
+              gameId: gameId,
             }),
           },
         ]);
@@ -46,9 +46,9 @@ export const useActions = () => {
   );
 
   const pull = useCallback(
-    async (packId: number, gameId: number) => {
+    async (gameId: number) => {
       try {
-        if (offline) return offlinePull(packId, gameId);
+        if (offline) return offlinePull(gameId);
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
@@ -65,7 +65,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "pull",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
             }),
           },
@@ -80,9 +79,9 @@ export const useActions = () => {
   );
 
   const cashOut = useCallback(
-    async (packId: number, gameId: number) => {
+    async (gameId: number) => {
       try {
-        if (offline) return offlineCashOut(packId, gameId);
+        if (offline) return offlineCashOut(gameId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -90,7 +89,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "cash_out",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
             }),
           },
@@ -105,9 +103,9 @@ export const useActions = () => {
   );
 
   const enter = useCallback(
-    async (packId: number, gameId: number) => {
+    async (gameId: number) => {
       try {
-        if (offline) return offlineEnter(packId, gameId);
+        if (offline) return offlineEnter(gameId);
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);
@@ -124,7 +122,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "enter",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
             }),
           },
@@ -139,9 +136,9 @@ export const useActions = () => {
   );
 
   const buy = useCallback(
-    async (packId: number, gameId: number, indices: number[]) => {
+    async (gameId: number, indices: number[]) => {
       try {
-        if (offline) return offlineBuy(packId, gameId, indices);
+        if (offline) return offlineBuy(gameId, indices);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -149,7 +146,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "buy",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
               indices: indices,
             }),
@@ -165,9 +161,9 @@ export const useActions = () => {
   );
 
   const exit = useCallback(
-    async (packId: number, gameId: number) => {
+    async (gameId: number) => {
       try {
-        if (offline) return offlineExit(packId, gameId);
+        if (offline) return offlineExit(gameId);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         await account.execute([
@@ -175,7 +171,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "exit",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
             }),
           },
@@ -190,9 +185,9 @@ export const useActions = () => {
   );
 
   const buyAndExit = useCallback(
-    async (packId: number, gameId: number, indices: number[]) => {
+    async (gameId: number, indices: number[]) => {
       try {
-        if (offline) return offlineBuyAndExit(packId, gameId, indices);
+        if (offline) return offlineBuyAndExit(gameId, indices);
         if (!account?.address) return false;
         const gameAddress = getGameAddress(chain.id);
         const calls = [];
@@ -203,7 +198,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "buy",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
               indices: indices,
             }),
@@ -215,7 +209,6 @@ export const useActions = () => {
           contractAddress: gameAddress,
           entrypoint: "exit",
           calldata: CallData.compile({
-            packId: packId,
             gameId: gameId,
           }),
         });
@@ -231,7 +224,7 @@ export const useActions = () => {
   );
 
   const refresh = useCallback(
-    async (packId: number, gameId: number) => {
+    async (gameId: number) => {
       try {
         if (offline) return offlineRefresh();
         if (!account?.address) return false;
@@ -250,7 +243,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "refresh",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
             }),
           },
@@ -265,7 +257,7 @@ export const useActions = () => {
   );
 
   const burn = useCallback(
-    async (packId: number, gameId: number, bagIndex: number) => {
+    async (gameId: number, bagIndex: number) => {
       try {
         if (offline) return offlineBurn();
         if (!account?.address) return false;
@@ -275,7 +267,6 @@ export const useActions = () => {
             contractAddress: gameAddress,
             entrypoint: "burn",
             calldata: CallData.compile({
-              packId: packId,
               gameId: gameId,
               bagIndex: bagIndex,
             }),

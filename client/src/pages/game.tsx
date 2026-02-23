@@ -58,7 +58,7 @@ export const Game = () => {
   const [searchParams] = useSearchParams();
   const { connector } = useAccount();
   const { cashOut, pull, enter, buyAndExit } = useActions();
-  const { pack, game, setPackId, setGameId } = useEntitiesContext();
+  const { game, setGameId } = useEntitiesContext();
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
@@ -87,12 +87,10 @@ export const Game = () => {
   const [isPulling, setIsPulling] = useState(false);
 
   const { dataPoints } = usePLDataPoints({
-    packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
 
   const { pulls, initialFetchComplete } = usePulls({
-    packId: pack?.id ?? 0,
     gameId: game?.id ?? 0,
   });
 
@@ -130,12 +128,10 @@ export const Game = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
-  // Set pack/game IDs from URL params
+  // Set game ID from URL params
   useEffect(() => {
-    const packId = searchParams.get("pack");
     const gameId = searchParams.get("game");
-    if (packId && gameId) {
-      setPackId(Number(packId));
+    if (gameId) {
       setGameId(Number(gameId));
       // Reset all local state when game changes
       lastPullIdRef.current = null;
@@ -145,7 +141,7 @@ export const Game = () => {
       setIsExitingShop(false);
       setIsPulling(false);
     }
-  }, [setPackId, setGameId, searchParams]);
+  }, [setGameId, searchParams]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -220,42 +216,42 @@ export const Game = () => {
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
-    if (!pack || !game || isPulling) return;
+    if (!game || isPulling) return;
     setIsPulling(true);
-    const success = await pull(pack.id, game.id);
+    const success = await pull(game.id);
     if (!success) {
       setIsPulling(false);
     }
-  }, [pull, pack, game, isPulling]);
+  }, [pull, game, isPulling]);
 
   const closeOverlay = useCallback(() => setOverlay("none"), []);
 
   const handleCashOut = useCallback(async () => {
-    if (!pack || !game) return;
+    if (!game) return;
     setIsCashingOut(true);
-    const success = await cashOut(pack.id, game.id);
+    const success = await cashOut(game.id);
     if (success) {
       setOverlay("none");
     }
     setIsCashingOut(false);
-  }, [cashOut, pack, game]);
+  }, [cashOut, game]);
 
   const handleEnterShop = useCallback(async () => {
-    if (!pack || !game) return;
+    if (!game) return;
     setIsEnteringShop(true);
-    const success = await enter(pack.id, game.id);
+    const success = await enter(game.id);
     if (!success) {
       // User cancelled or error - reset loading state
       setIsEnteringShop(false);
     }
     // On success, don't close overlay - wait for shop to load
-  }, [enter, pack, game]);
+  }, [enter, game]);
 
   const handleBuyAndExit = useCallback(
     async (indices: number[]) => {
-      if (pack && game) {
+      if (game) {
         setIsExitingShop(true);
-        const success = await buyAndExit(pack.id, game.id, indices);
+        const success = await buyAndExit(game.id, indices);
         if (!success) {
           // User cancelled or error - reset loading state
           setIsExitingShop(false);
@@ -263,7 +259,7 @@ export const Game = () => {
         // On success, wait for shop to clear via useEffect
       }
     },
-    [buyAndExit, pack, game],
+    [buyAndExit, game],
   );
 
   const openStash = useCallback(() => setOverlay("stash"), []);
@@ -300,12 +296,11 @@ export const Game = () => {
   const curseLabel = hasStickyBomb ? "Sticky Bomb" : undefined;
 
   // Check if we're still loading (have URL params but no data yet)
-  const isLoading = !pack || !game;
-  const packId = searchParams.get("pack");
-  const gameId = searchParams.get("game");
+  const isLoading = !game;
+  const gameIdParam = searchParams.get("game");
 
   // If no URL params at all, show nothing
-  if (!packId || !gameId) return null;
+  if (!gameIdParam) return null;
 
   // Determine which screen to show
   const renderScreen = () => {
@@ -429,7 +424,7 @@ export const Game = () => {
             />
             <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
               <CashOutChoice
-                moonrocks={pack.moonrocks}
+                moonrocks={game.moonrocks}
                 points={game.points}
                 onConfirm={handleCashOut}
                 onCancel={closeOverlay}
@@ -453,7 +448,7 @@ export const Game = () => {
             />
             <div className="flex-1 min-h-0 flex items-center justify-center">
               <MilestoneChoice
-                moonrocks={pack.moonrocks}
+                moonrocks={game.moonrocks}
                 points={game.points}
                 onCashOut={handleCashOut}
                 onEnterShop={handleEnterShop}
@@ -525,7 +520,7 @@ export const Game = () => {
   return (
     <div className="absolute inset-0 flex flex-col min-h-0">
       <GameHeader
-        moonrocks={pack?.moonrocks ?? 100}
+        moonrocks={game?.moonrocks ?? 100}
         chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />

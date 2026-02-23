@@ -1,9 +1,3 @@
-export interface OfflinePack {
-  id: number;
-  game_count: number;
-  moonrocks: number;
-}
-
 export interface OfflineShopState {
   orbs: number[];
   refreshUsed: boolean;
@@ -12,7 +6,6 @@ export interface OfflineShopState {
 }
 
 export interface OfflineGame {
-  pack_id: number;
   id: number;
   seed: string;
   over: boolean;
@@ -28,10 +21,11 @@ export interface OfflineGame {
   discards: boolean[];
   bag: number[];
   shop: OfflineShopState | null;
+  moonrocks: number;
+  stake: number;
 }
 
 export interface OfflineOrbPulled {
-  pack_id: number;
   game_id: number;
   id: number;
   orb: number;
@@ -39,7 +33,6 @@ export interface OfflineOrbPulled {
 }
 
 export interface OfflinePLDataPoint {
-  pack_id: number;
   game_id: number;
   id: number;
   potential_moonrocks: number;
@@ -48,9 +41,8 @@ export interface OfflinePLDataPoint {
 
 export interface OfflineState {
   version: number;
-  nextPackId: number;
-  packs: Record<number, OfflinePack>;
-  games: Record<string, OfflineGame>;
+  nextGameId: number;
+  games: Record<number, OfflineGame>;
   pulls: OfflineOrbPulled[];
   plDataPoints: OfflinePLDataPoint[];
 }

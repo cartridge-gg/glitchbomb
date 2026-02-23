@@ -2,7 +2,6 @@ export { CONFIG, Config } from "./config";
 export { GAME, Game } from "./game";
 export { Orb, OrbType } from "./orb";
 export { ORB_PULLED, OrbPulled } from "./orb-pulled";
-export { PACK, Pack } from "./pack";
 export { PL_DATA_POINT, PLDataPoint } from "./pl-data-point";
 export { STARTERPACK, Starterpack } from "./starterpack";
 
@@ -66,37 +65,10 @@ export interface RawStarterpack {
   };
 }
 
-export interface RawPack {
-  id: {
-    type: "primitive";
-    type_name: "u64";
-    value: string;
-    key: boolean;
-  };
-  game_count: {
-    type: "primitive";
-    type_name: "u8";
-    value: string;
-    key: boolean;
-  };
-  moonrocks: {
-    type: "primitive";
-    type_name: "u16";
-    value: string;
-    key: boolean;
-  };
-}
-
 export interface RawGame {
-  pack_id: {
-    type: "primitive";
-    type_name: "u64";
-    value: string;
-    key: boolean;
-  };
   id: {
     type: "primitive";
-    type_name: "u8";
+    type_name: "u64";
     value: string;
     key: boolean;
   };
@@ -178,18 +150,24 @@ export interface RawGame {
     value: string;
     key: boolean;
   };
-}
-
-export interface RawOrbPulled {
-  pack_id: {
+  moonrocks: {
     type: "primitive";
-    type_name: "u64";
+    type_name: "u16";
     value: string;
     key: boolean;
   };
-  game_id: {
+  stake: {
     type: "primitive";
     type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+}
+
+export interface RawOrbPulled {
+  game_id: {
+    type: "primitive";
+    type_name: "u64";
     value: string;
     key: boolean;
   };
@@ -214,15 +192,9 @@ export interface RawOrbPulled {
 }
 
 export interface RawPLDataPoint {
-  pack_id?: {
-    type: "primitive";
-    type_name: "u64";
-    value: string;
-    key: boolean;
-  };
   game_id?: {
     type: "primitive";
-    type_name: "u8";
+    type_name: "u64";
     value: string;
     key: boolean;
   };

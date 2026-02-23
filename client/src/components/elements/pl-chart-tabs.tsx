@@ -144,7 +144,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
 
         return (
           <div
-            key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
+            key={`${pull.game_id}-${pull.id}`}
             className="flex items-center"
           >
             <span

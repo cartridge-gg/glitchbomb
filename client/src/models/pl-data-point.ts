@@ -3,20 +3,17 @@ import type { RawPLDataPoint } from "./index";
 export const PL_DATA_POINT = "PLDataPoint";
 
 export class PLDataPoint {
-  packId: bigint;
-  gameId: number;
+  gameId: bigint;
   id: number;
   potentialMoonrocks: number;
   orb: number;
 
   constructor(
-    packId: bigint,
-    gameId: number,
+    gameId: bigint,
     id: number,
     potentialMoonrocks: number,
     orb: number,
   ) {
-    this.packId = packId;
     this.gameId = gameId;
     this.id = id;
     this.potentialMoonrocks = potentialMoonrocks;
@@ -85,14 +82,12 @@ export class PLDataPoint {
 
   static parse(data: RawPLDataPoint): PLDataPoint {
     const props = {
-      packId: BigInt(data.pack_id?.value ?? 0),
-      gameId: Number(data.game_id?.value ?? 0),
+      gameId: BigInt(data.game_id?.value ?? 0),
       id: Number(data.id?.value ?? 0),
       potentialMoonrocks: Number(data.potential_moonrocks?.value ?? 0),
       orb: Number(data.orb?.value ?? 0),
     };
     return new PLDataPoint(
-      props.packId,
       props.gameId,
       props.id,
       props.potentialMoonrocks,
@@ -107,7 +102,7 @@ export class PLDataPoint {
   static deduplicate(points: PLDataPoint[]): PLDataPoint[] {
     const seen = new Set<string>();
     return points.filter((point) => {
-      const key = `${point.packId}-${point.gameId}-${point.id}`;
+      const key = `${point.gameId}-${point.id}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;

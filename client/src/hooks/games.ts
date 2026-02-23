@@ -14,18 +14,13 @@ import { selectGame, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
-interface PackGameKey {
-  packId: number;
-  gameId: number;
-}
-
-const getGamesQuery = (keys: PackGameKey[]) => {
+const getGamesQuery = (gameIds: number[]) => {
   const modelName: `${string}-${string}` = `${NAMESPACE}-${Game.getModelName()}`;
   const clauses = OrComposeClause(
-    keys.map(({ packId, gameId }) =>
+    gameIds.map((id) =>
       new ClauseBuilder().keys(
         [modelName],
-        [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+        [`0x${id.toString(16).padStart(16, "0")}`],
         "FixedLen",
       ),
     ),
@@ -36,7 +31,7 @@ const getGamesQuery = (keys: PackGameKey[]) => {
     .withLimit(ENTITIES_LIMIT);
 };
 
-export function useGames(keys: PackGameKey[]) {
+export function useGames(gameIds: number[]) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
@@ -55,8 +50,8 @@ export function useGames(keys: PackGameKey[]) {
 
   // Create a stable key string for dependency comparison
   const keysString = useMemo(
-    () => JSON.stringify(keys.map((k) => `${k.packId}-${k.gameId}`).sort()),
-    [keys],
+    () => JSON.stringify([...gameIds].sort()),
+    [gameIds],
   );
 
   const onUpdate = useCallback(
@@ -70,8 +65,7 @@ export function useGames(keys: PackGameKey[]) {
           const newGame = Game.parse(model);
           setGames((prev: Game[]) => {
             const deduped = prev.filter(
-              (game) =>
-                !(game.pack_id === newGame.pack_id && game.id === newGame.id),
+              (game) => game.id !== newGame.id,
             );
             return [...deduped, newGame];
           });
@@ -84,13 +78,13 @@ export function useGames(keys: PackGameKey[]) {
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
     if (offline) return;
-    if (!client || !keys.length) return;
+    if (!client || !gameIds.length) return;
 
     // Cancel existing subscriptions
     subscriptionRef.current = null;
 
     // Fetch initial data
-    const query = getGamesQuery(keys).build();
+    const query = getGamesQuery(gameIds).build();
     const result = await client.getEntities(query);
     onUpdate({ data: result.items, error: undefined });
 
@@ -109,23 +103,21 @@ export function useGames(keys: PackGameKey[]) {
     };
   }, [refresh, offline, cancelSubscription]);
 
-  // Helper to get game by pack ID
-  const getGameForPack = useCallback(
-    (packId: number, gameId: number): Game | undefined => {
-      if (offline) return selectGame(offlineState, packId, gameId);
-      return games.find(
-        (game) => game.pack_id === packId && game.id === gameId,
-      );
+  // Helper to get game by ID
+  const getGame = useCallback(
+    (gameId: number): Game | undefined => {
+      if (offline) return selectGame(offlineState, gameId);
+      return games.find((game) => game.id === gameId);
     },
     [games, offline, offlineState],
   );
 
   return {
     games: offline
-      ? keys
-          .map((key) => selectGame(offlineState, key.packId, key.gameId))
+      ? gameIds
+          .map((id) => selectGame(offlineState, id))
           .filter((game): game is Game => !!game)
       : games,
-    getGameForPack,
+    getGame,
   };
 }

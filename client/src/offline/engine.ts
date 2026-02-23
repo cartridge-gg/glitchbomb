@@ -15,9 +15,8 @@ import type { OfflineGame, OfflineShopState } from "./types";
 
 const orbFromId = (id: number) => Orb.from(id);
 
-export function createGame(packId: number, gameId: number): OfflineGame {
+export function createGame(gameId: number, moonrocks: number, stake: number): OfflineGame {
   return {
-    pack_id: packId,
     id: gameId,
     seed: "0",
     over: false,
@@ -33,6 +32,8 @@ export function createGame(packId: number, gameId: number): OfflineGame {
     discards: [],
     bag: [],
     shop: null,
+    moonrocks,
+    stake,
   };
 }
 

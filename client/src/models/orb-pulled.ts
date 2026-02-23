@@ -4,20 +4,17 @@ import { Orb } from "./orb";
 export const ORB_PULLED = "OrbPulled";
 
 export class OrbPulled {
-  pack_id: number;
   game_id: number;
   id: number;
   orb: Orb;
-  potential_moonrocks: number; // pack.moonrocks + game.points (what you'd cash out)
+  potential_moonrocks: number;
 
   constructor(
-    pack_id: number,
     game_id: number,
     id: number,
     orb: Orb,
     potential_moonrocks: number,
   ) {
-    this.pack_id = pack_id;
     this.game_id = game_id;
     this.id = id;
     this.orb = orb;
@@ -34,14 +31,12 @@ export class OrbPulled {
 
   static parse(data: RawOrbPulled): OrbPulled {
     const props = {
-      pack_id: Number(data.pack_id.value),
       game_id: Number(data.game_id.value),
       id: Number(data.id.value),
       orb: Orb.from(Number(data.orb.value)),
       potential_moonrocks: Number(data.potential_moonrocks?.value ?? 0),
     };
     return new OrbPulled(
-      props.pack_id,
       props.game_id,
       props.id,
       props.orb,
@@ -55,7 +50,6 @@ export class OrbPulled {
         index ===
         self.findIndex(
           (t) =>
-            t.pack_id === item.pack_id &&
             t.game_id === item.game_id &&
             t.id === item.id,
         ),

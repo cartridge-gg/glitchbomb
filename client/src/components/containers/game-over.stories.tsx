@@ -50,63 +50,73 @@ const samplePLData: PLDataPoint[] = [
 // Sample pulls for history
 const samplePulls: OrbPulled[] = [
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 1,
+    potential_moonrocks: 0,
     orb: createMockOrb("Point5"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 2,
+    potential_moonrocks: 0,
     orb: createMockOrb("Bomb1"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 3,
+    potential_moonrocks: 0,
     orb: createMockOrb("Point7"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 4,
+    potential_moonrocks: 0,
     orb: createMockOrb("Multiplier50"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 5,
+    potential_moonrocks: 0,
     orb: createMockOrb("Point8"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 6,
+    potential_moonrocks: 0,
     orb: createMockOrb("Bomb2"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 7,
+    potential_moonrocks: 0,
     orb: createMockOrb("Moonrock15"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 8,
+    potential_moonrocks: 0,
     orb: createMockOrb("Health1"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 9,
+    potential_moonrocks: 0,
     orb: createMockOrb("Point9"),
   },
   {
-    pack_id: 1,
+
     game_id: 1,
     id: 10,
+    potential_moonrocks: 0,
     orb: createMockOrb("Bomb3"),
   },
 ] as OrbPulled[];
@@ -192,16 +202,18 @@ export const FirstLevel: Story = {
     ],
     pulls: [
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 1,
-        orb: createMockOrb("Point5"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Point5"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 2,
-        orb: createMockOrb("Bomb1"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Bomb1"),
       },
     ] as OrbPulled[],
   },
@@ -225,34 +237,39 @@ export const LosingStreak: Story = {
     plData: losingPLData,
     pulls: [
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 1,
-        orb: createMockOrb("Point5"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Point5"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 2,
-        orb: createMockOrb("Bomb1"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Bomb1"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 3,
-        orb: createMockOrb("Bomb2"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Bomb2"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 4,
-        orb: createMockOrb("Health1"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Health1"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 5,
-        orb: createMockOrb("Bomb3"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Bomb3"),
       },
     ] as OrbPulled[],
   },
@@ -281,52 +298,60 @@ export const BigWinner: Story = {
     plData: bigWinnerPLData,
     pulls: [
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 1,
-        orb: createMockOrb("Point9"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Point9"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 2,
-        orb: createMockOrb("Multiplier100"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Multiplier100"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 3,
-        orb: createMockOrb("Point8"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Point8"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 4,
-        orb: createMockOrb("Bomb1"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Bomb1"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 5,
-        orb: createMockOrb("Moonrock40"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Moonrock40"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 6,
-        orb: createMockOrb("Moonrock40"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Moonrock40"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 7,
-        orb: createMockOrb("Health2"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Health2"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 8,
-        orb: createMockOrb("Multiplier150"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Multiplier150"),
       },
     ] as OrbPulled[],
   },
@@ -352,28 +377,32 @@ export const CashedOutHighLevel: Story = {
     plData: bigWinnerPLData,
     pulls: [
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 1,
-        orb: createMockOrb("Point9"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Point9"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 2,
-        orb: createMockOrb("Multiplier150"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Multiplier150"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 3,
-        orb: createMockOrb("Moonrock40"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Moonrock40"),
       },
       {
-        pack_id: 1,
+    
         game_id: 1,
         id: 4,
-        orb: createMockOrb("Health2"),
+        potential_moonrocks: 0,
+    orb: createMockOrb("Health2"),
       },
     ] as OrbPulled[],
   },

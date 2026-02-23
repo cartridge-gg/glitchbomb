@@ -7,9 +7,9 @@ const createMockPulls = (count: number): OrbPulled[] => {
   const orbTypes = [1, 2, 5, 8, 12, 15]; // Point, Point, Health, Multiplier, Special, Bomb
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    pack_id: 1,
     game_id: 1,
     orb: new Orb(orbTypes[i % orbTypes.length]),
+    potential_moonrocks: 0,
   }));
 };
 

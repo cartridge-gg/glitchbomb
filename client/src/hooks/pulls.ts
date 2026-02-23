@@ -13,12 +13,11 @@ import { selectPulls, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
 
-const getPullsQuery = (packId: number, gameId: number) => {
+const getPullsQuery = (gameId: number) => {
   const modelName: `${string}-${string}` = `${NAMESPACE}-${OrbPulled.getModelName()}`;
-  // Use keys() to match BOTH pack_id AND game_id (composite key)
   const clauses = new ClauseBuilder().keys(
     [modelName],
-    [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+    [`0x${gameId.toString(16).padStart(16, "0")}`],
     "VariableLen",
   );
   return new ToriiQueryBuilder()
@@ -28,18 +27,16 @@ const getPullsQuery = (packId: number, gameId: number) => {
 };
 
 export function usePulls({
-  packId,
   gameId,
 }: {
-  packId: number;
   gameId: number;
 }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
   const offlinePulls = useMemo(
-    () => selectPulls(offlineState, packId, gameId),
-    [offlineState, packId, gameId],
+    () => selectPulls(offlineState, gameId),
+    [offlineState, gameId],
   );
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
@@ -57,14 +54,13 @@ export function usePulls({
   }, []);
 
   // Skip if invalid IDs (not yet loaded)
-  const isReady = packId > 0 && gameId > 0;
-  const fetchKey = isReady ? `${packId}-${gameId}` : null;
+  const isReady = gameId > 0;
+  const fetchKey = isReady ? `${gameId}` : null;
 
-  // Create onUpdate that filters by packId/gameId
+  // Create onUpdate that filters by gameId
   const onUpdate = useCallback(
     (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
-      filterPackId: number,
       filterGameId: number,
     ) => {
       if (!data || data.error) {
@@ -77,11 +73,8 @@ export function usePulls({
           ] as unknown as RawOrbPulled;
           const newPull = OrbPulled.parse(model);
 
-          // Filter by packId/gameId to prevent cross-game contamination
-          if (
-            Number(newPull.pack_id) !== filterPackId ||
-            newPull.game_id !== filterGameId
-          ) {
+          // Filter by gameId to prevent cross-game contamination
+          if (newPull.game_id !== filterGameId) {
             return;
           }
 
@@ -109,13 +102,13 @@ export function usePulls({
     }
 
     // Fetch and subscribe
-    const query = getPullsQuery(packId, gameId).build();
+    const query = getPullsQuery(gameId).build();
 
     // Create a wrapped callback that includes the filter
     const filteredOnUpdate = (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
     ) => {
-      onUpdate(data, packId, gameId);
+      onUpdate(data, gameId);
     };
 
     client
@@ -140,7 +133,7 @@ export function usePulls({
     return () => {
       cancelSubscription();
     };
-  }, [client, fetchKey, packId, gameId, onUpdate, offline, cancelSubscription]);
+  }, [client, fetchKey, gameId, onUpdate, offline, cancelSubscription]);
 
   return {
     pulls: offline ? offlinePulls : pulls,

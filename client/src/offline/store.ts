@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
-import { Game, Orb, OrbPulled, Pack, PLDataPoint } from "@/models";
-import { DEFAULT_GAMES_COUNT, DEFAULT_MOONROCKS } from "./constants";
+import { Game, Orb, OrbPulled, PLDataPoint } from "@/models";
+import { DEFAULT_MOONROCKS } from "./constants";
 import {
   buyFromShop,
   cashOut,
-  createGame,
+  createGame as createGameEngine,
   enterShop,
   exitShop,
   pullOrbs,
@@ -14,13 +14,12 @@ import { createSeed } from "./random";
 import type {
   OfflineGame,
   OfflineOrbPulled,
-  OfflinePack,
   OfflinePLDataPoint,
   OfflineState,
 } from "./types";
 
-const STORAGE_KEY = "glitchbomb_offline_state_v1";
-const STATE_VERSION = 1;
+const STORAGE_KEY = "glitchbomb_offline_state_v2";
+const STATE_VERSION = 2;
 
 type Listener = () => void;
 
@@ -43,15 +42,9 @@ function loadState(): OfflineState {
 }
 
 function defaultState(): OfflineState {
-  const pack: OfflinePack = {
-    id: 1,
-    game_count: 0,
-    moonrocks: DEFAULT_MOONROCKS,
-  };
   return {
     version: STATE_VERSION,
-    nextPackId: 2,
-    packs: { [pack.id]: pack },
+    nextGameId: 1,
     games: {},
     pulls: [],
     plDataPoints: [],
@@ -89,92 +82,58 @@ export function useOfflineStore(): OfflineState {
   return useSyncExternalStore(subscribe, getOfflineState, getOfflineState);
 }
 
-function keyFor(packId: number, gameId: number) {
-  return `${packId}-${gameId}`;
-}
-
-function ensurePack(prev: OfflineState, packId: number): OfflinePack {
-  const pack = prev.packs[packId];
-  if (!pack) throw new Error("Pack not found");
-  return pack;
-}
-
 function ensureGame(
   prev: OfflineState,
-  packId: number,
   gameId: number,
 ): OfflineGame {
-  const game = prev.games[keyFor(packId, gameId)];
+  const game = prev.games[gameId];
   if (!game) throw new Error("Game not found");
   return game;
 }
 
-export function createPack(): number {
+export function createOfflineGame(): number {
   let createdId = 0;
   setState((prev) => {
-    const id = prev.nextPackId;
+    const id = prev.nextGameId;
     createdId = id;
-    const pack: OfflinePack = {
-      id,
-      game_count: 0,
-      moonrocks: DEFAULT_MOONROCKS,
-    };
+    const game = createGameEngine(id, DEFAULT_MOONROCKS, 1);
     return {
       ...prev,
-      nextPackId: id + 1,
-      packs: { ...prev.packs, [id]: pack },
+      nextGameId: id + 1,
+      games: { ...prev.games, [id]: game },
     };
   });
   return createdId;
 }
 
-export function start(packId: number): boolean {
+export function start(gameId: number): boolean {
   try {
     setState((prev) => {
-      const pack = ensurePack(prev, packId);
-      if (pack.game_count >= DEFAULT_GAMES_COUNT) {
-        throw new Error("Pack: is over");
-      }
-      if (pack.game_count > 0) {
-        const lastGame = prev.games[keyFor(packId, pack.game_count)];
-        if (lastGame && !lastGame.over) {
-          throw new Error("Game: not over");
-        }
-      }
-
-      const gameId = pack.game_count + 1;
-      const game = createGame(packId, gameId);
+      const game = ensureGame(prev, gameId);
       const { game: started, cost } = startGame(game);
 
-      const beforeMoonrocks = pack.moonrocks;
-      if (beforeMoonrocks < cost) {
-        throw new Error("Pack: not enough moonrocks");
+      if (game.moonrocks < cost) {
+        throw new Error("Game: not enough moonrocks");
       }
-      const updatedPack: OfflinePack = {
-        ...pack,
-        game_count: gameId,
-        moonrocks: pack.moonrocks - cost,
-      };
+      const beforeMoonrocks = game.moonrocks;
+      started.moonrocks = game.moonrocks - cost;
 
       const plStart: OfflinePLDataPoint = {
-        pack_id: packId,
         game_id: gameId,
         id: 0,
         potential_moonrocks: beforeMoonrocks,
         orb: 0,
       };
       const plAfter: OfflinePLDataPoint = {
-        pack_id: packId,
         game_id: gameId,
         id: 1,
-        potential_moonrocks: updatedPack.moonrocks + started.points,
+        potential_moonrocks: started.moonrocks + started.points,
         orb: 0,
       };
 
       return {
         ...prev,
-        packs: { ...prev.packs, [packId]: updatedPack },
-        games: { ...prev.games, [keyFor(packId, gameId)]: started },
+        games: { ...prev.games, [gameId]: started },
         plDataPoints: [...prev.plDataPoints, plStart, plAfter],
       };
     });
@@ -185,15 +144,20 @@ export function start(packId: number): boolean {
   }
 }
 
-export function pull(packId: number, gameId: number): boolean {
+export function pull(gameId: number): boolean {
   try {
     setState((prev) => {
-      const pack = ensurePack(prev, packId);
-      const game = ensureGame(prev, packId, gameId);
+      const game = ensureGame(prev, gameId);
       const seed = createSeed();
       const { game: nextGame, orbs, earnings } = pullOrbs(game, seed);
 
-      const potential = pack.moonrocks + nextGame.points;
+      if (earnings) {
+        nextGame.moonrocks = game.moonrocks + earnings;
+      } else {
+        nextGame.moonrocks = game.moonrocks;
+      }
+
+      const potential = nextGame.moonrocks + nextGame.points;
       const previousCount = nextGame.pull_count - orbs.length;
       const baseId = 2 + previousCount * 2;
 
@@ -202,14 +166,12 @@ export function pull(packId: number, gameId: number): boolean {
 
       orbs.forEach((orbId, index) => {
         pulls.push({
-          pack_id: packId,
           game_id: gameId,
           id: nextGame.pull_count - index,
           orb: orbId,
           potential_moonrocks: potential,
         });
         plPoints.push({
-          pack_id: packId,
           game_id: gameId,
           id: baseId + index,
           potential_moonrocks: potential,
@@ -217,14 +179,9 @@ export function pull(packId: number, gameId: number): boolean {
         });
       });
 
-      const updatedPack: OfflinePack = earnings
-        ? { ...pack, moonrocks: pack.moonrocks + earnings }
-        : pack;
-
       return {
         ...prev,
-        packs: { ...prev.packs, [packId]: updatedPack },
-        games: { ...prev.games, [keyFor(packId, gameId)]: nextGame },
+        games: { ...prev.games, [gameId]: nextGame },
         pulls: [...prev.pulls, ...pulls],
         plDataPoints: [...prev.plDataPoints, ...plPoints],
       };
@@ -236,20 +193,20 @@ export function pull(packId: number, gameId: number): boolean {
   }
 }
 
-export function cashOutAction(packId: number, gameId: number): boolean {
+export function cashOutAction(gameId: number): boolean {
   try {
     setState((prev) => {
-      const pack = ensurePack(prev, packId);
-      const game = ensureGame(prev, packId, gameId);
+      const game = ensureGame(prev, gameId);
       const { game: nextGame, earnings } = cashOut(game);
-      const updatedPack: OfflinePack = earnings
-        ? { ...pack, moonrocks: pack.moonrocks + earnings }
-        : pack;
+      if (earnings) {
+        nextGame.moonrocks = game.moonrocks + earnings;
+      } else {
+        nextGame.moonrocks = game.moonrocks;
+      }
 
       return {
         ...prev,
-        packs: { ...prev.packs, [packId]: updatedPack },
-        games: { ...prev.games, [keyFor(packId, gameId)]: nextGame },
+        games: { ...prev.games, [gameId]: nextGame },
       };
     });
     return true;
@@ -259,15 +216,16 @@ export function cashOutAction(packId: number, gameId: number): boolean {
   }
 }
 
-export function enter(packId: number, gameId: number): boolean {
+export function enter(gameId: number): boolean {
   try {
     setState((prev) => {
-      const game = ensureGame(prev, packId, gameId);
+      const game = ensureGame(prev, gameId);
       const seed = createSeed();
       const { game: nextGame } = enterShop(game, seed);
+      nextGame.moonrocks = game.moonrocks;
       return {
         ...prev,
-        games: { ...prev.games, [keyFor(packId, gameId)]: nextGame },
+        games: { ...prev.games, [gameId]: nextGame },
       };
     });
     return true;
@@ -278,17 +236,17 @@ export function enter(packId: number, gameId: number): boolean {
 }
 
 export function buy(
-  packId: number,
   gameId: number,
   indices: number[],
 ): boolean {
   try {
     setState((prev) => {
-      const game = ensureGame(prev, packId, gameId);
+      const game = ensureGame(prev, gameId);
       const nextGame = buyFromShop(game, indices);
+      nextGame.moonrocks = game.moonrocks;
       return {
         ...prev,
-        games: { ...prev.games, [keyFor(packId, gameId)]: nextGame },
+        games: { ...prev.games, [gameId]: nextGame },
       };
     });
     return true;
@@ -298,26 +256,21 @@ export function buy(
   }
 }
 
-export function exit(packId: number, gameId: number): boolean {
+export function exit(gameId: number): boolean {
   try {
     setState((prev) => {
-      const pack = ensurePack(prev, packId);
-      const game = ensureGame(prev, packId, gameId);
+      const game = ensureGame(prev, gameId);
       const { game: nextGame, cost } = exitShop(game);
 
-      if (pack.moonrocks < cost) {
-        throw new Error("Pack: not enough moonrocks");
+      if (game.moonrocks < cost) {
+        throw new Error("Game: not enough moonrocks");
       }
 
-      const updatedPack: OfflinePack = {
-        ...pack,
-        moonrocks: pack.moonrocks - cost,
-      };
+      nextGame.moonrocks = game.moonrocks - cost;
 
       const plId = 2 + nextGame.pull_count * 2 + (nextGame.level - 1);
-      const potential = updatedPack.moonrocks + nextGame.points;
+      const potential = nextGame.moonrocks + nextGame.points;
       const plPoint: OfflinePLDataPoint = {
-        pack_id: packId,
         game_id: gameId,
         id: plId,
         potential_moonrocks: potential,
@@ -326,8 +279,7 @@ export function exit(packId: number, gameId: number): boolean {
 
       return {
         ...prev,
-        packs: { ...prev.packs, [packId]: updatedPack },
-        games: { ...prev.games, [keyFor(packId, gameId)]: nextGame },
+        games: { ...prev.games, [gameId]: nextGame },
         plDataPoints: [...prev.plDataPoints, plPoint],
       };
     });
@@ -339,15 +291,14 @@ export function exit(packId: number, gameId: number): boolean {
 }
 
 export function buyAndExit(
-  packId: number,
   gameId: number,
   indices: number[],
 ): boolean {
   if (!indices.length) {
-    return exit(packId, gameId);
+    return exit(gameId);
   }
-  if (!buy(packId, gameId, indices)) return false;
-  return exit(packId, gameId);
+  if (!buy(gameId, indices)) return false;
+  return exit(gameId);
 }
 
 export function refresh(): boolean {
@@ -364,33 +315,28 @@ export function resetOfflineState() {
   setState(() => defaultState());
 }
 
-export function selectPacks(source: OfflineState = state): Pack[] {
-  return Object.values(source.packs).map(
-    (pack) => new Pack(pack.id, pack.game_count, pack.moonrocks),
-  );
+export function selectGames(source: OfflineState = state): Game[] {
+  return Object.values(source.games).map((game) => toGameModel(game));
 }
 
 export function selectGame(
   source: OfflineState,
-  packId: number,
   gameId: number,
 ) {
-  const game = source.games[keyFor(packId, gameId)];
+  const game = source.games[gameId];
   if (!game) return undefined;
   return toGameModel(game);
 }
 
 export function selectPulls(
   source: OfflineState,
-  packId: number,
   gameId: number,
 ): OrbPulled[] {
   return source.pulls
-    .filter((pull) => pull.pack_id === packId && pull.game_id === gameId)
+    .filter((pull) => pull.game_id === gameId)
     .map(
       (pull) =>
         new OrbPulled(
-          pull.pack_id,
           pull.game_id,
           pull.id,
           Orb.from(pull.orb),
@@ -401,16 +347,14 @@ export function selectPulls(
 
 export function selectPLDataPoints(
   source: OfflineState,
-  packId: number,
   gameId: number,
 ): PLDataPoint[] {
   return source.plDataPoints
-    .filter((point) => point.pack_id === packId && point.game_id === gameId)
+    .filter((point) => point.game_id === gameId)
     .map(
       (point) =>
         new PLDataPoint(
-          BigInt(point.pack_id),
-          point.game_id,
+          BigInt(point.game_id),
           point.id,
           point.potential_moonrocks,
           point.orb,
@@ -419,8 +363,8 @@ export function selectPLDataPoints(
 }
 
 export function selectTotalMoonrocks(source: OfflineState = state): number {
-  return Object.values(source.packs).reduce(
-    (total, pack) => total + pack.moonrocks,
+  return Object.values(source.games).reduce(
+    (total, game) => total + game.moonrocks,
     0,
   );
 }
@@ -432,7 +376,6 @@ function toGameModel(game: OfflineGame): Game {
   const pullables = bag.filter((_orb, index) => !discards[index]);
 
   return new Game(
-    game.pack_id,
     game.id,
     game.over,
     game.level,
@@ -448,6 +391,8 @@ function toGameModel(game: OfflineGame): Game {
     bag,
     shop,
     pullables,
+    game.moonrocks,
+    game.stake,
   );
 }
 
