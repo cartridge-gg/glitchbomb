@@ -294,48 +294,6 @@ export const Puller = memo(function Puller({
             background: glowBackground,
           }}
         />
-        {isLoading && (
-          <>
-            <motion.div
-              className="absolute inset-[6%] rounded-full pointer-events-none border"
-              animate={{
-                scale: [0.96, 1.03, 0.96],
-                opacity: [0.22, 0.58, 0.22],
-              }}
-              transition={{
-                duration: 1.25,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-              style={{
-                borderColor: `color-mix(in srgb, ${currentColor.cssVar} 68%, transparent)`,
-              }}
-            />
-            <motion.div
-              className="absolute inset-[3%] rounded-full pointer-events-none"
-              animate={{
-                rotate: [0, 360],
-                opacity: [0.2, 0.34, 0.2],
-              }}
-              transition={{
-                rotate: {
-                  duration: 2.4,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "linear",
-                },
-                opacity: {
-                  duration: 1.25,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                },
-              }}
-              style={{
-                background: `conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, ${currentColor.cssVar} 72%, transparent) 58deg, transparent 132deg, transparent 216deg, color-mix(in srgb, ${currentColor.cssVar} 58%, transparent) 290deg, transparent 360deg)`,
-                mixBlendMode: "screen",
-              }}
-            />
-          </>
-        )}
 
         {/* 3. Glass filter */}
         <div
