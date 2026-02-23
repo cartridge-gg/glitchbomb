@@ -7,13 +7,13 @@ export class Config {
   id: string;
   vrf: string;
   token: string;
-  collection: string;
+  registry: string;
 
-  constructor(id: string, vrf: string, token: string, collection: string) {
+  constructor(id: string, vrf: string, token: string, registry: string) {
     this.id = id;
     this.vrf = vrf;
     this.token = token;
-    this.collection = collection;
+    this.registry = registry;
   }
 
   static from(data: RawConfig): Config | null {
@@ -26,7 +26,7 @@ export class Config {
       !data?.id?.value ||
       !data?.vrf?.value ||
       !data?.token?.value ||
-      !data?.collection?.value
+      !data?.registry?.value
     ) {
       console.warn("Config.parse: Missing required fields", data);
       return null;
@@ -35,7 +35,7 @@ export class Config {
       data.id.value,
       getChecksumAddress(data.vrf.value),
       getChecksumAddress(data.token.value),
-      getChecksumAddress(data.collection.value),
+      getChecksumAddress(data.registry.value),
     );
   }
 }

@@ -239,9 +239,12 @@ function useOfflineEntitiesValue(): EntitiesContextType {
     return selectGame(offlineState, gameId);
   }, [offlineState, gameId]);
 
-  const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0"), []);
+  const config = useMemo(
+    () => new Config("0", "0x0", "0x0", "0x0"),
+    [],
+  );
   const starterpack = useMemo(
-    () => new Starterpack("0", true, 0, 0n, "0x0"),
+    () => new Starterpack("0", true, 0, 1, 0n, "0x0"),
     [],
   );
 

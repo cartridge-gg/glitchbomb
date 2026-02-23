@@ -3,7 +3,6 @@ import {
   breakEvenScore,
   MAX_SCORE,
   maxPayout,
-  STARTERPACK_COUNT,
   toTokens,
   tokenPayout,
 } from "@/helpers/payout";

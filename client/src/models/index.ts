@@ -24,9 +24,33 @@ export interface RawConfig {
     value: string;
     key: boolean;
   };
-  collection: {
+  registry: {
     type: "primitive";
     type_name: "ContractAddress";
+    value: string;
+    key: boolean;
+  };
+  owner: {
+    type: "primitive";
+    type_name: "ContractAddress";
+    value: string;
+    key: boolean;
+  };
+  fee_receiver: {
+    type: "primitive";
+    type_name: "ContractAddress";
+    value: string;
+    key: boolean;
+  };
+  entry_price: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  target_supply: {
+    type: "primitive";
+    type_name: "u256";
     value: string;
     key: boolean;
   };
@@ -46,6 +70,12 @@ export interface RawStarterpack {
     key: boolean;
   };
   referral_percentage: {
+    type: "primitive";
+    type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  multiplier: {
     type: "primitive";
     type_name: "u8";
     value: string;

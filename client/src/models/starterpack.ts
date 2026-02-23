@@ -7,6 +7,7 @@ export class Starterpack {
   id: string;
   reissuable: boolean;
   referral_percentage: number;
+  multiplier: number;
   price: bigint;
   payment_token: string;
 
@@ -14,12 +15,14 @@ export class Starterpack {
     id: string,
     reissuable: boolean,
     referral_percentage: number,
+    multiplier: number,
     price: bigint,
     payment_token: string,
   ) {
     this.id = id;
     this.reissuable = reissuable;
     this.referral_percentage = referral_percentage;
+    this.multiplier = multiplier;
     this.price = price;
     this.payment_token = payment_token;
   }
@@ -34,6 +37,7 @@ export class Starterpack {
       data?.id?.value === undefined ||
       data?.reissuable?.value === undefined ||
       data?.referral_percentage?.value === undefined ||
+      data?.multiplier?.value === undefined ||
       data?.price?.value === undefined ||
       data?.payment_token?.value === undefined
     ) {
@@ -44,6 +48,7 @@ export class Starterpack {
       id: data.id.value,
       reissuable: data.reissuable.value,
       referral_percentage: Number(data.referral_percentage.value),
+      multiplier: Number(data.multiplier.value),
       price: BigInt(data.price.value),
       payment_token: getChecksumAddress(data.payment_token.value),
     };
@@ -51,6 +56,7 @@ export class Starterpack {
       props.id,
       props.reissuable,
       props.referral_percentage,
+      props.multiplier,
       props.price,
       props.payment_token,
     );
