@@ -58,8 +58,8 @@ pub mod PlayableComponent {
                 // [Interaction] Mint a game
                 let pack_id = collection.mint(recipient, true);
 
-                // [Effect] Create game
-                let pack = PackTrait::new(id: pack_id);
+                // [Effect] Create game with starterpack multiplier
+                let pack = PackTrait::new(id: pack_id, multiplier: starterpack.multiplier);
                 store.set_pack(@pack);
                 quantity -= 1;
             }
@@ -202,19 +202,20 @@ pub mod PlayableComponent {
             // [Event] Emit GameOver (cash out)
             store.game_over(@game, 1);
 
-            // [Effect] Compute reward via curve
+            // [Effect] Compute reward via curve, multiplied by pack multiplier
             let config = store.config();
             let token = config.token();
             let supply = token.total_supply();
             let target = config.target_supply;
             let reward: u64 = RewarderImpl::amount(score, supply, target);
+            let mut pack = store.pack(pack_id);
+            let reward: u64 = reward * pack.multiplier.into();
 
             if reward == 0 {
                 return;
             }
 
             let earnings: u16 = reward.try_into().unwrap();
-            let mut pack = store.pack(pack_id);
             pack.earn(earnings);
             store.set_pack(@pack);
 

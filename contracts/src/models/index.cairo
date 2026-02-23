@@ -21,6 +21,7 @@ pub struct Starterpack {
     pub id: u32,
     pub reissuable: bool,
     pub referral_percentage: u8,
+    pub multiplier: u8,
     pub price: u256,
     pub payment_token: ContractAddress,
 }
@@ -31,6 +32,7 @@ pub struct Pack {
     #[key]
     pub id: u64,
     pub game_count: u8,
+    pub multiplier: u8,
     pub moonrocks: u16,
 }
 
