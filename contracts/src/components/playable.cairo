@@ -109,11 +109,7 @@ pub mod PlayableComponent {
             store.game_started(@game);
         }
 
-        fn pull(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            game_id: u64,
-        ) {
+        fn pull(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -161,11 +157,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
         }
 
-        fn cash_out(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            game_id: u64,
-        ) {
+        fn cash_out(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -208,11 +200,7 @@ pub mod PlayableComponent {
             token.mint(caller, earnings.into());
         }
 
-        fn enter(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            game_id: u64,
-        ) {
+        fn enter(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -273,11 +261,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
         }
 
-        fn exit(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            game_id: u64,
-        ) {
+        fn exit(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
@@ -307,11 +291,7 @@ pub mod PlayableComponent {
             store.pl_data_point(pl_id, @game, potential, 0);
         }
 
-        fn refresh(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            game_id: u64,
-        ) {
+        fn refresh(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Check] Feature disabled
             assert(false, 'Refresh is disabled');
 

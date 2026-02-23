@@ -3,8 +3,8 @@ pub mod StarterpackComponent {
     // Imports
 
     use dojo::world::{WorldStorage, WorldStorageTrait};
-    use crate::interfaces::registry::IStarterpackRegistryDispatcherTrait;
     use crate::constants::{PRICE_MULTIPLIER, STARTERPACK_COUNT};
+    use crate::interfaces::registry::IStarterpackRegistryDispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
     use crate::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use crate::store::StoreTrait;

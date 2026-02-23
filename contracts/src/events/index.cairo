@@ -18,10 +18,7 @@ pub impl GameStartedImpl of GameStartedTrait {
     #[inline]
     fn new(game: @Game) -> GameStarted {
         GameStarted {
-            game_id: *game.id,
-            level: *game.level,
-            health: *game.health,
-            milestone: *game.milestone,
+            game_id: *game.id, level: *game.level, health: *game.health, milestone: *game.milestone,
         }
     }
 }
@@ -82,9 +79,7 @@ pub struct ShopEntered {
 pub impl ShopEnteredImpl of ShopEnteredTrait {
     #[inline]
     fn new(game: @Game) -> ShopEntered {
-        ShopEntered {
-            game_id: *game.id, shop: *game.shop, chips: *game.chips,
-        }
+        ShopEntered { game_id: *game.id, shop: *game.shop, chips: *game.chips }
     }
 }
 
@@ -102,12 +97,7 @@ pub struct OrbPurchased {
 pub impl OrbPurchasedImpl of OrbPurchasedTrait {
     #[inline]
     fn new(game: @Game, orb_id: u8, cost: u16) -> OrbPurchased {
-        OrbPurchased {
-            game_id: *game.id,
-            orb_id: orb_id,
-            cost: cost,
-            chips: *game.chips,
-        }
+        OrbPurchased { game_id: *game.id, orb_id: orb_id, cost: cost, chips: *game.chips }
     }
 }
 
@@ -124,9 +114,7 @@ pub struct ShopRefreshed {
 pub impl ShopRefreshedImpl of ShopRefreshedTrait {
     #[inline]
     fn new(game: @Game) -> ShopRefreshed {
-        ShopRefreshed {
-            game_id: *game.id, shop: *game.shop, chips: *game.chips,
-        }
+        ShopRefreshed { game_id: *game.id, shop: *game.shop, chips: *game.chips }
     }
 }
 
@@ -144,12 +132,7 @@ pub struct OrbBurned {
 pub impl OrbBurnedImpl of OrbBurnedTrait {
     #[inline]
     fn new(game: @Game, orb_id: u8, bag_index: u8) -> OrbBurned {
-        OrbBurned {
-            game_id: *game.id,
-            orb_id: orb_id,
-            bag_index: bag_index,
-            chips: *game.chips,
-        }
+        OrbBurned { game_id: *game.id, orb_id: orb_id, bag_index: bag_index, chips: *game.chips }
     }
 }
 

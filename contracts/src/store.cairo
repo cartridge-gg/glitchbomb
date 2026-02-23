@@ -64,17 +64,11 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn orb_pulled(
-        mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8,
-    ) {
+    fn orb_pulled(mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8) {
         if let Some(orb) = orb {
             self
                 .world
-                .emit_event(
-                    @OrbPulledTrait::new(
-                        *game.pull_count - index, game, orb.unbox(),
-                    ),
-                );
+                .emit_event(@OrbPulledTrait::new(*game.pull_count - index, game, orb.unbox()));
         }
     }
 
@@ -109,11 +103,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn pl_data_point(
-        mut self: Store, id: u32, game: @Game, potential_moonrocks: u16, orb: u8,
-    ) {
-        self
-            .world
-            .emit_event(@PLDataPointTrait::new(id, game, potential_moonrocks, orb));
+    fn pl_data_point(mut self: Store, id: u32, game: @Game, potential_moonrocks: u16, orb: u8) {
+        self.world.emit_event(@PLDataPointTrait::new(id, game, potential_moonrocks, orb));
     }
 }
