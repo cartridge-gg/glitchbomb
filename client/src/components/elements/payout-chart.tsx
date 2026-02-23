@@ -1,39 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  BASE_COST,
-  breakEvenPoints,
-  MAX_CHART_POINTS,
+  breakEvenScore,
+  MAX_SCORE,
   maxPayout,
-  PAYOUT_STEPS,
+  STARTERPACK_COUNT,
+  toTokens,
   tokenPayout,
 } from "@/helpers/payout";
 
 export interface PayoutChartProps {
-  /** Entry cost in dollars */
-  entryCost: number;
-  /** GLITCH token price in USD. Null = not yet loaded. */
+  /** Stake multiplier (1–STARTERPACK_COUNT) */
+  stake: number;
+  /** Token price in USD. Null = show raw token values. */
   tokenPrice: number | null;
 }
 
-export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
-  // When tokenPrice is available, show USD values; otherwise show raw token counts
+export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
   const hasPrice = tokenPrice != null && tokenPrice > 0;
 
-  // Build step data from PAYOUT_STEPS (sorted ascending by threshold)
-  const steps = [...PAYOUT_STEPS]
-    .reverse()
-    .map(([threshold, payout]) => {
-      const tokens = (payout * entryCost) / BASE_COST;
-      return {
-        threshold,
-        value: hasPrice ? tokens * tokenPrice : tokens,
-      };
-    });
-
-  const maxTokens = maxPayout(entryCost);
+  const maxTokens = toTokens(maxPayout(stake));
   const maxVal = hasPrice ? maxTokens * tokenPrice : maxTokens;
-  const bePoints = breakEvenPoints(entryCost, tokenPrice ?? undefined);
-  const beTokens = tokenPayout(bePoints, entryCost);
+  const beScore = breakEvenScore(stake, tokenPrice ?? undefined);
+  const beTokens = toTokens(tokenPayout(beScore, stake));
   const beValue = hasPrice ? beTokens * tokenPrice : beTokens;
 
   // Chart dimensions
@@ -46,33 +34,33 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
   const plotW = chartW - padL - padR;
   const plotH = chartH - padT - padB;
 
-  const yMax = maxVal * 1.1;
-  const toX = (pts: number) => padL + (pts / MAX_CHART_POINTS) * plotW;
+  const yMax = maxVal * 1.1 || 1;
+  const toX = (score: number) => padL + (score / MAX_SCORE) * plotW;
   const toY = (val: number) => padT + plotH - (val / yMax) * plotH;
 
-  // Build staircase path: H to next threshold, then V to its payout
-  let curvePath = `M ${toX(0)} ${toY(0)}`;
-  for (let i = 0; i < steps.length; i++) {
-    const nextThreshold =
-      i < steps.length - 1 ? steps[i + 1].threshold : MAX_CHART_POINTS;
-    curvePath += ` H ${toX(steps[i].threshold)} V ${toY(steps[i].value)}`;
-    // Extend horizontally to next threshold
-    curvePath += ` H ${toX(nextThreshold)}`;
+  // Build smooth curve path by sampling points
+  const SAMPLES = 100;
+  let curvePath = "";
+  for (let i = 0; i <= SAMPLES; i++) {
+    const score = (i / SAMPLES) * MAX_SCORE;
+    const tokens = toTokens(tokenPayout(score, stake));
+    const val = hasPrice ? tokens * tokenPrice : tokens;
+    const x = toX(score);
+    const y = toY(val);
+    curvePath += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
   }
 
-  // Base ($2) reference staircase
-  const showBaseCurve = entryCost > BASE_COST;
+  // Base (stake=1) reference curve when stake > 1
+  const showBaseCurve = stake > 1;
   let basePath = "";
   if (showBaseCurve) {
-    const baseSteps = [...PAYOUT_STEPS].reverse();
-    basePath = `M ${toX(0)} ${toY(0)}`;
-    for (let i = 0; i < baseSteps.length; i++) {
-      const [threshold, payout] = baseSteps[i];
-      const val = hasPrice ? payout * tokenPrice : payout;
-      const nextThreshold =
-        i < baseSteps.length - 1 ? baseSteps[i + 1][0] : MAX_CHART_POINTS;
-      basePath += ` H ${toX(threshold)} V ${toY(val)}`;
-      basePath += ` H ${toX(nextThreshold)}`;
+    for (let i = 0; i <= SAMPLES; i++) {
+      const score = (i / SAMPLES) * MAX_SCORE;
+      const tokens = toTokens(tokenPayout(score, 1));
+      const val = hasPrice ? tokens * tokenPrice : tokens;
+      const x = toX(score);
+      const y = toY(val);
+      basePath += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
     }
   }
 
@@ -81,8 +69,8 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
   const gridColor = "rgba(54, 248, 24, 0.06)";
   const lineColor = "#36F818";
 
-  // X-axis labels — moonrock thresholds from the step function
-  const xLabels = [0, 100, 150, 200, 250, MAX_CHART_POINTS];
+  // X-axis labels — score milestones
+  const xLabels = [0, 100, 200, 300, 400, MAX_SCORE];
 
   // Draw animation
   const pathRef = useRef<SVGPathElement>(null);
@@ -95,7 +83,7 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
     const len = path.getTotalLength();
     setPathLength(len);
     setPhase("ready");
-  }, [entryCost]);
+  }, [stake]);
 
   useEffect(() => {
     if (phase !== "ready") return;
@@ -111,7 +99,7 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
       className="w-full"
       style={{ fontFamily: "inherit" }}
     >
-      {/* Horizontal grid at $0 */}
+      {/* Horizontal grid at 0 */}
       <line
         x1={padL}
         y1={toY(0)}
@@ -122,59 +110,62 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
       />
 
       {/* Break-even dashed vertical line (top → intersection) */}
-      <line
-        x1={toX(bePoints)}
-        y1={padT}
-        x2={toX(bePoints)}
-        y2={toY(beValue)}
-        stroke={labelColor}
-        strokeWidth={0.8}
-        strokeDasharray="3 3"
-      />
+      {beScore < MAX_SCORE && (
+        <>
+          <line
+            x1={toX(beScore)}
+            y1={padT}
+            x2={toX(beScore)}
+            y2={toY(beValue)}
+            stroke={labelColor}
+            strokeWidth={0.8}
+            strokeDasharray="3 3"
+          />
 
-      {/* Break-even dashed horizontal line (left → intersection) */}
-      <line
-        x1={0}
-        y1={toY(beValue)}
-        x2={toX(bePoints)}
-        y2={toY(beValue)}
-        stroke={labelColor}
-        strokeWidth={0.8}
-        strokeDasharray="3 3"
-      />
+          {/* Break-even dashed horizontal line (left → intersection) */}
+          <line
+            x1={0}
+            y1={toY(beValue)}
+            x2={toX(beScore)}
+            y2={toY(beValue)}
+            stroke={labelColor}
+            strokeWidth={0.8}
+            strokeDasharray="3 3"
+          />
 
-      {/* "BREAK EVEN" badge — positioned at the intersection */}
-      <rect
-        x={toX(bePoints) + 4}
-        y={toY(beValue) - 7}
-        width={70}
-        height={14}
-        rx={3}
-        fill="rgba(54, 248, 24, 0.15)"
-      />
-      <text
-        x={toX(bePoints) + 39}
-        y={toY(beValue) + 4}
-        textAnchor="middle"
-        fill={valueColor}
-        fontSize={7}
-        className="font-secondary"
-      >
-        BREAK EVEN{" "}
-        {hasPrice ? `$${beValue.toFixed(0)}` : beValue.toFixed(0)}
-      </text>
+          {/* "BREAK EVEN" badge */}
+          <rect
+            x={toX(beScore) + 4}
+            y={toY(beValue) - 7}
+            width={70}
+            height={14}
+            rx={3}
+            fill="rgba(54, 248, 24, 0.15)"
+          />
+          <text
+            x={toX(beScore) + 39}
+            y={toY(beValue) + 4}
+            textAnchor="middle"
+            fill={valueColor}
+            fontSize={7}
+            className="font-secondary"
+          >
+            BREAK EVEN {beScore}
+          </text>
 
-      {/* Break-even dot */}
-      <circle
-        cx={toX(bePoints)}
-        cy={toY(beValue)}
-        r={3}
-        fill="#FFFFFF"
-        style={{
-          opacity: animated ? 1 : 0,
-          transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-        }}
-      />
+          {/* Break-even dot */}
+          <circle
+            cx={toX(beScore)}
+            cy={toY(beValue)}
+            r={3}
+            fill="#FFFFFF"
+            style={{
+              opacity: animated ? 1 : 0,
+              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+            }}
+          />
+        </>
+      )}
 
       {/* Base tier reference curve */}
       {showBaseCurve && (
@@ -188,19 +179,13 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
           />
           <text
             x={padL + plotW - 2}
-            y={
-              toY(
-                hasPrice
-                  ? tokenPayout(MAX_CHART_POINTS, BASE_COST) * tokenPrice
-                  : tokenPayout(MAX_CHART_POINTS, BASE_COST),
-              ) + 10
-            }
+            y={toY(hasPrice ? toTokens(maxPayout(1)) * tokenPrice : toTokens(maxPayout(1))) + 10}
             textAnchor="end"
             fill={labelColor}
             fontSize={7}
             className="font-secondary"
           >
-            {BASE_COST}x
+            1x
           </text>
         </>
       )}
@@ -238,18 +223,18 @@ export const PayoutChart = ({ entryCost, tokenPrice }: PayoutChartProps) => {
         0
       </text>
 
-      {/* X-axis labels (points) */}
-      {xLabels.map((pts) => (
+      {/* X-axis labels (score) */}
+      {xLabels.map((score) => (
         <text
-          key={`x-${pts}`}
-          x={toX(pts)}
+          key={`x-${score}`}
+          x={toX(score)}
           y={padT + plotH + 16}
           textAnchor="middle"
           fill={labelColor}
           fontSize={8}
           className="font-secondary"
         >
-          {pts}
+          {score}
         </text>
       ))}
     </svg>

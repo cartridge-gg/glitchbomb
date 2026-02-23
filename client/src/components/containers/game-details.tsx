@@ -2,10 +2,11 @@ import { CostStepper } from "@/components/elements/cost-stepper";
 import { PayoutChart } from "@/components/elements/payout-chart";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import {
-  breakEvenPoints,
-  COST_TIERS,
+  breakEvenScore,
   maxPayout,
-  rewardMultiplier,
+  STARTERPACK_COUNT,
+  tierPrice,
+  toTokens,
 } from "@/helpers/payout";
 
 interface GameDetailsProps {
@@ -19,35 +20,41 @@ export const GameDetails = ({
   onTierIndexChange,
   tokenPrice = null,
 }: GameDetailsProps) => {
-  const cost = COST_TIERS[tierIndex];
-  const multiplier = rewardMultiplier(cost);
-  const max = maxPayout(cost);
+  const stake = tierIndex + 1;
+  const cost = toTokens(tierPrice(stake));
+  const max = toTokens(maxPayout(stake));
 
   const hasPrice = tokenPrice != null && tokenPrice > 0;
+  const costUsd = hasPrice ? cost * tokenPrice : null;
   const maxUsd = hasPrice ? max * tokenPrice : null;
 
   const labelColor = "rgba(54, 248, 24, 0.40)";
   const valueColor = "#36F818";
-
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
+  const beScore = breakEvenScore(stake, tokenPrice ?? undefined);
+
   const stats = [
-    { label: "Cost", value: `$${cost.toFixed(2)}`, color: "#FACC15" },
+    {
+      label: "Cost",
+      value: costUsd != null ? `$${costUsd.toFixed(2)}` : `${cost.toFixed(2)} tokens`,
+      color: "#FACC15",
+    },
     {
       label: "Reward Multiplier",
-      value: `${multiplier % 1 === 0 ? multiplier : multiplier.toFixed(1)}X`,
+      value: `${stake}X`,
     },
     {
       label: "Break Even",
-      value: `${breakEvenPoints(cost, tokenPrice ?? undefined)} Moonrocks`,
+      value: `${beScore} Points`,
     },
     { label: "Expires In", value: "24HRS" },
     {
       label: "Maximum Reward",
       value:
         maxUsd != null
-          ? `$${maxUsd.toFixed(0)} (${max.toFixed(0)} Glitch)`
-          : `${max.toFixed(0)} Glitch`,
+          ? `$${maxUsd.toFixed(0)} (${max.toFixed(0)} tokens)`
+          : `${max.toFixed(2)} tokens`,
       highlight: true,
     },
   ];
@@ -70,17 +77,19 @@ export const GameDetails = ({
             className="rounded-xl p-3"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
           >
-            <PayoutChart entryCost={cost} tokenPrice={tokenPrice ?? null} />
+            <PayoutChart stake={stake} tokenPrice={tokenPrice ?? null} />
           </div>
         </GradientBorder>
 
         {/* Cost stepper */}
         <CostStepper
-          count={COST_TIERS.length}
+          count={STARTERPACK_COUNT}
           selectedIndex={tierIndex}
           onDecrement={() => onTierIndexChange(Math.max(0, tierIndex - 1))}
           onIncrement={() =>
-            onTierIndexChange(Math.min(COST_TIERS.length - 1, tierIndex + 1))
+            onTierIndexChange(
+              Math.min(STARTERPACK_COUNT - 1, tierIndex + 1),
+            )
           }
         />
 

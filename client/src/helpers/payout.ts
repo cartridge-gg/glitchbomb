@@ -1,57 +1,92 @@
-/** Step thresholds: moonrocks → glitch tokens. Mirrors on-chain cash_out_payout. */
-export const PAYOUT_STEPS: [number, number][] = [
-  [300, 10],
-  [250, 8],
-  [200, 6],
-  [150, 4],
-  [120, 3],
-  [100, 2],
-  [60, 1],
-];
+/**
+ * On-chain constants from contracts/src/constants.cairo
+ */
+export const MAX_SCORE = 500;
+export const REWARD_NUMERATOR = 488_000_000_000_000n;
+export const MIN_REWARD = 1n;
+export const STARTERPACK_COUNT = 10;
+export const PRICE_MULTIPLIER = 100_000n;
+export const DEFAULT_ENTRY_PRICE = 100_000_000n;
+export const TOKEN_DECIMALS = 6;
 
-export function cashOutPayout(points: number): number {
-  for (const [threshold, payout] of PAYOUT_STEPS) {
-    if (points >= threshold) return payout;
-  }
-  return 0;
-}
+/**
+ * Compute base reward for a given score using the nums-style progressive curve.
+ * Mirrors on-chain RewarderImpl::amount at target supply.
+ *
+ * reward = NUM / (DEN - score^5) - (NUM - MIN_REWARD * DEN) / DEN
+ * where DEN = (MAX_SCORE + 3)^5
+ */
+export function baseReward(score: number): number {
+  if (score <= 0) return Number(MIN_REWARD);
+  if (score > MAX_SCORE) score = MAX_SCORE;
 
-// --- Cost tiers & payout helpers ---
+  const num = REWARD_NUMERATOR;
+  const base = BigInt(MAX_SCORE + 3); // 503
+  const den = base ** 5n;
+  const s5 = BigInt(score) ** 5n;
 
-export const COST_TIERS = [2, 5, 10, 25, 50, 100, 250, 500];
-export const BASE_COST = COST_TIERS[0];
+  if (s5 >= den) return Number(num);
 
-/** Max points shown on the payout chart. */
-export const MAX_CHART_POINTS = 300;
-
-/** Reward multiplier relative to the base $2 tier. */
-export function rewardMultiplier(entryCost: number): number {
-  return entryCost / BASE_COST;
-}
-
-/** Token payout for a given number of points at a given entry cost. */
-export function tokenPayout(points: number, entryCost: number): number {
-  return (cashOutPayout(points) * entryCost) / BASE_COST;
+  const reward = num / (den - s5) - (num - MIN_REWARD * den) / den;
+  return Number(reward);
 }
 
 /**
- * Find the points threshold where USD value of token payout >= entry cost (break-even).
- * When tokenPrice is provided, break-even = first point where tokenPayout * tokenPrice >= entryCost.
- * Without tokenPrice, falls back to tokenPayout >= entryCost (assumes $1/token).
+ * Token payout (raw units) for a given score and stake multiplier.
+ * Mirrors on-chain: reward * stake
  */
-export function breakEvenPoints(
-  entryCost: number,
-  tokenPrice?: number,
-): number {
-  for (let p = 1; p <= MAX_CHART_POINTS; p++) {
-    const tokens = tokenPayout(p, entryCost);
-    const usdValue = tokenPrice != null ? tokens * tokenPrice : tokens;
-    if (usdValue >= entryCost) return p;
-  }
-  return MAX_CHART_POINTS;
+export function tokenPayout(score: number, stake: number): number {
+  return baseReward(score) * stake;
 }
 
-/** Maximum token payout at MAX_CHART_POINTS. */
-export function maxPayout(entryCost: number): number {
-  return tokenPayout(MAX_CHART_POINTS, entryCost);
+/**
+ * Convert raw token units to human-readable decimal value.
+ */
+export function toTokens(rawAmount: bigint | number): number {
+  return Number(rawAmount) / 10 ** TOKEN_DECIMALS;
+}
+
+/**
+ * Compute tier price in raw token units.
+ * Mirrors on-chain starterpack initialization:
+ *   price = stake * base_price * (PM - stake * PM / 100) / PM
+ */
+export function tierPrice(stake: number): bigint {
+  const s = BigInt(stake);
+  return (
+    (s *
+      DEFAULT_ENTRY_PRICE *
+      (PRICE_MULTIPLIER - (s * PRICE_MULTIPLIER) / 100n)) /
+    PRICE_MULTIPLIER
+  );
+}
+
+/** All tier prices in raw token units (stake 1 through STARTERPACK_COUNT). */
+export const TIER_PRICES: bigint[] = Array.from(
+  { length: STARTERPACK_COUNT },
+  (_, i) => tierPrice(i + 1),
+);
+
+/** Maximum token payout (raw units) at max score for a given stake. */
+export function maxPayout(stake: number): number {
+  return tokenPayout(MAX_SCORE, stake);
+}
+
+/**
+ * Find the score where token payout reaches break-even.
+ * When tokenPrice (USD per token) is provided, break-even = first score
+ * where tokenPayout * tokenPrice >= tier cost in USD.
+ * Without tokenPrice, compares raw token units directly.
+ */
+export function breakEvenScore(
+  stake: number,
+  tokenPrice?: number,
+): number {
+  const cost = toTokens(tierPrice(stake));
+  for (let s = 1; s <= MAX_SCORE; s++) {
+    const tokens = toTokens(tokenPayout(s, stake));
+    const value = tokenPrice != null ? tokens * tokenPrice : tokens;
+    if (value >= cost) return s;
+  }
+  return MAX_SCORE;
 }
