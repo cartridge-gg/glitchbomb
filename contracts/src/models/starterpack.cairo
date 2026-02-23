@@ -15,6 +15,7 @@ pub impl StarterpackImpl of StarterpackTrait {
         id: u32,
         reissuable: bool,
         referral_percentage: u8,
+        multiplier: u8,
         price: u256,
         payment_token: starknet::ContractAddress,
     ) -> Starterpack {
@@ -23,6 +24,7 @@ pub impl StarterpackImpl of StarterpackTrait {
             id: id,
             reissuable: reissuable,
             referral_percentage: referral_percentage,
+            multiplier: multiplier,
             price: price,
             payment_token: payment_token,
         }
@@ -67,11 +69,13 @@ pub impl StarterpackImpl of StarterpackTrait {
         ref self: Starterpack,
         reissuable: bool,
         referral_percentage: u8,
+        multiplier: u8,
         price: u256,
         payment_token: starknet::ContractAddress,
     ) {
         self.reissuable = reissuable;
         self.referral_percentage = referral_percentage;
+        self.multiplier = multiplier;
         self.price = price;
         self.payment_token = payment_token;
     }

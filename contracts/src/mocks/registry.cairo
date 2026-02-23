@@ -5,7 +5,13 @@ pub fn NAME() -> ByteArray {
 #[dojo::contract]
 mod Registry {
     use starknet::ContractAddress;
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use crate::interfaces::registry::IStarterpackRegistry;
+
+    #[storage]
+    struct Storage {
+        next_id: u32,
+    }
 
     #[abi(embed_v0)]
     impl ExternalImpl of IStarterpackRegistry<ContractState> {
@@ -19,7 +25,9 @@ mod Registry {
             payment_receiver: Option<ContractAddress>,
             metadata: ByteArray,
         ) -> u32 {
-            0
+            let id = self.next_id.read();
+            self.next_id.write(id + 1);
+            id
         }
 
         fn update(

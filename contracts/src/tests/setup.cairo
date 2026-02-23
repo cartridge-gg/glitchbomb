@@ -53,7 +53,6 @@ pub mod setup {
         NamespaceDef {
             namespace: NAMESPACE(),
             resources: [
-                TestResource::Model(models::m_Pack::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Game::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Starterpack::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Config::TEST_CLASS_HASH),
