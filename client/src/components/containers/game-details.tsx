@@ -53,8 +53,8 @@ export const GameDetails = ({
       label: "Maximum Reward",
       value:
         maxUsd != null
-          ? `$${maxUsd.toFixed(0)} (${max.toFixed(0)} tokens)`
-          : `${max.toFixed(2)} tokens`,
+          ? `${max.toFixed(4)} tokens ~ $${maxUsd.toFixed(2)}`
+          : `${max.toFixed(4)} tokens`,
       highlight: true,
     },
   ];
@@ -80,6 +80,21 @@ export const GameDetails = ({
             <PayoutChart stake={stake} tokenPrice={tokenPrice ?? null} />
           </div>
         </GradientBorder>
+
+        {/* Token price info box (like nums) */}
+        {hasPrice && (
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 py-2"
+            style={{ backgroundColor: rowBg }}
+          >
+            <span className="font-secondary text-xs" style={{ color: labelColor }}>
+              *
+            </span>
+            <span className="font-secondary text-xs" style={{ color: labelColor }}>
+              1 token = ${tokenPrice.toFixed(5)} USD
+            </span>
+          </div>
+        )}
 
         {/* Cost stepper */}
         <CostStepper
