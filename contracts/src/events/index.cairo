@@ -7,9 +7,7 @@ use crate::types::orb::Orb;
 #[dojo::event]
 pub struct GameStarted {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub level: u8,
     pub health: u8,
     pub milestone: u16,
@@ -20,7 +18,6 @@ pub impl GameStartedImpl of GameStartedTrait {
     #[inline]
     fn new(game: @Game) -> GameStarted {
         GameStarted {
-            pack_id: *game.pack_id,
             game_id: *game.id,
             level: *game.level,
             health: *game.health,
@@ -33,25 +30,22 @@ pub impl GameStartedImpl of GameStartedTrait {
 #[dojo::event]
 pub struct OrbPulled {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     #[key]
     pub id: u8,
     pub orb: u8,
-    pub potential_moonrocks: u16 // pack.moonrocks + game.points (what you'd have if you cash out)
+    pub potential_moonrocks: u16 // game.moonrocks + game.points (what you'd have if you cash out)
 }
 
 #[generate_trait]
 pub impl OrbPulledImpl of OrbPulledTrait {
     #[inline]
-    fn new(id: u8, game: @Game, orb: @Orb, pack_moonrocks: u16) -> OrbPulled {
+    fn new(id: u8, game: @Game, orb: @Orb) -> OrbPulled {
         OrbPulled {
-            pack_id: *game.pack_id,
             game_id: *game.id,
             id: id,
             orb: (*orb).into(),
-            potential_moonrocks: pack_moonrocks + *game.points,
+            potential_moonrocks: *game.moonrocks + *game.points,
         }
     }
 }
@@ -60,9 +54,7 @@ pub impl OrbPulledImpl of OrbPulledTrait {
 #[dojo::event]
 pub struct PLDataPoint {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     #[key]
     pub id: u32, // Sequential ID for ordering
     pub potential_moonrocks: u16,
@@ -72,8 +64,8 @@ pub struct PLDataPoint {
 #[generate_trait]
 pub impl PLDataPointImpl of PLDataPointTrait {
     #[inline]
-    fn new(id: u32, pack_id: u64, game_id: u8, potential_moonrocks: u16, orb: u8) -> PLDataPoint {
-        PLDataPoint { pack_id, game_id, id, potential_moonrocks, orb }
+    fn new(id: u32, game: @Game, potential_moonrocks: u16, orb: u8) -> PLDataPoint {
+        PLDataPoint { game_id: *game.id, id, potential_moonrocks, orb }
     }
 }
 
@@ -81,9 +73,7 @@ pub impl PLDataPointImpl of PLDataPointTrait {
 #[dojo::event]
 pub struct ShopEntered {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub shop: u128,
     pub chips: u16,
 }
@@ -93,7 +83,7 @@ pub impl ShopEnteredImpl of ShopEnteredTrait {
     #[inline]
     fn new(game: @Game) -> ShopEntered {
         ShopEntered {
-            pack_id: *game.pack_id, game_id: *game.id, shop: *game.shop, chips: *game.chips,
+            game_id: *game.id, shop: *game.shop, chips: *game.chips,
         }
     }
 }
@@ -102,9 +92,7 @@ pub impl ShopEnteredImpl of ShopEnteredTrait {
 #[dojo::event]
 pub struct OrbPurchased {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub orb_id: u8,
     pub cost: u16,
     pub chips: u16,
@@ -115,7 +103,6 @@ pub impl OrbPurchasedImpl of OrbPurchasedTrait {
     #[inline]
     fn new(game: @Game, orb_id: u8, cost: u16) -> OrbPurchased {
         OrbPurchased {
-            pack_id: *game.pack_id,
             game_id: *game.id,
             orb_id: orb_id,
             cost: cost,
@@ -128,9 +115,7 @@ pub impl OrbPurchasedImpl of OrbPurchasedTrait {
 #[dojo::event]
 pub struct ShopRefreshed {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub shop: u128,
     pub chips: u16,
 }
@@ -140,7 +125,7 @@ pub impl ShopRefreshedImpl of ShopRefreshedTrait {
     #[inline]
     fn new(game: @Game) -> ShopRefreshed {
         ShopRefreshed {
-            pack_id: *game.pack_id, game_id: *game.id, shop: *game.shop, chips: *game.chips,
+            game_id: *game.id, shop: *game.shop, chips: *game.chips,
         }
     }
 }
@@ -149,9 +134,7 @@ pub impl ShopRefreshedImpl of ShopRefreshedTrait {
 #[dojo::event]
 pub struct OrbBurned {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub orb_id: u8,
     pub bag_index: u8,
     pub chips: u16,
@@ -162,7 +145,6 @@ pub impl OrbBurnedImpl of OrbBurnedTrait {
     #[inline]
     fn new(game: @Game, orb_id: u8, bag_index: u8) -> OrbBurned {
         OrbBurned {
-            pack_id: *game.pack_id,
             game_id: *game.id,
             orb_id: orb_id,
             bag_index: bag_index,
@@ -175,9 +157,7 @@ pub impl OrbBurnedImpl of OrbBurnedTrait {
 #[dojo::event]
 pub struct ShopExited {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub level: u8,
     pub health: u8,
     pub milestone: u16,
@@ -189,7 +169,6 @@ pub impl ShopExitedImpl of ShopExitedTrait {
     #[inline]
     fn new(game: @Game, cost: u16) -> ShopExited {
         ShopExited {
-            pack_id: *game.pack_id,
             game_id: *game.id,
             level: *game.level,
             health: *game.health,
@@ -203,9 +182,7 @@ pub impl ShopExitedImpl of ShopExitedTrait {
 #[dojo::event]
 pub struct GameOver {
     #[key]
-    pub pack_id: u64,
-    #[key]
-    pub game_id: u8,
+    pub game_id: u64,
     pub reason: u8, // 0 = death, 1 = cash_out
     pub points: u16,
 }
@@ -214,6 +191,6 @@ pub struct GameOver {
 pub impl GameOverImpl of GameOverTrait {
     #[inline]
     fn new(game: @Game, reason: u8) -> GameOver {
-        GameOver { pack_id: *game.pack_id, game_id: *game.id, reason: reason, points: *game.points }
+        GameOver { game_id: *game.id, reason: reason, points: *game.points }
     }
 }

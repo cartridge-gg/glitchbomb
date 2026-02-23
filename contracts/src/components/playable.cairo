@@ -9,7 +9,6 @@ pub mod PlayableComponent {
     use crate::interfaces::erc20::IERC20DispatcherTrait;
     use crate::models::config::{ConfigAssert, ConfigTrait};
     use crate::models::game::{BASE_MULTIPLIER, GameAssert, GameTrait, SUPP_MULTIPLIER};
-    use crate::models::pack::{PackAssert, PackTrait};
     use crate::models::starterpack::StarterpackAssert;
     use crate::store::StoreTrait;
     use crate::systems::collection::{
@@ -56,11 +55,11 @@ pub mod PlayableComponent {
             let collection = self.collection(world);
             while quantity > 0 {
                 // [Interaction] Mint a game
-                let pack_id = collection.mint(recipient, true);
+                let game_id = collection.mint(recipient, true);
 
-                // [Effect] Create game with starterpack multiplier
-                let pack = PackTrait::new(id: pack_id, multiplier: starterpack.multiplier);
-                store.set_pack(@pack);
+                // [Effect] Create game with starterpack stake
+                let game = GameTrait::new(id: game_id, stake: starterpack.multiplier);
+                store.set_game(@game);
                 quantity -= 1;
             }
 
@@ -78,40 +77,33 @@ pub mod PlayableComponent {
     pub impl InternalImpl<
         TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
     > of InternalTrait<TContractState> {
-        fn start(ref self: ComponentState<TContractState>, world: WorldStorage, pack_id: u64) {
+        fn start(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
-            // [Check] Pack is not over
-            let mut pack = store.pack(pack_id);
-            pack.assert_not_over();
+            // [Check] Game has not been started yet
+            let mut game = store.game(game_id);
+            game.assert_not_started();
 
-            // [Check] Previous game is over if exists
-            let game = store.game(pack_id, pack.game_count);
-            game.assert_is_over();
-
-            // [Effect] Create and start a new game
-            let game_id: u8 = pack.open();
-            let mut game = GameTrait::new(pack_id, game_id);
+            // [Effect] Start the game
             let cost = game.start();
-            store.set_game(@game);
 
             // [Event] Emit PLDataPoint before level cost (initial moonrocks)
-            store.pl_data_point(0, pack_id, game_id, pack.moonrocks, 0);
+            store.pl_data_point(0, @game, game.moonrocks, 0);
 
-            // [Effect] Update pack earnings if exists
-            pack.spend(cost);
-            store.set_pack(@pack);
+            // [Effect] Spend moonrocks for entry
+            game.spend_moonrocks(cost);
+            store.set_game(@game);
 
             // [Event] Emit PLDataPoint after level cost
-            store.pl_data_point(1, pack_id, game_id, pack.moonrocks + game.points, 0);
+            store.pl_data_point(1, @game, game.moonrocks + game.points, 0);
 
             // [Interaction] Update token metadata
-            collection.update(pack_id.into());
+            collection.update(game_id.into());
 
             // [Event] Emit GameStarted
             store.game_started(@game);
@@ -120,45 +112,39 @@ pub mod PlayableComponent {
         fn pull(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
         ) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
-
-            // [Effect] Get pack for moonrocks tracking
-            let mut pack = store.pack(pack_id);
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let config = store.config();
             let mut rng = RandomTrait::new_vrf(config.vrf());
             let (orbs, earnings) = game.pull(rng.next_seed());
-            store.set_game(@game);
 
             // Calculate potential moonrocks and PL id base
-            let potential_moonrocks = pack.moonrocks + game.points;
+            let potential_moonrocks = game.moonrocks + game.points;
             let pl_base_id: u32 = 2 + (game.pull_count.into() - orbs.len()) * 2;
 
             // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
-            store.orb_pulled(@game, orbs.get(0), 0, pack.moonrocks);
-            store.orb_pulled(@game, orbs.get(1), 1, pack.moonrocks);
+            store.orb_pulled(@game, orbs.get(0), 0);
+            store.orb_pulled(@game, orbs.get(1), 1);
 
             if let Option::Some(orb) = orbs.get(0) {
                 let orb_type: u8 = (*orb.unbox()).into();
-                store.pl_data_point(pl_base_id, pack_id, game_id, potential_moonrocks, orb_type);
+                store.pl_data_point(pl_base_id, @game, potential_moonrocks, orb_type);
             }
             if let Option::Some(orb) = orbs.get(1) {
                 let orb_type: u8 = (*orb.unbox()).into();
-                store
-                    .pl_data_point(pl_base_id + 1, pack_id, game_id, potential_moonrocks, orb_type);
+                store.pl_data_point(pl_base_id + 1, @game, potential_moonrocks, orb_type);
             }
 
             // [Event] Emit GameOver if dead
@@ -166,19 +152,19 @@ pub mod PlayableComponent {
                 store.game_over(@game, 0);
             }
 
-            // [Effect] Update pack earnings if exists
+            // [Effect] Update game earnings if exists
             if (earnings == 0) {
+                store.set_game(@game);
                 return;
             }
-            pack.earn(earnings);
-            store.set_pack(@pack);
+            game.earn_moonrocks(earnings);
+            store.set_game(@game);
         }
 
         fn cash_out(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
         ) {
             // [Setup] Store
             let store = StoreTrait::new(world);
@@ -186,10 +172,10 @@ pub mod PlayableComponent {
             // [Check] Token ownership
             let collection = self.collection(world);
             let caller = starknet::get_caller_address();
-            collection.assert_is_owner(caller, pack_id.into());
+            collection.assert_is_owner(caller, game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Effect] Read score before cash_out clears it
@@ -197,27 +183,26 @@ pub mod PlayableComponent {
 
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();
-            store.set_game(@game);
 
             // [Event] Emit GameOver (cash out)
             store.game_over(@game, 1);
 
-            // [Effect] Compute reward via curve, multiplied by pack multiplier
+            // [Effect] Compute reward via curve, multiplied by stake
             let config = store.config();
             let token = config.token();
             let supply = token.total_supply();
             let target = config.target_supply;
             let reward: u64 = RewarderImpl::amount(score, supply, target);
-            let mut pack = store.pack(pack_id);
-            let reward: u64 = reward * pack.multiplier.into();
+            let reward: u64 = reward * game.stake.into();
 
             if reward == 0 {
+                store.set_game(@game);
                 return;
             }
 
             let earnings: u16 = reward.try_into().unwrap();
-            pack.earn(earnings);
-            store.set_pack(@pack);
+            game.earn_moonrocks(earnings);
+            store.set_game(@game);
 
             // [Interaction] Mint moonrocks token to caller
             token.mint(caller, earnings.into());
@@ -226,18 +211,17 @@ pub mod PlayableComponent {
         fn enter(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
         ) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Effect] Enter shop
@@ -253,8 +237,7 @@ pub mod PlayableComponent {
         fn buy(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
             ref indices: Span<u8>,
         ) {
             // [Setup] Store
@@ -262,10 +245,10 @@ pub mod PlayableComponent {
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Info] Get shop orbs for event emission
@@ -293,45 +276,41 @@ pub mod PlayableComponent {
         fn exit(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
         ) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Effect] Exit shop and get next level cost (applies level-based curse)
             let cost = game.exit();
-            store.set_game(@game);
 
             // [Event] Emit ShopExited (includes next level info)
             store.shop_exited(@game, cost);
 
             // [Effect] Spend moonrocks for next level
-            let mut pack = store.pack(pack_id);
-            pack.spend(cost);
-            store.set_pack(@pack);
+            game.spend_moonrocks(cost);
+            store.set_game(@game);
 
             // [Event] Emit PLDataPoint for level cost
             // Use a high base id to avoid collision with pull events
             // pl_id = 2 + pull_count * 2 + level_offset
             let pl_id: u32 = 2 + (game.pull_count.into() * 2) + (game.level.into() - 1);
-            let potential = pack.moonrocks + game.points;
-            store.pl_data_point(pl_id, pack_id, game_id, potential, 0);
+            let potential = game.moonrocks + game.points;
+            store.pl_data_point(pl_id, @game, potential, 0);
         }
 
         fn refresh(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
         ) {
             // [Check] Feature disabled
             assert(false, 'Refresh is disabled');
@@ -341,10 +320,10 @@ pub mod PlayableComponent {
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Effect] Refresh shop (costs 4 chips, can only do once)
@@ -360,8 +339,7 @@ pub mod PlayableComponent {
         fn burn(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            pack_id: u64,
-            game_id: u8,
+            game_id: u64,
             bag_index: u8,
         ) {
             // [Check] Feature disabled
@@ -372,10 +350,10 @@ pub mod PlayableComponent {
 
             // [Check] Token ownership
             let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), pack_id.into());
+            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
 
             // [Check] Game is not over
-            let mut game = store.game(pack_id, game_id);
+            let mut game = store.game(game_id);
             game.assert_not_over();
 
             // [Info] Get orb being burned for event

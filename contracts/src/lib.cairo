@@ -32,7 +32,6 @@ pub mod models {
     pub mod config;
     pub mod game;
     pub mod index;
-    pub mod pack;
     pub mod starterpack;
 }
 

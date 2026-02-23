@@ -5,7 +5,6 @@ pub const MAX_CAPACITY: u32 = 50;
 
 pub const DEFAULT_MOONROCKS: u16 = 100;
 pub const DEFAULT_ENTRY_PRICE: u256 = 100_000_000;
-pub const DEFAULT_GAMES_COUNT: u8 = 5;
 pub const DEFAULT_LEVEL: u8 = 1;
 
 pub const PRICE_MULTIPLIER: u256 = 100_000;

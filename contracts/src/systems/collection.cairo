@@ -30,7 +30,6 @@ pub mod Collection {
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
     use crate::constants::{BANNER, CLIENT_URL, DESCRIPTION, IMAGE, NAME, NAMESPACE, SYMBOL};
-    use crate::models::pack::PackTrait;
     use crate::store::StoreTrait;
     use crate::systems::play::NAME as PLAY_NAME;
     use crate::types::metadata::Metadata;
@@ -230,13 +229,13 @@ pub mod Collection {
             // [Return] Token URI
             let world = self.world(@NAMESPACE());
             let mut store = StoreTrait::new(world);
-            let pack = store.pack(game_id);
+            let game = store.game(game_id);
             Metadata::gen(
                 name: "Glitch Bomb Games",
                 description: "Glitch Bomb Games",
-                game_id: pack.id,
-                game_score: pack.moonrocks.into(),
-                game_over: pack.is_over(),
+                game_id: game.id,
+                game_score: game.moonrocks.into(),
+                game_over: game.over,
             )
         }
     }

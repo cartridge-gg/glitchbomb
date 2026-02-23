@@ -5,7 +5,7 @@ use crate::events::index::{
     GameOverTrait, GameStartedTrait, OrbBurnedTrait, OrbPulledTrait, OrbPurchasedTrait,
     PLDataPointTrait, ShopEnteredTrait, ShopExitedTrait, ShopRefreshedTrait,
 };
-use crate::models::index::{Config, Game, Pack, Starterpack};
+use crate::models::index::{Config, Game, Starterpack};
 use crate::types::orb::Orb;
 
 #[derive(Copy, Drop)]
@@ -44,23 +44,11 @@ pub impl StoreImpl of StoreTrait {
         self.world.write_model(starterpack)
     }
 
-    // Pack
-
-    #[inline]
-    fn pack(self: @Store, pack_id: u64) -> Pack {
-        self.world.read_model(pack_id)
-    }
-
-    #[inline]
-    fn set_pack(mut self: Store, pack: @Pack) {
-        self.world.write_model(pack)
-    }
-
     // Game
 
     #[inline]
-    fn game(self: @Store, pack_id: u64, game_id: u8) -> Game {
-        self.world.read_model((pack_id, game_id))
+    fn game(self: @Store, game_id: u64) -> Game {
+        self.world.read_model(game_id)
     }
 
     #[inline]
@@ -77,14 +65,14 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn orb_pulled(
-        mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8, pack_moonrocks: u16,
+        mut self: Store, game: @Game, orb: Option<Box<@Orb>>, index: u8,
     ) {
         if let Some(orb) = orb {
             self
                 .world
                 .emit_event(
                     @OrbPulledTrait::new(
-                        *game.pull_count - index, game, orb.unbox(), pack_moonrocks,
+                        *game.pull_count - index, game, orb.unbox(),
                     ),
                 );
         }
@@ -122,10 +110,10 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn pl_data_point(
-        mut self: Store, id: u32, pack_id: u64, game_id: u8, potential_moonrocks: u16, orb: u8,
+        mut self: Store, id: u32, game: @Game, potential_moonrocks: u16, orb: u8,
     ) {
         self
             .world
-            .emit_event(@PLDataPointTrait::new(id, pack_id, game_id, potential_moonrocks, orb));
+            .emit_event(@PLDataPointTrait::new(id, game, potential_moonrocks, orb));
     }
 }

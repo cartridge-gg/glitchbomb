@@ -5,14 +5,14 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait IPlay<T> {
-    fn start(ref self: T, pack_id: u64);
-    fn pull(ref self: T, pack_id: u64, game_id: u8);
-    fn cash_out(ref self: T, pack_id: u64, game_id: u8);
-    fn enter(ref self: T, pack_id: u64, game_id: u8);
-    fn buy(ref self: T, pack_id: u64, game_id: u8, indices: Span<u8>);
-    fn exit(ref self: T, pack_id: u64, game_id: u8);
-    fn refresh(ref self: T, pack_id: u64, game_id: u8);
-    fn burn(ref self: T, pack_id: u64, game_id: u8, bag_index: u8);
+    fn start(ref self: T, game_id: u64);
+    fn pull(ref self: T, game_id: u64);
+    fn cash_out(ref self: T, game_id: u64);
+    fn enter(ref self: T, game_id: u64);
+    fn buy(ref self: T, game_id: u64, indices: Span<u8>);
+    fn exit(ref self: T, game_id: u64);
+    fn refresh(ref self: T, game_id: u64);
+    fn burn(ref self: T, game_id: u64, bag_index: u8);
 }
 
 #[dojo::contract]
@@ -79,61 +79,60 @@ pub mod Play {
 
     #[abi(embed_v0)]
     impl PlayImpl of IPlay<ContractState> {
-        fn start(ref self: ContractState, pack_id: u64) {
+        fn start(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Start game
-            self.playable.start(world, pack_id)
+            self.playable.start(world, game_id)
         }
 
-        fn pull(ref self: ContractState, pack_id: u64, game_id: u8) {
+        fn pull(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Pull game
-            self.playable.pull(world, pack_id, game_id)
+            self.playable.pull(world, game_id)
         }
 
-        fn cash_out(ref self: ContractState, pack_id: u64, game_id: u8) {
+        fn cash_out(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Cash out game
-            self.playable.cash_out(world, pack_id, game_id)
+            self.playable.cash_out(world, game_id)
         }
 
-        fn enter(ref self: ContractState, pack_id: u64, game_id: u8) {
+        fn enter(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Enter game
-            self.playable.enter(world, pack_id, game_id)
+            self.playable.enter(world, game_id)
         }
 
-        fn buy(ref self: ContractState, pack_id: u64, game_id: u8, mut indices: Span<u8>) {
+        fn buy(ref self: ContractState, game_id: u64, mut indices: Span<u8>) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Buy items
-            self.playable.buy(world, pack_id, game_id, ref indices)
+            self.playable.buy(world, game_id, ref indices)
         }
 
-        fn exit(ref self: ContractState, pack_id: u64, game_id: u8) {
+        fn exit(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Exit shop
-            self.playable.exit(world, pack_id, game_id)
+            self.playable.exit(world, game_id)
         }
 
-        fn refresh(ref self: ContractState, pack_id: u64, game_id: u8) {
+        fn refresh(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Refresh shop
-            self.playable.refresh(world, pack_id, game_id)
+            self.playable.refresh(world, game_id)
         }
 
-        fn burn(ref self: ContractState, pack_id: u64, game_id: u8, bag_index: u8) {
+        fn burn(ref self: ContractState, game_id: u64, bag_index: u8) {
             // [Setup] World
             let world = self.world(@NAMESPACE());
             // [Effect] Burn orb from bag
-            self.playable.burn(world, pack_id, game_id, bag_index)
+            self.playable.burn(world, game_id, bag_index)
         }
     }
 }
-
