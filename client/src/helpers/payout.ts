@@ -2,32 +2,32 @@
  * On-chain constants from contracts/src/constants.cairo
  */
 export const MAX_SCORE = 500;
-export const REWARD_NUMERATOR = 488_000_000_000_000n;
-export const MIN_REWARD = 1n;
+export const REWARD_NUMERATOR = 359_105_052_483_616_060n;
+export const REWARD_OFFSET = 10;
 export const STARTERPACK_COUNT = 10;
 export const PRICE_MULTIPLIER = 100_000n;
 export const DEFAULT_ENTRY_PRICE = 2_000_000n;
 export const TOKEN_DECIMALS = 6;
 
 /**
- * Compute base reward for a given score using the nums-style progressive curve.
+ * Compute base reward for a given score using the progressive x^5 curve.
  * Mirrors on-chain RewarderImpl::amount at target supply.
  *
- * reward = NUM / (DEN - score^5) - (NUM - MIN_REWARD * DEN) / DEN
- * where DEN = (MAX_SCORE + 3)^5
+ * reward = NUM / (DEN - score^5) - NUM / DEN
+ * where DEN = (MAX_SCORE + REWARD_OFFSET)^5 = 510^5
  */
 export function baseReward(score: number): number {
-  if (score <= 0) return Number(MIN_REWARD);
+  if (score <= 0) return 0;
   if (score > MAX_SCORE) score = MAX_SCORE;
 
   const num = REWARD_NUMERATOR;
-  const base = BigInt(MAX_SCORE + 3); // 503
+  const base = BigInt(MAX_SCORE + REWARD_OFFSET); // 510
   const den = base ** 5n;
   const s5 = BigInt(score) ** 5n;
 
   if (s5 >= den) return Number(num);
 
-  const reward = num / (den - s5) - (num - MIN_REWARD * den) / den;
+  const reward = num / (den - s5) - num / den;
   return Number(reward);
 }
 

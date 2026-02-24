@@ -10,6 +10,7 @@ pub mod PlayableComponent {
     use ekubo::types::i129::i129;
     use ekubo::types::keys::PoolKey;
     use starknet::ContractAddress;
+    use crate::constants::MAX_SCORE;
     use crate::helpers::random::RandomTrait;
     use crate::helpers::rewarder::RewarderImpl;
     use crate::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -209,11 +210,12 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired(starknet::get_block_timestamp());
 
-            // [Effect] Read score before cash_out clears it
-            let score = game.points;
+            // [Effect] Use accumulated moonrocks as score (clamped to MAX_SCORE)
+            let score: u16 = if game.moonrocks > MAX_SCORE { MAX_SCORE } else { game.moonrocks };
 
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();
+            store.set_game(@game);
 
             // [Event] Emit GameOver (cash out)
             store.game_over(@game, 1);
@@ -227,16 +229,11 @@ pub mod PlayableComponent {
             let reward: u64 = reward * game.stake.into();
 
             if reward == 0 {
-                store.set_game(@game);
                 return;
             }
 
-            let earnings: u16 = reward.try_into().unwrap();
-            game.earn_moonrocks(earnings);
-            store.set_game(@game);
-
-            // [Interaction] Mint moonrocks token to caller
-            token.mint(caller, earnings.into());
+            // [Interaction] Mint Glitch tokens to caller
+            token.mint(caller, reward.into());
         }
 
         fn enter(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {

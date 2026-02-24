@@ -66,14 +66,14 @@ export function startGame(game: OfflineGame): {
 }
 
 const MAX_SCORE = 500;
-const REWARD_NUMERATOR = 488_000_000_000_000n;
-const MIN_REWARD = 1n;
+const REWARD_NUMERATOR = 359_105_052_483_616_060n;
+const REWARD_OFFSET = 10n;
 
 function computeReward(score: number, supply: bigint, target: bigint): number {
+  if (score <= 0) return 0;
   if (supply >= target * 2n) return 0;
 
   const numerator = REWARD_NUMERATOR;
-  const minReward = MIN_REWARD;
   const maxScore = BigInt(MAX_SCORE);
 
   const num =
@@ -81,7 +81,7 @@ function computeReward(score: number, supply: bigint, target: bigint): number {
       ? numerator + (numerator * (target - supply)) / target
       : numerator - (numerator * (supply - target)) / target;
 
-  const base = maxScore + 3n;
+  const base = maxScore + REWARD_OFFSET; // 510
   const base2 = base * base;
   const base4 = base2 * base2;
   const den = base4 * base;
@@ -91,24 +91,25 @@ function computeReward(score: number, supply: bigint, target: bigint): number {
   const s4 = s2 * s2;
   const s5 = s4 * s;
 
-  const reward = num / (den - s5) - (num - minReward * den) / den;
+  const reward = num / (den - s5) - num / den;
   return Number(reward);
 }
 
 export function cashOut(game: OfflineGame): {
   game: OfflineGame;
-  earnings: number;
+  reward: number;
 } {
   assertNotOver(game);
   assertNotInShop(game);
   const next = cloneGame(game);
-  const score = next.points;
+  // Use accumulated moonrocks as score (clamped to MAX_SCORE)
+  const score = Math.min(next.moonrocks, MAX_SCORE);
   next.points = 0;
   next.over = true;
   // Offline mode: assume supply = target (baseline rewards)
-  const target = 1_000_000n;
-  const earnings = computeReward(score, target, target);
-  return { game: next, earnings };
+  const target = 1_000_000_000n;
+  const reward = computeReward(score, target, target) * next.stake;
+  return { game: next, reward };
 }
 
 export function enterShop(

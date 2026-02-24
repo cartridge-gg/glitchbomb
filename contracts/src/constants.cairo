@@ -13,8 +13,8 @@ pub const STARTERPACK_COUNT: u8 = 10;
 pub const GAME_EXPIRATION_TIME: u64 = 86400;
 
 pub const MAX_SCORE: u16 = 500;
-pub const REWARD_NUMERATOR: u64 = 488_000_000_000_000;
-pub const MIN_REWARD: u64 = 1;
+pub const REWARD_NUMERATOR: u64 = 359_105_052_483_616_060;
+pub const REWARD_OFFSET: u16 = 10;
 
 #[inline]
 pub fn NAMESPACE() -> ByteArray {

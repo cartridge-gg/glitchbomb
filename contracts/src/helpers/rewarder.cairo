@@ -1,19 +1,24 @@
-use crate::constants::{MAX_SCORE, MIN_REWARD, REWARD_NUMERATOR};
+use crate::constants::{MAX_SCORE, REWARD_NUMERATOR, REWARD_OFFSET};
 
 #[generate_trait]
 pub impl RewarderImpl of RewarderTrait {
     /// Compute the reward for a given score, token supply, and target supply.
-    /// Adapted from the nums contract: uses a progressive curve that rewards
-    /// higher scores disproportionately and adjusts based on supply vs target.
+    /// Uses a progressive x^5 curve that rewards higher scores disproportionately
+    /// and adjusts based on supply vs target.
+    /// Formula: y = num / ((P+b)^5 - p^5) - num / (P+b)^5
     fn amount(score: u16, supply: u256, target: u256) -> u64 {
+        if score == 0 {
+            return 0;
+        }
+
         // No reward if supply meets or exceeds 2x target
         if supply >= target * 2 {
             return 0;
         }
 
         let numerator: u256 = REWARD_NUMERATOR.into();
-        let min_reward: u256 = MIN_REWARD.into();
         let max_score: u256 = MAX_SCORE.into();
+        let offset: u256 = REWARD_OFFSET.into();
 
         // Compute the supply adjustment factor:
         // num = NUMERATOR ± NUMERATOR * |target - supply| / target
@@ -23,8 +28,8 @@ pub impl RewarderImpl of RewarderTrait {
             numerator - numerator * (supply - target) / target
         };
 
-        // den = (MAX_SCORE + 3)^5 = 503^5
-        let base: u256 = max_score + 3;
+        // den = (MAX_SCORE + REWARD_OFFSET)^5 = 510^5
+        let base: u256 = max_score + offset;
         let base2: u256 = base * base;
         let base4: u256 = base2 * base2;
         let den: u256 = base4 * base;
@@ -34,8 +39,8 @@ pub impl RewarderImpl of RewarderTrait {
         let score4: u256 = score2 * score2;
         let score5: u256 = score4 * score_u256;
 
-        // reward = num / (den - score^5) - (num - MIN_REWARD * den) / den
-        let reward: u256 = num / (den - score5) - (num - min_reward * den) / den;
+        // reward = num / (den - score^5) - num / den
+        let reward: u256 = num / (den - score5) - num / den;
 
         reward.try_into().unwrap()
     }
@@ -45,40 +50,40 @@ pub impl RewarderImpl of RewarderTrait {
 mod tests {
     use super::RewarderImpl;
 
-    const TARGET: u256 = 1_000_000;
+    const TARGET: u256 = 1_000_000_000;
 
     #[test]
     fn test_reward_at_max_score() {
-        // Score 500 at target supply should yield ~500
+        // Score 500 at target supply should yield ~100,000
         let reward = RewarderImpl::amount(500, TARGET, TARGET);
-        assert(reward >= 490 && reward <= 510, 'max score reward ~500');
+        assert(reward >= 99_000 && reward <= 101_000, 'max score reward ~100k');
     }
 
     #[test]
     fn test_reward_at_490() {
-        // Score 490 should yield ~109
+        // Score 490 should yield ~47,000
         let reward = RewarderImpl::amount(490, TARGET, TARGET);
-        assert(reward >= 100 && reward <= 120, 'score 490 reward ~109');
+        assert(reward >= 45_000 && reward <= 49_000, 'score 490 reward ~47k');
     }
 
     #[test]
     fn test_reward_at_400() {
-        // Score 400 should yield ~8
+        // Score 400 should yield ~4,400
         let reward = RewarderImpl::amount(400, TARGET, TARGET);
-        assert(reward >= 5 && reward <= 12, 'score 400 reward ~8');
+        assert(reward >= 4_000 && reward <= 5_000, 'score 400 reward ~4.4k');
     }
 
     #[test]
     fn test_reward_low_score() {
-        // Score below 250 should yield MIN_REWARD (1)
+        // Score 100 yields a small reward
         let reward = RewarderImpl::amount(100, TARGET, TARGET);
-        assert(reward == 1, 'low score reward == 1');
+        assert(reward >= 1 && reward <= 10, 'low score reward small');
     }
 
     #[test]
     fn test_reward_zero_score() {
         let reward = RewarderImpl::amount(0, TARGET, TARGET);
-        assert(reward == 1, 'zero score reward == 1');
+        assert(reward == 0, 'zero score reward == 0');
     }
 
     #[test]
@@ -111,7 +116,8 @@ mod tests {
 
     #[test]
     fn test_reward_score_10() {
+        // Very low score yields 0 (curve heavily favors high scores)
         let reward = RewarderImpl::amount(10, TARGET, TARGET);
-        assert(reward == 1, 'score 10 reward == 1');
+        assert(reward == 0, 'score 10 reward == 0');
     }
 }

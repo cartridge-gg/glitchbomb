@@ -292,6 +292,7 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
         fill="none"
         stroke={lineColor}
         strokeWidth={1.5}
+        className="glitch-icon"
         style={
           pathLength > 0
             ? {

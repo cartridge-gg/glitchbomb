@@ -178,12 +178,7 @@ export function cashOutAction(gameId: number): boolean {
   try {
     setState((prev) => {
       const game = ensureGame(prev, gameId);
-      const { game: nextGame, earnings } = cashOut(game);
-      if (earnings) {
-        nextGame.moonrocks = game.moonrocks + earnings;
-      } else {
-        nextGame.moonrocks = game.moonrocks;
-      }
+      const { game: nextGame } = cashOut(game);
 
       return {
         ...prev,

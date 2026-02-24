@@ -84,7 +84,7 @@ pub mod setup {
                 .with_init_calldata(
                     // token, vrf, registry, owner, quote, ekubo, entry_price (u128), target_supply
                     // (u256: low, high)
-                    array![0, 0, 0, OWNER().into(), OWNER().into(), 0, 1000000, 1000000, 0]
+                    array![0, 0, 0, OWNER().into(), OWNER().into(), 0, 1000000, 1000000000, 0]
                         .span(),
                 ),
             ContractDefTrait::new(@NAMESPACE(), @PLAY_NAME())
