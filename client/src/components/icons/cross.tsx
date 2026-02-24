@@ -23,7 +23,7 @@ export const CrossIcon = forwardRef<SVGSVGElement, CrossIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 CrossIcon.displayName = "CrossIcon";

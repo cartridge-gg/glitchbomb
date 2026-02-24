@@ -31,7 +31,7 @@ export const ControllerIcon = forwardRef<SVGSVGElement, ControllerIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 ControllerIcon.displayName = "ControllerIcon";

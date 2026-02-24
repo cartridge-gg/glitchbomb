@@ -7,7 +7,7 @@ import { NAMESPACE } from "./constants";
 
 export const DEFAULT_CHAIN = import.meta.env.VITE_DEFAULT_CHAIN;
 export const DEFAULT_CHAIN_ID = shortString.encodeShortString(
-  import.meta.env.VITE_DEFAULT_CHAIN,
+  import.meta.env.VITE_DEFAULT_CHAIN
 );
 
 export const SEPOLIA_CHAIN_ID = shortString.encodeShortString("SN_SEPOLIA");
@@ -48,20 +48,20 @@ export const dojoConfigs = {
 export const getContractAddress = (
   chainId: bigint,
   namespace: string,
-  contractName: string,
+  contractName: string
 ) => {
   const chainIdHex = `0x${chainId.toString(16)}`;
 
   const manifest = manifests[chainIdHex];
   const contract = manifest.contracts.find(
-    (i) => i.tag === `${namespace}-${contractName}`,
+    (i) => i.tag === `${namespace}-${contractName}`
   );
   return contract?.address || addAddressPadding("0x0");
 };
 
 export const getVrfAddress = (chainId: bigint) => {
   const decodedChainId = shortString.decodeShortString(
-    `0x${chainId.toString(16)}`,
+    `0x${chainId.toString(16)}`
   );
   const fromEnv: string = import.meta.env[`VITE_${decodedChainId}_VRF`];
   if (fromEnv && BigInt(fromEnv) !== 0n) return fromEnv;
@@ -70,7 +70,7 @@ export const getVrfAddress = (chainId: bigint) => {
 
 export const getTokenAddress = (chainId: bigint) => {
   const decodedChainId = shortString.decodeShortString(
-    `0x${chainId.toString(16)}`,
+    `0x${chainId.toString(16)}`
   );
   const fromEnv = import.meta.env[`VITE_${decodedChainId}_TOKEN`];
   if (fromEnv && BigInt(fromEnv) !== 0n) return fromEnv as string;

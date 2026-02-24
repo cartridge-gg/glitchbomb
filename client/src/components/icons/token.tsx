@@ -37,7 +37,7 @@ export const TokenIcon = forwardRef<SVGSVGElement, TokenIconProps>(
         </defs>
       </svg>
     );
-  },
+  }
 );
 
 TokenIcon.displayName = "TokenIcon";

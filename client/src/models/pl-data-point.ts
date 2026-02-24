@@ -12,7 +12,7 @@ export class PLDataPoint {
     gameId: bigint,
     id: number,
     potentialMoonrocks: number,
-    orb: number,
+    orb: number
   ) {
     this.gameId = gameId;
     this.id = id;
@@ -91,7 +91,7 @@ export class PLDataPoint {
       props.gameId,
       props.id,
       props.potentialMoonrocks,
-      props.orb,
+      props.orb
     );
   }
 

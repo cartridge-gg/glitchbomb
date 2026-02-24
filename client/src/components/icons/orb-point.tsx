@@ -23,7 +23,7 @@ export const OrbPointIcon = forwardRef<SVGSVGElement, OrbPointIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 OrbPointIcon.displayName = "OrbPointIcon";

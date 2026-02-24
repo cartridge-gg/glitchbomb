@@ -21,8 +21,7 @@ const gradientColors: Record<GradientColor, string> = {
   none: "transparent",
 };
 
-export interface GradientBorderProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface GradientBorderProps extends React.HTMLAttributes<HTMLDivElement> {
   color?: GradientColor;
 }
 

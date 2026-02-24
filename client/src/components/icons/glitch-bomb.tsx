@@ -25,7 +25,7 @@ export const GlitchBombIcon = forwardRef<SVGSVGElement, GlitchBombIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 GlitchBombIcon.displayName = "GlitchBombIcon";

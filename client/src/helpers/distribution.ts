@@ -26,12 +26,12 @@ export const DistributionMath = {
    */
   calculateSegments(
     values: DistributionValues,
-    configs: SegmentConfig[],
+    configs: SegmentConfig[]
   ): Segment[] {
     // Calculate total
     const total = Object.values(values).reduce(
       (sum, v) => sum + Math.max(0, v),
-      0,
+      0
     );
 
     if (total === 0) {
@@ -98,7 +98,7 @@ export const DistributionMath = {
    */
   calculateMinPercentageForIcon(
     iconSize: number,
-    circumference: number,
+    circumference: number
   ): number {
     return (iconSize / circumference) * 100;
   },
@@ -111,7 +111,7 @@ export const DistributionMath = {
    */
   calculateAdjustedPercentage(
     percentage: number,
-    overlapPercentage: number,
+    overlapPercentage: number
   ): number {
     return percentage + overlapPercentage;
   },
@@ -126,7 +126,7 @@ export const DistributionMath = {
   calculateAdjustedOffset(
     offset: number,
     overlapPercentage: number,
-    isFirstSegment: boolean,
+    isFirstSegment: boolean
   ): number {
     return isFirstSegment ? offset : offset - overlapPercentage / 2;
   },
@@ -159,7 +159,7 @@ export const DistributionMath = {
    */
   convertAngleToDegrees(
     anglePercentage: number,
-    rotationAdjustment = 270,
+    rotationAdjustment = 270
   ): number {
     return (anglePercentage * 360) / 100 + rotationAdjustment;
   },

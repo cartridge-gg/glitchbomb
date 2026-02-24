@@ -7,7 +7,8 @@ import {
 import { ArrowDownIcon, ListIcon } from "@/components/icons";
 
 export interface GameFooterProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameFooterVariants> {
   details: BombTrackerProps["details"];
   onLeftClick?: () => void;

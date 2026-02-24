@@ -35,7 +35,7 @@ export class Config {
       data.id.value,
       getChecksumAddress(data.vrf.value),
       getChecksumAddress(data.token.value),
-      getChecksumAddress(data.registry.value),
+      getChecksumAddress(data.registry.value)
     );
   }
 }

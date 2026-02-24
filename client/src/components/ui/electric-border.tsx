@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
 
-export interface ElectricBorderProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ElectricBorderProps extends React.HTMLAttributes<HTMLDivElement> {
   color: string;
   gradient: string;
   borderGradient: string;
@@ -77,10 +76,10 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
-        effectiveFrequency,
+        effectiveFrequency
       );
       borderFrames.push(
-        `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`,
+        `${percentage.toFixed(0)}% { clip-path: ${ringClipPath}; }`
       );
 
       const contentClipPath = MultiplierMath.generateContentClipPath(
@@ -92,10 +91,10 @@ export const ElectricBorder = ({
         animationFrames,
         cornerRadius,
         aspectRatio,
-        effectiveFrequency,
+        effectiveFrequency
       );
       contentFrames.push(
-        `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`,
+        `${percentage.toFixed(0)}% { clip-path: ${contentClipPath}; }`
       );
     }
 

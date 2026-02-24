@@ -13,7 +13,8 @@ import { Button } from "../ui/button";
 import { StashModal } from "./stash-modal";
 
 export interface GameShopProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameShopVariants> {
   balance: number;
   orbs: Orb[];
@@ -35,7 +36,7 @@ const gameShopVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 // Get short name for orb type
@@ -161,7 +162,7 @@ export const GameShop = ({
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
     () => `${balance}-${orbs.length}-${orbs.map((o) => o.value).join(",")}`,
-    [balance, orbs],
+    [balance, orbs]
   );
 
   // Reset all states when orbs or balance change

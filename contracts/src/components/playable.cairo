@@ -116,25 +116,38 @@ pub mod PlayableComponent {
                     (game_token.contract_address, config.quote, true)
                 };
                 let pool_key = PoolKey {
-                    token0, token1, fee: POOL_FEE, tick_spacing: POOL_TICK_SPACING,
-                    extension: 0x73ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971.try_into().unwrap(),
+                    token0,
+                    token1,
+                    fee: POOL_FEE,
+                    tick_spacing: POOL_TICK_SPACING,
+                    extension: 0x73ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971
+                        .try_into()
+                        .unwrap(),
                 };
 
-                // sqrt_ratio_limit: selling token0 -> price drops -> MIN; selling token1 -> rises -> MAX
-                let sqrt_ratio_limit = if is_token1 { MAX_SQRT_RATIO } else { MIN_SQRT_RATIO };
+                // sqrt_ratio_limit: selling token0 -> price drops -> MIN; selling token1 -> rises
+                // -> MAX
+                let sqrt_ratio_limit = if is_token1 {
+                    MAX_SQRT_RATIO
+                } else {
+                    MIN_SQRT_RATIO
+                };
                 let node = RouteNode { pool_key, sqrt_ratio_limit, skip_ahead: 0 };
                 let token_amount = TokenAmount {
                     token: config.quote,
-                    amount: i129 { mag: amount.try_into().expect('Amount exceeds u128'), sign: false },
+                    amount: i129 {
+                        mag: amount.try_into().expect('Amount exceeds u128'), sign: false,
+                    },
                 };
 
                 // Swap USDC for game token
                 router.swap(node, token_amount);
 
                 // Clear tokens from router to this contract
-                clearer.clear_minimum(
-                    EkuboIERC20Dispatcher { contract_address: game_token.contract_address }, 0,
-                );
+                clearer
+                    .clear_minimum(
+                        EkuboIERC20Dispatcher { contract_address: game_token.contract_address }, 0,
+                    );
                 clearer.clear(EkuboIERC20Dispatcher { contract_address: config.quote });
 
                 // Burn all game tokens acquired
@@ -212,7 +225,11 @@ pub mod PlayableComponent {
             game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Effect] Use accumulated moonrocks as score (clamped to MAX_SCORE)
-            let score: u16 = if game.moonrocks > MAX_SCORE { MAX_SCORE } else { game.moonrocks };
+            let score: u16 = if game.moonrocks > MAX_SCORE {
+                MAX_SCORE
+            } else {
+                game.moonrocks
+            };
 
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();

@@ -82,10 +82,7 @@ export function useOfflineStore(): OfflineState {
   return useSyncExternalStore(subscribe, getOfflineState, getOfflineState);
 }
 
-function ensureGame(
-  prev: OfflineState,
-  gameId: number,
-): OfflineGame {
+function ensureGame(prev: OfflineState, gameId: number): OfflineGame {
   const game = prev.games[gameId];
   if (!game) throw new Error("Game not found");
   return game;
@@ -211,10 +208,7 @@ export function enter(gameId: number): boolean {
   }
 }
 
-export function buy(
-  gameId: number,
-  indices: number[],
-): boolean {
+export function buy(gameId: number, indices: number[]): boolean {
   try {
     setState((prev) => {
       const game = ensureGame(prev, gameId);
@@ -266,10 +260,7 @@ export function exit(gameId: number): boolean {
   }
 }
 
-export function buyAndExit(
-  gameId: number,
-  indices: number[],
-): boolean {
+export function buyAndExit(gameId: number, indices: number[]): boolean {
   if (!indices.length) {
     return exit(gameId);
   }
@@ -295,19 +286,13 @@ export function selectGames(source: OfflineState = state): Game[] {
   return Object.values(source.games).map((game) => toGameModel(game));
 }
 
-export function selectGame(
-  source: OfflineState,
-  gameId: number,
-) {
+export function selectGame(source: OfflineState, gameId: number) {
   const game = source.games[gameId];
   if (!game) return undefined;
   return toGameModel(game);
 }
 
-export function selectPulls(
-  source: OfflineState,
-  gameId: number,
-): OrbPulled[] {
+export function selectPulls(source: OfflineState, gameId: number): OrbPulled[] {
   return source.pulls
     .filter((pull) => pull.game_id === gameId)
     .map(
@@ -316,14 +301,14 @@ export function selectPulls(
           pull.game_id,
           pull.id,
           Orb.from(pull.orb),
-          pull.potential_moonrocks,
-        ),
+          pull.potential_moonrocks
+        )
     );
 }
 
 export function selectPLDataPoints(
   source: OfflineState,
-  gameId: number,
+  gameId: number
 ): PLDataPoint[] {
   return source.plDataPoints
     .filter((point) => point.game_id === gameId)
@@ -333,15 +318,15 @@ export function selectPLDataPoints(
           BigInt(point.game_id),
           point.id,
           point.potential_moonrocks,
-          point.orb,
-        ),
+          point.orb
+        )
     );
 }
 
 export function selectTotalMoonrocks(source: OfflineState = state): number {
   return Object.values(source.games).reduce(
     (total, game) => total + game.moonrocks,
-    0,
+    0
   );
 }
 
@@ -369,7 +354,7 @@ function toGameModel(game: OfflineGame): Game {
     pullables,
     game.moonrocks,
     game.stake,
-    game.created_at,
+    game.created_at
   );
 }
 

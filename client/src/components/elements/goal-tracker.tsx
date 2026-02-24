@@ -2,7 +2,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
 
 export interface GoalTrackerProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof goalTrackerVariants> {
   value: number;
   total: number;
@@ -23,7 +24,7 @@ const goalTrackerVariants = cva(
       variant: "default",
       size: "md",
     },
-  },
+  }
 );
 
 export const GoalTracker = ({

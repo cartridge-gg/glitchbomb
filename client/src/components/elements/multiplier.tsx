@@ -23,7 +23,8 @@ const BORDER_WIDTH_MAX = 5;
 export type MultiplierMagnitude = 1 | 2 | 3 | 4 | 5;
 
 export interface MultiplierProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof multiplierVariants> {
   count: number;
   electricColor?: string;
@@ -57,7 +58,7 @@ const multiplierVariants = cva(
       variant: "default",
       size: "md",
     },
-  },
+  }
 );
 
 const multiplierContainerVariants = cva(
@@ -71,7 +72,7 @@ const multiplierContainerVariants = cva(
     defaultVariants: {
       size: "md",
     },
-  },
+  }
 );
 
 export const Multiplier = ({
@@ -104,9 +105,9 @@ export const Multiplier = ({
       MultiplierMath.calculateNoiseAmplitude(
         magnitude,
         noiseAmplitudeMin,
-        noiseAmplitudeMax,
+        noiseAmplitudeMax
       ),
-    [magnitude, noiseAmplitudeMin, noiseAmplitudeMax],
+    [magnitude, noiseAmplitudeMin, noiseAmplitudeMax]
   );
 
   const borderWidth = useMemo(
@@ -114,9 +115,9 @@ export const Multiplier = ({
       MultiplierMath.calculateBorderWidth(
         magnitude,
         borderWidthMin,
-        borderWidthMax,
+        borderWidthMax
       ),
-    [magnitude, borderWidthMin, borderWidthMax],
+    [magnitude, borderWidthMin, borderWidthMax]
   );
 
   const safetyMargin = useMemo(
@@ -124,9 +125,9 @@ export const Multiplier = ({
       MultiplierMath.calculateSafetyMargin(
         magnitude,
         safetyMarginMin,
-        safetyMarginMax,
+        safetyMarginMax
       ),
-    [magnitude, safetyMarginMin, safetyMarginMax],
+    [magnitude, safetyMarginMin, safetyMarginMax]
   );
 
   const noisePoints = useMemo(
@@ -134,24 +135,24 @@ export const Multiplier = ({
       MultiplierMath.calculateNoisePoints(
         magnitude,
         noisePointsMin,
-        noisePointsMax,
+        noisePointsMax
       ),
-    [magnitude, noisePointsMin, noisePointsMax],
+    [magnitude, noisePointsMin, noisePointsMax]
   );
 
   const cssGradient = useMemo(
     () => MultiplierMath.getMagnitudeGradient(magnitude),
-    [magnitude],
+    [magnitude]
   );
 
   const cssBorderGradient = useMemo(
     () => MultiplierMath.getMagnitudeBorderGradient(magnitude),
-    [magnitude],
+    [magnitude]
   );
 
   const cssColor = useMemo(
     () => MultiplierMath.getMagnitudeColor(magnitude),
-    [magnitude],
+    [magnitude]
   );
 
   const resolvedGradient = electricGradient ?? cssGradient;
@@ -177,7 +178,7 @@ export const Multiplier = ({
       <div
         className={cn(
           multiplierVariants({ variant, size }),
-          "flex items-center justify-center",
+          "flex items-center justify-center"
         )}
       >
         <p

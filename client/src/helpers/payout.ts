@@ -64,7 +64,7 @@ export function tierPrice(stake: number): bigint {
 /** All tier prices in raw token units (stake 1 through STARTERPACK_COUNT). */
 export const TIER_PRICES: bigint[] = Array.from(
   { length: STARTERPACK_COUNT },
-  (_, i) => tierPrice(i + 1),
+  (_, i) => tierPrice(i + 1)
 );
 
 /** Maximum token payout (raw units) at max score for a given stake. */
@@ -78,10 +78,7 @@ export function maxPayout(stake: number): number {
  * where tokenPayout * tokenPrice >= tier cost in USD.
  * Without tokenPrice, compares raw token units directly.
  */
-export function breakEvenScore(
-  stake: number,
-  tokenPrice?: number,
-): number {
+export function breakEvenScore(stake: number, tokenPrice?: number): number {
   const cost = toTokens(tierPrice(stake));
   for (let s = 1; s <= MAX_SCORE; s++) {
     const tokens = toTokens(tokenPayout(s, stake));

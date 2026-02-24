@@ -47,7 +47,7 @@ export const TickIcon = forwardRef<SVGSVGElement, TickIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 TickIcon.displayName = "TickIcon";

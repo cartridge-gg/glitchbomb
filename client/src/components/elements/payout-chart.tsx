@@ -82,12 +82,12 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
 
   const curvePath = useMemo(
     () => buildStaircase(stake),
-    [buildStaircase, stake],
+    [buildStaircase, stake]
   );
   const showBaseCurve = stake > 1;
   const basePath = useMemo(
     () => (showBaseCurve ? buildStaircase(1) : ""),
-    [showBaseCurve, buildStaircase],
+    [showBaseCurve, buildStaircase]
   );
 
   const lineColor = "#36F818";
@@ -135,9 +135,7 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
     }
     if (showBreakEven) {
       // Only add break-even if it doesn't overlap a 100-step tick
-      const overlaps = ticks.some(
-        (t) => Math.abs(t.score - beScore) < 40,
-      );
+      const overlaps = ticks.some((t) => Math.abs(t.score - beScore) < 40);
       if (!overlaps) {
         ticks.push({ score: beScore, label: `${beScore}`, pill: true });
       }
@@ -274,7 +272,13 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
           />
           <text
             x={padL + plotW - 2}
-            y={toY(hasPrice ? toTokens(maxPayout(1)) * tokenPrice : toTokens(maxPayout(1))) + 10}
+            y={
+              toY(
+                hasPrice
+                  ? toTokens(maxPayout(1)) * tokenPrice
+                  : toTokens(maxPayout(1))
+              ) + 10
+            }
             textAnchor="end"
             fill={labelColor}
             fontSize={7}

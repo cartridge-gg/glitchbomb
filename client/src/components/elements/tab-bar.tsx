@@ -39,7 +39,7 @@ export const TabBar = <T extends string>({
           className={cn(
             "group flex-1 flex items-center justify-center gap-2 rounded-none transition-colors py-2 first:rounded-l-lg last:rounded-r-lg",
             isActive ? "bg-green-950" : "bg-green-1000 hover:bg-green-950/80",
-            buttonClassName,
+            buttonClassName
           )}
         >
           <Icon
@@ -48,7 +48,7 @@ export const TabBar = <T extends string>({
               isActive
                 ? "text-green-400"
                 : "text-green-600 opacity-70 group-hover:text-green-500 group-hover:opacity-100",
-              iconClassName,
+              iconClassName
             )}
           />
           {item.label ? (
@@ -58,7 +58,7 @@ export const TabBar = <T extends string>({
                 isActive
                   ? "text-green-400"
                   : "text-green-600 opacity-70 group-hover:text-green-500 group-hover:opacity-100",
-                labelClassName,
+                labelClassName
               )}
             >
               {item.label}

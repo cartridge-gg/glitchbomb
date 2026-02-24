@@ -25,7 +25,7 @@ export const BagIcon = forwardRef<SVGSVGElement, BagIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 BagIcon.displayName = "BagIcon";

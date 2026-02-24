@@ -31,7 +31,7 @@ export const CreditsIcon = forwardRef<SVGSVGElement, CreditsIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 CreditsIcon.displayName = "CreditsIcon";

@@ -23,7 +23,7 @@ export const OrbHealthIcon = forwardRef<SVGSVGElement, OrbHealthIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 OrbHealthIcon.displayName = "OrbHealthIcon";

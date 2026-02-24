@@ -50,6 +50,6 @@ export function useOfflineMode(): boolean {
   return useSyncExternalStore(
     subscribeOfflineMode,
     isOfflineMode,
-    isOfflineMode,
+    isOfflineMode
   );
 }

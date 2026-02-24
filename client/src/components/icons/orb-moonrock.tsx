@@ -23,7 +23,7 @@ export const OrbMoonrockIcon = forwardRef<SVGSVGElement, OrbMoonrockIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 OrbMoonrockIcon.displayName = "OrbMoonrockIcon";

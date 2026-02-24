@@ -25,7 +25,7 @@ export const MoonrockIcon = forwardRef<SVGSVGElement, MoonrockIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 MoonrockIcon.displayName = "MoonrockIcon";

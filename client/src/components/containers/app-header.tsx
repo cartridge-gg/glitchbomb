@@ -62,7 +62,9 @@ export const AppHeader = ({
       </div>
 
       {/* GlitchBomb text - only on md+ screens, hidden when onBack is set */}
-      <h1 className={`${onBack ? "hidden" : "hidden md:flex"} items-center gap-1 uppercase leading-none glitch-text`}>
+      <h1
+        className={`${onBack ? "hidden" : "hidden md:flex"} items-center gap-1 uppercase leading-none glitch-text`}
+      >
         <span className="text-green-400 text-2xl font-glitch font-thin tracking-tight">
           Glitch
         </span>

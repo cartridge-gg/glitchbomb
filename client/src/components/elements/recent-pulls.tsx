@@ -3,7 +3,8 @@ import { Dot } from "@/components/elements/dot";
 import type { Orb } from "@/models/orb";
 
 export interface RecentPullsProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof recentPullsVariants> {
   orbs: Orb[];
 }
@@ -19,7 +20,7 @@ const recentPullsVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export const RecentPulls = ({

@@ -63,7 +63,7 @@ export const Game = () => {
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
-    null,
+    null
   );
   const [currentOrb, setCurrentOrb] = useState<
     | {
@@ -190,7 +190,7 @@ export const Game = () => {
 
     // Get the latest pull (highest id)
     const latestPull = pulls.reduce((latest, pull) =>
-      pull.id > latest.id ? pull : latest,
+      pull.id > latest.id ? pull : latest
     );
 
     // Check if this is a new pull we haven't seen
@@ -259,7 +259,7 @@ export const Game = () => {
         // On success, wait for shop to clear via useEffect
       }
     },
-    [buyAndExit, game],
+    [buyAndExit, game]
   );
 
   const openStash = useCallback(() => setOverlay("stash"), []);
@@ -268,7 +268,7 @@ export const Game = () => {
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
-    [game],
+    [game]
   );
   const bombDetails = useMemo(
     () =>
@@ -282,11 +282,11 @@ export const Game = () => {
             double: { total: 0, count: 0 },
             triple: { total: 0, count: 0 },
           },
-    [game],
+    [game]
   );
   const hasStickyBomb = useMemo(
     () => game?.bag?.some((orb) => orb.value === OrbType.StickyBomb) ?? false,
-    [game?.bag],
+    [game?.bag]
   );
   const nextCurseLabel = useMemo(() => {
     const nextLevel = (game?.level ?? 0) + 1;

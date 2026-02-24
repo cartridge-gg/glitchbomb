@@ -18,7 +18,7 @@ const getPullsQuery = (gameId: number) => {
   const clauses = new ClauseBuilder().keys(
     [modelName],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
-    "VariableLen",
+    "VariableLen"
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -26,17 +26,13 @@ const getPullsQuery = (gameId: number) => {
     .withLimit(ENTITIES_LIMIT);
 };
 
-export function usePulls({
-  gameId,
-}: {
-  gameId: number;
-}) {
+export function usePulls({ gameId }: { gameId: number }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
   const offlinePulls = useMemo(
     () => selectPulls(offlineState, gameId),
-    [offlineState, gameId],
+    [offlineState, gameId]
   );
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
@@ -61,7 +57,7 @@ export function usePulls({
   const onUpdate = useCallback(
     (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
-      filterGameId: number,
+      filterGameId: number
     ) => {
       if (!data || data.error) {
         return;
@@ -79,12 +75,12 @@ export function usePulls({
           }
 
           setPulls((prev: OrbPulled[]) =>
-            OrbPulled.deduplicate([...prev, newPull]),
+            OrbPulled.deduplicate([...prev, newPull])
           );
         }
       });
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -106,7 +102,7 @@ export function usePulls({
 
     // Create a wrapped callback that includes the filter
     const filteredOnUpdate = (
-      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>
     ) => {
       onUpdate(data, gameId);
     };

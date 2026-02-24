@@ -78,9 +78,7 @@ export const GameDetails = ({
           selectedIndex={tierIndex}
           onDecrement={() => onTierIndexChange(Math.max(0, tierIndex - 1))}
           onIncrement={() =>
-            onTierIndexChange(
-              Math.min(STARTERPACK_COUNT - 1, tierIndex + 1),
-            )
+            onTierIndexChange(Math.min(STARTERPACK_COUNT - 1, tierIndex + 1))
           }
         />
 

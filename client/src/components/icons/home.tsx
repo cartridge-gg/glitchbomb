@@ -25,7 +25,7 @@ export const HomeIcon = forwardRef<SVGSVGElement, HomeIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 HomeIcon.displayName = "HomeIcon";

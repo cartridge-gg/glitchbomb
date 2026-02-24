@@ -80,7 +80,7 @@ export const Distribution = ({
 }: DistributionProps) => {
   const segments = useMemo(
     () => DistributionMath.calculateSegments(values, SEGMENT_CONFIGS),
-    [values],
+    [values]
   );
 
   const radius = DistributionMath.calculateRadius(size, thickness);
@@ -90,14 +90,14 @@ export const Distribution = ({
   // Minimum percentage needed to show an icon (adjust based on icon size)
   const minPercentageForIcon = DistributionMath.calculateMinPercentageForIcon(
     32,
-    circumference,
+    circumference
   );
 
   return (
     <div
       className={cn(
         "inline-flex items-center justify-center relative",
-        className,
+        className
       )}
     >
       <svg
@@ -124,16 +124,16 @@ export const Distribution = ({
           const adjustedOffset = DistributionMath.calculateAdjustedOffset(
             segment.offset,
             0,
-            index === 0,
+            index === 0
           );
 
           const strokeDasharray = DistributionMath.calculateStrokeDasharray(
             adjustedPercentage,
-            circumference,
+            circumference
           );
           const strokeDashoffset = DistributionMath.calculateStrokeDashoffset(
             adjustedOffset,
-            circumference,
+            circumference
           );
 
           return (
@@ -166,7 +166,7 @@ export const Distribution = ({
           }
 
           const angleInDegrees = DistributionMath.convertAngleToDegrees(
-            segment.angle,
+            segment.angle
           );
 
           const IconComponent = segment.config.Icon;

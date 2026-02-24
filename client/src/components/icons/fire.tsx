@@ -55,7 +55,7 @@ export const FireIcon = forwardRef<SVGSVGElement, FireIconProps>(
         </defs>
       </svg>
     );
-  },
+  }
 );
 
 FireIcon.displayName = "FireIcon";

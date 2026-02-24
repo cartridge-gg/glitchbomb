@@ -3,7 +3,8 @@ import SlotCounter from "react-slot-counter";
 import { ChipIcon, MoonrockIcon } from "@/components/icons";
 
 export interface CounterProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof counterVariants> {
   balance: number;
 }

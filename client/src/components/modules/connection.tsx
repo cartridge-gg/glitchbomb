@@ -10,7 +10,7 @@ export const Connection = () => {
 
   const onProfileClick = useCallback(async () => {
     (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
+      "inventory"
     );
   }, [connector]);
 

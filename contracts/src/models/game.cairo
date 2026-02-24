@@ -1,5 +1,7 @@
 use core::num::traits::Zero;
-use crate::constants::{DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH};
+use crate::constants::{
+    DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH,
+};
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::power::TwoPower;

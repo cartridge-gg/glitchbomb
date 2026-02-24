@@ -53,7 +53,7 @@ export const Bomb3xIcon = forwardRef<SVGSVGElement, Bomb3xIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 Bomb3xIcon.displayName = "Bomb3xIcon";

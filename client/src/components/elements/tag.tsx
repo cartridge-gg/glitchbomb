@@ -20,7 +20,7 @@ const tagVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const iconVariants = (variant: string) => {
@@ -43,7 +43,8 @@ const iconVariants = (variant: string) => {
 };
 
 export interface TagProps
-  extends Omit<HTMLMotionProps<"div">, "ref">,
+  extends
+    Omit<HTMLMotionProps<"div">, "ref">,
     VariantProps<typeof tagVariants> {
   count: number;
 }
@@ -54,7 +55,7 @@ export const Tag = ({ count, variant, className, ...props }: TagProps) => {
     <motion.div
       className={cn(
         tagVariants({ variant, className }),
-        count === 0 ? "text-green-700" : "",
+        count === 0 ? "text-green-700" : ""
       )}
       {...props}
     >

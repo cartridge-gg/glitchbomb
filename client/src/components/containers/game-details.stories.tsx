@@ -52,10 +52,7 @@ export const Interactive = () => {
   return (
     <div className="h-screen bg-green-950 p-4">
       <div className="max-w-md mx-auto">
-        <GameDetails
-          tierIndex={tierIndex}
-          onTierIndexChange={setTierIndex}
-        />
+        <GameDetails tierIndex={tierIndex} onTierIndexChange={setTierIndex} />
       </div>
     </div>
   );

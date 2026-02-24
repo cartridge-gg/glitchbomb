@@ -22,11 +22,12 @@ const itemVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface ItemProps
-  extends Omit<HTMLMotionProps<"div">, "ref">,
+  extends
+    Omit<HTMLMotionProps<"div">, "ref">,
     VariantProps<typeof itemVariants> {
   title: string;
   description: string;
@@ -86,7 +87,7 @@ export const Item = ({
       className={cn(
         itemVariants({ variant, className }),
         disabled && !hasQuantity && "opacity-40",
-        isClickable ? "cursor-pointer" : "",
+        isClickable ? "cursor-pointer" : ""
       )}
       onClick={onClick}
       {...props}

@@ -43,7 +43,7 @@ export class Game {
     pullables: Orb[],
     moonrocks: number,
     stake: number,
-    created_at: number,
+    created_at: number
   ) {
     this.id = id;
     this.over = over;
@@ -87,13 +87,13 @@ export class Game {
       multiplier: Number(data.multiplier.value) / 100,
       chips: Number(data.chips.value),
       discards: Packer.unpack(BigInt(data.discards.value), 1n).map(
-        (index) => index === 1,
+        (index) => index === 1
       ),
       bag: Packer.unpack(BigInt(data.bag.value), 5n).map((index) =>
-        Orb.from(index),
+        Orb.from(index)
       ),
       shop: Packer.unpack(BigInt(data.shop.value), 5n, 6).map((index) =>
-        Orb.from(index),
+        Orb.from(index)
       ),
       moonrocks: Number(data.moonrocks.value),
       stake: Number(data.stake.value),
@@ -121,14 +121,13 @@ export class Game {
       pullables,
       props.moonrocks,
       props.stake,
-      props.created_at,
+      props.created_at
     );
   }
 
   static deduplicate(items: Game[]): Game[] {
     return items.filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.id === item.id),
+      (item, index, self) => index === self.findIndex((t) => t.id === item.id)
     );
   }
 

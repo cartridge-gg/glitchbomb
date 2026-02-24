@@ -13,5 +13,5 @@ export interface EntitiesContextType {
 }
 
 export const EntitiesContext = createContext<EntitiesContextType | undefined>(
-  undefined,
+  undefined
 );

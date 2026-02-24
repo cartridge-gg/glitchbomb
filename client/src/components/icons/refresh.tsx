@@ -23,7 +23,7 @@ export const RefreshIcon = forwardRef<SVGSVGElement, RefreshIconProps>(
         />
       </svg>
     );
-  },
+  }
 );
 
 RefreshIcon.displayName = "RefreshIcon";

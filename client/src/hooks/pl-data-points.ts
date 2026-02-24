@@ -18,7 +18,7 @@ const getPLDataPointsQuery = (gameId: number) => {
   const clauses = new ClauseBuilder().keys(
     [modelName],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
-    "VariableLen",
+    "VariableLen"
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -36,17 +36,13 @@ const getSubscriptionQuery = () => {
     .withLimit(ENTITIES_LIMIT);
 };
 
-export function usePLDataPoints({
-  gameId,
-}: {
-  gameId: number;
-}) {
+export function usePLDataPoints({ gameId }: { gameId: number }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
   const offlinePoints = useMemo(
     () => selectPLDataPoints(offlineState, gameId),
-    [offlineState, gameId],
+    [offlineState, gameId]
   );
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
@@ -70,7 +66,7 @@ export function usePLDataPoints({
   const onUpdate = useCallback(
     (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
-      filterGameId?: number,
+      filterGameId?: number
     ) => {
       if (!data || data.error) {
         return;
@@ -91,12 +87,12 @@ export function usePLDataPoints({
           }
 
           setDataPoints((prev: PLDataPoint[]) =>
-            PLDataPoint.deduplicate([...prev, newPoint]),
+            PLDataPoint.deduplicate([...prev, newPoint])
           );
         }
       });
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -138,7 +134,7 @@ export function usePLDataPoints({
 
     // Create a wrapped callback that includes the filter
     const filteredOnUpdate = (
-      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>
     ) => {
       onUpdate(data, gameId);
     };
@@ -151,7 +147,7 @@ export function usePLDataPoints({
           subscriptionRef.current = response;
         })
         .catch((err) =>
-          console.error("[usePLDataPoints] Subscribe error:", err),
+          console.error("[usePLDataPoints] Subscribe error:", err)
         );
     }
 

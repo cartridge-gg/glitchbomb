@@ -51,11 +51,11 @@ export const Home = () => {
   const balance = useMemo(() => {
     if (!tokenAddress) return 0;
     const tokenContract = tokenContracts.find(
-      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress)
     );
     if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
-      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
+      (b) => BigInt(b.contract_address) === BigInt(tokenAddress)
     );
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
@@ -63,13 +63,13 @@ export const Home = () => {
 
   const offlineMoonrocks = useMemo(
     () => selectTotalMoonrocks(offlineState),
-    [offlineState],
+    [offlineState]
   );
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
+      "inventory"
     );
   }, [connector]);
 
@@ -86,20 +86,18 @@ export const Home = () => {
 
   // Build game list from owned games
   const gameList = useMemo(() => {
-    return [...ownedGames].sort(
-      (a, b) => b.id - a.id,
-    );
+    return [...ownedGames].sort((a, b) => b.id - a.id);
   }, [ownedGames]);
 
   // Split into active and completed games
   const activeGames = useMemo(
     () => gameList.filter((g) => !g.over),
-    [gameList],
+    [gameList]
   );
 
   const completedGames = useMemo(
     () => gameList.filter((g) => g.over),
-    [gameList],
+    [gameList]
   );
 
   // Group completed games by dynamic date labels using entity timestamps
@@ -209,7 +207,7 @@ export const Home = () => {
   // Clamp index when the list changes
   useEffect(() => {
     setActiveGameIndex((prev) =>
-      prev >= totalSlides ? totalSlides - 1 : prev,
+      prev >= totalSlides ? totalSlides - 1 : prev
     );
   }, [totalSlides]);
 
@@ -242,7 +240,7 @@ export const Home = () => {
       dragStart.current = { x: e.clientX, time: Date.now() };
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     },
-    [totalSlides],
+    [totalSlides]
   );
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
@@ -273,7 +271,7 @@ export const Home = () => {
       setDragOffset(0);
       setIsDragging(false);
     },
-    [totalSlides],
+    [totalSlides]
   );
 
   const handlePlay = async (gameId: number) => {
@@ -310,7 +308,7 @@ export const Home = () => {
       }
       action();
     },
-    [isLoggedIn, onConnectClick],
+    [isLoggedIn, onConnectClick]
   );
 
   return (
@@ -773,10 +771,7 @@ export const Home = () => {
                 }}
               >
                 {activeGames.map((game, idx) => (
-                  <div
-                    key={game.id}
-                    className="w-full shrink-0"
-                  >
+                  <div key={game.id} className="w-full shrink-0">
                     <ElectricBorder
                       color="#36F818"
                       gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
@@ -1024,9 +1019,7 @@ export const Home = () => {
                                 background: cashedOut ? "#071304" : "#1A0505",
                               }}
                               onClick={() =>
-                                navigate(
-                                  `/play?game=${game.id}&view=true`,
-                                )
+                                navigate(`/play?game=${game.id}&view=true`)
                               }
                             >
                               <BombIcon
@@ -1055,9 +1048,7 @@ export const Home = () => {
                               gradient={cashedOut ? "green" : "red"}
                               className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
                               onClick={() =>
-                                navigate(
-                                  `/play?game=${game.id}&view=true`,
-                                )
+                                navigate(`/play?game=${game.id}&view=true`)
                               }
                               aria-label="View game"
                             >
