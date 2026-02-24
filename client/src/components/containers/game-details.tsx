@@ -22,7 +22,7 @@ export const GameDetails = ({
   const cost = toTokens(tierPrice(stake));
   const max = toTokens(maxPayout(stake));
 
-  const labelColor = "rgba(54, 248, 24, 0.40)";
+  const labelColor = "#FFFFFF";
   const valueColor = "#36F818";
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
