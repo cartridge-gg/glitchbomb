@@ -25,8 +25,8 @@ pub mod PlayableComponent {
     use crate::types::orbs::OrbsTrait;
 
     // Ekubo pool parameters (hardcoded for sepolia)
-    const POOL_FEE: u128 = 170141183460469231731687303715884105728; // 0.05%
-    const POOL_TICK_SPACING: u128 = 1000;
+    const POOL_FEE: u128 = 3402823669209384634633746074317682114; // 1%
+    const POOL_TICK_SPACING: u128 = 354892;
     const MIN_SQRT_RATIO: u256 = 18446748437148339061;
     const MAX_SQRT_RATIO: u256 = 6277100250585753475930931601400621808602321654880405518632;
 
@@ -116,7 +116,8 @@ pub mod PlayableComponent {
                     (game_token.contract_address, config.quote, true)
                 };
                 let pool_key = PoolKey {
-                    token0, token1, fee: POOL_FEE, tick_spacing: POOL_TICK_SPACING, extension: Zero::zero(),
+                    token0, token1, fee: POOL_FEE, tick_spacing: POOL_TICK_SPACING,
+                    extension: 0x73ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971.try_into().unwrap(),
                 };
 
                 // sqrt_ratio_limit: selling token0 -> price drops -> MIN; selling token1 -> rises -> MAX
