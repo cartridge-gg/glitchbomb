@@ -22,7 +22,7 @@ export const RarityPill = ({
     <div
       className={cn(
         "inline-flex items-center justify-center rounded-md px-2 font-secondary text-2xs tracking-wider uppercase border",
-        className
+        className,
       )}
       style={{
         borderColor: colors.border,

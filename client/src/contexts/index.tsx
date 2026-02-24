@@ -36,7 +36,7 @@ const getEntityQuery = (namespace: string) => {
   const clauses = new ClauseBuilder().keys(
     [config, starterpack],
     [undefined],
-    "FixedLen"
+    "FixedLen",
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -48,7 +48,7 @@ const getGameQuery = (gameId: number) => {
   const clauses = new ClauseBuilder().keys(
     [game],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
-    "FixedLen"
+    "FixedLen",
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -71,7 +71,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
         ref.current = null;
       }
     },
-    []
+    [],
   );
   const [gameId, setGameIdState] = useState<number>(0);
   const [game, setGame] = useState<Game>();
@@ -85,13 +85,13 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       }
       setGameIdState(id);
     },
-    [gameId, cancelSubscription]
+    [gameId, cancelSubscription],
   );
 
   const [config, setConfig] = useState<Config>();
   const [starterpacks, setStarterpacks] = useState<Starterpack[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">(
-    "loading"
+    "loading",
   );
 
   // Initialize Torii client
@@ -144,7 +144,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
         }
       });
     },
-    []
+    [],
   );
 
   // Refresh function to fetch and subscribe to data
@@ -162,7 +162,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       client
         .getEntities(query.build())
         .then((result) =>
-          onEntityUpdate({ data: result.items, error: undefined })
+          onEntityUpdate({ data: result.items, error: undefined }),
         ),
     ]);
 
@@ -186,7 +186,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     await client
       .getEntities(query)
       .then((result) =>
-        onEntityUpdate({ data: result.items, error: undefined })
+        onEntityUpdate({ data: result.items, error: undefined }),
       );
 
     // Subscribe to entity and event updates

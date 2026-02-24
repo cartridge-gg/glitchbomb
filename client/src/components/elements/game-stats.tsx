@@ -51,7 +51,7 @@ export const GameStats = ({
 }: GameStatsProps) => {
   const goalProgress = Math.min(
     milestone > 0 ? (points / milestone) * 100 : 0,
-    100
+    100,
   );
   const goalDisplayProgress = goalProgress === 0 ? 3 : goalProgress;
   const healthProgress = (health / maxHealth) * 100;

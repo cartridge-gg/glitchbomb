@@ -19,8 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameSceneVariants> {
   lives: number;
   bombs: number;
@@ -89,13 +88,13 @@ export const GameScene = ({
 
   const distributionSize = Math.round(clamp(200, viewportHeight * 0.34, 300));
   const distributionThickness = Math.round(
-    clamp(30, viewportHeight * 0.065, 50)
+    clamp(30, viewportHeight * 0.065, 50),
   );
   const pullerSizePx = Math.round(clamp(130, distributionSize * 0.62, 190));
   const heightScale = clamp(0.7, viewportHeight / 800, 1);
   const badgeSizePx = Math.round(clamp(36, 72 * heightScale, 72));
   const badgeOffsetTop = Math.round(
-    (badgeSizePx * 1.05 + pullerSizePx * 0.22) * heightScale
+    (badgeSizePx * 1.05 + pullerSizePx * 0.22) * heightScale,
   );
   const badgeOffsetX = 104;
   const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
@@ -136,7 +135,7 @@ export const GameScene = ({
           "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
           phase === 0 && "opacity-100",
           (phase === 1 || phase === 2) && "opacity-10",
-          phase === 3 && "opacity-100"
+          phase === 3 && "opacity-100",
         )}
       >
         <Distribution
@@ -152,7 +151,7 @@ export const GameScene = ({
           "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
           phase === 0 && "opacity-100 z-20",
           (phase === 1 || phase === 2) && "opacity-0 z-0",
-          phase === 3 && "opacity-100 z-20"
+          phase === 3 && "opacity-100 z-20",
         )}
       >
         <div className="relative">

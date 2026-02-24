@@ -44,7 +44,7 @@ export const ArrowDownIcon = forwardRef<SVGSVGElement, ArrowDownIconProps>(
         <path d="M13 8.55664H11.8887V7.44531H13V8.55664Z" fill="currentColor" />
       </svg>
     );
-  }
+  },
 );
 
 ArrowDownIcon.displayName = "ArrowDownIcon";

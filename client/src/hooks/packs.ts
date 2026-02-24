@@ -25,9 +25,9 @@ const getOwnedGamesQuery = (gameIds: number[]) => {
         `${NAMESPACE}-${Game.getModelName()}`,
         "id",
         "Eq",
-        `0x${id.toString(16).padStart(16, "0")}`
-      )
-    )
+        `0x${id.toString(16).padStart(16, "0")}`,
+      ),
+    ),
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -91,7 +91,7 @@ export function useOwnedGames() {
         }
       });
     },
-    []
+    [],
   );
 
   // Refresh function to fetch and subscribe to data

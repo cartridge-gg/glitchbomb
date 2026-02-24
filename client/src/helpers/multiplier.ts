@@ -21,7 +21,7 @@ function periodicNoise(
   angle: number,
   frameIndex: number,
   seed: number,
-  animationFrames: number
+  animationFrames: number,
 ): number {
   // Use sin and cos to create perfectly looping noise in space
   const x = Math.cos(angle) * 3;
@@ -47,7 +47,7 @@ function periodicNoise(
 function roundedSquarePoint(
   t: number,
   size: number,
-  cornerRadius: number
+  cornerRadius: number,
 ): { x: number; y: number } {
   const halfSize = size;
   const r = cornerRadius;
@@ -149,7 +149,7 @@ function roundedSquarePoint(
 function roundedSquareNormal(
   t: number,
   size: number,
-  cornerRadius: number
+  cornerRadius: number,
 ): { nx: number; ny: number } {
   const halfSize = size;
   const r = cornerRadius;
@@ -246,7 +246,7 @@ export const MultiplierMath = {
     animationFrames: number,
     cornerRadius: number,
     aspectRatio: number = 1,
-    noiseFrequency: number = 1
+    noiseFrequency: number = 1,
   ): string {
     const outerPoints: string[] = [];
     const innerPoints: string[] = [];
@@ -276,7 +276,7 @@ export const MultiplierMath = {
         angle,
         frameIndex,
         seed,
-        animationFrames
+        animationFrames,
       );
 
       const displacement = noiseValue * noiseAmplitude * 10;
@@ -336,7 +336,7 @@ export const MultiplierMath = {
     animationFrames: number,
     cornerRadius: number,
     aspectRatio: number = 1,
-    noiseFrequency: number = 1
+    noiseFrequency: number = 1,
   ): string {
     const points: string[] = [];
     const outerSize = 50 - safetyMargin;
@@ -361,7 +361,7 @@ export const MultiplierMath = {
         angle,
         frameIndex,
         seed,
-        animationFrames
+        animationFrames,
       );
 
       const displacement = noiseValue * noiseAmplitude * 10;

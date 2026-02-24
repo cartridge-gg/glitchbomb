@@ -13,7 +13,7 @@ export class OrbPulled {
     game_id: number,
     id: number,
     orb: Orb,
-    potential_moonrocks: number
+    potential_moonrocks: number,
   ) {
     this.game_id = game_id;
     this.id = id;
@@ -40,7 +40,7 @@ export class OrbPulled {
       props.game_id,
       props.id,
       props.orb,
-      props.potential_moonrocks
+      props.potential_moonrocks,
     );
   }
 
@@ -48,7 +48,7 @@ export class OrbPulled {
     return items.filter(
       (item, index, self) =>
         index ===
-        self.findIndex((t) => t.game_id === item.game_id && t.id === item.id)
+        self.findIndex((t) => t.game_id === item.game_id && t.id === item.id),
     );
   }
 }

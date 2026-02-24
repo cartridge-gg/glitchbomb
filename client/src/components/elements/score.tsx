@@ -2,8 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect, useState } from "react";
 
 export interface ScoreProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof scoreVariants> {
   value: number;
 }

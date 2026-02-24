@@ -49,7 +49,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const cashOut = useCallback(
@@ -73,7 +73,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const enter = useCallback(
@@ -106,7 +106,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const buy = useCallback(
@@ -131,7 +131,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const exit = useCallback(
@@ -155,7 +155,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const buyAndExit = useCallback(
@@ -194,7 +194,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const refresh = useCallback(
@@ -227,7 +227,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const burn = useCallback(
@@ -252,7 +252,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   const mint = useCallback(
@@ -277,7 +277,7 @@ export const useActions = () => {
         return false;
       }
     },
-    [account, chain.id, offline]
+    [account, chain.id, offline],
   );
 
   return {

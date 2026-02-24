@@ -17,7 +17,7 @@ const BALANCE_LIMIT = 1_000;
 
 export function toDecimal(
   token: TokenContract,
-  balance: TokenBalance | undefined
+  balance: TokenBalance | undefined,
 ): number {
   const rawBalance = BigInt(balance?.balance ?? "0");
   const divisor = 10n ** BigInt(token.decimals);
@@ -26,7 +26,7 @@ export function toDecimal(
 }
 
 export function useTokenContracts(
-  request: GetTokenRequest & { contractType?: ContractType }
+  request: GetTokenRequest & { contractType?: ContractType },
 ) {
   const { client } = useEntitiesContext();
   const [contracts, setContracts] = useState<TokenContract[]>([]);
@@ -72,14 +72,14 @@ export function useTokenContracts(
 
 export function useTokens(
   request: GetTokenRequest &
-    GetTokenBalanceRequest & { contractType?: ContractType }
+    GetTokenBalanceRequest & { contractType?: ContractType },
 ) {
   const { account } = useAccount();
   const { client } = useEntitiesContext();
   const offline = useOfflineMode();
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const requestRef = useRef<(GetTokenRequest & GetTokenBalanceRequest) | null>(
-    null
+    null,
   );
   const subscriptionRef = useRef<Subscription | null>(null);
   const wasOfflineRef = useRef(offline);
@@ -107,11 +107,11 @@ export function useTokens(
     if (offline || !requestRef.current || !client || !account) return;
     const contractAddresses =
       request.contractAddresses?.map((i: string) =>
-        addAddressPadding(num.toHex64(i))
+        addAddressPadding(num.toHex64(i)),
       ) || [];
     const accountAddresses =
       request.accountAddresses?.map((i: string) =>
-        addAddressPadding(num.toHex64(i))
+        addAddressPadding(num.toHex64(i)),
       ) || [];
     // Fetch initial balance
     const balances = await client.getTokenBalances({
@@ -132,7 +132,7 @@ export function useTokens(
       [],
       async (data: TokenBalance) => {
         setTokenBalances((prev) => update(prev, data));
-      }
+      },
     );
 
     if (subscriptionRef.current) {
@@ -181,7 +181,7 @@ export function useTokens(
 
 function update(
   previousBalances: TokenBalance[],
-  newBalance: TokenBalance
+  newBalance: TokenBalance,
 ): TokenBalance[] {
   if (
     BigInt(newBalance.account_address) === 0n &&
@@ -194,7 +194,7 @@ function update(
       BigInt(balance.token_id || 0) === BigInt(newBalance.token_id || 0) &&
       BigInt(balance.contract_address) ===
         BigInt(newBalance.contract_address) &&
-      BigInt(balance.account_address) === BigInt(newBalance.account_address)
+      BigInt(balance.account_address) === BigInt(newBalance.account_address),
   );
 
   // If balance doesn't exist, append it to the list
@@ -204,6 +204,6 @@ function update(
 
   // If balance exists, update it while preserving order
   return previousBalances.map((balance, index) =>
-    index === existingBalanceIndex ? newBalance : balance
+    index === existingBalanceIndex ? newBalance : balance,
   );
 }

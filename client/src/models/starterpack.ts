@@ -17,7 +17,7 @@ export class Starterpack {
     referral_percentage: number,
     multiplier: number,
     price: bigint,
-    payment_token: string
+    payment_token: string,
   ) {
     this.id = id;
     this.reissuable = reissuable;
@@ -58,7 +58,7 @@ export class Starterpack {
       props.referral_percentage,
       props.multiplier,
       props.price,
-      props.payment_token
+      props.payment_token,
     );
   }
 }

@@ -3,8 +3,8 @@ import {
   breakEvenScore,
   MAX_SCORE,
   maxPayout,
-  toTokens,
   tokenPayout,
+  toTokens,
 } from "@/helpers/payout";
 
 export interface PayoutChartProps {
@@ -82,12 +82,12 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
 
   const curvePath = useMemo(
     () => buildStaircase(stake),
-    [buildStaircase, stake]
+    [buildStaircase, stake],
   );
   const showBaseCurve = stake > 1;
   const basePath = useMemo(
     () => (showBaseCurve ? buildStaircase(1) : ""),
-    [showBaseCurve, buildStaircase]
+    [showBaseCurve, buildStaircase],
   );
 
   const lineColor = "#36F818";
@@ -276,7 +276,7 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
               toY(
                 hasPrice
                   ? toTokens(maxPayout(1)) * tokenPrice
-                  : toTokens(maxPayout(1))
+                  : toTokens(maxPayout(1)),
               ) + 10
             }
             textAnchor="end"

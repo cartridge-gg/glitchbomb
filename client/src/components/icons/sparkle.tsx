@@ -23,7 +23,7 @@ export const SparkleIcon = forwardRef<SVGSVGElement, SparkleIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 SparkleIcon.displayName = "SparkleIcon";

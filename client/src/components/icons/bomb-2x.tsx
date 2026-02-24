@@ -45,7 +45,7 @@ export const Bomb2xIcon = forwardRef<SVGSVGElement, Bomb2xIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 Bomb2xIcon.displayName = "Bomb2xIcon";

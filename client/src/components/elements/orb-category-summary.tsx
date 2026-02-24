@@ -88,7 +88,7 @@ export const OrbCategorySummary = ({
       }
       return acc;
     },
-    {} as Record<OrbCategory, number>
+    {} as Record<OrbCategory, number>,
   );
 
   // Get categories with counts > 0, in display order
@@ -101,7 +101,7 @@ export const OrbCategorySummary = ({
     "moonrock",
   ];
   const categoriesToShow = displayOrder.filter(
-    (cat) => categoryCounts[cat] > 0
+    (cat) => categoryCounts[cat] > 0,
   );
 
   return (

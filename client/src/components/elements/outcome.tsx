@@ -62,8 +62,7 @@ const backgroundVariants = (variant: string) => {
 };
 
 export interface OutcomeProps
-  extends
-    Omit<HTMLMotionProps<"div">, "ref">,
+  extends Omit<HTMLMotionProps<"div">, "ref">,
     VariantProps<typeof outcomeVariants> {
   content: string;
 }
@@ -101,7 +100,7 @@ export const Outcome = ({
       {/* Text layer */}
       <p
         className={cn(
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black"
+          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-black",
         )}
       >
         {content}
@@ -109,7 +108,7 @@ export const Outcome = ({
       <p
         className={cn(
           "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-          textColorVariants(variant ?? "default")
+          textColorVariants(variant ?? "default"),
         )}
       >
         {content}

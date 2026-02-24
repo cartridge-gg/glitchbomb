@@ -64,7 +64,7 @@ export function tierPrice(stake: number): bigint {
 /** All tier prices in raw token units (stake 1 through STARTERPACK_COUNT). */
 export const TIER_PRICES: bigint[] = Array.from(
   { length: STARTERPACK_COUNT },
-  (_, i) => tierPrice(i + 1)
+  (_, i) => tierPrice(i + 1),
 );
 
 /** Maximum token payout (raw units) at max score for a given stake. */

@@ -21,9 +21,9 @@ const getGamesQuery = (gameIds: number[]) => {
       new ClauseBuilder().keys(
         [modelName],
         [`0x${id.toString(16).padStart(16, "0")}`],
-        "FixedLen"
-      )
-    )
+        "FixedLen",
+      ),
+    ),
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -51,7 +51,7 @@ export function useGames(gameIds: number[]) {
   // Create a stable key string for dependency comparison
   const keysString = useMemo(
     () => JSON.stringify([...gameIds].sort()),
-    [gameIds]
+    [gameIds],
   );
 
   const onUpdate = useCallback(
@@ -70,7 +70,7 @@ export function useGames(gameIds: number[]) {
         }
       });
     },
-    []
+    [],
   );
 
   // Refresh function to fetch and subscribe to data
@@ -107,7 +107,7 @@ export function useGames(gameIds: number[]) {
       if (offline) return selectGame(offlineState, gameId);
       return games.find((game) => game.id === gameId);
     },
-    [games, offline, offlineState]
+    [games, offline, offlineState],
   );
 
   return {

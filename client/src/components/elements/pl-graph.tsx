@@ -247,7 +247,7 @@ export const PLGraph = ({
       setView((prev) => {
         const nextScale = Math.min(
           zoomMax,
-          Math.max(zoomMin, prev.scale * zoomFactor)
+          Math.max(zoomMin, prev.scale * zoomFactor),
         );
         if (nextScale === prev.scale) return prev;
         const scaleRatio = nextScale / prev.scale;
@@ -256,7 +256,7 @@ export const PLGraph = ({
         return { scale: nextScale, x: nextX, y: nextY };
       });
     },
-    [zoomMax, zoomMin]
+    [zoomMax, zoomMin],
   );
 
   const handleWheelEvent = useCallback(
@@ -276,7 +276,7 @@ export const PLGraph = ({
 
       applyZoomAt(zoomFactor, pointerX, pointerY);
     },
-    [applyZoomAt]
+    [applyZoomAt],
   );
 
   useEffect(() => {

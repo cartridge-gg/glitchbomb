@@ -11,7 +11,7 @@ export const PointsProgress = ({
 }: PointsProgressProps) => {
   const progress = Math.min(
     milestone > 0 ? (points / milestone) * 100 : 0,
-    100
+    100,
   );
   const displayProgress = progress === 0 ? 3 : progress;
 

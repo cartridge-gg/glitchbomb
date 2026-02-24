@@ -23,7 +23,7 @@ export const HeartIcon = forwardRef<SVGSVGElement, HeartIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 HeartIcon.displayName = "HeartIcon";

@@ -63,7 +63,7 @@ export const NumsLogoIcon = forwardRef<SVGSVGElement, NumsLogoIconProps>(
         </defs>
       </svg>
     );
-  }
+  },
 );
 
 NumsLogoIcon.displayName = "NumsLogoIcon";

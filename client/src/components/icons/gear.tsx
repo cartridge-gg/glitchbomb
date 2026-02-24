@@ -25,7 +25,7 @@ export const GearIcon = forwardRef<SVGSVGElement, GearIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 GearIcon.displayName = "GearIcon";

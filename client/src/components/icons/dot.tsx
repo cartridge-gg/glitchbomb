@@ -25,7 +25,7 @@ export const DotIcon = forwardRef<SVGSVGElement, DotIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 DotIcon.displayName = "DotIcon";

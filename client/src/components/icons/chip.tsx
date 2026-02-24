@@ -31,7 +31,7 @@ export const ChipIcon = forwardRef<SVGSVGElement, ChipIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 ChipIcon.displayName = "ChipIcon";

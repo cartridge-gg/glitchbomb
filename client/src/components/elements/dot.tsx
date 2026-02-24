@@ -3,8 +3,7 @@ import { DotIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export interface DotProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof dotVariants> {}
 
 const dotVariants = cva("select-none relative", {

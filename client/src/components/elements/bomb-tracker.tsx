@@ -14,8 +14,7 @@ export interface BombDetails {
 }
 
 export interface BombTrackerProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof bombTrackerVariants> {
   details: BombDetails;
 }
@@ -36,7 +35,7 @@ const bombTrackerVariants = cva(
       variant: "default",
       size: "md",
     },
-  }
+  },
 );
 
 export const BombTracker = ({
@@ -58,7 +57,7 @@ export const BombTracker = ({
 
   const pushSlots = (
     detail: BombDetail,
-    variant: "simple" | "double" | "triple"
+    variant: "simple" | "double" | "triple",
   ) => {
     for (let index = 0; index < detail.total; index += 1) {
       const enabled = index >= detail.total - detail.count;
@@ -127,7 +126,7 @@ export const BombTracker = ({
               <Icon
                 className={cn(
                   "transition-opacity duration-300 opacity-25",
-                  slotClasses
+                  slotClasses,
                 )}
               />
             )}

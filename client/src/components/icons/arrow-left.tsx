@@ -56,7 +56,7 @@ export const ArrowLeftIcon = forwardRef<SVGSVGElement, ArrowLeftIconProps>(
         <path d="M13 7.44434V8.55566H5.22168V7.44434H13Z" fill="currentColor" />
       </svg>
     );
-  }
+  },
 );
 
 ArrowLeftIcon.displayName = "ArrowLeftIcon";

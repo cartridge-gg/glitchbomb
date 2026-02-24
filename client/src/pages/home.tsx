@@ -51,11 +51,11 @@ export const Home = () => {
   const balance = useMemo(() => {
     if (!tokenAddress) return 0;
     const tokenContract = tokenContracts.find(
-      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress)
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
     );
     if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
-      (b) => BigInt(b.contract_address) === BigInt(tokenAddress)
+      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
     );
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
@@ -63,13 +63,13 @@ export const Home = () => {
 
   const offlineMoonrocks = useMemo(
     () => selectTotalMoonrocks(offlineState),
-    [offlineState]
+    [offlineState],
   );
   const displayMoonrocks = offline ? offlineMoonrocks : balance;
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory"
+      "inventory",
     );
   }, [connector]);
 
@@ -92,12 +92,12 @@ export const Home = () => {
   // Split into active and completed games
   const activeGames = useMemo(
     () => gameList.filter((g) => !g.over),
-    [gameList]
+    [gameList],
   );
 
   const completedGames = useMemo(
     () => gameList.filter((g) => g.over),
-    [gameList]
+    [gameList],
   );
 
   // Group completed games by dynamic date labels using entity timestamps
@@ -207,7 +207,7 @@ export const Home = () => {
   // Clamp index when the list changes
   useEffect(() => {
     setActiveGameIndex((prev) =>
-      prev >= totalSlides ? totalSlides - 1 : prev
+      prev >= totalSlides ? totalSlides - 1 : prev,
     );
   }, [totalSlides]);
 
@@ -240,7 +240,7 @@ export const Home = () => {
       dragStart.current = { x: e.clientX, time: Date.now() };
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     },
-    [totalSlides]
+    [totalSlides],
   );
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
@@ -271,7 +271,7 @@ export const Home = () => {
       setDragOffset(0);
       setIsDragging(false);
     },
-    [totalSlides]
+    [totalSlides],
   );
 
   const handlePlay = async (gameId: number) => {
@@ -308,7 +308,7 @@ export const Home = () => {
       }
       action();
     },
-    [isLoggedIn, onConnectClick]
+    [isLoggedIn, onConnectClick],
   );
 
   return (
@@ -994,72 +994,70 @@ export const Home = () => {
                   </p>
                 </div>
               ) : (
-                <>
-                  {activityGroups.map((group, groupIdx) => (
-                    <div key={group.label} className="flex flex-col gap-2">
-                      {groupIdx > 0 && (
-                        <p
-                          className="font-secondary text-sm tracking-widest uppercase pt-1"
-                          style={{ color: "#36F818" }}
+                activityGroups.map((group, groupIdx) => (
+                  <div key={group.label} className="flex flex-col gap-2">
+                    {groupIdx > 0 && (
+                      <p
+                        className="font-secondary text-sm tracking-widest uppercase pt-1"
+                        style={{ color: "#36F818" }}
+                      >
+                        {group.label}
+                      </p>
+                    )}
+                    {group.games.map((game) => {
+                      const cashedOut = game.health > 0;
+                      return (
+                        <div
+                          key={`${group.label}-${game.id}`}
+                          className="flex items-center gap-2"
                         >
-                          {group.label}
-                        </p>
-                      )}
-                      {group.games.map((game) => {
-                        const cashedOut = game.health > 0;
-                        return (
-                          <div
-                            key={`${group.label}-${game.id}`}
-                            className="flex items-center gap-2"
+                          <button
+                            type="button"
+                            className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            style={{
+                              background: cashedOut ? "#071304" : "#1A0505",
+                            }}
+                            onClick={() =>
+                              navigate(`/play?game=${game.id}&view=true`)
+                            }
                           >
-                            <button
-                              type="button"
-                              className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            <BombIcon
+                              size="md"
+                              className="text-white shrink-0"
+                            />
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              #{game.id}
+                            </span>
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              L{game.level}
+                            </span>
+                            <span
+                              className="font-secondary text-sm tracking-widest"
                               style={{
-                                background: cashedOut ? "#071304" : "#1A0505",
+                                color: cashedOut ? "#36F818" : "#EF4444",
                               }}
-                              onClick={() =>
-                                navigate(`/play?game=${game.id}&view=true`)
-                              }
                             >
-                              <BombIcon
-                                size="md"
-                                className="text-white shrink-0"
-                              />
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                #{game.id}
-                              </span>
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                L{game.level}
-                              </span>
-                              <span
-                                className="font-secondary text-sm tracking-widest"
-                                style={{
-                                  color: cashedOut ? "#36F818" : "#EF4444",
-                                }}
-                              >
-                                {cashedOut
-                                  ? `+$${(game.points * 0.01).toFixed(2)}`
-                                  : "GLITCHED"}
-                              </span>
-                            </button>
-                            <Button
-                              variant="secondary"
-                              gradient={cashedOut ? "green" : "red"}
-                              className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                              onClick={() =>
-                                navigate(`/play?game=${game.id}&view=true`)
-                              }
-                              aria-label="View game"
-                            >
-                              <ArrowRightIcon size="sm" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </>
+                              {cashedOut
+                                ? `+$${(game.points * 0.01).toFixed(2)}`
+                                : "GLITCHED"}
+                            </span>
+                          </button>
+                          <Button
+                            variant="secondary"
+                            gradient={cashedOut ? "green" : "red"}
+                            className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                            onClick={() =>
+                              navigate(`/play?game=${game.id}&view=true`)
+                            }
+                            aria-label="View game"
+                          >
+                            <ArrowRightIcon size="sm" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))
               )}
             </div>
           </div>

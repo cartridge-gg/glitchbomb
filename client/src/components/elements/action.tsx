@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface ActionProps
-  extends
-    React.HTMLAttributes<HTMLButtonElement>,
+  extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof actionVariants> {
   active?: boolean;
   disabled?: boolean;

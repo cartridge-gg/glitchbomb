@@ -25,7 +25,7 @@ function RouterView() {
     document.documentElement.style.setProperty("--safe-area-top", safeArea.top);
     document.documentElement.style.setProperty(
       "--safe-area-bottom",
-      safeArea.bottom
+      safeArea.bottom,
     );
   }, [safeArea]);
 
@@ -58,7 +58,7 @@ function RouterView() {
       />
       <div
         className={cn(
-          "absolute inset-0 bg-green-gradient-100 transition-opacity duration-700 ease-in-out"
+          "absolute inset-0 bg-green-gradient-100 transition-opacity duration-700 ease-in-out",
           // isRoot ? "opacity-100" : "opacity-0",
         )}
         aria-hidden="true"

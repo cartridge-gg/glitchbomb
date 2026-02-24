@@ -226,7 +226,7 @@ export const BombIcon = forwardRef<SVGSVGElement, BombIconProps>(
         })()}
       </svg>
     );
-  }
+  },
 );
 
 BombIcon.displayName = "BombIcon";

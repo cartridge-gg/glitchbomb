@@ -25,7 +25,7 @@ export const OrbIcon = forwardRef<SVGSVGElement, OrbIconProps>(
         />
       </svg>
     );
-  }
+  },
 );
 
 OrbIcon.displayName = "OrbIcon";

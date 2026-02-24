@@ -1,5 +1,5 @@
-import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 import { PayoutChart } from "./payout-chart";
 
 const meta = {
@@ -63,8 +63,14 @@ export const Interactive = () => {
   return (
     <div className="max-w-md bg-green-950 p-4 rounded-xl flex flex-col gap-4">
       <div className="flex items-center gap-4">
-        <label className="text-green-400 font-secondary text-sm">Stake:</label>
+        <label
+          className="text-green-400 font-secondary text-sm"
+          htmlFor="stake-slider"
+        >
+          Stake:
+        </label>
         <input
+          id="stake-slider"
           type="range"
           min={1}
           max={10}

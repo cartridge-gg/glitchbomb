@@ -62,7 +62,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                     key={index}
                     className={cn(
                       "flex flex-col items-center",
-                      isDiscarded && "opacity-25"
+                      isDiscarded && "opacity-25",
                     )}
                   >
                     <OrbDisplay
@@ -102,7 +102,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                 key={`${orb.value}-${index}`}
                 className={cn(
                   "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
-                  isDiscarded && "opacity-25"
+                  isDiscarded && "opacity-25",
                 )}
               >
                 {/* Orb icon */}

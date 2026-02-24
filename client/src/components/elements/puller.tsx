@@ -36,7 +36,7 @@ const pullerVariants = cva(
       variant: "default",
       size: "md",
     },
-  }
+  },
 );
 
 // Color mapping for variants
@@ -76,8 +76,7 @@ const RAINBOW_SEQUENCE = [
 const DEFAULT_GLOW_POSITION = { x: 30, y: 25 } as const;
 
 export interface PullerProps
-  extends
-    Omit<HTMLMotionProps<"button">, "ref">,
+  extends Omit<HTMLMotionProps<"button">, "ref">,
     VariantProps<typeof pullerVariants> {
   orbs?: number;
   bombs?: number;
@@ -124,16 +123,16 @@ export const Puller = memo(function Puller({
   });
   const time = useTime();
   const aliveDriftX = useTransform(time, (t) =>
-    isHovering ? Math.sin(t / 820) * 2.2 : 0
+    isHovering ? Math.sin(t / 820) * 2.2 : 0,
   );
   const aliveDriftY = useTransform(time, (t) =>
-    isHovering ? Math.cos(t / 980) * 1.8 : 0
+    isHovering ? Math.cos(t / 980) * 1.8 : 0,
   );
   const glowCenterX = useTransform(() =>
-    Math.min(100, Math.max(0, smoothGlowX.get() + aliveDriftX.get()))
+    Math.min(100, Math.max(0, smoothGlowX.get() + aliveDriftX.get())),
   );
   const glowCenterY = useTransform(() =>
-    Math.min(100, Math.max(0, smoothGlowY.get() + aliveDriftY.get()))
+    Math.min(100, Math.max(0, smoothGlowY.get() + aliveDriftY.get())),
   );
 
   // Rainbow animation effect - only depends on variant, not controls
@@ -289,7 +288,7 @@ export const Puller = memo(function Puller({
         <motion.div
           className={cn(
             "puller-glow absolute inset-0 rounded-full pointer-events-none transition-[opacity,transform] duration-700 ease-out",
-            isHovering ? "opacity-100 scale-100" : "opacity-0 scale-[0.94]"
+            isHovering ? "opacity-100 scale-100" : "opacity-0 scale-[0.94]",
           )}
           style={{
             background: glowBackground,

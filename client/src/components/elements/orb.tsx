@@ -25,7 +25,7 @@ const orbVariants = cva(
       variant: "default",
       size: "md",
     },
-  }
+  },
 );
 
 const iconVariants = (variant: string) => {
@@ -73,8 +73,7 @@ const VARIANT_COLORS = {
 } as const;
 
 export interface OrbProps
-  extends
-    Omit<HTMLMotionProps<"div">, "ref">,
+  extends Omit<HTMLMotionProps<"div">, "ref">,
     VariantProps<typeof orbVariants> {}
 
 export const Orb = ({ variant, size, className, ...props }: OrbProps) => {

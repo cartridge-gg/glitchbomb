@@ -18,7 +18,7 @@ const orbFromId = (id: number) => Orb.from(id);
 export function createGame(
   gameId: number,
   moonrocks: number,
-  stake: number
+  stake: number,
 ): OfflineGame {
   return {
     id: gameId,
@@ -118,7 +118,7 @@ export function cashOut(game: OfflineGame): {
 
 export function enterShop(
   game: OfflineGame,
-  seed: bigint
+  seed: bigint,
 ): { game: OfflineGame; shop: OfflineShopState } {
   assertNotOver(game);
   assertNotInShop(game);
@@ -153,7 +153,7 @@ export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
     const purchaseCount = shop.purchaseCounts[orbId] ?? 0;
     const multiplier = BASE_MULTIPLIER + purchaseCount * SUPP_MULTIPLIER;
     const cost = Math.floor(
-      (baseCost * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER
+      (baseCost * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER,
     );
 
     if (next.chips < cost) {
@@ -195,7 +195,7 @@ export function exitShop(game: OfflineGame): {
 
 export function pullOrbs(
   game: OfflineGame,
-  seed: bigint
+  seed: bigint,
 ): { game: OfflineGame; orbs: number[]; earnings: number } {
   assertNotOver(game);
   assertNotCompleted(game);

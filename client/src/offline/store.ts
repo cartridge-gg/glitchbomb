@@ -301,14 +301,14 @@ export function selectPulls(source: OfflineState, gameId: number): OrbPulled[] {
           pull.game_id,
           pull.id,
           Orb.from(pull.orb),
-          pull.potential_moonrocks
-        )
+          pull.potential_moonrocks,
+        ),
     );
 }
 
 export function selectPLDataPoints(
   source: OfflineState,
-  gameId: number
+  gameId: number,
 ): PLDataPoint[] {
   return source.plDataPoints
     .filter((point) => point.game_id === gameId)
@@ -318,15 +318,15 @@ export function selectPLDataPoints(
           BigInt(point.game_id),
           point.id,
           point.potential_moonrocks,
-          point.orb
-        )
+          point.orb,
+        ),
     );
 }
 
 export function selectTotalMoonrocks(source: OfflineState = state): number {
   return Object.values(source.games).reduce(
     (total, game) => total + game.moonrocks,
-    0
+    0,
   );
 }
 
@@ -354,7 +354,7 @@ function toGameModel(game: OfflineGame): Game {
     pullables,
     game.moonrocks,
     game.stake,
-    game.created_at
+    game.created_at,
   );
 }
 

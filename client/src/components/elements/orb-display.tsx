@@ -28,7 +28,7 @@ const orbDisplayVariants = cva(
     defaultVariants: {
       size: "md",
     },
-  }
+  },
 );
 
 const valueSizeMap = {
@@ -114,8 +114,7 @@ const getOrbDisplayValue = (orb: Orb): string => {
 };
 
 export interface OrbDisplayProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
   bombTierIcons?: boolean;
@@ -149,7 +148,7 @@ export const OrbDisplay = ({
       <div
         className={cn(
           orbDisplayVariants({ size, className }),
-          "overflow-hidden"
+          "overflow-hidden",
         )}
         style={{
           borderWidth: "1px",
@@ -183,7 +182,7 @@ export const OrbDisplay = ({
         <Icon
           className={cn(
             "relative z-10",
-            orb.isBomb() ? "w-3/5 h-3/5" : "w-full h-full"
+            orb.isBomb() ? "w-3/5 h-3/5" : "w-full h-full",
           )}
           style={{
             color,
@@ -199,7 +198,7 @@ export const OrbDisplay = ({
             valuePosition === "top-right"
               ? valueSizeCompactMap[size ?? "md"]
               : valueSizeMap[size ?? "md"],
-            valuePositionMap[valuePosition][size ?? "md"]
+            valuePositionMap[valuePosition][size ?? "md"],
           )}
           style={{ backgroundColor: color }}
         >

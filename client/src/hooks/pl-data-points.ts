@@ -18,7 +18,7 @@ const getPLDataPointsQuery = (gameId: number) => {
   const clauses = new ClauseBuilder().keys(
     [modelName],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
-    "VariableLen"
+    "VariableLen",
   );
   return new ToriiQueryBuilder()
     .withClause(clauses.build())
@@ -42,7 +42,7 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
   const offline = useOfflineMode();
   const offlinePoints = useMemo(
     () => selectPLDataPoints(offlineState, gameId),
-    [offlineState, gameId]
+    [offlineState, gameId],
   );
   const [dataPoints, setDataPoints] = useState<PLDataPoint[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
@@ -66,7 +66,7 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
   const onUpdate = useCallback(
     (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
-      filterGameId?: number
+      filterGameId?: number,
     ) => {
       if (!data || data.error) {
         return;
@@ -87,12 +87,12 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
           }
 
           setDataPoints((prev: PLDataPoint[]) =>
-            PLDataPoint.deduplicate([...prev, newPoint])
+            PLDataPoint.deduplicate([...prev, newPoint]),
           );
         }
       });
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -134,7 +134,7 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
 
     // Create a wrapped callback that includes the filter
     const filteredOnUpdate = (
-      data: SubscriptionCallbackArgs<torii.Entity[], Error>
+      data: SubscriptionCallbackArgs<torii.Entity[], Error>,
     ) => {
       onUpdate(data, gameId);
     };
@@ -147,7 +147,7 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
           subscriptionRef.current = response;
         })
         .catch((err) =>
-          console.error("[usePLDataPoints] Subscribe error:", err)
+          console.error("[usePLDataPoints] Subscribe error:", err),
         );
     }
 
