@@ -122,6 +122,17 @@ export const Game = () => {
     });
   }, [dataPoints]);
 
+  const potentialMoonrocks = useMemo(() => {
+    if (!pack) return undefined;
+    if (plData.length > 0) {
+      return plData[plData.length - 1].value;
+    }
+    if (game) {
+      return pack.moonrocks + game.points;
+    }
+    return pack.moonrocks;
+  }, [pack, plData, game]);
+
   // Fetch username from controller
   useEffect(() => {
     if (!connector) return;
@@ -526,6 +537,7 @@ export const Game = () => {
     <div className="absolute inset-0 flex flex-col min-h-0">
       <GameHeader
         moonrocks={pack?.moonrocks ?? 100}
+        potentialMoonrocks={potentialMoonrocks}
         chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
       />
