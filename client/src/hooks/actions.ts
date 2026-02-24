@@ -12,38 +12,12 @@ import {
   exit as offlineExit,
   pull as offlinePull,
   refresh as offlineRefresh,
-  start as offlineStart,
 } from "@/offline/store";
 
 export const useActions = () => {
   const { account } = useAccount();
   const { chain } = useNetwork();
   const offline = useOfflineMode();
-
-  const start = useCallback(
-    async (gameId: number) => {
-      try {
-        if (offline) return offlineStart(gameId);
-        if (!account?.address) return false;
-        const gameAddress = getGameAddress(chain.id);
-        await account.execute([
-          {
-            contractAddress: gameAddress,
-            entrypoint: "start",
-            calldata: CallData.compile({
-              gameId: gameId,
-            }),
-          },
-        ]);
-
-        return true;
-      } catch (e) {
-        console.log({ e });
-        return false;
-      }
-    },
-    [account, chain.id, offline],
-  );
 
   const pull = useCallback(
     async (gameId: number) => {
@@ -307,7 +281,6 @@ export const useActions = () => {
   );
 
   return {
-    start,
     pull,
     cashOut,
     enter,

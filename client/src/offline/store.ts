@@ -97,51 +97,32 @@ export function createOfflineGame(): number {
     const id = prev.nextGameId;
     createdId = id;
     const game = createGameEngine(id, DEFAULT_MOONROCKS, 1);
+
+    // Start the game immediately (fill bag, deduct entry cost)
+    const { game: started, cost } = startGame(game);
+    started.moonrocks = game.moonrocks - cost;
+
+    const plStart: OfflinePLDataPoint = {
+      game_id: id,
+      id: 0,
+      potential_moonrocks: game.moonrocks,
+      orb: 0,
+    };
+    const plAfter: OfflinePLDataPoint = {
+      game_id: id,
+      id: 1,
+      potential_moonrocks: started.moonrocks + started.points,
+      orb: 0,
+    };
+
     return {
       ...prev,
       nextGameId: id + 1,
-      games: { ...prev.games, [id]: game },
+      games: { ...prev.games, [id]: started },
+      plDataPoints: [...prev.plDataPoints, plStart, plAfter],
     };
   });
   return createdId;
-}
-
-export function start(gameId: number): boolean {
-  try {
-    setState((prev) => {
-      const game = ensureGame(prev, gameId);
-      const { game: started, cost } = startGame(game);
-
-      if (game.moonrocks < cost) {
-        throw new Error("Game: not enough moonrocks");
-      }
-      const beforeMoonrocks = game.moonrocks;
-      started.moonrocks = game.moonrocks - cost;
-
-      const plStart: OfflinePLDataPoint = {
-        game_id: gameId,
-        id: 0,
-        potential_moonrocks: beforeMoonrocks,
-        orb: 0,
-      };
-      const plAfter: OfflinePLDataPoint = {
-        game_id: gameId,
-        id: 1,
-        potential_moonrocks: started.moonrocks + started.points,
-        orb: 0,
-      };
-
-      return {
-        ...prev,
-        games: { ...prev.games, [gameId]: started },
-        plDataPoints: [...prev.plDataPoints, plStart, plAfter],
-      };
-    });
-    return true;
-  } catch (error) {
-    console.error("[offline] start failed", error);
-    return false;
-  }
 }
 
 export function pull(gameId: number): boolean {
@@ -393,6 +374,7 @@ function toGameModel(game: OfflineGame): Game {
     pullables,
     game.moonrocks,
     game.stake,
+    game.created_at,
   );
 }
 

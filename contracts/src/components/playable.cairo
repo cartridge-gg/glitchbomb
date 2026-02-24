@@ -2,11 +2,17 @@
 pub mod PlayableComponent {
     // Imports
 
+    use core::num::traits::Zero;
     use dojo::world::{WorldStorage, WorldStorageTrait};
+    use ekubo::components::clear::IClearDispatcherTrait;
+    use ekubo::interfaces::erc20::IERC20Dispatcher as EkuboIERC20Dispatcher;
+    use ekubo::interfaces::router::{IRouterDispatcherTrait, RouteNode, TokenAmount};
+    use ekubo::types::i129::i129;
+    use ekubo::types::keys::PoolKey;
     use starknet::ContractAddress;
     use crate::helpers::random::RandomTrait;
     use crate::helpers::rewarder::RewarderImpl;
-    use crate::interfaces::erc20::IERC20DispatcherTrait;
+    use crate::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::models::config::{ConfigAssert, ConfigTrait};
     use crate::models::game::{BASE_MULTIPLIER, GameAssert, GameTrait, SUPP_MULTIPLIER};
     use crate::models::starterpack::StarterpackAssert;
@@ -16,6 +22,12 @@ pub mod PlayableComponent {
     };
     use crate::types::orb::OrbTrait;
     use crate::types::orbs::OrbsTrait;
+
+    // Ekubo pool parameters (hardcoded for sepolia)
+    const POOL_FEE: u128 = 170141183460469231731687303715884105728; // 0.05%
+    const POOL_TICK_SPACING: u128 = 1000;
+    const MIN_SQRT_RATIO: u256 = 18446748437148339061;
+    const MAX_SQRT_RATIO: u256 = 6277100250585753475930931601400621808602321654880405518632;
 
     // Storage
 
@@ -58,18 +70,75 @@ pub mod PlayableComponent {
                 let game_id = collection.mint(recipient, true);
 
                 // [Effect] Create game with starterpack stake
-                let game = GameTrait::new(id: game_id, stake: starterpack.multiplier);
+                let mut game = GameTrait::new(id: game_id, stake: starterpack.multiplier);
+                game.created_at = starknet::get_block_timestamp();
+
+                // [Effect] Start the game immediately (fill bag)
+                let cost = game.start();
+
+                // [Event] Emit PLDataPoint before level cost (initial moonrocks)
+                store.pl_data_point(0, @game, game.moonrocks, 0);
+
+                // [Effect] Spend moonrocks for entry
+                game.spend_moonrocks(cost);
                 store.set_game(@game);
+
+                // [Event] Emit PLDataPoint after level cost
+                store.pl_data_point(1, @game, game.moonrocks + game.points, 0);
+
+                // [Interaction] Update token metadata
+                collection.update(game_id.into());
+
+                // [Event] Emit GameStarted
+                store.game_started(@game);
+
                 quantity -= 1;
             }
 
-            // [Interaction] Transfer the entry price to the fee receiver
-            // TODO: transfer part to the prize pool once available
+            // [Interaction] Buy-and-burn via Ekubo (skip when ekubo is not configured)
             let config = store.config();
-            let token = config.token();
-            let receiver = config.fee_receiver;
-            let amount = token.balance_of(starknet::get_contract_address());
-            token.transfer(receiver, amount);
+            if config.ekubo.is_non_zero() {
+                let this = starknet::get_contract_address();
+                let quote = IERC20Dispatcher { contract_address: config.quote };
+                let game_token = config.token();
+                let amount = quote.balance_of(this);
+
+                // Transfer USDC to ekubo router
+                let router = store.ekubo_router();
+                let clearer = store.ekubo_clearer();
+                quote.transfer(router.contract_address, amount);
+
+                // Construct pool key (token0 must be the smaller address)
+                let (token0, token1, is_token1) = if config.quote < game_token.contract_address {
+                    (config.quote, game_token.contract_address, false)
+                } else {
+                    (game_token.contract_address, config.quote, true)
+                };
+                let pool_key = PoolKey {
+                    token0, token1, fee: POOL_FEE, tick_spacing: POOL_TICK_SPACING, extension: Zero::zero(),
+                };
+
+                // sqrt_ratio_limit: selling token0 -> price drops -> MIN; selling token1 -> rises -> MAX
+                let sqrt_ratio_limit = if is_token1 { MAX_SQRT_RATIO } else { MIN_SQRT_RATIO };
+                let node = RouteNode { pool_key, sqrt_ratio_limit, skip_ahead: 0 };
+                let token_amount = TokenAmount {
+                    token: config.quote,
+                    amount: i129 { mag: amount.try_into().expect('Amount exceeds u128'), sign: false },
+                };
+
+                // Swap USDC for game token
+                router.swap(node, token_amount);
+
+                // Clear tokens from router to this contract
+                clearer.clear_minimum(
+                    EkuboIERC20Dispatcher { contract_address: game_token.contract_address }, 0,
+                );
+                clearer.clear(EkuboIERC20Dispatcher { contract_address: config.quote });
+
+                // Burn all game tokens acquired
+                let acquired = game_token.balance_of(this);
+                game_token.burn(acquired);
+            }
         }
     }
 
@@ -77,38 +146,6 @@ pub mod PlayableComponent {
     pub impl InternalImpl<
         TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
     > of InternalTrait<TContractState> {
-        fn start(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
-            // [Setup] Store
-            let store = StoreTrait::new(world);
-
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game has not been started yet
-            let mut game = store.game(game_id);
-            game.assert_not_started();
-
-            // [Effect] Start the game
-            let cost = game.start();
-
-            // [Event] Emit PLDataPoint before level cost (initial moonrocks)
-            store.pl_data_point(0, @game, game.moonrocks, 0);
-
-            // [Effect] Spend moonrocks for entry
-            game.spend_moonrocks(cost);
-            store.set_game(@game);
-
-            // [Event] Emit PLDataPoint after level cost
-            store.pl_data_point(1, @game, game.moonrocks + game.points, 0);
-
-            // [Interaction] Update token metadata
-            collection.update(game_id.into());
-
-            // [Event] Emit GameStarted
-            store.game_started(@game);
-        }
-
         fn pull(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
@@ -120,6 +157,7 @@ pub mod PlayableComponent {
             // [Check] Game is not over
             let mut game = store.game(game_id);
             game.assert_not_over();
+            game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let config = store.config();
@@ -169,6 +207,7 @@ pub mod PlayableComponent {
             // [Check] Game is not over
             let mut game = store.game(game_id);
             game.assert_not_over();
+            game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Effect] Read score before cash_out clears it
             let score = game.points;
@@ -211,6 +250,7 @@ pub mod PlayableComponent {
             // [Check] Game is not over
             let mut game = store.game(game_id);
             game.assert_not_over();
+            game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Effect] Enter shop
             let config = store.config();
@@ -238,6 +278,7 @@ pub mod PlayableComponent {
             // [Check] Game is not over
             let mut game = store.game(game_id);
             game.assert_not_over();
+            game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Info] Get shop orbs for event emission
             let orbs = GameTrait::get_shop_orbs(game.shop);
@@ -272,6 +313,7 @@ pub mod PlayableComponent {
             // [Check] Game is not over
             let mut game = store.game(game_id);
             game.assert_not_over();
+            game.assert_not_expired(starknet::get_block_timestamp());
 
             // [Effect] Exit shop and get next level cost (applies level-based curse)
             let cost = game.exit();

@@ -22,14 +22,9 @@ const meta = {
       control: { type: "range", min: 0, max: 9, step: 1 },
       description: "Selected tier index (0-based)",
     },
-    tokenPrice: {
-      control: { type: "number" },
-      description: "Token price in USD",
-    },
   },
   args: {
     tierIndex: 0,
-    tokenPrice: null,
   },
 } satisfies Meta<typeof GameDetails>;
 
@@ -52,13 +47,6 @@ export const MaxTier: Story = {
   },
 };
 
-export const WithTokenPrice: Story = {
-  args: {
-    tierIndex: 2,
-    tokenPrice: 0.05,
-  },
-};
-
 export const Interactive = () => {
   const [tierIndex, setTierIndex] = useState(0);
   return (
@@ -67,7 +55,6 @@ export const Interactive = () => {
         <GameDetails
           tierIndex={tierIndex}
           onTierIndexChange={setTierIndex}
-          tokenPrice={null}
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 use core::num::traits::Zero;
-use crate::constants::{DEFAULT_LEVEL, DEFAULT_MOONROCKS, MAX_CAPACITY, MAX_HEALTH};
+use crate::constants::{DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH};
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::power::TwoPower;
@@ -44,6 +44,7 @@ pub mod Errors {
     pub const GAME_SHOP_BURN_USED: felt252 = 'Game: shop burn used';
     pub const GAME_CANNOT_BURN_BOMB: felt252 = 'Game: cannot burn bomb';
     pub const GAME_INVALID_BAG_INDEX: felt252 = 'Game: invalid bag index';
+    pub const GAME_EXPIRED: felt252 = 'Game: expired';
 }
 
 #[generate_trait]
@@ -67,6 +68,7 @@ pub impl GameImpl of GameTrait {
             shop: 0,
             moonrocks: DEFAULT_MOONROCKS,
             stake: stake,
+            created_at: 0,
         }
     }
 
@@ -508,6 +510,13 @@ pub impl GameAssert of AssertTrait {
     #[inline]
     fn assert_not_full(self: @Game, len: u32) {
         assert(len < MAX_CAPACITY, Errors::GAME_BAG_FULL);
+    }
+
+    #[inline]
+    fn assert_not_expired(self: @Game, current_time: u64) {
+        if *self.created_at != 0 {
+            assert(current_time < *self.created_at + GAME_EXPIRATION_TIME, Errors::GAME_EXPIRED);
+        }
     }
 }
 

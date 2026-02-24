@@ -23,6 +23,7 @@ export interface OfflineGame {
   shop: OfflineShopState | null;
   moonrocks: number;
   stake: number;
+  created_at: number;
 }
 
 export interface OfflineOrbPulled {

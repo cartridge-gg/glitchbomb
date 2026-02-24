@@ -6,7 +6,7 @@ export const REWARD_NUMERATOR = 488_000_000_000_000n;
 export const MIN_REWARD = 1n;
 export const STARTERPACK_COUNT = 10;
 export const PRICE_MULTIPLIER = 100_000n;
-export const DEFAULT_ENTRY_PRICE = 100_000_000n;
+export const DEFAULT_ENTRY_PRICE = 2_000_000n;
 export const TOKEN_DECIMALS = 6;
 
 /**

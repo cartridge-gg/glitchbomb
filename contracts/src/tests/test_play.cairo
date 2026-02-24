@@ -8,14 +8,13 @@ use crate::tests::setup::setup::spawn_game;
 
 #[test]
 fn test_play_start() {
-    // [Setup] Mint one token
+    // [Setup] Mint one token (game is started automatically in on_issue)
     let (world, systems, context) = spawn_game();
     set_contract_address(systems.registry.contract_address);
     systems.starterpack.on_issue(context.player, 0, 1);
-    // [Action] Start the game
+    // [Action] Pull orbs (game is already started)
     let game_id: u64 = 1;
     set_contract_address(context.player);
-    systems.play.start(game_id);
     // [Action] Pull orbs
     set_transaction_hash(0x0);
     systems.play.pull(game_id); // Orb: Bomb 1
@@ -50,10 +49,9 @@ fn test_play_cash_out_mints_moonrocks() {
     set_contract_address(systems.registry.contract_address);
     systems.starterpack.on_issue(context.player, 0, 1);
 
-    // [Action] Start the game and make deterministic pulls
+    // [Action] Make deterministic pulls (game is already started from on_issue)
     let game_id: u64 = 1;
     set_contract_address(context.player);
-    systems.play.start(game_id);
     set_transaction_hash(0x0);
     systems.play.pull(game_id); // Orb: Bomb 1
     systems.play.pull(game_id); // Orb: Bomb 1
@@ -113,8 +111,7 @@ fn test_play_cash_out_reward_scales_with_stake() {
 
     set_contract_address(context.player);
 
-    // [Action] Play game 1 (stake=1): start + 4 pulls → 10 points, then cash out
-    systems.play.start(1);
+    // [Action] Play game 1 (stake=1): 4 pulls → 10 points, then cash out
     set_transaction_hash(0x0);
     systems.play.pull(1);
     systems.play.pull(1);
@@ -123,7 +120,6 @@ fn test_play_cash_out_reward_scales_with_stake() {
     systems.play.cash_out(1);
 
     // [Action] Play game 2 (stake=5): same pulls → same 10 points, then cash out
-    systems.play.start(2);
     set_transaction_hash(0x0);
     systems.play.pull(2);
     systems.play.pull(2);
@@ -157,8 +153,7 @@ fn test_play_cash_out_max_stake() {
 
     set_contract_address(context.player);
 
-    // [Action] Start + 4 pulls → 10 points, then cash out
-    systems.play.start(1);
+    // [Action] 4 pulls → 10 points, then cash out (game already started from on_issue)
     set_transaction_hash(0x0);
     systems.play.pull(1);
     systems.play.pull(1);

@@ -49,7 +49,9 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
 
   const yMax = maxVal * 1.15 || 1;
   const toX = (score: number) => padL + (score / MAX_SCORE) * plotW;
-  const toY = (val: number) => padT + plotH - (val / yMax) * plotH;
+  // sqrt scale so the lower values aren't crushed into a flat line
+  const toY = (val: number) =>
+    padT + plotH - (Math.sqrt(val) / Math.sqrt(yMax)) * plotH;
 
   // Build staircase path (step-after: hold value, then jump)
   const buildStaircase = useMemo(() => {
@@ -125,15 +127,21 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
     return ticks;
   }, [maxVal, beVal, yMax, showBreakEven, hasPrice]);
 
-  // X-axis ticks: first, break-even (if applicable), last
+  // X-axis ticks: 0, 100, 200, 300, 400, 500 + break-even
   const xTicks = useMemo(() => {
-    const ticks: { score: number; label: string; pill?: boolean }[] = [
-      { score: 0, label: "0" },
-    ];
-    if (showBreakEven) {
-      ticks.push({ score: beScore, label: `${beScore}`, pill: true });
+    const ticks: { score: number; label: string; pill?: boolean }[] = [];
+    for (let s = 0; s <= MAX_SCORE; s += 100) {
+      ticks.push({ score: s, label: `${s}` });
     }
-    ticks.push({ score: MAX_SCORE, label: `${MAX_SCORE}` });
+    if (showBreakEven) {
+      // Only add break-even if it doesn't overlap a 100-step tick
+      const overlaps = ticks.some(
+        (t) => Math.abs(t.score - beScore) < 40,
+      );
+      if (!overlaps) {
+        ticks.push({ score: beScore, label: `${beScore}`, pill: true });
+      }
+    }
     return ticks;
   }, [beScore, showBreakEven]);
 

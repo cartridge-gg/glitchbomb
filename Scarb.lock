@@ -88,6 +88,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "ekubo"
+version = "0.1.0"
+source = "git+https://github.com/EkuboProtocol/starknet-contracts?rev=cf2e95f#cf2e95fd124bfb19491e1a7da9ffba4b63cc6c4e"
+
+[[package]]
 name = "glitchbomb"
 version = "0.0.0"
 dependencies = [
@@ -96,6 +101,7 @@ dependencies = [
  "dojo",
  "dojo_cairo_macros",
  "dojo_cairo_test",
+ "ekubo",
  "graffiti",
  "openzeppelin",
  "starterpack",

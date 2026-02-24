@@ -6,11 +6,12 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait ISetup<T> {
-    fn set_entry_price(ref self: T, entry_price: felt252);
+    fn set_entry_price(ref self: T, entry_price: u128);
     fn set_registry(ref self: T, registry_address: ContractAddress);
     fn set_token(ref self: T, token: ContractAddress);
     fn set_owner(ref self: T, owner: ContractAddress);
-    fn set_fee_receiver(ref self: T, fee_receiver: ContractAddress);
+    fn set_quote_address(ref self: T, quote: ContractAddress);
+    fn set_ekubo_address(ref self: T, ekubo: ContractAddress);
     fn set_target_supply(ref self: T, target_supply: u256);
 }
 
@@ -44,8 +45,9 @@ pub mod Setup {
         vrf: ContractAddress,
         registry: ContractAddress,
         owner: ContractAddress,
-        fee_receiver: ContractAddress,
-        entry_price: felt252,
+        quote_address: ContractAddress,
+        ekubo_address: ContractAddress,
+        entry_price: u128,
         target_supply: u256,
     ) {
         // [Setup] World and Store
@@ -73,7 +75,8 @@ pub mod Setup {
             vrf: vrf,
             registry: registry,
             owner: owner,
-            fee_receiver: fee_receiver,
+            quote: quote_address,
+            ekubo: ekubo_address,
             entry_price: entry_price,
             target_supply: target_supply,
         );
@@ -94,7 +97,7 @@ pub mod Setup {
 
     #[abi(embed_v0)]
     impl SetupImpl of ISetup<ContractState> {
-        fn set_entry_price(ref self: ContractState, entry_price: felt252) {
+        fn set_entry_price(ref self: ContractState, entry_price: u128) {
             // [Setup] World and Store
             let mut world = self.world(@NAMESPACE());
             let store = StoreTrait::new(world);
@@ -146,7 +149,7 @@ pub mod Setup {
             store.set_config(@config);
         }
 
-        fn set_fee_receiver(ref self: ContractState, fee_receiver: ContractAddress) {
+        fn set_quote_address(ref self: ContractState, quote: ContractAddress) {
             // [Setup] World and Store
             let mut world = self.world(@NAMESPACE());
             let store = StoreTrait::new(world);
@@ -155,7 +158,20 @@ pub mod Setup {
             let caller = starknet::get_caller_address();
             config.assert_is_owner(caller);
             // [Effect] Update config
-            config.fee_receiver = fee_receiver;
+            config.quote = quote;
+            store.set_config(@config);
+        }
+
+        fn set_ekubo_address(ref self: ContractState, ekubo: ContractAddress) {
+            // [Setup] World and Store
+            let mut world = self.world(@NAMESPACE());
+            let store = StoreTrait::new(world);
+            // [Check] Caller is allowed
+            let mut config = store.config();
+            let caller = starknet::get_caller_address();
+            config.assert_is_owner(caller);
+            // [Effect] Update config
+            config.ekubo = ekubo;
             store.set_config(@config);
         }
 

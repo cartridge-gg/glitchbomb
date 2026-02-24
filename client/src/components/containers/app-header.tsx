@@ -13,6 +13,7 @@ export interface AppHeaderProps {
   username?: string;
   showBack?: boolean;
   backPath?: string;
+  onBack?: () => void;
   onMint?: () => void;
   onProfileClick?: () => void;
   onConnect?: () => void;
@@ -23,41 +24,45 @@ export const AppHeader = ({
   username,
   showBack = true,
   backPath = "/",
+  onBack,
   onMint,
   onProfileClick,
   onConnect,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
+  const handleBack = onBack ?? (() => navigate(backPath));
 
   return (
     <div className="relative flex items-center gap-2 px-4 py-4">
       {/* Left: Back button (desktop only) + Logo on mobile */}
       <div className="flex items-center gap-2 shrink-0">
         {showBack && (
-          <div className="hidden md:flex">
+          <div className={onBack ? "flex" : "hidden md:flex"}>
             <Button
               variant="secondary"
               gradient="green"
               className="h-12 w-12 p-0"
-              onClick={() => navigate(backPath)}
+              onClick={handleBack}
             >
               <ArrowLeftIcon size="sm" />
             </Button>
           </div>
         )}
         {/* Logo on mobile - clickable to go back if showBack is true */}
-        <button
-          type="button"
-          className="md:hidden h-12 w-12 p-0 flex items-center justify-center"
-          onClick={showBack ? () => navigate(backPath) : undefined}
-        >
-          <GlitchBombIcon size="xl" className="text-white glitch-icon" />
-        </button>
+        {!onBack && (
+          <button
+            type="button"
+            className="md:hidden h-12 w-12 p-0 flex items-center justify-center"
+            onClick={showBack ? handleBack : undefined}
+          >
+            <GlitchBombIcon size="xl" className="text-white glitch-icon" />
+          </button>
+        )}
       </div>
 
-      {/* GlitchBomb text - only on md+ screens */}
-      <h1 className="hidden md:flex items-center gap-1 uppercase leading-none glitch-text">
+      {/* GlitchBomb text - only on md+ screens, hidden when onBack is set */}
+      <h1 className={`${onBack ? "hidden" : "hidden md:flex"} items-center gap-1 uppercase leading-none glitch-text`}>
         <span className="text-green-400 text-2xl font-glitch font-thin tracking-tight">
           Glitch
         </span>

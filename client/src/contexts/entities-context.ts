@@ -6,7 +6,7 @@ export interface EntitiesContextType {
   client?: torii.ToriiClient;
   game?: Game;
   config?: Config;
-  starterpack?: Starterpack;
+  starterpacks: Starterpack[];
   status: "loading" | "error" | "success";
   refresh: () => Promise<void>;
   setGameId: (id: number) => void;

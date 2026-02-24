@@ -1,6 +1,8 @@
 use dojo::event::EventStorage;
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
+use ekubo::components::clear::IClearDispatcher;
+use ekubo::interfaces::router::IRouterDispatcher;
 use crate::events::index::{
     GameOverTrait, GameStartedTrait, OrbBurnedTrait, OrbPulledTrait, OrbPurchasedTrait,
     PLDataPointTrait, ShopEnteredTrait, ShopExitedTrait, ShopRefreshedTrait,
@@ -25,6 +27,20 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn config(self: @Store) -> Config {
         self.world.read_model(0)
+    }
+
+    // Ekubo
+
+    #[inline]
+    fn ekubo_router(self: @Store) -> IRouterDispatcher {
+        let config: Config = self.world.read_model(0);
+        IRouterDispatcher { contract_address: config.ekubo }
+    }
+
+    #[inline]
+    fn ekubo_clearer(self: @Store) -> IClearDispatcher {
+        let config: Config = self.world.read_model(0);
+        IClearDispatcher { contract_address: config.ekubo }
     }
 
     #[inline]

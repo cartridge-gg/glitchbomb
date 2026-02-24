@@ -12,32 +12,26 @@ import {
 interface GameDetailsProps {
   tierIndex: number;
   onTierIndexChange: (index: number) => void;
-  tokenPrice?: number | null;
 }
 
 export const GameDetails = ({
   tierIndex,
   onTierIndexChange,
-  tokenPrice = null,
 }: GameDetailsProps) => {
   const stake = tierIndex + 1;
   const cost = toTokens(tierPrice(stake));
   const max = toTokens(maxPayout(stake));
 
-  const hasPrice = tokenPrice != null && tokenPrice > 0;
-  const costUsd = hasPrice ? cost * tokenPrice : null;
-  const maxUsd = hasPrice ? max * tokenPrice : null;
-
   const labelColor = "rgba(54, 248, 24, 0.40)";
   const valueColor = "#36F818";
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
-  const beScore = breakEvenScore(stake, tokenPrice ?? undefined);
+  const beScore = breakEvenScore(stake);
 
   const stats = [
     {
       label: "Cost",
-      value: costUsd != null ? `$${costUsd.toFixed(2)}` : `${cost.toFixed(2)} tokens`,
+      value: `$${cost.toFixed(2)}`,
       color: "#FACC15",
     },
     {
@@ -51,10 +45,7 @@ export const GameDetails = ({
     { label: "Expires In", value: "24HRS" },
     {
       label: "Maximum Reward",
-      value:
-        maxUsd != null
-          ? `${max.toFixed(4)} tokens ~ $${maxUsd.toFixed(2)}`
-          : `${max.toFixed(4)} tokens`,
+      value: `$${max.toFixed(2)}`,
       highlight: true,
     },
   ];
@@ -77,24 +68,9 @@ export const GameDetails = ({
             className="rounded-xl p-3"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
           >
-            <PayoutChart stake={stake} tokenPrice={tokenPrice ?? null} />
+            <PayoutChart stake={stake} tokenPrice={1} />
           </div>
         </GradientBorder>
-
-        {/* Token price info box (like nums) */}
-        {hasPrice && (
-          <div
-            className="flex items-center gap-2 rounded-lg px-3 py-2"
-            style={{ backgroundColor: rowBg }}
-          >
-            <span className="font-secondary text-xs" style={{ color: labelColor }}>
-              *
-            </span>
-            <span className="font-secondary text-xs" style={{ color: labelColor }}>
-              1 token = ${tokenPrice.toFixed(5)} USD
-            </span>
-          </div>
-        )}
 
         {/* Cost stepper */}
         <CostStepper

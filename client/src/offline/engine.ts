@@ -34,6 +34,7 @@ export function createGame(gameId: number, moonrocks: number, stake: number): Of
     shop: null,
     moonrocks,
     stake,
+    created_at: Math.floor(Date.now() / 1000),
   };
 }
 

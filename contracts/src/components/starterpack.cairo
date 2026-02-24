@@ -32,7 +32,7 @@ pub mod StarterpackComponent {
             let config = store.config();
             // [Interaction] Register starterpack tiers
             let registry = config.registry();
-            let payment_token = config.token().contract_address;
+            let payment_token = config.quote;
             let play_address = self.play(world).contract_address;
             let reissuable = true;
             let referral_percentage = 0;
@@ -76,7 +76,7 @@ pub mod StarterpackComponent {
             store.starterpack(starterpack_id).assert_does_exist();
 
             // [Interaction] Update metadata
-            let payment_token = config.token().contract_address;
+            let payment_token = config.quote;
             let registry = config.registry();
             registry.update_metadata(starterpack_id, StarterpackTrait::metadata(payment_token));
         }

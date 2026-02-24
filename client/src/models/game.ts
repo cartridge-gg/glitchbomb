@@ -23,6 +23,7 @@ export class Game {
   pullables: Orb[];
   moonrocks: number;
   stake: number;
+  created_at: number;
 
   constructor(
     id: number,
@@ -42,6 +43,7 @@ export class Game {
     pullables: Orb[],
     moonrocks: number,
     stake: number,
+    created_at: number,
   ) {
     this.id = id;
     this.over = over;
@@ -60,6 +62,7 @@ export class Game {
     this.pullables = pullables;
     this.moonrocks = moonrocks;
     this.stake = stake;
+    this.created_at = created_at;
   }
 
   static getModelName(): string {
@@ -94,6 +97,7 @@ export class Game {
       ),
       moonrocks: Number(data.moonrocks.value),
       stake: Number(data.stake.value),
+      created_at: Number(data.created_at.value),
     };
     // Computed fields
     // - pullables: corresponding to the bag without the discards
@@ -117,6 +121,7 @@ export class Game {
       pullables,
       props.moonrocks,
       props.stake,
+      props.created_at,
     );
   }
 

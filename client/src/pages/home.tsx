@@ -2,7 +2,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppHeader } from "@/components/containers";
+import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import {
   ArrowRightIcon,
@@ -31,11 +31,13 @@ export const Home = () => {
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { starterpack, config } = useEntitiesContext();
+  const { starterpacks, config } = useEntitiesContext();
   const { games: ownedGames } = useOwnedGames();
   const offlineState = useOfflineStore();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [tierIndex, setTierIndex] = useState(0);
 
   const offline = isOfflineMode();
 
@@ -284,12 +286,14 @@ export const Home = () => {
       createOfflineGame();
       return;
     }
-    if (starterpack) {
-      (connector as ControllerConnector)?.controller.openStarterPack(
-        starterpack.id.toString(),
-      );
-    }
-  }, [connector, starterpack, offline]);
+    setShowDetails(true);
+  }, [offline]);
+
+  const handleBuyGame = useCallback(() => {
+    const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
+    if (!pack) return;
+    (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
+  }, [connector, tierIndex, starterpacks]);
 
   const handlePractice = useCallback(() => {
     setOfflineMode(true);
@@ -1103,6 +1107,57 @@ export const Home = () => {
           </Button>
         </div>
       </div>
+
+      {/* Game Details Overlay */}
+      {showDetails && !offline && (
+        <div className="absolute inset-0 z-50 flex flex-col bg-green-gradient-100">
+          {/* Header */}
+          <AppHeader
+            moonrocks={displayMoonrocks}
+            username={username}
+            showBack
+            onBack={() => setShowDetails(false)}
+            onMint={offline ? undefined : () => mint(tokenAddress)}
+            onProfileClick={onProfileClick}
+            onConnect={isLoggedIn ? undefined : onConnectClick}
+          />
+
+          {/* Scrollable content */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="w-full max-w-[500px] mx-auto">
+              <GameDetails
+                tierIndex={tierIndex}
+                onTierIndexChange={setTierIndex}
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="shrink-0 pt-4 pb-4 px-4">
+            <div className="flex gap-3 w-full max-w-[500px] mx-auto">
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="flex-1"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={() => setShowDetails(false)}
+              >
+                BACK
+              </Button>
+              <Button
+                variant="secondary"
+                gradient="yellow"
+                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest !text-yellow-100 hover:!brightness-125"
+                style={{ backgroundColor: "#3D3200" }}
+                onClick={handleBuyGame}
+              >
+                PURCHASE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

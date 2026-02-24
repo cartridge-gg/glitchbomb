@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x55f220dae0588ebe6fd7860747c15debaefb232d5c4c2fc7be9f62a7ff11393",
-    "seed": "glitchbomb-v0.0.7",
+    "address": "0x406ad504e4aff4a66c0e35132b6d1659c066804e7bb5ff38523ea3417406ebd",
+    "seed": "glitchbomb-v0.1.1",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,8 +33,8 @@
   },
   "contracts": [
     {
-      "address": "0x83b6b2ebee75e101a7cac473b8980d29d4f64fda398fbb074fc0c9b803403e",
-      "class_hash": "0x7024fc584f96b691a2304c243bb9cb1acd0e0ffd1a6a491d8671eb160bd192b",
+      "address": "0x30f3b28ca4fe9ee82f1ec3ea691a625fc9051a1adbb4de474167224c7bfb7c4",
+      "class_hash": "0x11a76010c2314c6e689a237a2d5b00a7228769883fd55879e1012124c11b0aa",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
       "selector": "0x166335fcbdf05bfcafa7930b541245ccdd7207eb463920b36b1723d60b3686d",
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "address": "0x7f5f0f8ea0d878f222761c8c7b7ac04d520da35db70f26bec81eb9000ac8165",
-      "class_hash": "0x7c149c504e551ecacc70a24c47a017b7e2ed8419c95a983a4f8ef539f007514",
+      "address": "0x7e272112d9cb4c143184ddccb00471c407d9d167aa5f5a58b2a0a5d7314ae8e",
+      "class_hash": "0x34e78d6810c1aaf7962fd5d930585fdb0037b0e99e70a636ccfadad28b78fd",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -77,15 +77,18 @@
       ]
     },
     {
-      "address": "0x598650851eaad4240fe6a11d77f2af11479e27a0a8f4eb48457402e4d8bc73f",
-      "class_hash": "0xcef487592d5e63a8af7649860d86b7f996d0707b110edc9941cebb4d9de3f8",
+      "address": "0x7f05513a0efc54147d3b96344f23adc321555d9fdc804b072bfbff738f5727",
+      "class_hash": "0x2c72e0a77aac768a48a87a723a4c7d3283ccd11a12ae88be602ca55d46ff1af",
       "init_calldata": [
         "0x0",
         "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",
         "0x03eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43",
-        "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753",
-        "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753",
-        "0xF4240"
+        "0x025Ee38b230906EA41B00401cC12bb51f58DC62198cf058a336655696908863D",
+        "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080",
+        "0x050d4da9f66589eadaa1d5e31cf73b08ac1a67c8b4dcd88e6fd4fe501c628af2",
+        "0x1E8480",
+        "0xE8D4A51000",
+        "0x0"
       ],
       "tag": "GLITCHBOMB-Setup",
       "selector": "0x5fc15085677f71c38421ea453a5cfd952a2d265c4aa5c0aa08584eedbec7e56",
@@ -95,13 +98,15 @@
         "set_registry",
         "set_token",
         "set_owner",
-        "set_fee_receiver",
+        "set_quote_address",
+        "set_ekubo_address",
+        "set_target_supply",
         "upgrade"
       ]
     },
     {
-      "address": "0x1d678a2364bb55a2939fec619c2f3be59c2d192d9e2bc840c5b2f3389a25a0a",
-      "class_hash": "0x26fc3ce97e1d14e58e1f8ed5bd2a81a6be430186fede417f4db014372ecf53e",
+      "address": "0x3ef7358dfe4f047e7e4f78d9cef0fd339bf54c7bf8711cebd3a96ef089bcc56",
+      "class_hash": "0x74e688f5875b7020fb8c59d87a23f01e70336bffd0fc8296db40dc6169d39d3",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Token",
       "selector": "0x3ab0de3c8e27439e10f3e85da59bb47b0afe94b8d19c0a7f024b802aee28130",
@@ -120,7 +125,7 @@
       ]
     },
     {
-      "address": "0xce00f29eab6dc8a7fdcd294a83aaf5b0a6a67ed6d7d64e8b03128c2bb32f55",
+      "address": "0x170917b6644d924ad2494a6ddbf7212b8eb857f2bea5ae7573fd813021994c8",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -163,30 +168,35 @@
           "key": false
         },
         {
-          "name": "fee_receiver",
+          "name": "quote",
+          "type": "core::starknet::contract_address::ContractAddress",
+          "key": false
+        },
+        {
+          "name": "ekubo",
           "type": "core::starknet::contract_address::ContractAddress",
           "key": false
         },
         {
           "name": "entry_price",
-          "type": "core::felt252",
+          "type": "core::integer::u128",
+          "key": false
+        },
+        {
+          "name": "target_supply",
+          "type": "core::integer::u256",
           "key": false
         }
       ],
-      "class_hash": "0x1e0556e84da1166ebda509f8899c27629e23889d3f833129146b758b506bb27",
+      "class_hash": "0x39b0763a790a177d70717d46e8833ccce4b395ccaf4b7c2000f9dc7a0ea5f9f",
       "tag": "GLITCHBOMB-Config",
       "selector": "0x16ddde8f5c437c9820f010ba29d509ef4e193076a88b1249113be5242cecd85"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -258,33 +268,26 @@
           "name": "shop",
           "type": "core::integer::u128",
           "key": false
-        }
-      ],
-      "class_hash": "0x50336ed9e7f4b87534f166ba1f9ac98f00cf7fb2a2cbb3f8cf93be1a5666653",
-      "tag": "GLITCHBOMB-Game",
-      "selector": "0xd48638ded3043e79d3c7617230f85cc9026c5fc30e8cb05f80b142373c8bd6"
-    },
-    {
-      "members": [
-        {
-          "name": "id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
-          "name": "game_count",
-          "type": "core::integer::u8",
-          "key": false
         },
         {
           "name": "moonrocks",
           "type": "core::integer::u16",
           "key": false
+        },
+        {
+          "name": "stake",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
+          "name": "created_at",
+          "type": "core::integer::u64",
+          "key": false
         }
       ],
-      "class_hash": "0x51a356646261707d62fc0762406e096d2fa98d0eb69b0b1cde6da33d9e541dd",
-      "tag": "GLITCHBOMB-Pack",
-      "selector": "0x22019c37d5ff5a42a6ff3b0503595a45af98084029cd102bbc9452311487150"
+      "class_hash": "0x7ed7e095dae6e98885723616b4c47e03ec891f388c1223a05a7ce46f2d40dbb",
+      "tag": "GLITCHBOMB-Game",
+      "selector": "0xd48638ded3043e79d3c7617230f85cc9026c5fc30e8cb05f80b142373c8bd6"
     },
     {
       "members": [
@@ -304,6 +307,11 @@
           "key": false
         },
         {
+          "name": "multiplier",
+          "type": "core::integer::u8",
+          "key": false
+        },
+        {
           "name": "price",
           "type": "core::integer::u256",
           "key": false
@@ -314,7 +322,7 @@
           "key": false
         }
       ],
-      "class_hash": "0x1514d4bd57991d8baa952984fb4e97ec0504bc55ac07df53896d5172283294e",
+      "class_hash": "0x1e18e0728f3bf476870f72ba8ee02211273c1769bf863a829c6d8e01052ca14",
       "tag": "GLITCHBOMB-Starterpack",
       "selector": "0x375fd842639db3c28296f8f7fa988b53a329e198d12e9391a54a77021da88b1"
     }
@@ -323,13 +331,8 @@
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -343,20 +346,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x672ef7f395f16a1c6b5edd24023a2245274a02c8302c2615cbdf409343afedf",
+      "class_hash": "0x6a85e2fc64754b1a3303dd47304fa0c26b82b64d81f742247df32b620809529",
       "tag": "GLITCHBOMB-GameOver",
       "selector": "0xb78732c579c28f15d7caff1ae8df4d924acb92ca16b787e90ce354afbf3e"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -375,20 +373,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x39ad0f92ed384995aa3e4e5b7d30f64e49c95f142c6ac2d09ec8a3c5be75970",
+      "class_hash": "0x2df50b67e8c0d0af3452b88fe0e1f194ef87f6546b219c119f1661317a34cf1",
       "tag": "GLITCHBOMB-GameStarted",
       "selector": "0x5fc90b88b9583e128352a5a44285ff4a132f84230ae1e976cc4707570614fe1"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -407,20 +400,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x50c95daae35c4ffc411388aeaafabd27b6f9561d544edb48bfe1b102313dbc7",
+      "class_hash": "0x1240e260cd7357d8780c9751fc2ffa50490f6d29364f1603540579c6c67a6f7",
       "tag": "GLITCHBOMB-OrbBurned",
       "selector": "0x7aa2590d39aa763e488837f67ded9abce1135a76cb2a7d19e0a449c6efc7124"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -439,20 +427,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x3d9fc63c667b4926a9ecb092204811d5f828705e5a583c84eb2f72b6114de45",
+      "class_hash": "0x44dca5c5de48c17b2a82f39fe7eb71cd5db3e90ff8eb29052d7295d0acf082c",
       "tag": "GLITCHBOMB-OrbPulled",
       "selector": "0x6cb2e0a7bbe5d1ffa648bf389768dca23a668e70f0312191d7b615064c1d829"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -471,20 +454,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x2d83727c225b067718102a817ce82e0164fb2aa336b8c7fe7fae753f5600556",
+      "class_hash": "0xd25b4e55249b93bc640950bc823efde7997bb9e8b19673b11e2142a434e52a",
       "tag": "GLITCHBOMB-OrbPurchased",
       "selector": "0x67b80eede7005812caef8632a83d110a50b9cd5fc3bd5f9fef39f06435862a1"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -503,20 +481,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x3eda8f61e4b51bef26da6169620a22ca8c995bdaede092048ab7645b22ef7a2",
+      "class_hash": "0x41ac9686c94730a47261a9144a84ed7c36edcc110694b4301514e13af4629be",
       "tag": "GLITCHBOMB-PLDataPoint",
       "selector": "0x5a90a58bb8ae92c4c4def0ff1d1b0e00b0776948e6d46bd31c5eeb4d326e9ae"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -530,20 +503,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x3199d8548f719e3f8875b4f65610d9442db1ccd1c9d1f415d95ac20ddfa326b",
+      "class_hash": "0x21574d15fefc88eeb4bfa3337a92bf915091d06878bf04015e4cabd805e5a34",
       "tag": "GLITCHBOMB-ShopEntered",
       "selector": "0xf41f393785a6354e38f9c9f24d3986bcccffc2002fa69748c4365f28bd4013"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -567,20 +535,15 @@
           "key": false
         }
       ],
-      "class_hash": "0x694fcd9b74d252506e6986fb6a1a3a3652be2ff99c8ba439e94061642162c21",
+      "class_hash": "0x46a0a72b424597d1197c1e9be7e2fb6c7ffdd15fa464d21ab6317226c6445ff",
       "tag": "GLITCHBOMB-ShopExited",
       "selector": "0x429eab70ed8e5afc668fde4d5c822532755434b9d85281db413a1a1ef2ef55e"
     },
     {
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64",
-          "key": true
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8",
+          "type": "core::integer::u64",
           "key": true
         },
         {
@@ -594,7 +557,7 @@
           "key": false
         }
       ],
-      "class_hash": "0xd1f6998191dbd23498c9d1a1d31e139615ce6da7e010c937556dd044c24d83",
+      "class_hash": "0x1656362ff98c6270e708347508fc4a0593c524f8f0628ea92fdfcb209d04c64",
       "tag": "GLITCHBOMB-ShopRefreshed",
       "selector": "0x757880648dbe33e8fa1fe69dafda243e7041755dd3f8ae12f4fe86d068257be"
     }
@@ -2599,12 +2562,8 @@
       "name": "glitchbomb::events::index::GameOver",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "reason",
@@ -2635,12 +2594,8 @@
       "name": "glitchbomb::events::index::GameStarted",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "level",
@@ -2679,12 +2634,8 @@
       "name": "glitchbomb::events::index::OrbBurned",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "orb_id",
@@ -2723,12 +2674,8 @@
       "name": "glitchbomb::events::index::OrbPulled",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "id",
@@ -2763,12 +2710,8 @@
       "name": "glitchbomb::events::index::OrbPurchased",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "orb_id",
@@ -2807,12 +2750,8 @@
       "name": "glitchbomb::events::index::PLDataPoint",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "id",
@@ -2847,12 +2786,8 @@
       "name": "glitchbomb::events::index::ShopEntered",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "shop",
@@ -2883,12 +2818,8 @@
       "name": "glitchbomb::events::index::ShopExited",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "level",
@@ -2935,12 +2866,8 @@
       "name": "glitchbomb::events::index::ShopRefreshed",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "game_id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "shop",
@@ -3147,12 +3074,20 @@
           "type": "core::starknet::contract_address::ContractAddress"
         },
         {
-          "name": "fee_receiver",
+          "name": "quote",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "name": "ekubo",
           "type": "core::starknet::contract_address::ContractAddress"
         },
         {
           "name": "entry_price",
-          "type": "core::felt252"
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "target_supply",
+          "type": "core::integer::u256"
         }
       ]
     },
@@ -3177,12 +3112,20 @@
           "type": "core::starknet::contract_address::ContractAddress"
         },
         {
-          "name": "fee_receiver",
+          "name": "quote",
+          "type": "core::starknet::contract_address::ContractAddress"
+        },
+        {
+          "name": "ekubo",
           "type": "core::starknet::contract_address::ContractAddress"
         },
         {
           "name": "entry_price",
-          "type": "core::felt252"
+          "type": "core::integer::u128"
+        },
+        {
+          "name": "target_supply",
+          "type": "core::integer::u256"
         }
       ]
     },
@@ -3191,12 +3134,8 @@
       "name": "glitchbomb::models::index::Game",
       "members": [
         {
-          "name": "pack_id",
-          "type": "core::integer::u64"
-        },
-        {
           "name": "id",
-          "type": "core::integer::u8"
+          "type": "core::integer::u64"
         },
         {
           "name": "seed",
@@ -3253,6 +3192,18 @@
         {
           "name": "shop",
           "type": "core::integer::u128"
+        },
+        {
+          "name": "moonrocks",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "stake",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "created_at",
+          "type": "core::integer::u64"
         }
       ]
     },
@@ -3315,38 +3266,18 @@
         {
           "name": "shop",
           "type": "core::integer::u128"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "glitchbomb::models::index::Pack",
-      "members": [
+        },
         {
-          "name": "id",
+          "name": "moonrocks",
+          "type": "core::integer::u16"
+        },
+        {
+          "name": "stake",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "created_at",
           "type": "core::integer::u64"
-        },
-        {
-          "name": "game_count",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "moonrocks",
-          "type": "core::integer::u16"
-        }
-      ]
-    },
-    {
-      "type": "struct",
-      "name": "glitchbomb::models::index::PackValue",
-      "members": [
-        {
-          "name": "game_count",
-          "type": "core::integer::u8"
-        },
-        {
-          "name": "moonrocks",
-          "type": "core::integer::u16"
         }
       ]
     },
@@ -3364,6 +3295,10 @@
         },
         {
           "name": "referral_percentage",
+          "type": "core::integer::u8"
+        },
+        {
+          "name": "multiplier",
           "type": "core::integer::u8"
         },
         {
@@ -3389,6 +3324,10 @@
           "type": "core::integer::u8"
         },
         {
+          "name": "multiplier",
+          "type": "core::integer::u8"
+        },
+        {
           "name": "price",
           "type": "core::integer::u256"
         },
@@ -3407,12 +3346,6 @@
     {
       "type": "event",
       "name": "glitchbomb::models::index::m_Game::Event",
-      "kind": "enum",
-      "variants": []
-    },
-    {
-      "type": "event",
-      "name": "glitchbomb::models::index::m_Pack::Event",
       "kind": "enum",
       "variants": []
     },
@@ -3544,7 +3477,7 @@
           "name": "start",
           "inputs": [
             {
-              "name": "pack_id",
+              "name": "game_id",
               "type": "core::integer::u64"
             }
           ],
@@ -3556,12 +3489,8 @@
           "name": "pull",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             }
           ],
           "outputs": [],
@@ -3572,12 +3501,8 @@
           "name": "cash_out",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             }
           ],
           "outputs": [],
@@ -3588,12 +3513,8 @@
           "name": "enter",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             }
           ],
           "outputs": [],
@@ -3604,12 +3525,8 @@
           "name": "buy",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             },
             {
               "name": "indices",
@@ -3624,12 +3541,8 @@
           "name": "exit",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             }
           ],
           "outputs": [],
@@ -3640,12 +3553,8 @@
           "name": "refresh",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             }
           ],
           "outputs": [],
@@ -3656,12 +3565,8 @@
           "name": "burn",
           "inputs": [
             {
-              "name": "pack_id",
-              "type": "core::integer::u64"
-            },
-            {
               "name": "game_id",
-              "type": "core::integer::u8"
+              "type": "core::integer::u64"
             },
             {
               "name": "bag_index",
@@ -3710,7 +3615,7 @@
           "inputs": [
             {
               "name": "entry_price",
-              "type": "core::felt252"
+              "type": "core::integer::u128"
             }
           ],
           "outputs": [],
@@ -3754,11 +3659,35 @@
         },
         {
           "type": "function",
-          "name": "set_fee_receiver",
+          "name": "set_quote_address",
           "inputs": [
             {
-              "name": "fee_receiver",
+              "name": "quote",
               "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "type": "function",
+          "name": "set_ekubo_address",
+          "inputs": [
+            {
+              "name": "ekubo",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "type": "function",
+          "name": "set_target_supply",
+          "inputs": [
+            {
+              "name": "target_supply",
+              "type": "core::integer::u256"
             }
           ],
           "outputs": [],

@@ -5,7 +5,6 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait IPlay<T> {
-    fn start(ref self: T, game_id: u64);
     fn pull(ref self: T, game_id: u64);
     fn cash_out(ref self: T, game_id: u64);
     fn enter(ref self: T, game_id: u64);
@@ -79,13 +78,6 @@ pub mod Play {
 
     #[abi(embed_v0)]
     impl PlayImpl of IPlay<ContractState> {
-        fn start(ref self: ContractState, game_id: u64) {
-            // [Setup] World
-            let world = self.world(@NAMESPACE());
-            // [Effect] Start game
-            self.playable.start(world, game_id)
-        }
-
         fn pull(ref self: ContractState, game_id: u64) {
             // [Setup] World
             let world = self.world(@NAMESPACE());

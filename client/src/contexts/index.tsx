@@ -89,7 +89,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   );
 
   const [config, setConfig] = useState<Config>();
-  const [starterpack, setStarterpack] = useState<Starterpack>();
+  const [starterpacks, setStarterpacks] = useState<Starterpack[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">(
     "loading",
   );
@@ -125,7 +125,16 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
             `${NAMESPACE}-${STARTERPACK}`
           ] as unknown as RawStarterpack;
           const parsed = Starterpack.parse(model);
-          if (parsed) setStarterpack(parsed);
+          if (parsed)
+            setStarterpacks((prev) => {
+              const idx = prev.findIndex((s) => s.id === parsed.id);
+              if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = parsed;
+                return next;
+              }
+              return [...prev, parsed];
+            });
         }
         if (entity.models[`${NAMESPACE}-${GAME}`]) {
           const model = entity.models[
@@ -222,7 +231,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   return {
     client,
     game,
-    starterpack,
+    starterpacks,
     config,
     status,
     refresh,
@@ -243,10 +252,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
     () => new Config("0", "0x0", "0x0", "0x0"),
     [],
   );
-  const starterpack = useMemo(
-    () => new Starterpack("0", true, 0, 1, 0n, "0x0"),
-    [],
-  );
+  const starterpacks = useMemo<Starterpack[]>(() => [], []);
 
   const refresh = useCallback(async () => {}, []);
 
@@ -256,7 +262,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
 
   return {
     game,
-    starterpack,
+    starterpacks,
     config,
     status: "success",
     refresh,

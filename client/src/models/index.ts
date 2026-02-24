@@ -36,7 +36,13 @@ export interface RawConfig {
     value: string;
     key: boolean;
   };
-  fee_receiver: {
+  quote: {
+    type: "primitive";
+    type_name: "ContractAddress";
+    value: string;
+    key: boolean;
+  };
+  ekubo: {
     type: "primitive";
     type_name: "ContractAddress";
     value: string;
@@ -44,7 +50,7 @@ export interface RawConfig {
   };
   entry_price: {
     type: "primitive";
-    type_name: "felt252";
+    type_name: "u128";
     value: string;
     key: boolean;
   };
@@ -189,6 +195,12 @@ export interface RawGame {
   stake: {
     type: "primitive";
     type_name: "u8";
+    value: string;
+    key: boolean;
+  };
+  created_at: {
+    type: "primitive";
+    type_name: "u64";
     value: string;
     key: boolean;
   };
