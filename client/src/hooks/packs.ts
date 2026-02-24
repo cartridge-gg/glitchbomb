@@ -11,18 +11,18 @@ import { addAddressPadding } from "starknet";
 import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { Pack, type RawPack } from "@/models";
+import { Game, type RawGame } from "@/models";
 import { useOfflineMode } from "@/offline/mode";
-import { selectPacks, useOfflineStore } from "@/offline/store";
+import { selectGames, useOfflineStore } from "@/offline/store";
 import { useTokens } from "./tokens";
 
 const ENTITIES_LIMIT = 10_000;
 
-const getPackQuery = (packIds: number[]) => {
+const getOwnedGamesQuery = (gameIds: number[]) => {
   const clauses = OrComposeClause(
-    packIds.map((id) =>
+    gameIds.map((id) =>
       MemberClause(
-        `${NAMESPACE}-${Pack.getModelName()}`,
+        `${NAMESPACE}-${Game.getModelName()}`,
         "id",
         "Eq",
         `0x${id.toString(16).padStart(16, "0")}`,
@@ -35,21 +35,21 @@ const getPackQuery = (packIds: number[]) => {
     .withLimit(ENTITIES_LIMIT);
 };
 
-export function usePacks() {
+export function useOwnedGames() {
   const { client } = useEntitiesContext();
   const { address } = useAccount();
   const { chain } = useNetwork();
   const offlineState = useOfflineStore();
   const offline = useOfflineMode();
-  const offlinePacks = useMemo(() => selectPacks(offlineState), [offlineState]);
-  const [packs, setPacks] = useState<Pack[]>([]);
+  const offlineGames = useMemo(() => selectGames(offlineState), [offlineState]);
+  const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(() => {
     if (!subscriptionRef.current) return;
     try {
       subscriptionRef.current.cancel();
     } catch (error) {
-      console.warn("[usePacks] cancel failed", error);
+      console.warn("[useOwnedGames] cancel failed", error);
     } finally {
       subscriptionRef.current = null;
     }
@@ -62,7 +62,7 @@ export function usePacks() {
     contractType: "ERC721",
   });
 
-  const packIds = useMemo(() => {
+  const gameIds = useMemo(() => {
     return balances
       .filter((balance) => {
         const balanceValue = BigInt(balance.balance || "0x0");
@@ -79,17 +79,14 @@ export function usePacks() {
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
       (data.data || [data] || []).forEach((entity) => {
-        if (entity.models[`${NAMESPACE}-${Pack.getModelName()}`]) {
+        if (entity.models[`${NAMESPACE}-${Game.getModelName()}`]) {
           const model = entity.models[
-            `${NAMESPACE}-${Pack.getModelName()}`
-          ] as unknown as RawPack;
-          const newPack = Pack.parse(
-            model,
-            (entity as torii.Entity).updated_at ?? 0,
-          );
-          setPacks((prev: Pack[]) => {
-            const deduped = prev.filter((pack) => pack.id !== newPack.id);
-            return [...deduped, newPack];
+            `${NAMESPACE}-${Game.getModelName()}`
+          ] as unknown as RawGame;
+          const newGame = Game.parse(model);
+          setGames((prev: Game[]) => {
+            const deduped = prev.filter((game) => game.id !== newGame.id);
+            return [...deduped, newGame];
           });
         }
       });
@@ -100,13 +97,13 @@ export function usePacks() {
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
     if (offline) return;
-    if (!client || !packIds.length) return;
+    if (!client || !gameIds.length) return;
 
     // Cancel existing subscriptions
     subscriptionRef.current = null;
 
     // Fetch initial data
-    const query = getPackQuery(packIds).build();
+    const query = getOwnedGamesQuery(gameIds).build();
     await client
       .getEntities(query)
       .then((result) => onUpdate({ data: result.items, error: undefined }));
@@ -115,7 +112,7 @@ export function usePacks() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, packIds, onUpdate, offline]);
+  }, [client, gameIds, onUpdate, offline]);
 
   useEffect(() => {
     refresh();
@@ -126,6 +123,6 @@ export function usePacks() {
   }, [refresh, offline, cancelSubscription]);
 
   return {
-    packs: offline ? offlinePacks : packs,
+    games: offline ? offlineGames : games,
   };
 }

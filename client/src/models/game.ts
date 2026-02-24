@@ -6,7 +6,6 @@ import { Orb, OrbType } from "./orb";
 export const GAME = "Game";
 
 export class Game {
-  pack_id: number;
   id: number;
   over: boolean;
   level: number;
@@ -22,9 +21,11 @@ export class Game {
   bag: Orb[];
   shop: Orb[];
   pullables: Orb[];
+  moonrocks: number;
+  stake: number;
+  created_at: number;
 
   constructor(
-    pack_id: number,
     id: number,
     over: boolean,
     level: number,
@@ -40,8 +41,10 @@ export class Game {
     bag: Orb[],
     shop: Orb[],
     pullables: Orb[],
+    moonrocks: number,
+    stake: number,
+    created_at: number,
   ) {
-    this.pack_id = pack_id;
     this.id = id;
     this.over = over;
     this.level = level;
@@ -57,6 +60,9 @@ export class Game {
     this.bag = bag;
     this.shop = shop;
     this.pullables = pullables;
+    this.moonrocks = moonrocks;
+    this.stake = stake;
+    this.created_at = created_at;
   }
 
   static getModelName(): string {
@@ -69,7 +75,6 @@ export class Game {
 
   static parse(data: RawGame): Game {
     const props = {
-      pack_id: Number(data.pack_id.value),
       id: Number(data.id.value),
       over: data.over.value,
       level: Number(data.level.value),
@@ -90,13 +95,15 @@ export class Game {
       shop: Packer.unpack(BigInt(data.shop.value), 5n, 6).map((index) =>
         Orb.from(index),
       ),
+      moonrocks: Number(data.moonrocks.value),
+      stake: Number(data.stake.value),
+      created_at: Number(data.created_at.value),
     };
     // Computed fields
     // - pullables: corresponding to the bag without the discards
     const pullables = props.bag.filter((_orb, index) => !props.discards[index]);
 
     return new Game(
-      props.pack_id,
       props.id,
       props.over,
       props.level,
@@ -112,14 +119,15 @@ export class Game {
       props.bag,
       props.shop,
       pullables,
+      props.moonrocks,
+      props.stake,
+      props.created_at,
     );
   }
 
   static deduplicate(items: Game[]): Game[] {
     return items.filter(
-      (item, index, self) =>
-        index ===
-        self.findIndex((t) => t.pack_id === item.pack_id && t.id === item.id),
+      (item, index, self) => index === self.findIndex((t) => t.id === item.id),
     );
   }
 

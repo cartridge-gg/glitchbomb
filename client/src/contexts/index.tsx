@@ -20,11 +20,8 @@ import {
   Config,
   GAME,
   Game,
-  PACK,
-  Pack,
   type RawConfig,
   type RawGame,
-  type RawPack,
   type RawStarterpack,
   STARTERPACK,
   Starterpack,
@@ -46,23 +43,11 @@ const getEntityQuery = (namespace: string) => {
     .includeHashedKeys();
 };
 
-const getPackQuery = (packId: number) => {
-  const pack: `${string}-${string}` = `${NAMESPACE}-${PACK}`;
-  const clauses = new ClauseBuilder().keys(
-    [pack],
-    [`0x${packId.toString(16).padStart(16, "0")}`],
-    "FixedLen",
-  );
-  return new ToriiQueryBuilder()
-    .withClause(clauses.build())
-    .includeHashedKeys();
-};
-
-const getGameQuery = (packId: number, gameId: number) => {
+const getGameQuery = (gameId: number) => {
   const game: `${string}-${string}` = `${NAMESPACE}-${GAME}`;
   const clauses = new ClauseBuilder().keys(
     [game],
-    [`0x${packId.toString(16).padStart(16, "0")}`, `${gameId.toString()}`],
+    [`0x${gameId.toString(16).padStart(16, "0")}`],
     "FixedLen",
   );
   return new ToriiQueryBuilder()
@@ -74,7 +59,6 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   const { address: accountAddress } = useAccount();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
-  const packSubscriptionRef = useRef<torii.Subscription | null>(null);
   const gameSubscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(
     (ref: MutableRefObject<torii.Subscription | null>, label: string) => {
@@ -89,25 +73,8 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     },
     [],
   );
-  const [packId, setPackIdState] = useState<number>(0);
   const [gameId, setGameIdState] = useState<number>(0);
-  const [pack, setPack] = useState<Pack>();
   const [game, setGame] = useState<Game>();
-
-  // Clear game state when IDs change to prevent stale data
-  const setPackId = useCallback(
-    (id: number) => {
-      if (id !== packId) {
-        // Cancel existing subscriptions when switching packs
-        cancelSubscription(packSubscriptionRef, "pack");
-        cancelSubscription(gameSubscriptionRef, "game");
-        setPack(undefined);
-        setGame(undefined);
-      }
-      setPackIdState(id);
-    },
-    [packId, cancelSubscription],
-  );
 
   const setGameId = useCallback(
     (id: number) => {
@@ -122,7 +89,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   );
 
   const [config, setConfig] = useState<Config>();
-  const [starterpack, setStarterpack] = useState<Starterpack>();
+  const [starterpacks, setStarterpacks] = useState<Starterpack[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">(
     "loading",
   );
@@ -141,7 +108,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     getClient();
   }, [enabled, client]);
 
-  // Handler for entity updates (packs)
+  // Handler for entity updates
   const onEntityUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
@@ -158,13 +125,16 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
             `${NAMESPACE}-${STARTERPACK}`
           ] as unknown as RawStarterpack;
           const parsed = Starterpack.parse(model);
-          if (parsed) setStarterpack(parsed);
-        }
-        if (entity.models[`${NAMESPACE}-${PACK}`]) {
-          const model = entity.models[
-            `${NAMESPACE}-${PACK}`
-          ] as unknown as RawPack;
-          setPack(Pack.parse(model));
+          if (parsed)
+            setStarterpacks((prev) => {
+              const idx = prev.findIndex((s) => s.id === parsed.id);
+              if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = parsed;
+                return next;
+              }
+              return [...prev, parsed];
+            });
         }
         if (entity.models[`${NAMESPACE}-${GAME}`]) {
           const model = entity.models[
@@ -204,46 +174,15 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       });
   }, [enabled, client, accountAddress, onEntityUpdate, cancelSubscription]);
 
-  // Refresh function to fetch and subscribe to data
-  const refreshPack = useCallback(async () => {
-    if (!enabled || !client || !accountAddress || !packId || !gameId) return;
-
-    // Cancel existing subscriptions
-    cancelSubscription(packSubscriptionRef, "pack");
-
-    // Fetch initial data
-    const query = getPackQuery(packId).build();
-    await client
-      .getEntities(query)
-      .then((result) =>
-        onEntityUpdate({ data: result.items, error: undefined }),
-      );
-
-    // Subscribe to entity and event updates
-    client
-      .onEntityUpdated(query.clause, [], onEntityUpdate)
-      .then((response) => {
-        packSubscriptionRef.current = response;
-      });
-  }, [
-    enabled,
-    client,
-    accountAddress,
-    onEntityUpdate,
-    packId,
-    gameId,
-    cancelSubscription,
-  ]);
-
-  // Refresh function to fetch and subscribe to data
+  // Refresh function to fetch and subscribe to game data
   const refreshGame = useCallback(async () => {
-    if (!enabled || !client || !accountAddress || !packId || !gameId) return;
+    if (!enabled || !client || !accountAddress || !gameId) return;
 
     // Cancel existing subscriptions
     cancelSubscription(gameSubscriptionRef, "game");
 
     // Fetch initial data
-    const query = getGameQuery(packId, gameId).build();
+    const query = getGameQuery(gameId).build();
     await client
       .getEntities(query)
       .then((result) =>
@@ -261,16 +200,14 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     client,
     accountAddress,
     onEntityUpdate,
-    packId,
     gameId,
     cancelSubscription,
   ]);
 
   const refresh = useCallback(async () => {
     await refreshEntities();
-    await refreshPack();
     await refreshGame();
-  }, [refreshEntities, refreshPack, refreshGame]);
+  }, [refreshEntities, refreshGame]);
 
   // Initial fetch and subscription setup
   useEffect(() => {
@@ -287,70 +224,46 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
 
     return () => {
       cancelSubscription(entitiesSubscriptionRef, "entities");
-      cancelSubscription(packSubscriptionRef, "pack");
       cancelSubscription(gameSubscriptionRef, "game");
     };
   }, [enabled, refresh, cancelSubscription]);
 
   return {
     client,
-    pack,
     game,
-    starterpack,
+    starterpacks,
     config,
     status,
     refresh,
     setGameId,
-    setPackId,
   };
 }
 
 function useOfflineEntitiesValue(): EntitiesContextType {
   const offlineState = useOfflineStore();
-  const [packId, setPackIdState] = useState<number>(0);
   const [gameId, setGameIdState] = useState<number>(0);
 
-  const pack = useMemo(() => {
-    const raw = offlineState.packs[packId];
-    return raw ? new Pack(raw.id, raw.game_count, raw.moonrocks) : undefined;
-  }, [offlineState.packs, packId]);
-
   const game = useMemo(() => {
-    if (!packId || !gameId) return undefined;
-    return selectGame(offlineState, packId, gameId);
-  }, [offlineState, packId, gameId]);
+    if (!gameId) return undefined;
+    return selectGame(offlineState, gameId);
+  }, [offlineState, gameId]);
 
   const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0"), []);
-  const starterpack = useMemo(
-    () => new Starterpack("0", true, 0, 0n, "0x0"),
-    [],
-  );
+  const starterpacks = useMemo<Starterpack[]>(() => [], []);
 
   const refresh = useCallback(async () => {}, []);
-
-  const setPackId = useCallback(
-    (id: number) => {
-      if (id !== packId) {
-        setGameIdState(0);
-      }
-      setPackIdState(id);
-    },
-    [packId],
-  );
 
   const setGameId = useCallback((id: number) => {
     setGameIdState(id);
   }, []);
 
   return {
-    pack,
     game,
-    starterpack,
+    starterpacks,
     config,
     status: "success",
     refresh,
     setGameId,
-    setPackId,
   };
 }
 

@@ -9,8 +9,9 @@ pub struct Config {
     pub token: ContractAddress,
     pub registry: ContractAddress,
     pub owner: ContractAddress,
-    pub fee_receiver: ContractAddress,
-    pub entry_price: felt252,
+    pub quote: ContractAddress,
+    pub ekubo: ContractAddress,
+    pub entry_price: u128,
     pub target_supply: u256,
 }
 
@@ -47,4 +48,5 @@ pub struct Game {
     pub shop: u128, // Packed: orbs (30 bits) | refresh_used (1) | burn_used (1) | purchase_counts (60 bits)
     pub moonrocks: u16,
     pub stake: u8,
+    pub created_at: u64,
 }

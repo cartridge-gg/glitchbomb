@@ -18,8 +18,9 @@ pub impl ConfigImpl of ConfigTrait {
         vrf: ContractAddress,
         registry: ContractAddress,
         owner: ContractAddress,
-        fee_receiver: ContractAddress,
-        entry_price: felt252,
+        quote: ContractAddress,
+        ekubo: ContractAddress,
+        entry_price: u128,
         target_supply: u256,
     ) -> Config {
         Config {
@@ -28,7 +29,8 @@ pub impl ConfigImpl of ConfigTrait {
             vrf: vrf,
             registry: registry,
             owner: owner,
-            fee_receiver: fee_receiver,
+            quote: quote,
+            ekubo: ekubo,
             entry_price: entry_price,
             target_supply: target_supply,
         }

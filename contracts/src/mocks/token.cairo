@@ -74,7 +74,7 @@ mod Token {
 
 
     fn dojo_init(ref self: ContractState) {
-        self.erc20.initializer("Token", "TKN");
+        self.erc20.initializer("Glitch", "GLITCH");
         let mut world = self.world(@NAMESPACE());
         let play_address = world.dns_address(@PLAY_NAME()).expect('Game contract not found!');
         let deployer_account = starknet::get_tx_info().unbox().account_contract_address;
@@ -87,11 +87,11 @@ mod Token {
     impl ERC20Metadata<ContractState> of super::IERC20Metadata<ContractState> {
         // IERC20Metadata
         fn name(self: @ContractState) -> felt252 {
-            'Token'
+            'Glitch'
         }
 
         fn symbol(self: @ContractState) -> felt252 {
-            'TKN'
+            'GLITCH'
         }
 
         fn decimals(self: @ContractState) -> u8 {

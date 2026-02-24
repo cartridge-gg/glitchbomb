@@ -4,15 +4,17 @@ pub const MAX_HEALTH: u8 = 5;
 pub const MAX_CAPACITY: u32 = 50;
 
 pub const DEFAULT_MOONROCKS: u16 = 100;
-pub const DEFAULT_ENTRY_PRICE: u256 = 100_000_000;
+pub const DEFAULT_ENTRY_PRICE: u256 = 2_000_000;
 pub const DEFAULT_LEVEL: u8 = 1;
 
 pub const PRICE_MULTIPLIER: u256 = 100_000;
 pub const STARTERPACK_COUNT: u8 = 10;
 
+pub const GAME_EXPIRATION_TIME: u64 = 86400;
+
 pub const MAX_SCORE: u16 = 500;
-pub const REWARD_NUMERATOR: u64 = 488_000_000_000_000;
-pub const MIN_REWARD: u64 = 1;
+pub const REWARD_NUMERATOR: u64 = 359_105_052_483_616_060;
+pub const REWARD_OFFSET: u16 = 10;
 
 #[inline]
 pub fn NAMESPACE() -> ByteArray {

@@ -143,10 +143,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
         const colorClass = getCategoryColor(pull.orb);
 
         return (
-          <div
-            key={`${pull.pack_id}-${pull.game_id}-${pull.id}`}
-            className="flex items-center"
-          >
+          <div key={`${pull.game_id}-${pull.id}`} className="flex items-center">
             <span
               className={`font-secondary text-xs tracking-widest uppercase ${colorClass}`}
             >

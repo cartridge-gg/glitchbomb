@@ -2,7 +2,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppHeader } from "@/components/containers";
+import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import {
   ArrowRightIcon,
@@ -16,31 +16,28 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
-import { useGames } from "@/hooks/games";
-import { usePacks } from "@/hooks/packs";
+import { useOwnedGames } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { isOfflineMode, setOfflineMode } from "@/offline/mode";
 import {
-  createPack,
+  createOfflineGame,
   selectTotalMoonrocks,
   useOfflineStore,
 } from "@/offline/store";
 
 export const Home = () => {
   const navigate = useNavigate();
-  const { mint, start } = useActions();
+  const { mint } = useActions();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { starterpack, config } = useEntitiesContext();
-  const { packs } = usePacks();
+  const { starterpacks, config } = useEntitiesContext();
+  const { games: ownedGames } = useOwnedGames();
   const offlineState = useOfflineStore();
   const [username, setUsername] = useState<string>();
-  const [loadingGameId, setLoadingGameId] = useState<string | null>(null);
-  const pendingNavigationRef = useRef<{
-    packId: number;
-    gameId: number;
-  } | null>(null);
+  const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [tierIndex, setTierIndex] = useState(0);
 
   const offline = isOfflineMode();
 
@@ -87,77 +84,19 @@ export const Home = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
-  // Build game keys from packs
-  const gameKeys = useMemo(() => {
-    return packs.map((p) => ({
-      packId: p.id,
-      gameId: Math.max(p.game_count, 1),
-    }));
-  }, [packs]);
-
-  const { getGameForPack } = useGames(gameKeys);
-
-  // Navigate when pending game becomes available
-  useEffect(() => {
-    if (!pendingNavigationRef.current) return;
-    const { packId, gameId } = pendingNavigationRef.current;
-    const game = getGameForPack(packId, gameId);
-    if (game) {
-      pendingNavigationRef.current = null;
-      setLoadingGameId(null);
-      navigate(`/play?pack=${packId}&game=${gameId}`);
-    }
-  }, [getGameForPack, navigate]);
-
-  // Build game list
+  // Build game list from owned games
   const gameList = useMemo(() => {
-    const games: Array<{
-      packId: number;
-      gameId: number;
-      pullCount: number;
-      bagSize: number;
-      level: number;
-      isOver: boolean;
-      hasNoGame: boolean;
-      points: number;
-      multiplier: number;
-      health: number;
-      moonrocks: number;
-      updatedAt: number;
-    }> = [];
-
-    for (const pack of packs) {
-      const gameId = Math.max(pack.game_count, 1);
-      const game = getGameForPack(pack.id, gameId);
-      games.push({
-        packId: pack.id,
-        gameId,
-        pullCount: game?.pull_count ?? 0,
-        bagSize: game?.bag.length ?? 0,
-        level: game?.level ?? 1,
-        isOver: game?.over ?? false,
-        hasNoGame: pack.game_count === 0,
-        points: game?.points ?? 0,
-        multiplier: game?.multiplier ?? 1,
-        health: game?.health ?? 0,
-        moonrocks: pack.moonrocks ?? 0,
-        updatedAt: pack.updated_at ?? 0,
-      });
-    }
-
-    return games.sort(
-      (a, b) => b.updatedAt - a.updatedAt || b.packId - a.packId,
-    );
-  }, [packs, getGameForPack]);
+    return [...ownedGames].sort((a, b) => b.id - a.id);
+  }, [ownedGames]);
 
   // Split into active and completed games
   const activeGames = useMemo(
-    () => gameList.filter((g) => !g.isOver),
+    () => gameList.filter((g) => !g.over),
     [gameList],
   );
 
   const completedGames = useMemo(
-    () => gameList.filter((g) => g.isOver),
+    () => gameList.filter((g) => g.over),
     [gameList],
   );
 
@@ -207,7 +146,7 @@ export const Home = () => {
     const labelIndex: Record<string, number> = {};
 
     for (const game of completedGames) {
-      const tsMs = game.updatedAt > 0 ? game.updatedAt * 1000 : Date.now();
+      const tsMs = Date.now();
       const label = getLabel(tsMs);
       if (label in labelIndex) {
         grouped[labelIndex[label]].games.push(game);
@@ -335,48 +274,28 @@ export const Home = () => {
     [totalSlides],
   );
 
-  const handlePlay = async (
-    packId: number,
-    gameId: number,
-    hasNoGame: boolean,
-  ) => {
-    const gameKey = `${packId}-${gameId}`;
-    setLoadingGameId(gameKey);
-
-    const existingGame = getGameForPack(packId, gameId);
-    if (existingGame) {
-      navigate(`/play?pack=${packId}&game=${gameId}`);
-      return;
-    }
-
-    pendingNavigationRef.current = { packId, gameId };
-
-    try {
-      if (hasNoGame) {
-        await start(packId);
-      }
-    } catch (error) {
-      console.error(error);
-      pendingNavigationRef.current = null;
-      setLoadingGameId(null);
-    }
+  const handlePlay = async (gameId: number) => {
+    setLoadingGameId(gameId);
+    navigate(`/play?game=${gameId}`);
   };
 
   const handleNewGame = useCallback(() => {
     if (offline) {
-      createPack();
+      createOfflineGame();
       return;
     }
-    if (starterpack) {
-      (connector as ControllerConnector)?.controller.openStarterPack(
-        starterpack.id.toString(),
-      );
-    }
-  }, [connector, starterpack, offline]);
+    setShowDetails(true);
+  }, [offline]);
+
+  const handleBuyGame = useCallback(() => {
+    const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
+    if (!pack) return;
+    (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
+  }, [connector, tierIndex, starterpacks]);
 
   const handlePractice = useCallback(() => {
     setOfflineMode(true);
-    createPack();
+    createOfflineGame();
   }, []);
 
   const isLoggedIn = !!account && !!username;
@@ -852,10 +771,7 @@ export const Home = () => {
                 }}
               >
                 {activeGames.map((game, idx) => (
-                  <div
-                    key={`${game.packId}-${game.gameId}`}
-                    className="w-full shrink-0"
-                  >
+                  <div key={game.id} className="w-full shrink-0">
                     <ElectricBorder
                       color="#36F818"
                       gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
@@ -875,13 +791,7 @@ export const Home = () => {
                         className="w-full p-3 flex items-center gap-3 text-left"
                         onClick={() => {
                           if (didDrag.current) return;
-                          requireLogin(() =>
-                            handlePlay(
-                              game.packId,
-                              game.gameId,
-                              game.hasNoGame,
-                            ),
-                          );
+                          requireLogin(() => handlePlay(game.id));
                         }}
                       >
                         {/* Icon container */}
@@ -903,7 +813,7 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                #{game.packId}
+                                #{game.id}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -951,7 +861,7 @@ export const Home = () => {
                           </div>
                         </div>
 
-                        {loadingGameId === `${game.packId}-${game.gameId}` && (
+                        {loadingGameId === game.id && (
                           <LoadingSpinner size="sm" />
                         )}
                       </button>
@@ -1084,76 +994,70 @@ export const Home = () => {
                   </p>
                 </div>
               ) : (
-                <>
-                  {activityGroups.map((group, groupIdx) => (
-                    <div key={group.label} className="flex flex-col gap-2">
-                      {groupIdx > 0 && (
-                        <p
-                          className="font-secondary text-sm tracking-widest uppercase pt-1"
-                          style={{ color: "#36F818" }}
+                activityGroups.map((group, groupIdx) => (
+                  <div key={group.label} className="flex flex-col gap-2">
+                    {groupIdx > 0 && (
+                      <p
+                        className="font-secondary text-sm tracking-widest uppercase pt-1"
+                        style={{ color: "#36F818" }}
+                      >
+                        {group.label}
+                      </p>
+                    )}
+                    {group.games.map((game) => {
+                      const cashedOut = game.health > 0;
+                      return (
+                        <div
+                          key={`${group.label}-${game.id}`}
+                          className="flex items-center gap-2"
                         >
-                          {group.label}
-                        </p>
-                      )}
-                      {group.games.map((game) => {
-                        const cashedOut = game.health > 0;
-                        return (
-                          <div
-                            key={`${group.label}-${game.packId}-${game.gameId}`}
-                            className="flex items-center gap-2"
+                          <button
+                            type="button"
+                            className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            style={{
+                              background: cashedOut ? "#071304" : "#1A0505",
+                            }}
+                            onClick={() =>
+                              navigate(`/play?game=${game.id}&view=true`)
+                            }
                           >
-                            <button
-                              type="button"
-                              className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            <BombIcon
+                              size="md"
+                              className="text-white shrink-0"
+                            />
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              #{game.id}
+                            </span>
+                            <span className="font-secondary text-sm tracking-widest text-white">
+                              L{game.level}
+                            </span>
+                            <span
+                              className="font-secondary text-sm tracking-widest"
                               style={{
-                                background: cashedOut ? "#071304" : "#1A0505",
+                                color: cashedOut ? "#36F818" : "#EF4444",
                               }}
-                              onClick={() =>
-                                navigate(
-                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                )
-                              }
                             >
-                              <BombIcon
-                                size="md"
-                                className="text-white shrink-0"
-                              />
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                #{game.packId}
-                              </span>
-                              <span className="font-secondary text-sm tracking-widest text-white">
-                                L{game.level}
-                              </span>
-                              <span
-                                className="font-secondary text-sm tracking-widest"
-                                style={{
-                                  color: cashedOut ? "#36F818" : "#EF4444",
-                                }}
-                              >
-                                {cashedOut
-                                  ? `+$${(game.points * 0.01).toFixed(2)}`
-                                  : "GLITCHED"}
-                              </span>
-                            </button>
-                            <Button
-                              variant="secondary"
-                              gradient={cashedOut ? "green" : "red"}
-                              className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
-                              onClick={() =>
-                                navigate(
-                                  `/play?pack=${game.packId}&game=${game.gameId}&view=true`,
-                                )
-                              }
-                              aria-label="View game"
-                            >
-                              <ArrowRightIcon size="sm" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </>
+                              {cashedOut
+                                ? `+$${(game.points * 0.01).toFixed(2)}`
+                                : "GLITCHED"}
+                            </span>
+                          </button>
+                          <Button
+                            variant="secondary"
+                            gradient={cashedOut ? "green" : "red"}
+                            className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                            onClick={() =>
+                              navigate(`/play?game=${game.id}&view=true`)
+                            }
+                            aria-label="View game"
+                          >
+                            <ArrowRightIcon size="sm" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))
               )}
             </div>
           </div>
@@ -1183,11 +1087,7 @@ export const Home = () => {
                 if (isOnNewGameCard) {
                   handleNewGame();
                 } else if (activeGame) {
-                  handlePlay(
-                    activeGame.packId,
-                    activeGame.gameId,
-                    activeGame.hasNoGame,
-                  );
+                  handlePlay(activeGame.id);
                 }
               })
             }
@@ -1196,6 +1096,57 @@ export const Home = () => {
           </Button>
         </div>
       </div>
+
+      {/* Game Details Overlay */}
+      {showDetails && !offline && (
+        <div className="absolute inset-0 z-50 flex flex-col bg-green-gradient-100">
+          {/* Header */}
+          <AppHeader
+            moonrocks={displayMoonrocks}
+            username={username}
+            showBack
+            onBack={() => setShowDetails(false)}
+            onMint={offline ? undefined : () => mint(tokenAddress)}
+            onProfileClick={onProfileClick}
+            onConnect={isLoggedIn ? undefined : onConnectClick}
+          />
+
+          {/* Scrollable content */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
+            <div className="w-full max-w-[500px] mx-auto">
+              <GameDetails
+                tierIndex={tierIndex}
+                onTierIndexChange={setTierIndex}
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="shrink-0 pt-4 pb-4 px-4">
+            <div className="flex gap-3 w-full max-w-[500px] mx-auto">
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="flex-1"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={() => setShowDetails(false)}
+              >
+                BACK
+              </Button>
+              <Button
+                variant="secondary"
+                gradient="yellow"
+                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest !text-yellow-100 hover:!brightness-125"
+                style={{ backgroundColor: "#3D3200" }}
+                onClick={handleBuyGame}
+              >
+                PURCHASE
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

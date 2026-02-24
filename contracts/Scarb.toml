@@ -15,6 +15,7 @@ build-external-contracts = ["dojo::world::world_contract::world"]
 collection.workspace = true
 starterpack.workspace = true
 graffiti.workspace = true
+ekubo.workspace = true
 openzeppelin.workspace = true
 alexandria_encoding.workspace = true
 dojo.workspace = true

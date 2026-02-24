@@ -41,7 +41,6 @@ const buildPolicies = () => {
     contracts: {
       [gameAddress]: {
         methods: [
-          { entrypoint: "start", description: "Start a new game" },
           { entrypoint: "pull", description: "Pull an orb" },
           { entrypoint: "cash_out", description: "Cash out and end the game" },
           { entrypoint: "enter", description: "Enter the shop at milestone" },
