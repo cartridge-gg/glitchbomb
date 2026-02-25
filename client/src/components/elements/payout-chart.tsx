@@ -329,17 +329,18 @@ export const PayoutChart = ({
       {yTicks.map((tick) => {
         const y = toY(tick.val);
         const textX = padL - 4;
-        const textW = tick.label.length * 4.5 + 6;
+        const labelW = tick.label.length * 4.5;
+        const pillPad = 5;
         return (
           <g key={`y-${tick.val}`}>
             {tick.pill && (
               <rect
-                x={textX - textW / 2 - 12}
+                x={textX - labelW - pillPad}
                 y={y - pillH / 2}
-                width={textW + 8}
+                width={labelW + pillPad * 2}
                 height={pillH}
                 rx={pillRx}
-                fill={pillBg}
+                fill="#071E03"
                 stroke={pillBorder}
                 strokeWidth={0.5}
               />
