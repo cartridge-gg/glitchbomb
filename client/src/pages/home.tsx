@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
+import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
@@ -40,6 +41,30 @@ export const Home = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => setNow(Math.floor(Date.now() / 1000)),
+      60_000,
+    );
+    return () => clearInterval(interval);
+  }, []);
+
+  const GAME_EXPIRATION = 86400;
+
+  const formatExpiry = useCallback(
+    (createdAt: number) => {
+      if (!createdAt) return "--";
+      const remaining = createdAt + GAME_EXPIRATION - now;
+      if (remaining <= 0) return "EXPIRED";
+      const hours = Math.floor(remaining / 3600);
+      const minutes = Math.floor((remaining % 3600) / 60);
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      return `${minutes}m`;
+    },
+    [now],
+  );
 
   const offline = isOfflineMode();
 
@@ -68,6 +93,17 @@ export const Home = () => {
     [tokenContract],
   );
   const target = config?.target_supply ?? 0n;
+
+  const formatPayout = useCallback(
+    (score: number, stake: number) => {
+      if (score <= 0) return "$0.00";
+      const rewards = cumulativeRewards(stake, supply, target);
+      const glitch = toTokens(rewards[Math.min(score, rewards.length) - 1] || 0);
+      if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
+      return `${glitch.toFixed(1)} GLITCH`;
+    },
+    [supply, target, tokenPrice],
+  );
 
   const balance = useMemo(() => {
     if (!tokenContract) return 0;
@@ -856,7 +892,7 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                --
+                                {formatExpiry(game.created_at)}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -878,13 +914,13 @@ export const Home = () => {
                                 className="font-secondary text-sm leading-none"
                                 style={{ color: "rgba(54, 248, 24, 0.24)" }}
                               >
-                                Max Payout
+                                Payout
                               </p>
                               <p
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {game.moonrocks + game.points}
+                                {formatPayout(game.points, game.stake)}
                               </p>
                             </div>
                           </div>
@@ -982,7 +1018,7 @@ export const Home = () => {
                               className="font-secondary text-sm leading-none"
                               style={{ color: "rgba(250, 204, 21, 0.24)" }}
                             >
-                              Max Payout
+                              Payout
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
