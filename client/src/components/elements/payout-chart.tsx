@@ -268,7 +268,7 @@ export const PayoutChart = ({
           />
           <text
             x={toX(beScore)}
-            y={padT - pillH / 2 + 1}
+            y={padT - pillH / 2 - 2}
             textAnchor="middle"
             dominantBaseline="central"
             fill={valueColor}
