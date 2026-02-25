@@ -1083,14 +1083,12 @@ export const Home = () => {
               ) : (
                 activityGroups.map((group, groupIdx) => (
                   <div key={group.label} className="flex flex-col gap-2">
-                    {groupIdx > 0 && (
-                      <p
-                        className="font-secondary text-sm tracking-widest uppercase pt-1"
-                        style={{ color: "#36F818" }}
-                      >
-                        {group.label}
-                      </p>
-                    )}
+                    <p
+                      className="font-secondary text-sm tracking-widest uppercase pt-1"
+                      style={{ color: "#36F818" }}
+                    >
+                      {group.label}
+                    </p>
                     {group.games.map((game) => {
                       const expired = !!game.expired;
                       const cashedOut = !expired && game.health > 0;
