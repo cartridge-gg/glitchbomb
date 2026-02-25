@@ -13,7 +13,7 @@ pub const STARTERPACK_COUNT: u8 = 10;
 pub const GAME_EXPIRATION_TIME: u64 = 86400;
 
 pub const MAX_SCORE: u16 = 500;
-pub const REWARD_NUMERATOR: u64 = 359_105_052_483_616_060;
+pub const REWARD_NUMERATOR: u128 = 35_910_505_248_361_606_000_000;
 pub const REWARD_OFFSET: u16 = 10;
 
 #[inline]

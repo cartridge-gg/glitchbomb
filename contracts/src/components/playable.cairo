@@ -25,7 +25,7 @@ pub mod PlayableComponent {
     use crate::types::orbs::OrbsTrait;
 
     // Ekubo pool parameters (hardcoded for sepolia)
-    const POOL_FEE: u128 = 3402823669209384634633746074317682114; // 1%
+    const POOL_FEE: u128 = 170141183460469235273462165868118016; // 0.05%
     const POOL_TICK_SPACING: u128 = 354892;
     const MIN_SQRT_RATIO: u256 = 18446748437148339061;
     const MAX_SQRT_RATIO: u256 = 6277100250585753475930931601400621808602321654880405518632;

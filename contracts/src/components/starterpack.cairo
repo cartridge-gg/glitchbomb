@@ -33,11 +33,12 @@ pub mod StarterpackComponent {
             // [Interaction] Register starterpack tiers
             let registry = config.registry();
             let payment_token = config.quote;
+            let token = config.token;
             let play_address = self.play(world).contract_address;
             let reissuable = true;
             let referral_percentage = 0;
             let base_price: u256 = config.entry_price.into();
-            let metadata = StarterpackTrait::metadata(payment_token);
+            let metadata = StarterpackTrait::metadata(token);
             for index in 0..STARTERPACK_COUNT {
                 let multiplier: u8 = index + 1;
                 let stake: u256 = multiplier.into();
@@ -76,9 +77,9 @@ pub mod StarterpackComponent {
             store.starterpack(starterpack_id).assert_does_exist();
 
             // [Interaction] Update metadata
-            let payment_token = config.quote;
+            let token = config.token;
             let registry = config.registry();
-            registry.update_metadata(starterpack_id, StarterpackTrait::metadata(payment_token));
+            registry.update_metadata(starterpack_id, StarterpackTrait::metadata(token));
         }
     }
 

@@ -58,7 +58,7 @@
     },
     {
       "address": "0x7e272112d9cb4c143184ddccb00471c407d9d167aa5f5a58b2a0a5d7314ae8e",
-      "class_hash": "0x2e926b5f0da71332ec79fee1f448a463dbd1ee906a3cee646610f065bea72ff",
+      "class_hash": "0x78a5d1937975746ab66dc5979331ac296b5d23a1b385a76f417f949f6b8faef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -72,6 +72,7 @@
         "exit",
         "refresh",
         "burn",
+        "update_starterpack_metadata",
         "upgrade"
       ]
     },
@@ -3558,6 +3559,18 @@
             {
               "name": "bag_index",
               "type": "core::integer::u8"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "type": "function",
+          "name": "update_starterpack_metadata",
+          "inputs": [
+            {
+              "name": "starterpack_id",
+              "type": "core::integer::u32"
             }
           ],
           "outputs": [],

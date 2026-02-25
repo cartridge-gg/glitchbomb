@@ -17,6 +17,7 @@ import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
+import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { isOfflineMode, setOfflineMode } from "@/offline/mode";
 import {
@@ -48,18 +49,33 @@ export const Home = () => {
     contractAddresses: [tokenAddress],
   });
 
-  const balance = useMemo(() => {
-    if (!tokenAddress) return 0;
-    const tokenContract = tokenContracts.find(
+  const glitchAddress = getTokenAddress(chain.id);
+  const { price: tokenPrice } = useTokenPrice(
+    glitchAddress,
+    config?.quote,
+    chain.id.toString(),
+  );
+  const tokenContract = useMemo(() => {
+    if (!tokenAddress) return undefined;
+    return tokenContracts.find(
       (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
     );
+  }, [tokenContracts, tokenAddress]);
+
+  const supply = useMemo(
+    () => BigInt(tokenContract?.total_supply ?? "0"),
+    [tokenContract],
+  );
+  const target = config?.target_supply ?? 0n;
+
+  const balance = useMemo(() => {
     if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
       (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
     );
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
-  }, [tokenContracts, tokenBalances, tokenAddress]);
+  }, [tokenContract, tokenBalances, tokenAddress]);
 
   const offlineMoonrocks = useMemo(
     () => selectTotalMoonrocks(offlineState),
@@ -1117,6 +1133,9 @@ export const Home = () => {
               <GameDetails
                 tierIndex={tierIndex}
                 onTierIndexChange={setTierIndex}
+                tokenPrice={tokenPrice}
+                supply={supply}
+                target={target}
               />
             </div>
           </div>

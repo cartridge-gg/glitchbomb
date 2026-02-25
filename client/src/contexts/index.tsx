@@ -248,7 +248,7 @@ function useOfflineEntitiesValue(): EntitiesContextType {
     return selectGame(offlineState, gameId);
   }, [offlineState, gameId]);
 
-  const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0"), []);
+  const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0", "0x0"), []);
   const starterpacks = useMemo<Starterpack[]>(() => [], []);
 
   const refresh = useCallback(async () => {}, []);

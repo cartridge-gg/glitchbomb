@@ -54,30 +54,30 @@ mod tests {
 
     #[test]
     fn test_reward_at_max_score() {
-        // Score 500 at target supply should yield ~100,000
+        // Score 500 at target supply should yield ~10,000,000,000
         let reward = RewarderImpl::amount(500, TARGET, TARGET);
-        assert(reward >= 99_000 && reward <= 101_000, 'max score reward ~100k');
+        assert(reward >= 9_900_000_000 && reward <= 10_100_000_000, 'max score reward ~10B');
     }
 
     #[test]
     fn test_reward_at_490() {
-        // Score 490 should yield ~47,000
+        // Score 490 should yield ~4,700,000,000
         let reward = RewarderImpl::amount(490, TARGET, TARGET);
-        assert(reward >= 45_000 && reward <= 49_000, 'score 490 reward ~47k');
+        assert(reward >= 4_500_000_000 && reward <= 4_900_000_000, 'score 490 reward ~4.7B');
     }
 
     #[test]
     fn test_reward_at_400() {
-        // Score 400 should yield ~4,400
+        // Score 400 should yield ~440,000,000
         let reward = RewarderImpl::amount(400, TARGET, TARGET);
-        assert(reward >= 4_000 && reward <= 5_000, 'score 400 reward ~4.4k');
+        assert(reward >= 400_000_000 && reward <= 500_000_000, 'score 400 reward ~440M');
     }
 
     #[test]
     fn test_reward_low_score() {
-        // Score 100 yields a small reward
+        // Score 100 yields a small reward (~500k with 100kx numerator)
         let reward = RewarderImpl::amount(100, TARGET, TARGET);
-        assert(reward >= 1 && reward <= 10, 'low score reward small');
+        assert(reward >= 100_000 && reward <= 1_000_000, 'low score reward small');
     }
 
     #[test]
@@ -116,8 +116,8 @@ mod tests {
 
     #[test]
     fn test_reward_score_10() {
-        // Very low score yields 0 (curve heavily favors high scores)
+        // Very low score yields near-zero reward
         let reward = RewarderImpl::amount(10, TARGET, TARGET);
-        assert(reward == 0, 'score 10 reward == 0');
+        assert(reward <= 100, 'score 10 reward near 0');
     }
 }

@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   breakEvenScore,
+  cumulativeRewards,
   MAX_SCORE,
-  maxPayout,
-  tokenPayout,
   toTokens,
 } from "@/helpers/payout";
 
 export interface PayoutChartProps {
   /** Stake multiplier (1–STARTERPACK_COUNT) */
   stake: number;
-  /** Token price in USD. Null = show raw token values. */
+  /** GLITCH price in USD (from Ekubo). Null = price unavailable. */
   tokenPrice: number | null;
+  /** Current token total supply (raw units). */
+  supply?: bigint;
+  /** Target token supply from config (raw units). */
+  target?: bigint;
 }
 
 /** Format a token value for axis labels. */
@@ -24,23 +27,47 @@ function formatTokens(v: number): string {
   return v.toFixed(4);
 }
 
-/** Score milestones for the staircase (step-after). */
-const STEP_SCORES = Array.from({ length: 21 }, (_, i) => i * 25); // 0,25,50,...,500
+/** Helper to look up cumulative reward at a score from precomputed array. */
+function cumulAt(arr: number[], score: number): number {
+  if (score <= 0 || arr.length === 0) return 0;
+  return arr[Math.min(score, arr.length) - 1];
+}
 
-export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
+/** Score sample points for the cumulative curve. */
+const STEP_SCORES = Array.from({ length: 51 }, (_, i) => i * 10); // 0,10,20,...,500
+
+export const PayoutChart = ({
+  stake,
+  tokenPrice,
+  supply = 0n,
+  target = 0n,
+}: PayoutChartProps) => {
   const hasPrice = tokenPrice != null && tokenPrice > 0;
 
-  const maxTokens = toTokens(maxPayout(stake));
-  const maxVal = hasPrice ? maxTokens * tokenPrice : maxTokens;
-  const beScore = breakEvenScore(stake, tokenPrice ?? undefined);
-  const beTokens = toTokens(tokenPayout(beScore, stake));
-  const beVal = hasPrice ? beTokens * tokenPrice : beTokens;
+  const rewards = useMemo(
+    () => cumulativeRewards(stake, supply, target),
+    [stake, supply, target],
+  );
+  const baseRewardsArr = useMemo(
+    () => (stake > 1 ? cumulativeRewards(1, supply, target) : []),
+    [stake, supply, target],
+  );
+
+  // Y-axis always in GLITCH tokens (like Nums shows NUMS)
+  const maxVal = toTokens(cumulAt(rewards, MAX_SCORE));
+  const beScore = breakEvenScore(
+    stake,
+    tokenPrice ?? undefined,
+    supply,
+    target,
+  );
+  const beVal = toTokens(cumulAt(rewards, beScore));
   const showBreakEven = beScore < MAX_SCORE;
 
   // Chart dimensions
   const chartW = 320;
   const chartH = 220;
-  const padL = 56;
+  const padL = 36;
   const padR = 14;
   const padT = showBreakEven ? 24 : 10;
   const padB = 32;
@@ -53,41 +80,27 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
   const toY = (val: number) =>
     padT + plotH - (Math.sqrt(val) / Math.sqrt(yMax)) * plotH;
 
-  // Build staircase path (step-after: hold value, then jump)
-  const buildStaircase = useMemo(() => {
-    return (stakeVal: number) => {
+  // Build smooth cumulative curve path
+  const buildCurve = useMemo(() => {
+    return (cumulArr: number[]) => {
       let path = "";
       for (let i = 0; i < STEP_SCORES.length; i++) {
         const score = STEP_SCORES[i];
-        const tokens = toTokens(tokenPayout(score, stakeVal));
-        const val = hasPrice ? tokens * tokenPrice : tokens;
+        const val = toTokens(cumulAt(cumulArr, score));
         const x = toX(score);
         const y = toY(val);
-
-        if (i === 0) {
-          path = `M ${x} ${y}`;
-        } else {
-          // Horizontal to current x at previous y, then vertical to current y
-          const prevScore = STEP_SCORES[i - 1];
-          const prevTokens = toTokens(tokenPayout(prevScore, stakeVal));
-          const prevVal = hasPrice ? prevTokens * tokenPrice : prevTokens;
-          const prevY = toY(prevVal);
-          path += ` L ${x} ${prevY} L ${x} ${y}`;
-        }
+        path += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
       }
       return path;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasPrice, tokenPrice, yMax]);
+  }, [yMax]);
 
-  const curvePath = useMemo(
-    () => buildStaircase(stake),
-    [buildStaircase, stake],
-  );
+  const curvePath = useMemo(() => buildCurve(rewards), [buildCurve, rewards]);
   const showBaseCurve = stake > 1;
   const basePath = useMemo(
-    () => (showBaseCurve ? buildStaircase(1) : ""),
-    [showBaseCurve, buildStaircase],
+    () => (showBaseCurve ? buildCurve(baseRewardsArr) : ""),
+    [showBaseCurve, buildCurve, baseRewardsArr],
   );
 
   const lineColor = "#36F818";
@@ -97,35 +110,29 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
   const pillBg = "rgba(54, 248, 24, 0.12)";
   const pillBorder = "rgba(54, 248, 24, 0.25)";
 
-  // Y-axis ticks: always show max; show break-even if applicable; show 0 if room
+  // Y-axis ticks: always show GLITCH token amounts
   const yTicks = useMemo(() => {
     const ticks: { val: number; label: string; pill?: boolean }[] = [];
-    const unit = hasPrice ? "USD" : "tokens";
 
     ticks.push({
       val: maxVal,
-      label: hasPrice
-        ? `$${formatTokens(maxVal)}`
-        : `${formatTokens(maxVal)} ${unit}`,
+      label: formatTokens(maxVal),
     });
 
     if (showBreakEven && Math.abs(beVal - maxVal) / yMax > 0.12) {
       ticks.push({
         val: beVal,
-        label: hasPrice
-          ? `$${formatTokens(beVal)}`
-          : `${formatTokens(beVal)} ${unit}`,
+        label: formatTokens(beVal),
         pill: true,
       });
     }
 
-    // Show 0 if there's room
     if (ticks.every((t) => t.val / yMax > 0.15)) {
       ticks.push({ val: 0, label: "0" });
     }
 
     return ticks;
-  }, [maxVal, beVal, yMax, showBreakEven, hasPrice]);
+  }, [maxVal, beVal, yMax, showBreakEven]);
 
   // X-axis ticks: 0, 100, 200, 300, 400, 500 + break-even
   const xTicks = useMemo(() => {
@@ -184,6 +191,20 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
           />
         </filter>
       </defs>
+
+      {/* Token price label */}
+      {hasPrice && (
+        <text
+          x={padL + plotW}
+          y={padT - 2}
+          textAnchor="end"
+          fill={labelColor}
+          fontSize={7}
+          className="font-secondary"
+        >
+          1 USD = {formatTokens(1 / tokenPrice)} GLITCH
+        </text>
+      )}
 
       {/* Horizontal grid at 0 */}
       <line
@@ -272,13 +293,7 @@ export const PayoutChart = ({ stake, tokenPrice }: PayoutChartProps) => {
           />
           <text
             x={padL + plotW - 2}
-            y={
-              toY(
-                hasPrice
-                  ? toTokens(maxPayout(1)) * tokenPrice
-                  : toTokens(maxPayout(1)),
-              ) + 10
-            }
+            y={toY(toTokens(cumulAt(baseRewardsArr, MAX_SCORE))) + 10}
             textAnchor="end"
             fill={labelColor}
             fontSize={7}

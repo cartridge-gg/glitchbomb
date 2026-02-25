@@ -8,12 +8,23 @@ export class Config {
   vrf: string;
   token: string;
   registry: string;
+  quote: string;
+  target_supply: bigint;
 
-  constructor(id: string, vrf: string, token: string, registry: string) {
+  constructor(
+    id: string,
+    vrf: string,
+    token: string,
+    registry: string,
+    quote: string,
+    target_supply: bigint = 0n,
+  ) {
     this.id = id;
     this.vrf = vrf;
     this.token = token;
     this.registry = registry;
+    this.quote = quote;
+    this.target_supply = target_supply;
   }
 
   static from(data: RawConfig): Config | null {
@@ -26,7 +37,8 @@ export class Config {
       !data?.id?.value ||
       !data?.vrf?.value ||
       !data?.token?.value ||
-      !data?.registry?.value
+      !data?.registry?.value ||
+      !data?.quote?.value
     ) {
       console.warn("Config.parse: Missing required fields", data);
       return null;
@@ -36,6 +48,8 @@ export class Config {
       getChecksumAddress(data.vrf.value),
       getChecksumAddress(data.token.value),
       getChecksumAddress(data.registry.value),
+      getChecksumAddress(data.quote.value),
+      data?.target_supply?.value ? BigInt(data.target_supply.value) : 0n,
     );
   }
 }

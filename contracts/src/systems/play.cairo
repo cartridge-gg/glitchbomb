@@ -12,6 +12,7 @@ pub trait IPlay<T> {
     fn exit(ref self: T, game_id: u64);
     fn refresh(ref self: T, game_id: u64);
     fn burn(ref self: T, game_id: u64, bag_index: u8);
+    fn update_starterpack_metadata(ref self: T, starterpack_id: u32);
 }
 
 #[dojo::contract]
@@ -125,6 +126,13 @@ pub mod Play {
             let world = self.world(@NAMESPACE());
             // [Effect] Burn orb from bag
             self.playable.burn(world, game_id, bag_index)
+        }
+
+        fn update_starterpack_metadata(ref self: ContractState, starterpack_id: u32) {
+            // [Setup] World
+            let world = self.world(@NAMESPACE());
+            // [Effect] Update starterpack metadata
+            self.starterpack.update_metadata(world, starterpack_id)
         }
     }
 }

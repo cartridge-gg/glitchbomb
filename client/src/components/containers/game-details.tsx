@@ -3,6 +3,7 @@ import { PayoutChart } from "@/components/elements/payout-chart";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import {
   breakEvenScore,
+  MAX_SCORE,
   maxPayout,
   STARTERPACK_COUNT,
   tierPrice,
@@ -12,21 +13,35 @@ import {
 interface GameDetailsProps {
   tierIndex: number;
   onTierIndexChange: (index: number) => void;
+  tokenPrice?: number | null;
+  supply?: bigint;
+  target?: bigint;
 }
 
 export const GameDetails = ({
   tierIndex,
   onTierIndexChange,
+  tokenPrice,
+  supply = 0n,
+  target = 0n,
 }: GameDetailsProps) => {
   const stake = tierIndex + 1;
   const cost = toTokens(tierPrice(stake));
-  const max = toTokens(maxPayout(stake));
+  const max = toTokens(maxPayout(stake, supply, target));
 
   const labelColor = "#FFFFFF";
   const valueColor = "#36F818";
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
-  const beScore = breakEvenScore(stake);
+  const beScore = breakEvenScore(
+    stake,
+    tokenPrice ?? undefined,
+    supply,
+    target,
+  );
+
+  const hasPrice = tokenPrice != null && tokenPrice > 0;
+  const maxUsd = hasPrice ? max * tokenPrice : null;
 
   const stats = [
     {
@@ -38,14 +53,25 @@ export const GameDetails = ({
       label: "Reward Multiplier",
       value: `${stake}X`,
     },
+    ...(hasPrice
+      ? [
+          {
+            label: "Token Price",
+            value: `1 USD = ${Math.round(1 / tokenPrice).toLocaleString("en-US")} GLITCH`,
+          },
+        ]
+      : []),
     {
       label: "Break Even",
-      value: `${beScore} Points`,
+      value: beScore === MAX_SCORE ? "\u2014" : `${beScore} Moonrocks`,
     },
     { label: "Expires In", value: "24HRS" },
     {
       label: "Maximum Reward",
-      value: `$${max.toFixed(2)}`,
+      value:
+        maxUsd != null
+          ? `${max.toFixed(1)} GLITCH ($${maxUsd.toFixed(2)})`
+          : `${max.toFixed(1)} GLITCH`,
       highlight: true,
     },
   ];
@@ -68,7 +94,12 @@ export const GameDetails = ({
             className="rounded-xl p-3"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
           >
-            <PayoutChart stake={stake} tokenPrice={1} />
+            <PayoutChart
+              stake={stake}
+              tokenPrice={tokenPrice ?? null}
+              supply={supply}
+              target={target}
+            />
           </div>
         </GradientBorder>
 
