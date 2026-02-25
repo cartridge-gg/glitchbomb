@@ -39,6 +39,7 @@ export const Home = () => {
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
+  const purchaseGameIdsRef = useRef<Set<number> | null>(null);
 
   const offline = isOfflineMode();
 
@@ -306,8 +307,20 @@ export const Home = () => {
   const handleBuyGame = useCallback(() => {
     const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
     if (!pack) return;
+    purchaseGameIdsRef.current = new Set(ownedGames.map((g) => g.id));
     (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
-  }, [connector, tierIndex, starterpacks]);
+  }, [connector, tierIndex, starterpacks, ownedGames]);
+
+  useEffect(() => {
+    if (!purchaseGameIdsRef.current) return;
+    const newGame = ownedGames.find(
+      (g) => !purchaseGameIdsRef.current!.has(g.id),
+    );
+    if (newGame) {
+      purchaseGameIdsRef.current = null;
+      navigate(`/play?game=${newGame.id}`);
+    }
+  }, [ownedGames, navigate]);
 
   const handlePractice = useCallback(() => {
     setOfflineMode(true);
