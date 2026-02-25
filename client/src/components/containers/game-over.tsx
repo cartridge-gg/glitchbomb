@@ -9,6 +9,7 @@ export interface GameOverProps {
   plData: PLDataPoint[];
   pulls: OrbPulled[];
   cashedOut: boolean; // true = voluntarily cashed out, false = died (health = 0)
+  expired?: boolean; // true = game expired without being played to completion
   onPlayAgain?: () => void;
 }
 
@@ -18,14 +19,23 @@ export const GameOver = ({
   plData,
   pulls,
   cashedOut,
+  expired,
   onPlayAgain,
 }: GameOverProps) => {
-  // Green theme for cashed out, red theme for glitched out
-  const titleColor = cashedOut ? "text-green-400" : "text-red-100";
-  const textColor = cashedOut ? "text-green-400" : "text-red-100";
+  // Yellow theme for expired, green for cashed out, red for glitched out
+  const titleColor = expired
+    ? "text-yellow-400"
+    : cashedOut
+      ? "text-green-400"
+      : "text-red-100";
+  const textColor = expired
+    ? "text-yellow-400"
+    : cashedOut
+      ? "text-green-400"
+      : "text-red-100";
 
-  // Use glitch font only for "glitched out", regular font for "cashed out"
-  const titleFont = cashedOut ? "font-body" : "font-glitch";
+  // Use glitch font only for "glitched out", regular font for others
+  const titleFont = !cashedOut && !expired ? "font-glitch" : "font-body";
 
   return (
     <div className="flex flex-col max-w-[420px] w-full mx-auto px-4 min-h-full">
@@ -33,9 +43,9 @@ export const GameOver = ({
       <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)]">
         <div className="flex flex-col items-center gap-0">
           <h1
-            className={`${titleColor} ${titleFont} uppercase text-[clamp(2rem,6svh,3rem)] tracking-wider leading-tight text-center ${cashedOut ? "" : "glitch-text"}`}
+            className={`${titleColor} ${titleFont} uppercase text-[clamp(2rem,6svh,3rem)] tracking-wider leading-tight text-center ${!cashedOut && !expired ? "glitch-text" : ""}`}
           >
-            {cashedOut ? "CASHED OUT" : "GLITCHED OUT"}
+            {expired ? "EXPIRED" : cashedOut ? "CASHED OUT" : "GLITCHED OUT"}
           </h1>
           <span className="text-green-600 font-secondary text-sm tracking-widest">
             Lvl {level}
@@ -45,19 +55,29 @@ export const GameOver = ({
         <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
 
         <InfoCard
-          variant={cashedOut ? "green" : "red"}
-          label={`You Earned${cashedOut ? "!" : ""}`}
+          variant={expired ? "yellow" : cashedOut ? "green" : "red"}
+          label={expired ? "Time's Up" : `You Earned${cashedOut ? "!" : ""}`}
           className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
           innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
         >
-          <MoonrockIcon
-            className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
-          />
-          <span
-            className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em]`}
-          >
-            {moonrocksEarned} MOON ROCKS
-          </span>
+          {expired ? (
+            <span
+              className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em] text-center`}
+            >
+              GAME EXPIRED
+            </span>
+          ) : (
+            <>
+              <MoonrockIcon
+                className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
+              />
+              <span
+                className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em]`}
+              >
+                {moonrocksEarned} MOON ROCKS
+              </span>
+            </>
+          )}
         </InfoCard>
       </div>
 

@@ -98,7 +98,9 @@ export const Home = () => {
     (score: number, stake: number) => {
       if (score <= 0) return "$0.00";
       const rewards = cumulativeRewards(stake, supply, target);
-      const glitch = toTokens(rewards[Math.min(score, rewards.length) - 1] || 0);
+      const glitch = toTokens(
+        rewards[Math.min(score, rewards.length) - 1] || 0,
+      );
       if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
       return `${glitch.toFixed(1)} GLITCH`;
     },
@@ -142,10 +144,24 @@ export const Home = () => {
     return [...ownedGames].sort((a, b) => b.id - a.id);
   }, [ownedGames]);
 
-  // Split into active and completed games
+  // Check if a non-completed game has expired (24h elapsed)
+  const isExpired = useCallback(
+    (game: { created_at: number; over: boolean }) =>
+      !game.over &&
+      game.created_at > 0 &&
+      game.created_at + GAME_EXPIRATION <= now,
+    [now],
+  );
+
+  // Split into active, expired, and completed games
   const activeGames = useMemo(
-    () => gameList.filter((g) => !g.over),
-    [gameList],
+    () => gameList.filter((g) => !g.over && !isExpired(g)),
+    [gameList, isExpired],
+  );
+
+  const expiredGames = useMemo(
+    () => gameList.filter((g) => isExpired(g)),
+    [gameList, isExpired],
   );
 
   const completedGames = useMemo(
@@ -153,9 +169,15 @@ export const Home = () => {
     [gameList],
   );
 
-  // Group completed games by dynamic date labels using entity timestamps
+  // Group completed + expired games by dynamic date labels
+  type ActivityGame = (typeof gameList)[number] & { expired?: boolean };
   const activityGroups = useMemo(() => {
-    if (completedGames.length === 0) return [];
+    const feedGames: ActivityGame[] = [
+      ...expiredGames.map((g) => ({ ...g, expired: true })),
+      ...completedGames,
+    ].sort((a, b) => b.id - a.id);
+
+    if (feedGames.length === 0) return [];
 
     const now = new Date();
     const startOfToday = new Date(now);
@@ -195,11 +217,11 @@ export const Home = () => {
     };
 
     // Preserve insertion order (games are already sorted by most recent first)
-    const grouped: Array<{ label: string; games: typeof completedGames }> = [];
+    const grouped: Array<{ label: string; games: ActivityGame[] }> = [];
     const labelIndex: Record<string, number> = {};
 
-    for (const game of completedGames) {
-      const tsMs = Date.now();
+    for (const game of feedGames) {
+      const tsMs = game.created_at > 0 ? game.created_at * 1000 : Date.now();
       const label = getLabel(tsMs);
       if (label in labelIndex) {
         grouped[labelIndex[label]].games.push(game);
@@ -210,7 +232,7 @@ export const Home = () => {
     }
 
     return grouped;
-  }, [completedGames]);
+  }, [completedGames, expiredGames]);
 
   const [bannerIndex, setBannerIndex] = useState(0);
   const bannerCount = 2;
@@ -1070,7 +1092,8 @@ export const Home = () => {
                       </p>
                     )}
                     {group.games.map((game) => {
-                      const cashedOut = game.health > 0;
+                      const expired = !!game.expired;
+                      const cashedOut = !expired && game.health > 0;
                       return (
                         <div
                           key={`${group.label}-${game.id}`}
@@ -1080,7 +1103,11 @@ export const Home = () => {
                             type="button"
                             className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
                             style={{
-                              background: cashedOut ? "#071304" : "#1A0505",
+                              background: expired
+                                ? "#1A1500"
+                                : cashedOut
+                                  ? "#071304"
+                                  : "#1A0505",
                             }}
                             onClick={() =>
                               navigate(`/play?game=${game.id}&view=true`)
@@ -1099,18 +1126,32 @@ export const Home = () => {
                             <span
                               className="font-secondary text-sm tracking-widest"
                               style={{
-                                color: cashedOut ? "#36F818" : "#EF4444",
+                                color: expired
+                                  ? "#FACC15"
+                                  : cashedOut
+                                    ? "#36F818"
+                                    : "#EF4444",
                               }}
                             >
-                              {cashedOut
-                                ? `+$${(game.points * 0.01).toFixed(2)}`
-                                : "GLITCHED"}
+                              {expired
+                                ? "EXPIRED"
+                                : cashedOut
+                                  ? `+$${(game.points * 0.01).toFixed(2)}`
+                                  : "GLITCHED"}
                             </span>
                           </button>
                           <Button
                             variant="secondary"
-                            gradient={cashedOut ? "green" : "red"}
-                            className={`shrink-0 h-12 w-12 p-0 ${cashedOut ? "" : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"}`}
+                            gradient={
+                              expired ? "yellow" : cashedOut ? "green" : "red"
+                            }
+                            className={`shrink-0 h-12 w-12 p-0 ${
+                              expired
+                                ? "!bg-[#1A1500] hover:!bg-[#2A2200] !text-yellow-100"
+                                : cashedOut
+                                  ? ""
+                                  : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"
+                            }`}
                             onClick={() =>
                               navigate(`/play?game=${game.id}&view=true`)
                             }

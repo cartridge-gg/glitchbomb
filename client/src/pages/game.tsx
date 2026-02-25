@@ -365,6 +365,25 @@ export const Game = () => {
       );
     }
 
+    // Expired (created_at + 24h has passed without completion)
+    const isExpired =
+      game.created_at > 0 &&
+      game.created_at + 86400 <= Math.floor(Date.now() / 1000);
+
+    if (!game.over && isExpired) {
+      return (
+        <GameOver
+          level={game.level}
+          moonrocksEarned={0}
+          plData={plData}
+          pulls={pulls}
+          cashedOut={false}
+          expired={true}
+          onPlayAgain={() => navigate("/")}
+        />
+      );
+    }
+
     // Game over (terminal state) - both view mode and immediate game over
     if (game.over) {
       const cashedOut = game.health > 0;
