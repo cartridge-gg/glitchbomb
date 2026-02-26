@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
-import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
@@ -1081,7 +1081,7 @@ export const Home = () => {
                   </p>
                 </div>
               ) : (
-                activityGroups.map((group, groupIdx) => (
+                activityGroups.map((group) => (
                   <div key={group.label} className="flex flex-col gap-2">
                     <p
                       className="font-secondary text-sm tracking-widest uppercase pt-1"

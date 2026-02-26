@@ -18,20 +18,32 @@ export const Default: Story = {
   render: () => (
     <div className="flex justify-center items-end gap-4 text-white">
       <Icons.ArrowDownIcon size="md" />
+      <Icons.ArrowLeftIcon size="md" />
       <Icons.ArrowRightIcon size="md" />
       <Icons.BagIcon size="md" />
+      <Icons.Bomb1xIcon size="md" />
+      <Icons.Bomb2xIcon size="md" />
+      <Icons.Bomb3xIcon size="md" />
       <Icons.BombOrbIcon size="md" />
       <Icons.BombIcon size="md" />
+      <Icons.BracketArrowIcon size="md" />
       <Icons.ChipIcon size="md" />
       <Icons.ControllerIcon size="md" />
+      <Icons.CreditsIcon size="md" />
       <Icons.CrossIcon size="md" />
       <Icons.DotIcon size="md" />
+      <Icons.FireIcon size="md" />
       <Icons.GearIcon size="md" />
+      <Icons.GlitchBombIcon size="md" />
       <Icons.HeartIcon size="md" />
+      <Icons.HeartOutlineIcon size="md" />
+      <Icons.HomeIcon size="md" />
       <Icons.ListIcon size="md" />
       <Icons.MoonrockIcon size="md" />
+      <Icons.NumsLogoIcon size="md" />
       <Icons.OrbIcon size="md" />
       <Icons.RefreshIcon size="md" />
+      <Icons.SparkleIcon size="md" />
       <Icons.SparklesIcon size="md" />
       <Icons.TickIcon size="md" />
       <Icons.TokenIcon size="md" />
@@ -60,6 +72,18 @@ export const ArrowDown: Story = {
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.ArrowDownIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const ArrowLeft: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.ArrowLeftIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -155,7 +179,7 @@ export const GlitchBomb: Story = {
     <div className="flex flex-col gap-4">
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
-          <Icons.HeartIcon key={size} size={size} />
+          <Icons.GlitchBombIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -168,6 +192,30 @@ export const Heart: Story = {
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.HeartIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const HeartOutline: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.HeartOutlineIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Home: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.HomeIcon key={size} size={size} />
         ))}
       </div>
     </div>
@@ -294,12 +342,108 @@ export const Bomb: Story = {
   ),
 };
 
+export const Bomb1x: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-green-400">
+        {sizes.map((size) => (
+          <Icons.Bomb1xIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Bomb2x: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-orange-100">
+        {sizes.map((size) => (
+          <Icons.Bomb2xIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Bomb3x: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-red-100">
+        {sizes.map((size) => (
+          <Icons.Bomb3xIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const BracketArrow: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.BracketArrowIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
 export const Controller: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center items-end gap-4 text-white">
         {sizes.map((size) => (
           <Icons.ControllerIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Credits: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.CreditsIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Fire: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.FireIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const NumsLogo: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.NumsLogoIcon key={size} size={size} />
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const Sparkle: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-center items-end gap-4 text-white">
+        {sizes.map((size) => (
+          <Icons.SparkleIcon key={size} size={size} />
         ))}
       </div>
     </div>
