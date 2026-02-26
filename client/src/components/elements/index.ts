@@ -27,6 +27,7 @@ export * from "./profile";
 export * from "./puller";
 export * from "./rarity-pill";
 export * from "./recent-pulls";
+export * from "./reward-overlay";
 export * from "./score";
 export * from "./tab-bar";
 export * from "./tag";
