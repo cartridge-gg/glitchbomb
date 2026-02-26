@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
-import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
@@ -141,8 +141,21 @@ export const Home = () => {
 
   // Build game list from owned games
   const gameList = useMemo(() => {
-    return [...ownedGames].sort((a, b) => b.id - a.id);
-  }, [ownedGames]);
+    return [...ownedGames].sort((a, b) => {
+      // 1. Expiry urgency: less time remaining = higher priority
+      const aRemaining =
+        a.created_at > 0 ? a.created_at + GAME_EXPIRATION - now : Infinity;
+      const bRemaining =
+        b.created_at > 0 ? b.created_at + GAME_EXPIRATION - now : Infinity;
+      if (aRemaining !== bRemaining) return aRemaining - bRemaining;
+      // 2. Higher level first
+      if (a.level !== b.level) return b.level - a.level;
+      // 3. Higher points first
+      if (a.points !== b.points) return b.points - a.points;
+      // 4. Newest game first (tiebreaker)
+      return b.id - a.id;
+    });
+  }, [ownedGames, now]);
 
   // Check if a non-completed game has expired (24h elapsed)
   const isExpired = useCallback(
@@ -1081,7 +1094,7 @@ export const Home = () => {
                   </p>
                 </div>
               ) : (
-                activityGroups.map((group, groupIdx) => (
+                activityGroups.map((group) => (
                   <div key={group.label} className="flex flex-col gap-2">
                     <p
                       className="font-secondary text-sm tracking-widest uppercase pt-1"

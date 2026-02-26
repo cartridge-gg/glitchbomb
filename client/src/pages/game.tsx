@@ -158,6 +158,7 @@ export const Game = () => {
       rewardShownForGameRef.current = game.id;
       setShowRewardOverlay(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, game?.level, game?.pull_count, game?.over]);
 
   // Reset loading states when data changes

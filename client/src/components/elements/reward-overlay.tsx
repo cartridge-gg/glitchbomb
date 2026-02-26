@@ -48,9 +48,11 @@ export const RewardOverlay = ({
             {/* Stacked orb icons — two coins */}
             <motion.div
               className="relative w-32 h-32"
-              style={{
-                "--blue-100": "var(--yellow-100)",
-              } as React.CSSProperties}
+              style={
+                {
+                  "--blue-100": "var(--yellow-100)",
+                } as React.CSSProperties
+              }
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{
@@ -62,10 +64,7 @@ export const RewardOverlay = ({
             >
               {/* Back orb — offset slightly right and down */}
               <div className="absolute top-1/2 left-1/2 -translate-x-[46%] -translate-y-[48%] opacity-60">
-                <Orb
-                  variant={reward.variant}
-                  className="scale-[0.44]"
-                />
+                <Orb variant={reward.variant} className="scale-[0.44]" />
               </div>
               {/* Front orb with black border */}
               <div className="absolute top-1/2 left-1/2 -translate-x-[54%] -translate-y-[52%]">
