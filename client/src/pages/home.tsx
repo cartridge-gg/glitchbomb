@@ -1094,7 +1094,7 @@ export const Home = () => {
                   </p>
                 </div>
               ) : (
-                activityGroups.map((group, _groupIdx) => (
+                activityGroups.map((group) => (
                   <div key={group.label} className="flex flex-col gap-2">
                     <p
                       className="font-secondary text-sm tracking-widest uppercase pt-1"
