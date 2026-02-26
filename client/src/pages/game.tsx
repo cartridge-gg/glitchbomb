@@ -16,6 +16,7 @@ import {
   MilestoneChoice,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
+  RewardOverlay,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,8 @@ export const Game = () => {
   const { game, setGameId } = useEntitiesContext();
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
+  const [showRewardOverlay, setShowRewardOverlay] = useState(false);
+  const rewardShownForGameRef = useRef<number | null>(null);
   const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
     null,
@@ -142,6 +145,20 @@ export const Game = () => {
       setIsPulling(false);
     }
   }, [setGameId, searchParams]);
+
+  // Show reward overlay for fresh games
+  useEffect(() => {
+    if (
+      game &&
+      game.level === 1 &&
+      game.pull_count === 0 &&
+      !game.over &&
+      rewardShownForGameRef.current !== game.id
+    ) {
+      rewardShownForGameRef.current = game.id;
+      setShowRewardOverlay(true);
+    }
+  }, [game?.id, game?.level, game?.pull_count, game?.over]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -551,6 +568,15 @@ export const Game = () => {
         onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
         orbs={game?.bag ?? []}
         discards={game?.discards ?? []}
+      />
+      <RewardOverlay
+        open={showRewardOverlay}
+        onDismiss={() => setShowRewardOverlay(false)}
+        reward={{
+          variant: "moonrock",
+          count: game?.moonrocks ?? 0,
+          label: "Moonrocks",
+        }}
       />
     </div>
   );
