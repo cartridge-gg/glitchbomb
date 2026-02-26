@@ -575,7 +575,7 @@ export const Game = () => {
         reward={{
           variant: "moonrock",
           count: game?.moonrocks ?? 0,
-          label: "Moon Rocks",
+          label: "Moonrocks",
         }}
       />
     </div>
