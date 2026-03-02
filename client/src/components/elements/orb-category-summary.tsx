@@ -89,9 +89,7 @@ export const OrbCategorySummary = ({
     "health",
     "special",
   ];
-  const categoriesToShow = displayOrder.filter(
-    (cat) => categoryCounts[cat] > 0,
-  );
+  const categoriesToShow = displayOrder;
 
   return (
     <button
@@ -125,7 +123,7 @@ export const OrbCategorySummary = ({
         {categoriesToShow.length > 0 ? (
           categoriesToShow.map((category) => {
             const config = categoryConfig[category];
-            const count = categoryCounts[category];
+            const count = categoryCounts[category] || 0;
 
             return (
               <div key={category} className="relative flex-shrink-0">
