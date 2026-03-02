@@ -352,17 +352,17 @@ export class Orb {
       case OrbType.StickyBomb:
         return "var(--red-100)";
       case OrbType.Health1:
-        return "var(--salmon-100)";
+        return "var(--orb-heart)";
       case OrbType.Health2:
-        return "var(--salmon-100)";
+        return "var(--orb-heart)";
       case OrbType.Health3:
-        return "var(--salmon-100)";
+        return "var(--orb-heart)";
       case OrbType.Multiplier50:
-        return "var(--yellow-100)";
+        return "var(--orb-multiplier)";
       case OrbType.Multiplier100:
-        return "var(--yellow-100)";
+        return "var(--orb-multiplier)";
       case OrbType.Multiplier150:
-        return "var(--yellow-100)";
+        return "var(--orb-multiplier)";
       case OrbType.Point5:
         return "var(--green-400)";
       case OrbType.Point6:
@@ -378,11 +378,11 @@ export class Orb {
       case OrbType.PointBomb4:
         return "var(--green-400)";
       case OrbType.Moonrock15:
-        return "var(--blue-100)";
+        return "var(--orb-moonrock)";
       case OrbType.Moonrock40:
-        return "var(--blue-100)";
+        return "var(--orb-moonrock)";
       case OrbType.Chips15:
-        return "var(--orange-100)";
+        return "var(--orb-chips)";
       default:
         return "var(--white-100)";
     }

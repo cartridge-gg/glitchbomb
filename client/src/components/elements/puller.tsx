@@ -51,13 +51,13 @@ const VARIANT_COLORS = {
     cssVar: "var(--green-400)",
   },
   multiplier: {
-    cssVar: "var(--yellow-100)",
+    cssVar: "var(--orb-multiplier)",
   },
   chip: {
-    cssVar: "var(--orange-100)",
+    cssVar: "var(--orb-chips)",
   },
   moonrock: {
-    cssVar: "var(--blue-100)",
+    cssVar: "var(--orb-moonrock)",
   },
   rainbow: {
     cssVar: "#ffffff",

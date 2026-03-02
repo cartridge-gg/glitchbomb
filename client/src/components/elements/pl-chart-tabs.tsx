@@ -70,11 +70,11 @@ const getOrbCategory = (orb: OrbPulled["orb"]): string => {
 // Get category color for an orb
 const getCategoryColor = (orb: OrbPulled["orb"]): string => {
   if (orb.isPoint()) return "text-green-400";
-  if (orb.isMultiplier()) return "text-yellow-400";
+  if (orb.isMultiplier()) return "text-orb-multiplier";
   if (orb.isBomb()) return "text-red-400";
-  if (orb.isHealth()) return "text-pink-400";
-  if (orb.isMoonrock()) return "text-blue-400";
-  if (orb.isChips()) return "text-orange-400";
+  if (orb.isHealth()) return "text-orb-heart";
+  if (orb.isMoonrock()) return "text-orb-moonrock";
+  if (orb.isChips()) return "text-orb-chips";
   if (orb.isCurse()) return "text-purple-400";
   return "text-green-400";
 };

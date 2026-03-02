@@ -107,14 +107,13 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         }}
       >
         <div className="flex items-center gap-2 px-3">
-          <ChipIcon size="sm" style={{ color: "#F1721C" }} />
+          <ChipIcon size="sm" className="text-orange-100" />
           <motion.span
             key={price}
             initial={{ scale: 1.3 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="font-secondary text-sm"
-            style={{ color: "#F1721C" }}
+            className="font-secondary text-sm text-orange-100"
           >
             {price}
           </motion.span>

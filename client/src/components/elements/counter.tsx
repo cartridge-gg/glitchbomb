@@ -11,8 +11,8 @@ export interface CounterProps
 const counterVariants = cva("relative", {
   variants: {
     variant: {
-      moonrock: "text-blue-100",
-      chip: "text-orange-100",
+      moonrock: "text-orb-moonrock",
+      chip: "text-orb-chips",
     },
     size: {
       md: "w-[21px] h-[41px]",

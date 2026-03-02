@@ -30,13 +30,13 @@ const textColorVariants = (variant: string) => {
     case "point":
       return "text-green-900";
     case "multiplier":
-      return "text-yellow-300";
+      return "text-orb-multiplier-faded";
     case "health":
-      return "text-salmon-300";
+      return "text-orb-heart-faded";
     case "chip":
-      return "text-orange-300";
+      return "text-orb-chips-faded";
     case "moonrock":
-      return "text-blue-300";
+      return "text-orb-moonrock-faded";
     default:
       return "text-green-900";
   }

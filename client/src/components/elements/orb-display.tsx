@@ -91,10 +91,10 @@ const getOrbColor = (orb: Orb) => {
   // PointBomb4 should be red like a bomb
   if (orb.isBomb()) return "var(--red-100)";
   if (orb.isPoint()) return "var(--green-400)";
-  if (orb.isMultiplier()) return "var(--yellow-100)";
-  if (orb.isHealth()) return "var(--salmon-100)";
-  if (orb.isChips()) return "var(--orange-100)";
-  if (orb.isMoonrock()) return "var(--blue-100)";
+  if (orb.isMultiplier()) return "var(--orb-multiplier)";
+  if (orb.isHealth()) return "var(--orb-heart)";
+  if (orb.isChips()) return "var(--orb-chips)";
+  if (orb.isMoonrock()) return "var(--orb-moonrock)";
   return "var(--green-400)";
 };
 

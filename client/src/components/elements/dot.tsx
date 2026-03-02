@@ -11,11 +11,11 @@ const dotVariants = cva("select-none relative", {
     variant: {
       default: "text-green-900",
       green: "text-green-400",
-      yellow: "text-yellow-100",
-      orange: "text-orange-100",
+      yellow: "text-orb-multiplier",
+      orange: "text-orb-chips",
       red: "text-red-100",
-      blue: "text-blue-100",
-      salmon: "text-salmon-100",
+      blue: "text-orb-moonrock",
+      salmon: "text-orb-heart",
     },
     size: {
       md: "size-[15px]",
@@ -40,15 +40,15 @@ export const Dot = ({
       case "green":
         return "var(--green-400)";
       case "yellow":
-        return "var(--yellow-100)";
+        return "var(--orb-multiplier)";
       case "orange":
-        return "var(--orange-100)";
+        return "var(--orb-chips)";
       case "red":
         return "var(--red-100)";
       case "blue":
-        return "var(--blue-100)";
+        return "var(--orb-moonrock)";
       case "salmon":
-        return "var(--salmon-100)";
+        return "var(--orb-heart)";
       default:
         return "";
     }

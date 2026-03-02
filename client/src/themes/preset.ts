@@ -72,6 +72,22 @@ export const preset: Partial<Config> = {
           DEFAULT: "var(--black-100)",
           100: "var(--black-100)",
         },
+        "orb-multiplier": {
+          DEFAULT: "var(--orb-multiplier)",
+          faded: "var(--orb-multiplier-faded)",
+        },
+        "orb-chips": {
+          DEFAULT: "var(--orb-chips)",
+          faded: "var(--orb-chips-faded)",
+        },
+        "orb-heart": {
+          DEFAULT: "var(--orb-heart)",
+          faded: "var(--orb-heart-faded)",
+        },
+        "orb-moonrock": {
+          DEFAULT: "var(--orb-moonrock)",
+          faded: "var(--orb-moonrock-faded)",
+        },
       },
       backgroundImage: {
         "green-gradient-100": "var(--green-gradient-100)",

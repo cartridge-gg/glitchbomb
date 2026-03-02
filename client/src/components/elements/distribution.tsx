@@ -44,29 +44,29 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
   },
   {
     key: "multipliers",
-    bgColor: "var(--yellow-300)", // Custom yellow from preset
-    iconColor: "var(--yellow-100)", // Custom yellow from preset
+    bgColor: "var(--orb-multiplier-faded)",
+    iconColor: "var(--orb-multiplier)",
     Icon: CrossIcon,
     order: 3,
   },
   {
     key: "health",
-    bgColor: "var(--salmon-300)", // Custom salmon from preset
-    iconColor: "var(--salmon-100)", // Custom salmon from preset
+    bgColor: "var(--orb-heart-faded)",
+    iconColor: "var(--orb-heart)",
     Icon: HeartIcon,
     order: 2,
   },
   {
     key: "chips",
-    bgColor: "var(--orange-300)", // Custom orange from preset
-    iconColor: "var(--orange-100)", // Custom orange from preset
+    bgColor: "var(--orb-chips-faded)",
+    iconColor: "var(--orb-chips)",
     Icon: ChipIcon,
     order: 5,
   },
   {
     key: "moonrocks",
-    bgColor: "var(--blue-300)", // Custom blue from preset
-    iconColor: "var(--blue-100)", // Custom blue from preset
+    bgColor: "var(--orb-moonrock-faded)",
+    iconColor: "var(--orb-moonrock)",
     Icon: MoonrockIcon,
     order: 4,
   },

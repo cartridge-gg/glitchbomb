@@ -50,7 +50,7 @@ export const RewardOverlay = ({
               className="relative w-32 h-32"
               style={
                 {
-                  "--blue-100": "var(--yellow-100)",
+                  "--orb-moonrock": "var(--yellow-100)",
                 } as React.CSSProperties
               }
               initial={{ scale: 0, opacity: 0 }}
