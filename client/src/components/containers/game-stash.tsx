@@ -170,7 +170,7 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
         </div>
 
         <div
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="flex-1 min-h-0 overflow-y-auto pb-[clamp(12px,3svh,24px)]"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Tab Content */}
