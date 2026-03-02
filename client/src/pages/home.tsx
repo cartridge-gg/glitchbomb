@@ -20,7 +20,6 @@ import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { setOfflineMode } from "@/offline/mode";
 import { createOfflineGame, resetOfflineState } from "@/offline/store";
 
 export const Home = () => {
@@ -379,7 +378,6 @@ export const Home = () => {
   }, [ownedGames, navigate]);
 
   const handlePractice = useCallback(() => {
-    setOfflineMode(true);
     resetOfflineState();
     const gameId = createOfflineGame();
     navigate(`/play?game=${gameId}`);

@@ -12,8 +12,6 @@ import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { Game, type RawGame } from "@/models";
-import { useOfflineMode } from "@/offline/mode";
-import { selectGames, useOfflineStore } from "@/offline/store";
 import { useTokens } from "./tokens";
 
 const ENTITIES_LIMIT = 10_000;
@@ -39,9 +37,6 @@ export function useOwnedGames() {
   const { client } = useEntitiesContext();
   const { address } = useAccount();
   const { chain } = useNetwork();
-  const offlineState = useOfflineStore();
-  const offline = useOfflineMode();
-  const offlineGames = useMemo(() => selectGames(offlineState), [offlineState]);
   const [games, setGames] = useState<Game[]>([]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(() => {
@@ -96,7 +91,6 @@ export function useOwnedGames() {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
-    if (offline) return;
     if (!client || !gameIds.length) return;
 
     // Cancel existing subscriptions
@@ -112,7 +106,7 @@ export function useOwnedGames() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, gameIds, onUpdate, offline]);
+  }, [client, gameIds, onUpdate]);
 
   useEffect(() => {
     refresh();
@@ -120,9 +114,9 @@ export function useOwnedGames() {
     return () => {
       cancelSubscription();
     };
-  }, [refresh, offline, cancelSubscription]);
+  }, [refresh, cancelSubscription]);
 
   return {
-    games: offline ? offlineGames : games,
+    games,
   };
 }

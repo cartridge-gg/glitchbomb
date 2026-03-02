@@ -3,7 +3,6 @@ import { Profile } from "@/components/elements";
 import { ArrowLeftIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { setOfflineMode } from "@/offline/mode";
 
 export interface GameHeaderProps {
   moonrocks: number;
@@ -22,10 +21,7 @@ export const GameHeader = ({ moonrocks, chips, username }: GameHeaderProps) => {
           variant="secondary"
           gradient="green"
           className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
-          onClick={() => {
-            setOfflineMode(false);
-            navigate("/");
-          }}
+          onClick={() => navigate("/")}
         >
           <ArrowLeftIcon size="sm" />
         </Button>

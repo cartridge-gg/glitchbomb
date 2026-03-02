@@ -8,7 +8,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { OrbPulled, type RawOrbPulled } from "@/models";
-import { useOfflineMode } from "@/offline/mode";
 import { selectPulls, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
@@ -29,7 +28,7 @@ const getPullsQuery = (gameId: number) => {
 export function usePulls({ gameId }: { gameId: number }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
-  const offline = useOfflineMode();
+  const isPractice = !!offlineState.games[gameId];
   const offlinePulls = useMemo(
     () => selectPulls(offlineState, gameId),
     [offlineState, gameId],
@@ -84,7 +83,7 @@ export function usePulls({ gameId }: { gameId: number }) {
   );
 
   useEffect(() => {
-    if (offline || !client || !fetchKey) return;
+    if (isPractice || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
@@ -129,11 +128,11 @@ export function usePulls({ gameId }: { gameId: number }) {
     return () => {
       cancelSubscription();
     };
-  }, [client, fetchKey, gameId, onUpdate, offline, cancelSubscription]);
+  }, [client, fetchKey, gameId, onUpdate, isPractice, cancelSubscription]);
 
   return {
-    pulls: offline ? offlinePulls : pulls,
+    pulls: isPractice ? offlinePulls : pulls,
     isReady,
-    initialFetchComplete: offline ? true : initialFetchComplete,
+    initialFetchComplete: isPractice ? true : initialFetchComplete,
   };
 }

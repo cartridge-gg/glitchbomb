@@ -18,32 +18,14 @@ import type {
   OfflineState,
 } from "./types";
 
-const STORAGE_KEY = "glitchbomb_offline_state_v2";
-const STATE_VERSION = 2;
-
 type Listener = () => void;
 
 const listeners = new Set<Listener>();
-let state: OfflineState = loadState();
-
-function loadState(): OfflineState {
-  if (typeof window === "undefined") {
-    return defaultState();
-  }
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw) as OfflineState;
-    if (!parsed || parsed.version !== STATE_VERSION) return defaultState();
-    return parsed;
-  } catch {
-    return defaultState();
-  }
-}
+let state: OfflineState = defaultState();
 
 function defaultState(): OfflineState {
   return {
-    version: STATE_VERSION,
+    version: 1,
     nextGameId: 1,
     games: {},
     pulls: [],
@@ -51,22 +33,11 @@ function defaultState(): OfflineState {
   };
 }
 
-function persist(nextState: OfflineState) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-  } catch {
-    // Ignore persistence errors in private mode or full storage.
-  }
-}
-
 function setState(updater: (prev: OfflineState) => OfflineState) {
-  const next = updater(state);
-  state = next;
-  persist(state);
-  listeners.forEach((listener) => {
+  state = updater(state);
+  for (const listener of listeners) {
     listener();
-  });
+  }
 }
 
 export function getOfflineState(): OfflineState {
@@ -80,6 +51,11 @@ export function subscribe(listener: Listener): () => void {
 
 export function useOfflineStore(): OfflineState {
   return useSyncExternalStore(subscribe, getOfflineState, getOfflineState);
+}
+
+/** Check if a game exists in the in-memory practice store. */
+export function isPracticeGame(gameId: number): boolean {
+  return !!state.games[gameId];
 }
 
 function ensureGame(prev: OfflineState, gameId: number): OfflineGame {
@@ -282,10 +258,6 @@ export function resetOfflineState() {
   setState(() => defaultState());
 }
 
-export function selectGames(source: OfflineState = state): Game[] {
-  return Object.values(source.games).map((game) => toGameModel(game));
-}
-
 export function selectGame(source: OfflineState, gameId: number) {
   const game = source.games[gameId];
   if (!game) return undefined;
@@ -321,13 +293,6 @@ export function selectPLDataPoints(
           point.orb,
         ),
     );
-}
-
-export function selectTotalMoonrocks(source: OfflineState = state): number {
-  return Object.values(source.games).reduce(
-    (total, game) => total + game.moonrocks,
-    0,
-  );
 }
 
 function toGameModel(game: OfflineGame): Game {

@@ -8,7 +8,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { PLDataPoint, type RawPLDataPoint } from "@/models";
-import { useOfflineMode } from "@/offline/mode";
 import { selectPLDataPoints, useOfflineStore } from "@/offline/store";
 
 const ENTITIES_LIMIT = 10_000;
@@ -39,7 +38,7 @@ const getSubscriptionQuery = () => {
 export function usePLDataPoints({ gameId }: { gameId: number }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
-  const offline = useOfflineMode();
+  const isPractice = !!offlineState.games[gameId];
   const offlinePoints = useMemo(
     () => selectPLDataPoints(offlineState, gameId),
     [offlineState, gameId],
@@ -96,7 +95,7 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
   );
 
   useEffect(() => {
-    if (offline || !client || !fetchKey) return;
+    if (isPractice || !client || !fetchKey) return;
 
     // Check if we're switching to a different game
     const isNewGame = currentKeyRef.current !== fetchKey;
@@ -156,10 +155,10 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
       clearTimeout(retryTimeout2);
       cancelSubscription();
     };
-  }, [client, fetchKey, gameId, onUpdate, offline, cancelSubscription]);
+  }, [client, fetchKey, gameId, onUpdate, isPractice, cancelSubscription]);
 
   return {
-    dataPoints: offline ? offlinePoints : dataPoints,
+    dataPoints: isPractice ? offlinePoints : dataPoints,
     isReady,
   };
 }

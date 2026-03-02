@@ -30,7 +30,6 @@ import { useTokenPrice } from "@/hooks/token-price";
 import { useTokens } from "@/hooks/tokens";
 import { OrbType } from "@/models/orb";
 import { milestoneCost } from "@/offline/milestone";
-import { setOfflineMode } from "@/offline/mode";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -442,10 +441,7 @@ export const Game = () => {
           pulls={pulls}
           cashedOut={false}
           expired={true}
-          onPlayAgain={() => {
-            setOfflineMode(false);
-            navigate("/");
-          }}
+          onPlayAgain={() => navigate("/")}
         />
       );
     }
@@ -467,10 +463,7 @@ export const Game = () => {
           plData={plData}
           pulls={pulls}
           cashedOut={cashedOut}
-          onPlayAgain={() => {
-            setOfflineMode(false);
-            navigate("/");
-          }}
+          onPlayAgain={() => navigate("/")}
           stake={game.stake}
           tokenPrice={tokenPrice}
           supply={supply}

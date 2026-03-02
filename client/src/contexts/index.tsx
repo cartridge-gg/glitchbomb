@@ -26,7 +26,6 @@ import {
   STARTERPACK,
   Starterpack,
 } from "@/models";
-import { useOfflineMode } from "@/offline/mode";
 import { selectGame, useOfflineStore } from "@/offline/store";
 import { EntitiesContext, type EntitiesContextType } from "./entities-context";
 
@@ -55,8 +54,9 @@ const getGameQuery = (gameId: number) => {
     .includeHashedKeys();
 };
 
-function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
+function useEntitiesValue(): EntitiesContextType {
   const { address: accountAddress } = useAccount();
+  const offlineState = useOfflineStore();
   const [client, setClient] = useState<torii.ToriiClient>();
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
   const gameSubscriptionRef = useRef<torii.Subscription | null>(null);
@@ -74,14 +74,22 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
     [],
   );
   const [gameId, setGameIdState] = useState<number>(0);
-  const [game, setGame] = useState<Game>();
+  const [onchainGame, setOnchainGame] = useState<Game>();
+
+  // Check if the current game is a practice game
+  const isPractice = gameId > 0 && !!offlineState.games[gameId];
+
+  const game = useMemo(() => {
+    if (isPractice) return selectGame(offlineState, gameId);
+    return onchainGame;
+  }, [isPractice, offlineState, gameId, onchainGame]);
 
   const setGameId = useCallback(
     (id: number) => {
       if (id !== gameId) {
         // Cancel existing game subscription when switching games
         cancelSubscription(gameSubscriptionRef, "game");
-        setGame(undefined);
+        setOnchainGame(undefined);
       }
       setGameIdState(id);
     },
@@ -96,7 +104,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
 
   // Initialize Torii client
   useEffect(() => {
-    if (!enabled || client) return;
+    if (client) return;
     const getClient = async () => {
       const toriiUrl = import.meta.env.VITE_SEPOLIA_TORII_URL;
       const nextClient = await new torii.ToriiClient({
@@ -106,7 +114,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       setClient(nextClient);
     };
     getClient();
-  }, [enabled, client]);
+  }, [client]);
 
   // Handler for entity updates
   const onEntityUpdate = useCallback(
@@ -140,7 +148,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
           const model = entity.models[
             `${NAMESPACE}-${GAME}`
           ] as unknown as RawGame;
-          setGame(Game.parse(model));
+          setOnchainGame(Game.parse(model));
         }
       });
     },
@@ -149,7 +157,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
 
   // Refresh function to fetch and subscribe to data
   const refreshEntities = useCallback(async () => {
-    if (!enabled || !client || !accountAddress) return;
+    if (!client || !accountAddress) return;
 
     // Cancel existing subscriptions
     cancelSubscription(entitiesSubscriptionRef, "entities");
@@ -172,11 +180,11 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       .then((response) => {
         entitiesSubscriptionRef.current = response;
       });
-  }, [enabled, client, accountAddress, onEntityUpdate, cancelSubscription]);
+  }, [client, accountAddress, onEntityUpdate, cancelSubscription]);
 
   // Refresh function to fetch and subscribe to game data
   const refreshGame = useCallback(async () => {
-    if (!enabled || !client || !accountAddress || !gameId) return;
+    if (!client || !accountAddress || !gameId || isPractice) return;
 
     // Cancel existing subscriptions
     cancelSubscription(gameSubscriptionRef, "game");
@@ -196,11 +204,11 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
         gameSubscriptionRef.current = response;
       });
   }, [
-    enabled,
     client,
     accountAddress,
     onEntityUpdate,
     gameId,
+    isPractice,
     cancelSubscription,
   ]);
 
@@ -211,7 +219,6 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
 
   // Initial fetch and subscription setup
   useEffect(() => {
-    if (!enabled) return;
     setStatus("loading");
     refresh()
       .then(() => {
@@ -226,7 +233,7 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
       cancelSubscription(entitiesSubscriptionRef, "entities");
       cancelSubscription(gameSubscriptionRef, "game");
     };
-  }, [enabled, refresh, cancelSubscription]);
+  }, [refresh, cancelSubscription]);
 
   return {
     client,
@@ -239,39 +246,8 @@ function useOnchainEntitiesValue(enabled: boolean): EntitiesContextType {
   };
 }
 
-function useOfflineEntitiesValue(): EntitiesContextType {
-  const offlineState = useOfflineStore();
-  const [gameId, setGameIdState] = useState<number>(0);
-
-  const game = useMemo(() => {
-    if (!gameId) return undefined;
-    return selectGame(offlineState, gameId);
-  }, [offlineState, gameId]);
-
-  const config = useMemo(() => new Config("0", "0x0", "0x0", "0x0", "0x0"), []);
-  const starterpacks = useMemo<Starterpack[]>(() => [], []);
-
-  const refresh = useCallback(async () => {}, []);
-
-  const setGameId = useCallback((id: number) => {
-    setGameIdState(id);
-  }, []);
-
-  return {
-    game,
-    starterpacks,
-    config,
-    status: "success",
-    refresh,
-    setGameId,
-  };
-}
-
 export function EntitiesProvider({ children }: { children: ReactNode }) {
-  const offline = useOfflineMode();
-  const onchainValue = useOnchainEntitiesValue(!offline);
-  const offlineValue = useOfflineEntitiesValue();
-  const value = offline ? offlineValue : onchainValue;
+  const value = useEntitiesValue();
 
   return (
     <EntitiesContext.Provider value={value}>

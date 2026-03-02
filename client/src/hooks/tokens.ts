@@ -10,7 +10,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { addAddressPadding, num } from "starknet";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { equal } from "@/helpers";
-import { useOfflineMode } from "@/offline/mode";
 
 const CONTRACT_LIMIT = 1_000;
 const BALANCE_LIMIT = 1_000;
@@ -76,13 +75,11 @@ export function useTokens(
 ) {
   const { account } = useAccount();
   const { client } = useEntitiesContext();
-  const offline = useOfflineMode();
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const requestRef = useRef<(GetTokenRequest & GetTokenBalanceRequest) | null>(
     null,
   );
   const subscriptionRef = useRef<Subscription | null>(null);
-  const wasOfflineRef = useRef(offline);
 
   const cancelSubscription = useCallback(() => {
     if (!subscriptionRef.current) return;
@@ -104,7 +101,7 @@ export function useTokens(
   const { contracts } = useTokenContracts(request);
 
   const fetchBalances = useCallback(async () => {
-    if (offline || !requestRef.current || !client || !account) return;
+    if (!requestRef.current || !client || !account) return;
     const contractAddresses =
       request.contractAddresses?.map((i: string) =>
         addAddressPadding(num.toHex64(i)),
@@ -145,7 +142,6 @@ export function useTokens(
     account,
     request.contractAddresses,
     request.accountAddresses,
-    offline,
     cancelSubscription,
   ]);
 
@@ -160,13 +156,6 @@ export function useTokens(
       fetchBalances();
     }
   }, [contracts, fetchBalances, request]);
-
-  useEffect(() => {
-    if (wasOfflineRef.current && !offline) {
-      fetchBalances();
-    }
-    wasOfflineRef.current = offline;
-  }, [offline, fetchBalances]);
 
   const refetch = useCallback(async () => {
     fetchBalances();
