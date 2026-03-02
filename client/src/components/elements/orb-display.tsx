@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion } from "framer-motion";
 import {
   Bomb1xIcon,
   Bomb2xIcon,
@@ -161,7 +162,7 @@ export const OrbDisplay = ({
         }}
       >
         {/* Orb background */}
-        <div
+        <motion.div
           className="absolute inset-0 rounded-full"
           style={{
             backgroundImage: "url(/assets/orb.png)",
@@ -169,7 +170,12 @@ export const OrbDisplay = ({
             backgroundPosition: "center",
             opacity: 0.4,
             backfaceVisibility: "hidden",
-            animation: "orb-drift 6s ease-in-out infinite",
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 60,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
           }}
         />
         {/* Color tint */}
