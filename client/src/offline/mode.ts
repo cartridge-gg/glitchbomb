@@ -1,55 +1,30 @@
 import { useSyncExternalStore } from "react";
 
-export const OFFLINE_MODE_ENV = import.meta.env.VITE_OFFLINE_MODE === "true";
+let offlineModeState = false;
 
-const OFFLINE_EVENT = "gb-offline-mode";
-let offlineModeState = OFFLINE_MODE_ENV;
+const listeners = new Set<() => void>();
 
-function loadStoredMode(): boolean {
-  if (typeof window === "undefined") return offlineModeState;
-  try {
-    return window.localStorage.getItem("gb_offline_mode") === "1";
-  } catch {
-    return offlineModeState;
+function emit() {
+  for (const listener of listeners) {
+    listener();
   }
 }
 
 export function isOfflineMode(): boolean {
-  if (OFFLINE_MODE_ENV) return true;
-  if (typeof window === "undefined") return false;
-  return offlineModeState || loadStoredMode();
+  return offlineModeState;
 }
 
 export function setOfflineMode(enabled: boolean) {
-  if (OFFLINE_MODE_ENV) return;
+  if (offlineModeState === enabled) return;
   offlineModeState = enabled;
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem("gb_offline_mode", enabled ? "1" : "0");
-  } catch {
-    // Ignore storage errors.
-  }
-  window.dispatchEvent(new Event(OFFLINE_EVENT));
+  emit();
 }
 
-export function subscribeOfflineMode(callback: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-  const handler = () => {
-    offlineModeState = loadStoredMode();
-    callback();
-  };
-  window.addEventListener(OFFLINE_EVENT, handler);
-  window.addEventListener("storage", handler);
-  return () => {
-    window.removeEventListener(OFFLINE_EVENT, handler);
-    window.removeEventListener("storage", handler);
-  };
+function subscribe(callback: () => void): () => void {
+  listeners.add(callback);
+  return () => listeners.delete(callback);
 }
 
 export function useOfflineMode(): boolean {
-  return useSyncExternalStore(
-    subscribeOfflineMode,
-    isOfflineMode,
-    isOfflineMode,
-  );
+  return useSyncExternalStore(subscribe, isOfflineMode, isOfflineMode);
 }

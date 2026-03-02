@@ -1,7 +1,6 @@
 import { type CSSProperties, useEffect, useMemo } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { setOfflineMode } from "@/offline/mode";
 import { Game, Home } from "@/pages";
 
 function RouterView() {
@@ -28,11 +27,6 @@ function RouterView() {
       safeArea.bottom,
     );
   }, [safeArea]);
-
-  useEffect(() => {
-    if (pathname.startsWith("/play")) return;
-    setOfflineMode(false);
-  }, [pathname]);
 
   return (
     <div className="relative w-full h-full overflow-hidden select-none bg-cover bg-center bg-black">
