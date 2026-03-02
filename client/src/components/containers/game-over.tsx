@@ -67,45 +67,52 @@ export const GameOver = ({
           </span>
         </div>
 
-        {/* Payout chart replaces PL chart when stake data is available; fall back to PL chart */}
-        {stake != null && !expired ? (
-          <GradientBorder color="green" className="rounded-xl">
-            <div
-              className="rounded-xl p-3"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
-            >
-              <PayoutChart
-                stake={stake}
-                tokenPrice={tokenPrice ?? null}
-                supply={supply}
-                target={target}
-                score={moonrocksEarned}
-              />
-            </div>
-          </GradientBorder>
-        ) : (
-          <PLChartTabs
-            data={plData}
-            pulls={pulls}
-            mode="absolute"
-            title="P/L"
-          />
-        )}
-
-        <InfoCard
-          variant={expired ? "yellow" : cashedOut ? "green" : "red"}
-          label={expired ? "Time's Up" : `You Earned${cashedOut ? "!" : ""}`}
-          className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
-          innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
-        >
-          {expired ? (
+        {expired ? (
+          <InfoCard
+            variant="yellow"
+            label="Time's Up"
+            className="w-full h-auto"
+            innerClassName="py-[clamp(12px,3svh,24px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
+          >
             <span
               className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em] text-center`}
             >
               GAME EXPIRED
             </span>
-          ) : (
-            <>
+          </InfoCard>
+        ) : (
+          <>
+            {/* Payout chart replaces PL chart when stake data is available */}
+            {stake != null ? (
+              <GradientBorder color="green" className="rounded-xl">
+                <div
+                  className="rounded-xl p-3"
+                  style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+                >
+                  <PayoutChart
+                    stake={stake}
+                    tokenPrice={tokenPrice ?? null}
+                    supply={supply}
+                    target={target}
+                    score={moonrocksEarned}
+                  />
+                </div>
+              </GradientBorder>
+            ) : (
+              <PLChartTabs
+                data={plData}
+                pulls={pulls}
+                mode="absolute"
+                title="P/L"
+              />
+            )}
+
+            <InfoCard
+              variant={cashedOut ? "green" : "red"}
+              label={`You Earned${cashedOut ? "!" : ""}`}
+              className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
+              innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
+            >
               <MoonrockIcon
                 className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
               />
@@ -114,9 +121,9 @@ export const GameOver = ({
               >
                 {moonrocksEarned} MOON ROCKS
               </span>
-            </>
-          )}
-        </InfoCard>
+            </InfoCard>
+          </>
+        )}
       </div>
 
       {/* Play Again Button — pinned to bottom */}
