@@ -39,6 +39,7 @@ const meta = {
   args: {
     moonrocks: 100,
     points: 50,
+    ante: 4,
     onCashOut: () => console.log("Cash out clicked"),
     onEnterShop: () => console.log("Enter shop clicked"),
     isEnteringShop: false,
@@ -82,6 +83,15 @@ export const CashingOut: Story = {
 export const KnownCurse: Story = {
   args: {
     points: 80,
+    ante: 6,
     nextCurseLabel: "Double Draw",
+  },
+};
+
+export const HighAnte: Story = {
+  args: {
+    points: 120,
+    ante: 13,
+    nextCurseLabel: "Double Bomb",
   },
 };

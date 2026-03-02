@@ -5,6 +5,7 @@ import { InfoCard } from "./info-card";
 export interface MilestoneChoiceProps {
   moonrocks: number; // Current pack moonrocks
   points: number; // Current game points (will become chips on continue, added to moonrocks on cash out)
+  ante?: number; // Moonrocks deducted when continuing to the next level
   nextCurseLabel?: string; // Optional label if the next level has a known curse
   onCashOut: () => void;
   onEnterShop: () => void;
@@ -15,6 +16,7 @@ export interface MilestoneChoiceProps {
 export const MilestoneChoice = ({
   moonrocks,
   points,
+  ante,
   onCashOut,
   onEnterShop,
   isEnteringShop = false,
@@ -25,6 +27,7 @@ export const MilestoneChoice = ({
   const totalMoonrocks = moonrocks + points;
   const curseLabel = nextCurseLabel?.trim();
   const showCurse = Boolean(curseLabel);
+  const showAnte = ante != null && ante > 0;
   const rewardValueClass =
     "font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none";
   const rewardLabelClass =
@@ -144,6 +147,33 @@ export const MilestoneChoice = ({
             </div>
           )}
         </div>
+
+        {/* Ante row */}
+        {showAnte && (
+          <div
+            className="flex rounded-lg overflow-hidden w-full"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+          >
+            {/* Label half */}
+            <div
+              className="flex items-center justify-center px-[clamp(12px,2.4svh,20px)] py-[clamp(6px,1.4svh,10px)]"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
+            >
+              <span className="text-orange-400/70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.3em] uppercase">
+                Ante
+              </span>
+            </div>
+            {/* Separator */}
+            <div className="w-px bg-orange-100" />
+            {/* Value half */}
+            <div className="flex-1 flex items-center justify-center gap-1.5 px-[clamp(8px,1.6svh,14px)] py-[clamp(6px,1.4svh,10px)]">
+              <MoonrockIcon className="w-[clamp(14px,3svh,20px)] h-[clamp(14px,3svh,20px)] text-orange-400" />
+              <span className="text-orange-400 font-secondary text-[clamp(0.8rem,2svh,1.1rem)] leading-none">
+                -{ante}
+              </span>
+            </div>
+          </div>
+        )}
       </InfoCard>
     </div>
   );

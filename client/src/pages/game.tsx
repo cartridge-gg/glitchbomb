@@ -28,6 +28,7 @@ import { useActions } from "@/hooks/actions";
 import { useTokenPrice } from "@/hooks/token-price";
 import { useTokens } from "@/hooks/tokens";
 import { OrbType } from "@/models/orb";
+import { milestoneCost } from "@/offline/milestone";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -519,6 +520,7 @@ export const Game = () => {
               <MilestoneChoice
                 moonrocks={game.moonrocks}
                 points={game.points}
+                ante={milestoneCost(game.level + 1)}
                 onCashOut={handleCashOut}
                 onEnterShop={handleEnterShop}
                 isEnteringShop={isEnteringShop}
