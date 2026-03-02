@@ -169,6 +169,7 @@ export const OrbDisplay = ({
             backgroundPosition: "center",
             opacity: 0.4,
             backfaceVisibility: "hidden",
+            animation: "orb-drift 6s ease-in-out infinite",
           }}
         />
         {/* Color tint */}
