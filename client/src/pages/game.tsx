@@ -1,5 +1,5 @@
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -21,9 +21,12 @@ import {
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
+import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
+import { useTokenPrice } from "@/hooks/token-price";
+import { useTokens } from "@/hooks/tokens";
 import { OrbType } from "@/models/orb";
 
 // Initial game values for optimistic rendering
@@ -57,9 +60,34 @@ type OverlayView = "none" | "stash" | "cashout";
 export const Game = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { connector } = useAccount();
+  const { account, connector } = useAccount();
+  const { chain } = useNetwork();
   const { cashOut, pull, enter, buyAndExit } = useActions();
-  const { game, setGameId } = useEntitiesContext();
+  const { game, config, setGameId } = useEntitiesContext();
+
+  // Payout chart data
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+  const glitchAddress = getTokenAddress(chain.id);
+  const { price: tokenPrice } = useTokenPrice(
+    glitchAddress,
+    config?.quote,
+    chain.id.toString(),
+  );
+  const { tokenContracts } = useTokens({
+    accountAddresses: account?.address ? [account.address] : [],
+    contractAddresses: [tokenAddress],
+  });
+  const tokenContract = useMemo(() => {
+    if (!tokenAddress) return undefined;
+    return tokenContracts.find(
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
+    );
+  }, [tokenContracts, tokenAddress]);
+  const supply = useMemo(
+    () => BigInt(tokenContract?.total_supply ?? "0"),
+    [tokenContract],
+  );
+  const target = config?.target_supply ?? 0n;
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
@@ -420,6 +448,10 @@ export const Game = () => {
           pulls={pulls}
           cashedOut={cashedOut}
           onPlayAgain={() => navigate("/")}
+          stake={game.stake}
+          tokenPrice={tokenPrice}
+          supply={supply}
+          target={target}
         />
       );
     }

@@ -332,6 +332,45 @@ export const BigWinner: Story = {
   },
 };
 
+// Cashed out with payout chart
+export const CashedOutWithPayout: Story = {
+  args: {
+    level: 5,
+    moonrocksEarned: 70,
+    cashedOut: true,
+    plData: samplePLData,
+    pulls: samplePulls,
+    stake: 3,
+    tokenPrice: 0.05,
+  },
+};
+
+// Glitched out with payout chart at score 0
+export const GlitchedOutWithPayout: Story = {
+  args: {
+    level: 3,
+    moonrocksEarned: 0,
+    cashedOut: false,
+    plData: losingPLData,
+    pulls: samplePulls,
+    stake: 3,
+    tokenPrice: 0.05,
+  },
+};
+
+// Big winner with payout chart showing high score
+export const BigWinnerWithPayout: Story = {
+  args: {
+    level: 12,
+    moonrocksEarned: 250,
+    cashedOut: true,
+    plData: bigWinnerPLData,
+    pulls: samplePulls,
+    stake: 5,
+    tokenPrice: 0.05,
+  },
+};
+
 // Cashed out successfully - green theme
 export const CashedOut: Story = {
   args: {

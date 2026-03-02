@@ -15,6 +15,8 @@ export interface PayoutChartProps {
   supply?: bigint;
   /** Target token supply from config (raw units). */
   target?: bigint;
+  /** Player's final score (moonrocks earned). When provided, renders a "YOU" marker on the curve. */
+  score?: number;
 }
 
 /** Format a token value for axis labels. */
@@ -41,6 +43,7 @@ export const PayoutChart = ({
   tokenPrice,
   supply = 0n,
   target = 0n,
+  score,
 }: PayoutChartProps) => {
   const hasPrice = tokenPrice != null && tokenPrice > 0;
 
@@ -103,12 +106,19 @@ export const PayoutChart = ({
     [showBaseCurve, buildCurve, baseRewardsArr],
   );
 
+  // Score marker position
+  const showScore = score != null;
+  const scoreVal = showScore ? toTokens(cumulAt(rewards, score)) : 0;
+
   const lineColor = "#36F818";
   const labelColor = "rgba(54, 248, 24, 0.40)";
   const valueColor = "#36F818";
   const gridColor = "rgba(54, 248, 24, 0.06)";
   const pillBg = "rgba(54, 248, 24, 0.12)";
   const pillBorder = "rgba(54, 248, 24, 0.25)";
+  const scoreColor = "#FFFFFF";
+  const scorePillBg = "rgba(255, 255, 255, 0.15)";
+  const scorePillBorder = "rgba(255, 255, 255, 0.35)";
 
   // Y-axis ticks: always show GLITCH token amounts
   const yTicks = useMemo(() => {
@@ -278,6 +288,80 @@ export const PayoutChart = ({
             filter="url(#label-shadow)"
           >
             BREAK EVEN
+          </text>
+        </>
+      )}
+
+      {/* Score marker crosshairs */}
+      {showScore && (
+        <>
+          {/* Vertical dashed line: X-axis → intersection */}
+          <line
+            x1={toX(score)}
+            y1={toY(scoreVal)}
+            x2={toX(score)}
+            y2={toY(0)}
+            stroke={scorePillBorder}
+            strokeWidth={0.8}
+            strokeDasharray="3 3"
+          />
+
+          {/* Horizontal dashed line: Y-axis → intersection */}
+          <line
+            x1={padL}
+            y1={toY(scoreVal)}
+            x2={toX(score)}
+            y2={toY(scoreVal)}
+            stroke={scorePillBorder}
+            strokeWidth={0.8}
+            strokeDasharray="3 3"
+          />
+
+          {/* Score dot */}
+          <circle
+            cx={toX(score)}
+            cy={toY(scoreVal)}
+            r={3.5}
+            fill={scoreColor}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth={0.5}
+            style={{
+              opacity: animated ? 1 : 0,
+              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+            }}
+          />
+
+          {/* "YOU" pill near the dot */}
+          <rect
+            x={toX(score) + 6}
+            y={toY(scoreVal) - pillH / 2}
+            width={30}
+            height={pillH}
+            rx={pillRx}
+            fill={scorePillBg}
+            stroke={scorePillBorder}
+            strokeWidth={0.5}
+            style={{
+              opacity: animated ? 1 : 0,
+              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+            }}
+          />
+          <text
+            x={toX(score) + 21}
+            y={toY(scoreVal)}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={scoreColor}
+            fontSize={7}
+            letterSpacing="0.06em"
+            className="font-secondary"
+            filter="url(#label-shadow)"
+            style={{
+              opacity: animated ? 1 : 0,
+              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+            }}
+          >
+            YOU
           </text>
         </>
       )}

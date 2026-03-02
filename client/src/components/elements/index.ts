@@ -20,6 +20,7 @@ export * from "./orb";
 export * from "./orb-category-summary";
 export * from "./orb-display";
 export * from "./outcome";
+export * from "./payout-chart";
 export * from "./pl-chart-tabs";
 export * from "./pl-graph";
 export * from "./points-progress";

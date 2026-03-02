@@ -58,6 +58,30 @@ export const WithTokenPrice: Story = {
   },
 };
 
+export const WithScoreMarker: Story = {
+  args: {
+    stake: 3,
+    tokenPrice: 0.05,
+    score: 120,
+  },
+};
+
+export const WithScoreMarkerHighScore: Story = {
+  args: {
+    stake: 5,
+    tokenPrice: 0.05,
+    score: 350,
+  },
+};
+
+export const WithScoreMarkerZero: Story = {
+  args: {
+    stake: 3,
+    tokenPrice: 0.05,
+    score: 0,
+  },
+};
+
 export const Interactive = () => {
   const [stake, setStake] = useState(1);
   return (
