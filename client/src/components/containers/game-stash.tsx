@@ -47,98 +47,153 @@ const ListIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+interface OrbGroup {
+  orb: Orb;
+  count: number;
+  discardedCount: number;
+}
+
+const groupOrbs = (orbs: Orb[], discards?: boolean[]): OrbGroup[] => {
+  const map = new Map<string, OrbGroup>();
+  for (let i = 0; i < orbs.length; i++) {
+    const orb = orbs[i];
+    const key = orb.value;
+    const isDiscarded = Boolean(discards?.[i]);
+    const existing = map.get(key);
+    if (existing) {
+      existing.count += 1;
+      if (isDiscarded) existing.discardedCount += 1;
+    } else {
+      map.set(key, { orb, count: 1, discardedCount: isDiscarded ? 1 : 0 });
+    }
+  }
+  return Array.from(map.values());
+};
+
+const darkenColor = (color: string, factor: number): string => {
+  // Handle CSS variables by falling back to a dark color
+  if (color.startsWith("var(")) return "rgba(0,0,0,0.6)";
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  const r = Math.max(0, Math.round(parseInt(color.slice(1, 3), 16) * factor));
+  const g = Math.max(0, Math.round(parseInt(color.slice(3, 5), 16) * factor));
+  const b = Math.max(0, Math.round(parseInt(color.slice(5, 7), 16) * factor));
+  const toHex = (v: number) => v.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
 const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
+  const groups = groupOrbs(orbs, discards);
+
   return (
-    <>
-      {/* Orbs grid */}
-      <div className="flex flex-col items-start w-full">
-        {orbs.length > 0 ? (
-          <div className="flex justify-center w-full">
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
-              {orbs.map((orb, index) => {
-                const isDiscarded = Boolean(discards?.[index]);
-                return (
+    <div className="flex flex-col items-start w-full">
+      {groups.length > 0 ? (
+        <div className="flex justify-center w-full">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-5 pb-3 place-items-center">
+            {groups.map((group) => {
+              const allDiscarded = group.discardedCount === group.count;
+              return (
+                <div
+                  key={group.orb.value}
+                  className={cn(
+                    "relative flex flex-col items-center",
+                    allDiscarded && "opacity-25",
+                  )}
+                >
+                  <OrbDisplay
+                    orb={group.orb}
+                    size="sm"
+                    bombTierIcons
+                    valuePosition="top-right"
+                  />
+                  {/* Count pill */}
                   <div
-                    key={index}
-                    className={cn(
-                      "flex flex-col items-center",
-                      isDiscarded && "opacity-25",
-                    )}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary whitespace-nowrap"
+                    style={{
+                      backgroundColor: darkenColor(group.orb.color(), 0.35),
+                      border: `1px solid ${group.orb.color()}`,
+                      color: group.orb.color(),
+                    }}
                   >
-                    <OrbDisplay
-                      orb={orb}
-                      size="sm"
-                      bombTierIcons
-                      valuePosition="top-right"
-                    />
-                    <span className="sr-only">{orb.name()}</span>
+                    <span style={{ opacity: 0.3 }}>X</span>
+                    {group.count}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
-              No orbs in your bag yet
-            </p>
-          </div>
-        )}
-      </div>
-    </>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
+            No orbs in your bag yet
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
 const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
-  return (
-    <>
-      {/* Orbs list */}
-      <div className="flex flex-col gap-1 pb-4 w-full">
-        {orbs.length > 0 ? (
-          orbs.map((orb, index) => {
-            const isDiscarded = Boolean(discards?.[index]);
-            return (
-              <div
-                key={`${orb.value}-${index}`}
-                className={cn(
-                  "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
-                  isDiscarded && "opacity-25",
-                )}
-              >
-                {/* Orb icon */}
-                <OrbDisplay
-                  orb={orb}
-                  size="xs"
-                  bombTierIcons
-                  valuePosition="top-right"
-                />
+  const groups = groupOrbs(orbs, discards);
 
-                {/* Orb info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase flex-1 min-w-0">
-                      {orb.name()}
-                    </h3>
-                    {!orb.isBomb() && (
-                      <RarityPill rarity={orb.rarity()} className="ml-auto" />
-                    )}
-                  </div>
-                  <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">
-                    {orb.description()}
-                  </p>
+  return (
+    <div className="flex flex-col gap-1 pb-4 w-full">
+      {groups.length > 0 ? (
+        groups.map((group) => {
+          const allDiscarded = group.discardedCount === group.count;
+          return (
+            <div
+              key={group.orb.value}
+              className={cn(
+                "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
+                allDiscarded && "opacity-25",
+              )}
+            >
+              {/* Orb icon */}
+              <OrbDisplay
+                orb={group.orb}
+                size="xs"
+                bombTierIcons
+                valuePosition="top-right"
+              />
+
+              {/* Orb info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase flex-1 min-w-0">
+                    {group.orb.name()}
+                  </h3>
+                  {!group.orb.isBomb() && (
+                    <RarityPill
+                      rarity={group.orb.rarity()}
+                      className="ml-auto"
+                    />
+                  )}
                 </div>
+                <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">
+                  {group.orb.description()}
+                </p>
               </div>
-            );
-          })
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
-              No orbs in your bag yet
-            </p>
-          </div>
-        )}
-      </div>
-    </>
+
+              {/* Count */}
+              <span
+                className="font-secondary text-[11px] font-bold shrink-0"
+                style={{ color: group.orb.color() }}
+              >
+                <span style={{ opacity: 0.3 }}>x</span>
+                {group.count}
+              </span>
+            </div>
+          );
+        })
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-green-600 text-center font-secondary text-sm tracking-wide">
+            No orbs in your bag yet
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
