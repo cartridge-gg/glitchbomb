@@ -100,16 +100,19 @@ const getOrbColor = (orb: Orb) => {
 
 // Get display value for orb (the number shown in the icon)
 const getOrbDisplayValue = (orb: Orb): string => {
-  const name = orb.name();
-  // Extract number from name like "Point 5", "Multiplier 50%", etc.
-  const match = name.match(/(\d+)/);
   if (orb.isMultiplier()) {
-    // For multipliers, show as X3, X2, etc.
+    const match = orb.name().match(/(\d+)/);
     const percent = match ? parseInt(match[1], 10) : 0;
     if (percent === 50) return "X2";
     if (percent === 100) return "X3";
     if (percent === 150) return "X4";
   }
+  // For bombs and health, name has no number — extract from outcome
+  if (orb.isBomb() || orb.isHealth()) {
+    const match = orb.outcome().match(/(\d+)/);
+    return match ? match[1] : "";
+  }
+  const match = orb.name().match(/(\d+)/);
   return match ? match[1] : "";
 };
 
