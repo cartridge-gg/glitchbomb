@@ -78,7 +78,6 @@ export const MilestoneChoice = ({
       {/* Continue Card - clickable */}
       <InfoCard
         variant="orange"
-        label="Continue"
         onClick={onEnterShop}
         disabled={isLoading}
         isLoading={isEnteringShop}
@@ -87,6 +86,35 @@ export const MilestoneChoice = ({
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
+        {/* Custom header row: Continue label + Ante pill */}
+        <div className="flex items-center justify-between w-full">
+          <span className="text-orange-400 font-secondary text-sm tracking-[0.4em] uppercase text-[clamp(0.55rem,1.2svh,0.75rem)]">
+            Continue
+          </span>
+          {showAnte && (
+            <div
+              className="flex items-center rounded-md overflow-hidden"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
+            >
+              <div
+                className="flex items-center justify-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]"
+                style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
+              >
+                <span className="text-orange-400/70 font-secondary text-[clamp(0.45rem,0.9svh,0.6rem)] tracking-[0.25em] uppercase">
+                  Ante
+                </span>
+              </div>
+              <div className="w-px self-stretch bg-orange-400/20" />
+              <div className="flex items-center gap-1 px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
+                <MoonrockIcon className="w-[clamp(10px,2svh,14px)] h-[clamp(10px,2svh,14px)] text-orange-400" />
+                <span className="text-orange-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
+                  -{ante}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="flex gap-[clamp(8px,2.2svh,18px)] w-full h-full">
           {/* Reward Inner Card */}
           <div
@@ -147,33 +175,6 @@ export const MilestoneChoice = ({
             </div>
           )}
         </div>
-
-        {/* Ante row */}
-        {showAnte && (
-          <div
-            className="flex rounded-lg overflow-hidden w-full"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-          >
-            {/* Label half */}
-            <div
-              className="flex items-center justify-center px-[clamp(12px,2.4svh,20px)] py-[clamp(6px,1.4svh,10px)]"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
-            >
-              <span className="text-orange-400/70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.3em] uppercase">
-                Ante
-              </span>
-            </div>
-            {/* Separator */}
-            <div className="w-px bg-orange-100" />
-            {/* Value half */}
-            <div className="flex-1 flex items-center justify-center gap-1.5 px-[clamp(8px,1.6svh,14px)] py-[clamp(6px,1.4svh,10px)]">
-              <MoonrockIcon className="w-[clamp(14px,3svh,20px)] h-[clamp(14px,3svh,20px)] text-orange-400" />
-              <span className="text-orange-400 font-secondary text-[clamp(0.8rem,2svh,1.1rem)] leading-none">
-                -{ante}
-              </span>
-            </div>
-          </div>
-        )}
       </InfoCard>
     </div>
   );
