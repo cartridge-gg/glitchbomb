@@ -391,7 +391,7 @@ export const GameShop = ({
         <Button
           variant="secondary"
           gradient="green"
-          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest disabled:opacity-30"
           wrapperClassName="flex-1"
           disabled={history.length === 0 || isLoading}
           onClick={handleUndo}
@@ -399,20 +399,19 @@ export const GameShop = ({
           <span className="text-md leading-none translate-y-[1px]">↻</span>
           UNDO
         </Button>
-        <Button
-          variant="secondary"
-          gradient="orange"
-          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
-          wrapperClassName="flex-1"
+        <button
+          type="button"
+          className="flex-1 flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-bold text-xl font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all disabled:pointer-events-none disabled:opacity-50 hover:brightness-125 [--bg-from:#602A06] [--bg-to:#281202] border border-[rgba(241,114,28,0.25)]"
           style={{
             color: "#F1721C",
-            background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
+            background:
+              "linear-gradient(180deg, var(--bg-from) 0%, var(--bg-to) 100%)",
           }}
           onClick={handleContinue}
           disabled={isLoading}
         >
           {isLoading ? <LoadingSpinner size="sm" /> : "CONTINUE"}
-        </Button>
+        </button>
       </div>
 
       <StashModal
