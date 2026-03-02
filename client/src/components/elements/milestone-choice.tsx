@@ -100,7 +100,7 @@ export const MilestoneChoice = ({
                 className="flex items-center justify-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]"
                 style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
               >
-                <span className="text-orange-400/70 font-secondary text-[clamp(0.45rem,0.9svh,0.6rem)] tracking-[0.25em] uppercase">
+                <span className="text-orange-400 font-secondary text-[clamp(0.45rem,0.9svh,0.6rem)] tracking-[0.25em] uppercase">
                   Ante
                 </span>
               </div>
