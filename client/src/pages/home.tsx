@@ -888,7 +888,7 @@ export const Home = () => {
                     >
                       <button
                         type="button"
-                        className="w-full p-3 flex items-center gap-3 text-left"
+                        className="w-full p-3 flex items-center gap-3 text-left cursor-default"
                         onClick={() => {
                           if (didDrag.current) return;
                           requireLogin(() => handlePlay(game.id));
