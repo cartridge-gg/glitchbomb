@@ -955,7 +955,10 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {formatPayout(game.points, game.stake)}
+                                {formatPayout(
+                                  game.moonrocks + game.points,
+                                  game.stake,
+                                )}
                               </p>
                             </div>
                           </div>
