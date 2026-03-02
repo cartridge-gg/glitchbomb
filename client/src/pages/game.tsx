@@ -102,6 +102,8 @@ export const Game = () => {
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
+  const [animateHeaderCount, setAnimateHeaderCount] = useState(false);
+  const moonrocksRef = useRef<HTMLDivElement>(null);
   const rewardShownForGameRef = useRef<number | null>(null);
   const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
@@ -610,6 +612,9 @@ export const Game = () => {
         moonrocks={game?.moonrocks ?? 100}
         chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
         username={username}
+        moonrocksRef={moonrocksRef}
+        animateCount={animateHeaderCount}
+        rewardOverlayOpen={showRewardOverlay}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
@@ -622,7 +627,12 @@ export const Game = () => {
       />
       <RewardOverlay
         open={showRewardOverlay}
-        onDismiss={() => setShowRewardOverlay(false)}
+        onDismiss={() => {
+          setShowRewardOverlay(false);
+          setAnimateHeaderCount(false);
+        }}
+        onAnimationStart={() => setAnimateHeaderCount(true)}
+        targetRef={moonrocksRef}
         reward={{
           variant: "moonrock",
           count: game?.moonrocks ?? 0,
