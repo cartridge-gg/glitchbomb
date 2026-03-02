@@ -513,6 +513,7 @@ export const Game = () => {
               <CashOutChoice
                 moonrocks={game.moonrocks}
                 points={game.points}
+                cashOutValue={formatCashOutValue}
                 onConfirm={handleCashOut}
                 onCancel={closeOverlay}
                 isConfirming={isCashingOut}

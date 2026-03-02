@@ -5,6 +5,7 @@ import { InfoCard } from "./info-card";
 export interface CashOutChoiceProps {
   moonrocks: number; // Current pack moonrocks
   points: number; // Current game points (will be added to moonrocks)
+  cashOutValue?: string; // Formatted USD value of cashing out (e.g. "$1.23")
   onConfirm: () => void;
   onCancel: () => void;
   isConfirming?: boolean;
@@ -13,6 +14,7 @@ export interface CashOutChoiceProps {
 export const CashOutChoice = ({
   moonrocks,
   points,
+  cashOutValue,
   onConfirm,
   onCancel,
   isConfirming = false,
@@ -37,11 +39,32 @@ export const CashOutChoice = ({
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
-        {/* Custom header row */}
+        {/* Custom header row: Cash Out label + Value pill */}
         <div className="flex items-center justify-between w-full">
           <span className="text-yellow-400 font-secondary text-sm tracking-[0.4em] uppercase text-[clamp(0.55rem,1.2svh,0.75rem)]">
             Cash Out
           </span>
+          {cashOutValue && (
+            <div
+              className="flex items-center rounded-md overflow-hidden"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
+            >
+              <div
+                className="flex items-center justify-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]"
+                style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
+              >
+                <span className="text-yellow-400 font-secondary text-[clamp(0.45rem,0.9svh,0.6rem)] tracking-[0.25em] uppercase">
+                  Value
+                </span>
+              </div>
+              <div className="w-px self-stretch bg-yellow-400/20" />
+              <div className="flex items-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
+                <span className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
+                  {cashOutValue}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div
