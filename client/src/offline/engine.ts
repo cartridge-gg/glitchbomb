@@ -134,7 +134,11 @@ export function enterShop(
   };
   next.chips += next.points;
   next.points = 0;
-  return { game: next, shop: next.shop };
+  // Spend moonrocks for the next level ante
+  const cost = milestoneCost(next.level + 1);
+  if (next.moonrocks < cost) throw new Error("Game: not enough moonrocks");
+  next.moonrocks -= cost;
+  return { game: next, shop: next.shop, cost };
 }
 
 export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
@@ -174,7 +178,6 @@ export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
 
 export function exitShop(game: OfflineGame): {
   game: OfflineGame;
-  cost: number;
 } {
   assertNotOver(game);
   assertInShop(game);
@@ -189,8 +192,7 @@ export function exitShop(game: OfflineGame): {
 
   applyLevelCurse(next);
 
-  const cost = milestoneCost(next.level);
-  return { game: next, cost };
+  return { game: next };
 }
 
 export function pullOrbs(

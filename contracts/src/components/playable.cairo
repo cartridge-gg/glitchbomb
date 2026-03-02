@@ -270,8 +270,13 @@ pub mod PlayableComponent {
             // [Effect] Enter shop
             let config = store.config();
             let mut rng = RandomTrait::new_vrf(config.vrf());
-            game.enter(rng.next_seed());
+            let _cost = game.enter(rng.next_seed());
             store.set_game(@game);
+
+            // [Event] Emit PLDataPoint for ante cost
+            let pl_id: u32 = 2 + (game.pull_count.into() * 2) + game.level.into();
+            let potential = game.moonrocks + game.points;
+            store.pl_data_point(pl_id, @game, potential, 0);
 
             // [Event] Emit ShopEntered
             store.shop_entered(@game);
@@ -330,22 +335,12 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired(starknet::get_block_timestamp());
 
-            // [Effect] Exit shop and get next level cost (applies level-based curse)
-            let cost = game.exit();
-
-            // [Event] Emit ShopExited (includes next level info)
-            store.shop_exited(@game, cost);
-
-            // [Effect] Spend moonrocks for next level
-            game.spend_moonrocks(cost);
+            // [Effect] Exit shop (applies level-based curse)
+            game.exit();
             store.set_game(@game);
 
-            // [Event] Emit PLDataPoint for level cost
-            // Use a high base id to avoid collision with pull events
-            // pl_id = 2 + pull_count * 2 + level_offset
-            let pl_id: u32 = 2 + (game.pull_count.into() * 2) + (game.level.into() - 1);
-            let potential = game.moonrocks + game.points;
-            store.pl_data_point(pl_id, @game, potential, 0);
+            // [Event] Emit ShopExited
+            store.shop_exited(@game, 0);
         }
 
         fn refresh(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {

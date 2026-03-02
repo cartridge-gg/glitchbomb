@@ -171,10 +171,20 @@ export function enter(gameId: number): boolean {
       const game = ensureGame(prev, gameId);
       const seed = createSeed();
       const { game: nextGame } = enterShop(game, seed);
-      nextGame.moonrocks = game.moonrocks;
+
+      const plId = 2 + nextGame.pull_count * 2 + nextGame.level;
+      const potential = nextGame.moonrocks + nextGame.points;
+      const plPoint: OfflinePLDataPoint = {
+        game_id: gameId,
+        id: plId,
+        potential_moonrocks: potential,
+        orb: 0,
+      };
+
       return {
         ...prev,
         games: { ...prev.games, [gameId]: nextGame },
+        plDataPoints: [...prev.plDataPoints, plPoint],
       };
     });
     return true;
@@ -206,27 +216,11 @@ export function exit(gameId: number): boolean {
   try {
     setState((prev) => {
       const game = ensureGame(prev, gameId);
-      const { game: nextGame, cost } = exitShop(game);
-
-      if (game.moonrocks < cost) {
-        throw new Error("Game: not enough moonrocks");
-      }
-
-      nextGame.moonrocks = game.moonrocks - cost;
-
-      const plId = 2 + nextGame.pull_count * 2 + (nextGame.level - 1);
-      const potential = nextGame.moonrocks + nextGame.points;
-      const plPoint: OfflinePLDataPoint = {
-        game_id: gameId,
-        id: plId,
-        potential_moonrocks: potential,
-        orb: 0,
-      };
+      const { game: nextGame } = exitShop(game);
 
       return {
         ...prev,
         games: { ...prev.games, [gameId]: nextGame },
-        plDataPoints: [...prev.plDataPoints, plPoint],
       };
     });
     return true;

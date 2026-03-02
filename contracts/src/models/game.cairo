@@ -226,7 +226,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn enter(ref self: Game, seed: felt252) {
+    fn enter(ref self: Game, seed: felt252) -> u16 {
         // [Check] Game state
         self.assert_not_over();
         self.assert_not_shop();
@@ -240,6 +240,10 @@ pub impl GameImpl of GameTrait {
         // [Effect] Convert points to chips
         self.earn_chips(self.points);
         self.points = 0;
+        // [Effect] Spend moonrocks for the next level ante
+        let cost = Milestone::cost(self.level + 1);
+        self.spend_moonrocks(cost);
+        cost
     }
 
     #[inline]
@@ -272,7 +276,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn exit(ref self: Game) -> u16 {
+    fn exit(ref self: Game) {
         // [Check] Game state
         self.assert_not_over();
         self.assert_in_shop();
@@ -298,8 +302,6 @@ pub impl GameImpl of GameTrait {
             },
             _ => {},
         }
-        // [Return] Entry fee
-        Milestone::cost(self.level)
     }
 
     #[inline]
@@ -685,9 +687,12 @@ mod tests {
     fn test_game_enter() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 100;
         game.earn_points(100);
-        game.enter(1);
+        let cost = game.enter(1);
         assert_eq!(game.shop != 0, true);
+        assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
+        assert_eq!(game.moonrocks, 100 - cost);
     }
 
     #[test]
@@ -707,13 +712,13 @@ mod tests {
     fn test_game_buy_then_exit() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 100;
         game.earn_points(100);
         game.enter(SEED);
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
-        let cost = game.exit();
+        game.exit();
         assert_eq!(game.shop, 0);
-        assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
     }
 
     #[test]
@@ -848,6 +853,7 @@ mod tests {
     fn test_game_flags_reset_on_new_shop() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 500;
         game.earn_points(200);
         game.enter(SEED);
         // [Effect] Use refresh and burn in first shop
@@ -1190,6 +1196,7 @@ mod tests {
     fn test_game_exit_applies_double_bomb_on_level_4() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 5000;
         // [Info] Advance to level 4
         game.points = Milestone::get(game.level);
         game.enter(SEED);
@@ -1214,6 +1221,7 @@ mod tests {
     fn test_game_exit_applies_sticky_bomb_on_level_6() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 5000;
         // [Info] Advance to level 6
         game.points = Milestone::get(game.level);
         game.enter(SEED);
@@ -1244,6 +1252,7 @@ mod tests {
     fn test_game_exit_applies_double_bomb_on_level_7() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
+        game.moonrocks = 5000;
         // [Info] Advance to level 7
         game.points = Milestone::get(game.level);
         game.enter(SEED);
