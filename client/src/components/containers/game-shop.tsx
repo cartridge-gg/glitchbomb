@@ -301,7 +301,7 @@ export const GameShop = ({
         <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
           <WarningIcon size="xl" className="text-yellow-400" />
           <div className="flex flex-col gap-3">
-            <h1 className="text-white uppercase text-2xl font-primary">
+            <h1 className="text-white uppercase text-2xl font-secondary">
               Leave Shop?
             </h1>
             <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide max-w-xs">
