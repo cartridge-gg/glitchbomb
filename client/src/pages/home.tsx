@@ -23,6 +23,7 @@ import { toDecimal, useTokens } from "@/hooks/tokens";
 import { isOfflineMode, setOfflineMode } from "@/offline/mode";
 import {
   createOfflineGame,
+  resetOfflineState,
   selectTotalMoonrocks,
   useOfflineStore,
 } from "@/offline/store";
@@ -395,8 +396,10 @@ export const Home = () => {
 
   const handlePractice = useCallback(() => {
     setOfflineMode(true);
-    createOfflineGame();
-  }, []);
+    resetOfflineState();
+    const gameId = createOfflineGame();
+    navigate(`/play?game=${gameId}`);
+  }, [navigate]);
 
   const isLoggedIn = !!account && !!username;
 
