@@ -54,7 +54,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
       <div className="flex flex-col items-start w-full">
         {orbs.length > 0 ? (
           <div className="flex justify-center w-full">
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pt-4 pb-3 place-items-center">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
               {orbs.map((orb, index) => {
                 const isDiscarded = Boolean(discards?.[index]);
                 return (
@@ -93,7 +93,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   return (
     <>
       {/* Orbs list */}
-      <div className="flex flex-col gap-1 py-4 w-full">
+      <div className="flex flex-col gap-1 pb-4 w-full">
         {orbs.length > 0 ? (
           orbs.map((orb, index) => {
             const isDiscarded = Boolean(discards?.[index]);
@@ -165,12 +165,12 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
             items={tabItems}
             active={activeTab}
             onChange={setActiveTab}
-            className="w-full mt-2"
+            className="w-full mt-2 mb-[clamp(8px,2svh,16px)]"
           />
         </div>
 
         <div
-          className="flex-1 min-h-0 overflow-y-auto pb-[clamp(12px,3svh,24px)]"
+          className="flex-1 min-h-0 overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Tab Content */}
