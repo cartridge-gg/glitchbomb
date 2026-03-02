@@ -1,4 +1,4 @@
-import { BagIcon } from "@/components/icons";
+import { BagIcon, MoonrockIcon } from "@/components/icons";
 import { Orb, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 
@@ -7,13 +7,7 @@ export interface OrbCategorySummaryProps {
   onClick?: () => void;
 }
 
-type OrbCategory =
-  | "bomb"
-  | "point"
-  | "multiplier"
-  | "health"
-  | "chip"
-  | "moonrock";
+type OrbCategory = "bomb" | "point" | "multiplier" | "health" | "special";
 
 interface CategoryConfig {
   orb: Orb;
@@ -55,11 +49,7 @@ const categoryConfig: Record<OrbCategory, CategoryConfig> = {
     orb: new Orb(OrbType.Health1),
     color: "#FF0099",
   },
-  chip: {
-    orb: new Orb(OrbType.Chips15),
-    color: "#9747FF",
-  },
-  moonrock: {
+  special: {
     orb: new Orb(OrbType.Moonrock15),
     color: "#9747FF",
   },
@@ -70,8 +60,8 @@ const getOrbCategory = (orb: Orb): OrbCategory | null => {
   if (orb.isPoint()) return "point";
   if (orb.isMultiplier()) return "multiplier";
   if (orb.isHealth()) return "health";
-  if (orb.isChips()) return "chip";
-  if (orb.isMoonrock()) return "moonrock";
+  if (orb.isChips()) return "special";
+  if (orb.isMoonrock()) return "special";
   return null;
 };
 
@@ -97,8 +87,7 @@ export const OrbCategorySummary = ({
     "point",
     "multiplier",
     "health",
-    "chip",
-    "moonrock",
+    "special",
   ];
   const categoriesToShow = displayOrder.filter(
     (cat) => categoryCounts[cat] > 0,
@@ -125,7 +114,7 @@ export const OrbCategorySummary = ({
 
       {/* Category orbs container with base gradient */}
       <div
-        className="flex items-center gap-3 flex-1 px-4 pt-2 pb-3 border border-[#071304]"
+        className="flex items-center justify-around flex-1 px-4 pt-2 pb-3 border border-[#071304]"
         style={{
           background:
             "linear-gradient(180deg, #071304 0%, rgba(7, 19, 4, 0.00) 100%)",
@@ -140,12 +129,31 @@ export const OrbCategorySummary = ({
 
             return (
               <div key={category} className="relative flex-shrink-0">
-                <OrbDisplay
-                  orb={config.orb}
-                  size="xs"
-                  showValue={false}
-                  glowScale={0.7}
-                />
+                {category === "special" ? (
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
+                    style={{
+                      borderWidth: "1px",
+                      borderStyle: "solid",
+                      borderColor: config.color,
+                    }}
+                  >
+                    <MoonrockIcon
+                      className="w-5 h-5"
+                      style={{
+                        color: config.color,
+                        filter: `drop-shadow(0 0 3px ${config.color})`,
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <OrbDisplay
+                    orb={config.orb}
+                    size="xs"
+                    showValue={false}
+                    glowScale={0.7}
+                  />
+                )}
                 {/* Count pill */}
                 <div
                   className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary"
