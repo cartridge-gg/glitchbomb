@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from "@/components/icons";
-import { CardDivider } from "./card-divider";
+import { Button } from "@/components/ui/button";
 import { CashOutCard } from "./cash-out-card";
-import { InfoCard } from "./info-card";
 
 export interface CashOutChoiceProps {
   moonrocks: number; // Current pack moonrocks
@@ -32,44 +31,17 @@ export const CashOutChoice = ({
         isLoading={isConfirming}
       />
 
-      {/* Cancel Card - clickable */}
-      <InfoCard
-        variant="green"
+      {/* Go Back Button */}
+      <Button
+        variant="secondary"
+        gradient="green"
+        className="h-12 w-full font-secondary uppercase text-sm tracking-widest"
         onClick={onCancel}
         disabled={isConfirming}
-        className="flex-1"
-        contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
-        labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
-        hideInner
       >
-        {/* Custom header row */}
-        <div className="flex items-center justify-between w-full">
-          <span className="text-green-400 font-secondary text-sm tracking-[0.4em] uppercase text-[clamp(0.55rem,1.2svh,0.75rem)]">
-            Go Back
-          </span>
-        </div>
-
-        <div
-          className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-        >
-          <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-            <span className="text-green-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
-              Go Back
-            </span>
-          </div>
-          <CardDivider className="bg-green-100" />
-          <div className="flex-1 flex items-center justify-center gap-2 py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-            <ArrowLeftIcon
-              size="sm"
-              className="text-green-400 w-[clamp(14px,3svh,18px)] h-[clamp(14px,3svh,18px)]"
-            />
-            <span className="text-green-400 font-secondary text-[clamp(0.75rem,2svh,1rem)] tracking-wider">
-              CANCEL
-            </span>
-          </div>
-        </div>
-      </InfoCard>
+        <ArrowLeftIcon size="sm" />
+        Go Back
+      </Button>
     </div>
   );
 };
