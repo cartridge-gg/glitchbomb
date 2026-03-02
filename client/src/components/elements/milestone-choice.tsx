@@ -91,7 +91,7 @@ export const MilestoneChoice = ({
                   className={`${rewardIconClass} text-yellow-400`}
                 />
                 <span className={`text-yellow-400 ${rewardValueClass}`}>
-                  +{points}
+                  {moonrocks + points}
                 </span>
               </div>
               <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
