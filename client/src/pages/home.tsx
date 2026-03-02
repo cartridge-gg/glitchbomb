@@ -20,13 +20,8 @@ import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
-import { isOfflineMode, setOfflineMode } from "@/offline/mode";
-import {
-  createOfflineGame,
-  resetOfflineState,
-  selectTotalMoonrocks,
-  useOfflineStore,
-} from "@/offline/store";
+import { setOfflineMode } from "@/offline/mode";
+import { createOfflineGame, resetOfflineState } from "@/offline/store";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -36,7 +31,6 @@ export const Home = () => {
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
   const { games: ownedGames } = useOwnedGames();
-  const offlineState = useOfflineStore();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -66,8 +60,6 @@ export const Home = () => {
     },
     [now],
   );
-
-  const offline = isOfflineMode();
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
 
@@ -117,11 +109,7 @@ export const Home = () => {
     return toDecimal(tokenContract, tokenBalance);
   }, [tokenContract, tokenBalances, tokenAddress]);
 
-  const offlineMoonrocks = useMemo(
-    () => selectTotalMoonrocks(offlineState),
-    [offlineState],
-  );
-  const displayMoonrocks = offline ? offlineMoonrocks : balance;
+  const displayMoonrocks = balance;
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
@@ -369,12 +357,8 @@ export const Home = () => {
   };
 
   const handleNewGame = useCallback(() => {
-    if (offline) {
-      createOfflineGame();
-      return;
-    }
     setShowDetails(true);
-  }, [offline]);
+  }, []);
 
   const handleBuyGame = useCallback(() => {
     const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
@@ -421,7 +405,7 @@ export const Home = () => {
         moonrocks={displayMoonrocks}
         username={username}
         showBack={false}
-        onMint={offline ? undefined : () => mint(tokenAddress)}
+        onMint={() => mint(tokenAddress)}
         onProfileClick={onProfileClick}
         onConnect={isLoggedIn ? undefined : onConnectClick}
       />
@@ -1221,7 +1205,7 @@ export const Home = () => {
       </div>
 
       {/* Game Details Overlay */}
-      {showDetails && !offline && (
+      {showDetails && (
         <div className="absolute inset-0 z-50 flex flex-col bg-green-gradient-100">
           {/* Header */}
           <AppHeader
@@ -1229,7 +1213,7 @@ export const Home = () => {
             username={username}
             showBack
             onBack={() => setShowDetails(false)}
-            onMint={offline ? undefined : () => mint(tokenAddress)}
+            onMint={() => mint(tokenAddress)}
             onProfileClick={onProfileClick}
             onConnect={isLoggedIn ? undefined : onConnectClick}
           />
