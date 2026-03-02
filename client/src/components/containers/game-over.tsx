@@ -67,7 +67,30 @@ export const GameOver = ({
           </span>
         </div>
 
-        <PLChartTabs data={plData} pulls={pulls} mode="absolute" title="P/L" />
+        {/* Payout chart replaces PL chart when stake data is available; fall back to PL chart */}
+        {stake != null && !expired ? (
+          <GradientBorder color="green" className="rounded-xl">
+            <div
+              className="rounded-xl p-3"
+              style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+            >
+              <PayoutChart
+                stake={stake}
+                tokenPrice={tokenPrice ?? null}
+                supply={supply}
+                target={target}
+                score={moonrocksEarned}
+              />
+            </div>
+          </GradientBorder>
+        ) : (
+          <PLChartTabs
+            data={plData}
+            pulls={pulls}
+            mode="absolute"
+            title="P/L"
+          />
+        )}
 
         <InfoCard
           variant={expired ? "yellow" : cashedOut ? "green" : "red"}
@@ -94,24 +117,6 @@ export const GameOver = ({
             </>
           )}
         </InfoCard>
-
-        {/* Payout chart — show for non-expired games when stake data is available */}
-        {stake != null && !expired && (
-          <GradientBorder color="green" className="rounded-xl">
-            <div
-              className="rounded-xl p-3"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
-            >
-              <PayoutChart
-                stake={stake}
-                tokenPrice={tokenPrice ?? null}
-                supply={supply}
-                target={target}
-                score={moonrocksEarned}
-              />
-            </div>
-          </GradientBorder>
-        )}
       </div>
 
       {/* Play Again Button — pinned to bottom */}
