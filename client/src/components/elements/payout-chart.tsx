@@ -293,78 +293,103 @@ export const PayoutChart = ({
       )}
 
       {/* Score marker crosshairs */}
-      {showScore && (
-        <>
-          {/* Vertical dashed line: X-axis → intersection */}
-          <line
-            x1={toX(score)}
-            y1={toY(scoreVal)}
-            x2={toX(score)}
-            y2={toY(0)}
-            stroke={scorePillBorder}
-            strokeWidth={0.8}
-            strokeDasharray="3 3"
-          />
+      {showScore &&
+        (() => {
+          const sx = toX(score);
+          const sy = toY(scoreVal);
+          const dotR = 4;
+          const belowBreakEven = showBreakEven && score < beScore;
+          const markerColor = belowBreakEven ? "#FF6B6B" : scoreColor;
+          const markerPillBg = belowBreakEven
+            ? "rgba(255, 107, 107, 0.18)"
+            : scorePillBg;
+          const markerPillBorder = belowBreakEven
+            ? "rgba(255, 107, 107, 0.45)"
+            : scorePillBorder;
+          // Place pill above the dot; if near top, place below
+          const pillAbove = sy - dotR - pillH - 4 >= padT;
+          const pillY = pillAbove ? sy - dotR - pillH - 2 : sy + dotR + 2;
+          const youPillW = 30;
+          // Clamp horizontally so pill stays inside chart
+          const pillX = Math.max(
+            padL,
+            Math.min(sx - youPillW / 2, padL + plotW - youPillW),
+          );
+          return (
+            <>
+              {/* Vertical dashed line: dot → X-axis */}
+              <line
+                x1={sx}
+                y1={sy + dotR}
+                x2={sx}
+                y2={toY(0)}
+                stroke={markerPillBorder}
+                strokeWidth={0.8}
+                strokeDasharray="3 3"
+              />
 
-          {/* Horizontal dashed line: Y-axis → intersection */}
-          <line
-            x1={padL}
-            y1={toY(scoreVal)}
-            x2={toX(score)}
-            y2={toY(scoreVal)}
-            stroke={scorePillBorder}
-            strokeWidth={0.8}
-            strokeDasharray="3 3"
-          />
+              {/* Horizontal dashed line: Y-axis → dot */}
+              {score > 0 && (
+                <line
+                  x1={padL}
+                  y1={sy}
+                  x2={sx - dotR}
+                  y2={sy}
+                  stroke={markerPillBorder}
+                  strokeWidth={0.8}
+                  strokeDasharray="3 3"
+                />
+              )}
 
-          {/* Score dot */}
-          <circle
-            cx={toX(score)}
-            cy={toY(scoreVal)}
-            r={3.5}
-            fill={scoreColor}
-            stroke="rgba(0,0,0,0.3)"
-            strokeWidth={0.5}
-            style={{
-              opacity: animated ? 1 : 0,
-              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-            }}
-          />
+              {/* Score dot */}
+              <circle
+                cx={sx}
+                cy={sy}
+                r={dotR}
+                fill={markerColor}
+                stroke="rgba(0,0,0,0.4)"
+                strokeWidth={0.5}
+                style={{
+                  opacity: animated ? 1 : 0,
+                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+                }}
+              />
 
-          {/* "YOU" pill near the dot */}
-          <rect
-            x={toX(score) + 6}
-            y={toY(scoreVal) - pillH / 2}
-            width={30}
-            height={pillH}
-            rx={pillRx}
-            fill={scorePillBg}
-            stroke={scorePillBorder}
-            strokeWidth={0.5}
-            style={{
-              opacity: animated ? 1 : 0,
-              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-            }}
-          />
-          <text
-            x={toX(score) + 21}
-            y={toY(scoreVal)}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill={scoreColor}
-            fontSize={7}
-            letterSpacing="0.06em"
-            className="font-secondary"
-            filter="url(#label-shadow)"
-            style={{
-              opacity: animated ? 1 : 0,
-              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-            }}
-          >
-            YOU
-          </text>
-        </>
-      )}
+              {/* "YOU" pill above/below the dot */}
+              <rect
+                x={pillX}
+                y={pillY}
+                width={youPillW}
+                height={pillH}
+                rx={pillRx}
+                fill={markerPillBg}
+                stroke={markerPillBorder}
+                strokeWidth={0.5}
+                style={{
+                  opacity: animated ? 1 : 0,
+                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+                }}
+              />
+              <text
+                x={pillX + youPillW / 2}
+                y={pillY + pillH / 2}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={markerColor}
+                fontSize={7}
+                letterSpacing="0.06em"
+                className="font-secondary"
+                filter="url(#label-shadow)"
+                style={{
+                  opacity: animated ? 1 : 0,
+                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
+                }}
+              >
+                YOU
+              </text>
+            </>
+          );
+        })()}
 
       {/* Base tier reference curve (dimmed staircase) */}
       {showBaseCurve && (
