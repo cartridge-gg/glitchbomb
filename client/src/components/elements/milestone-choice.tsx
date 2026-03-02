@@ -24,7 +24,6 @@ export const MilestoneChoice = ({
   nextCurseLabel,
 }: MilestoneChoiceProps) => {
   const isLoading = isEnteringShop || isCashingOut;
-  const totalMoonrocks = moonrocks + points;
   const curseLabel = nextCurseLabel?.trim();
   const showCurse = Boolean(curseLabel);
   const showAnte = ante != null && ante > 0;
@@ -48,29 +47,57 @@ export const MilestoneChoice = ({
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
-        <div
-          className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-        >
-          {/* Header */}
-          <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-            <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
-              Reward
-            </span>
-          </div>
-          {/* Separator */}
-          <CardDivider className="bg-yellow-100" />
-          {/* Content */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-            <div className="flex items-center justify-center gap-1">
-              <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
-              <span className={`text-yellow-400 ${rewardValueClass}`}>
-                +{totalMoonrocks}
+        <div className="flex gap-[clamp(8px,2.2svh,18px)] w-full h-full">
+          {/* You Own Inner Card */}
+          <div
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+          >
+            <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
+              <span className="text-yellow-400/70 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
+                You Own
               </span>
             </div>
-            <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
-              Moon Rocks
-            </span>
+            <CardDivider className="bg-yellow-100" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+              <div className="flex items-center justify-center gap-1">
+                <MoonrockIcon
+                  className={`${rewardIconClass} text-yellow-400`}
+                />
+                <span className={`text-yellow-400 ${rewardValueClass}`}>
+                  {moonrocks}
+                </span>
+              </div>
+              <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
+                Moon Rocks
+              </span>
+            </div>
+          </div>
+
+          {/* Reward Inner Card */}
+          <div
+            className="flex-1 flex flex-col rounded-lg overflow-hidden"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+          >
+            <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
+              <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
+                Reward
+              </span>
+            </div>
+            <CardDivider className="bg-yellow-100" />
+            <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+              <div className="flex items-center justify-center gap-1">
+                <MoonrockIcon
+                  className={`${rewardIconClass} text-yellow-400`}
+                />
+                <span className={`text-yellow-400 ${rewardValueClass}`}>
+                  +{points}
+                </span>
+              </div>
+              <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
+                Moon Rocks
+              </span>
+            </div>
           </div>
         </div>
       </InfoCard>
