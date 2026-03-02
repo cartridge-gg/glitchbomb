@@ -121,6 +121,8 @@ export interface OrbDisplayProps
   valuePosition?: "bottom" | "top-right";
   showValue?: boolean;
   glowScale?: number;
+  /** When set, the pill shows this count instead of the orb value */
+  count?: number;
 }
 
 export const OrbDisplay = ({
@@ -130,12 +132,13 @@ export const OrbDisplay = ({
   valuePosition = "bottom",
   showValue = true,
   glowScale = 1,
+  count,
   className,
   ...props
 }: OrbDisplayProps) => {
   const Icon = getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
-  const displayValue = getOrbDisplayValue(orb);
+  const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
   const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (

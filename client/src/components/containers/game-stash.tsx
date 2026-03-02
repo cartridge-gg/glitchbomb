@@ -70,17 +70,6 @@ const groupOrbs = (orbs: Orb[], discards?: boolean[]): OrbGroup[] => {
   return Array.from(map.values());
 };
 
-const darkenColor = (color: string, factor: number): string => {
-  // Handle CSS variables by falling back to a dark color
-  if (color.startsWith("var(")) return "rgba(0,0,0,0.6)";
-  if (!color.startsWith("#") || color.length !== 7) return color;
-  const r = Math.max(0, Math.round(parseInt(color.slice(1, 3), 16) * factor));
-  const g = Math.max(0, Math.round(parseInt(color.slice(3, 5), 16) * factor));
-  const b = Math.max(0, Math.round(parseInt(color.slice(5, 7), 16) * factor));
-  const toHex = (v: number) => v.toString(16).padStart(2, "0");
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-};
-
 const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   const groups = groupOrbs(orbs, discards);
 
@@ -88,14 +77,14 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
     <div className="flex flex-col items-start w-full">
       {groups.length > 0 ? (
         <div className="flex justify-center w-full">
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-5 pb-3 place-items-center">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
             {groups.map((group) => {
               const allDiscarded = group.discardedCount === group.count;
               return (
                 <div
                   key={group.orb.value}
                   className={cn(
-                    "relative flex flex-col items-center",
+                    "flex flex-col items-center",
                     allDiscarded && "opacity-25",
                   )}
                 >
@@ -104,19 +93,8 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                     size="sm"
                     bombTierIcons
                     valuePosition="top-right"
+                    count={group.count}
                   />
-                  {/* Count pill */}
-                  <div
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-1.5 py-[1px] rounded-full text-[9px] font-bold font-secondary whitespace-nowrap"
-                    style={{
-                      backgroundColor: darkenColor(group.orb.color(), 0.35),
-                      border: `1px solid ${group.orb.color()}`,
-                      color: group.orb.color(),
-                    }}
-                  >
-                    <span style={{ opacity: 0.3 }}>X</span>
-                    {group.count}
-                  </div>
                 </div>
               );
             })}
@@ -155,6 +133,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                 size="xs"
                 bombTierIcons
                 valuePosition="top-right"
+                count={group.count}
               />
 
               {/* Orb info */}
@@ -174,15 +153,6 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                   {group.orb.description()}
                 </p>
               </div>
-
-              {/* Count */}
-              <span
-                className="font-secondary text-[11px] font-bold shrink-0"
-                style={{ color: group.orb.color() }}
-              >
-                <span style={{ opacity: 0.3 }}>x</span>
-                {group.count}
-              </span>
             </div>
           );
         })
