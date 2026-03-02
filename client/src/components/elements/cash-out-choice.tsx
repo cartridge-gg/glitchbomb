@@ -29,7 +29,6 @@ export const CashOutChoice = ({
       {/* Confirm Cash Out Card - clickable */}
       <InfoCard
         variant="yellow"
-        label="Cash Out"
         onClick={onConfirm}
         disabled={isConfirming}
         isLoading={isConfirming}
@@ -38,6 +37,13 @@ export const CashOutChoice = ({
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
         hideInner
       >
+        {/* Custom header row */}
+        <div className="flex items-center justify-between w-full">
+          <span className="text-yellow-400 font-secondary text-sm tracking-[0.4em] uppercase text-[clamp(0.55rem,1.2svh,0.75rem)]">
+            Cash Out
+          </span>
+        </div>
+
         <div
           className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
@@ -68,15 +74,20 @@ export const CashOutChoice = ({
       {/* Cancel Card - clickable */}
       <InfoCard
         variant="green"
-        label="Go Back"
         onClick={onCancel}
         disabled={isConfirming}
         className="flex-1"
         contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
         labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
-        innerClassName="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
         hideInner
       >
+        {/* Custom header row */}
+        <div className="flex items-center justify-between w-full">
+          <span className="text-green-400 font-secondary text-sm tracking-[0.4em] uppercase text-[clamp(0.55rem,1.2svh,0.75rem)]">
+            Go Back
+          </span>
+        </div>
+
         <div
           className="flex-1 flex flex-col rounded-lg overflow-hidden w-full"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}

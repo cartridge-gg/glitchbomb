@@ -5,5 +5,5 @@ export interface CardDividerProps {
 }
 
 export const CardDivider = ({ className }: CardDividerProps) => (
-  <div className={cn("h-px opacity-10", className)} />
+  <div className={cn("h-px opacity-5", className)} />
 );
