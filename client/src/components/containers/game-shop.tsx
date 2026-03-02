@@ -399,19 +399,20 @@ export const GameShop = ({
           <span className="text-md leading-none translate-y-[1px]">↻</span>
           UNDO
         </Button>
-        <button
-          type="button"
-          className="flex-1 flex items-center justify-center min-h-[clamp(40px,6svh,56px)] w-full font-bold text-xl font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg disabled:pointer-events-none disabled:opacity-50 hover:brightness-125 transition-all"
+        <Button
+          variant="secondary"
+          gradient="orange"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
+          wrapperClassName="flex-1"
           style={{
             color: "#F1721C",
-            border: "1px solid rgba(241, 114, 28, 0.48)",
             background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
           }}
           onClick={handleContinue}
           disabled={isLoading}
         >
           {isLoading ? <LoadingSpinner size="sm" /> : "CONTINUE"}
-        </button>
+        </Button>
       </div>
 
       <StashModal
