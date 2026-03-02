@@ -1,8 +1,8 @@
 @layer base {
   :root {
-    --blue-100: #7487FF;
-    --blue-300: #7487FF40;
-    --blue-500: #7487FF26;
+    --blue-100: #9747FF;
+    --blue-300: #9747FF40;
+    --blue-500: #9747FF26;
 
     --green-100: #D8F8CB;
     --green-200: #BEF5AA;
@@ -16,17 +16,17 @@
     --green-950: #092604;
     --green-1000: #061A03;
 
-    --yellow-100: #FFF121;
-    --yellow-300: #FFF12140;
-    --yellow-500: #FFF12126;
+    --yellow-100: #4C91FF;
+    --yellow-300: #4C91FF40;
+    --yellow-500: #4C91FF26;
 
-    --orange-100: #F1721C;
-    --orange-300: #F1721C40;
-    --orange-500: #F1721C26;
+    --orange-100: #9747FF;
+    --orange-300: #9747FF40;
+    --orange-500: #9747FF26;
 
-    --salmon-100: #FE5578;
-    --salmon-300: #FE557840;
-    --salmon-500: #FE557826;
+    --salmon-100: #FF0099;
+    --salmon-300: #FF009940;
+    --salmon-500: #FF009926;
 
     --red-100: #FF1E00;
     --red-300: #FF1E0040;
@@ -51,9 +51,9 @@
     --multiplier-five-200: linear-gradient(0deg, #57143B6E, #FD53796E);
 
     --point-gradient-100: linear-gradient(0deg, #33B48B, #00FF4D);
-    --multiplier-gradient-100: linear-gradient(0deg, #F3AA17, #FFF121);
-    --hp-gradient-100: linear-gradient(0deg, #CD0096, #FF5678);
-    --moonrock-gradient-100: linear-gradient(0deg, #667AE5, #C65EE3);
-    --chip-gradient-100: linear-gradient(0deg, #CD0000, #FFAA56);
+    --multiplier-gradient-100: linear-gradient(0deg, #2B5FCC, #4C91FF);
+    --hp-gradient-100: linear-gradient(0deg, #CC0077, #FF0099);
+    --moonrock-gradient-100: linear-gradient(0deg, #6B2FCC, #9747FF);
+    --chip-gradient-100: linear-gradient(0deg, #6B2FCC, #9747FF);
   }
 }

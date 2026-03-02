@@ -14,13 +14,13 @@ const getOrbColor = (variant: string): string => {
     case "red":
       return "#FF1E00"; // --red-100
     case "blue":
-      return "#7487FF"; // --blue-100
+      return "#9747FF"; // --blue-100
     case "yellow":
-      return "#FFF121"; // --yellow-100
+      return "#4C91FF"; // --yellow-100
     case "salmon":
-      return "#FE5578"; // --salmon-100
+      return "#FF0099"; // --salmon-100
     case "orange":
-      return "#F1721C"; // --orange-100
+      return "#9747FF"; // --orange-100
     default:
       return "#36F818"; // default to green
   }

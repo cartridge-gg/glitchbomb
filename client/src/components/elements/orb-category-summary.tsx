@@ -49,19 +49,19 @@ const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   },
   multiplier: {
     orb: new Orb(OrbType.Multiplier50),
-    color: "#FFF121",
+    color: "#4C91FF",
   },
   health: {
     orb: new Orb(OrbType.Health1),
-    color: "#FE5578",
+    color: "#FF0099",
   },
   chip: {
     orb: new Orb(OrbType.Chips15),
-    color: "#FFF121",
+    color: "#9747FF",
   },
   moonrock: {
     orb: new Orb(OrbType.Moonrock15),
-    color: "#7487FF",
+    color: "#9747FF",
   },
 };
 

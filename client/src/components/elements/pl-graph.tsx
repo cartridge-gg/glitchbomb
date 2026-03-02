@@ -30,9 +30,9 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
     case "red":
       return "#FF1E00"; // --red-100
     case "blue":
-      return "#7487FF"; // --blue-100
+      return "#9747FF"; // --blue-100
     case "yellow":
-      return "#FFF121"; // --yellow-100
+      return "#4C91FF"; // --yellow-100
     default:
       return "#36F818";
   }
@@ -603,7 +603,7 @@ export const PLGraph = ({
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
-                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#7487FF" ? "blue" : "yellow"}`;
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#9747FF" ? "blue" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
                   return (
                     <motion.circle

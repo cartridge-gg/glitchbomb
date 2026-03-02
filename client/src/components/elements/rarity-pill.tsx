@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 const rarityColors = {
   common: { border: "rgba(54, 248, 24, 0.5)", text: "#36F818" },
-  rare: { border: "rgba(116, 135, 255, 0.5)", text: "#7487FF" },
+  rare: { border: "rgba(151, 71, 255, 0.5)", text: "#9747FF" },
   cosmic: { border: "rgba(192, 132, 252, 0.5)", text: "#d8b4fe" },
 };
 
