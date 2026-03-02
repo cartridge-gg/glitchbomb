@@ -184,6 +184,8 @@ export const Game = () => {
       setIsEnteringShop(false);
       setIsExitingShop(false);
       setIsPulling(false);
+      setShowRewardOverlay(false);
+      setAnimateHeaderCount(false);
     }
   }, [setGameId, searchParams]);
 
