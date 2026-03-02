@@ -1147,7 +1147,7 @@ export const Home = () => {
                               {expired
                                 ? "EXPIRED"
                                 : cashedOut
-                                  ? `+$${(game.points * 0.01).toFixed(2)}`
+                                  ? formatPayout(game.moonrocks, game.stake)
                                   : "GLITCHED"}
                             </span>
                           </button>
