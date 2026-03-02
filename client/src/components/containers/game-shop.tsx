@@ -8,6 +8,7 @@ import {
   RarityPill,
 } from "@/components/elements";
 import { ChipIcon, WarningIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
 import { StashModal } from "./stash-modal";
@@ -77,7 +78,10 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
 
   return (
     <motion.div
-      className="flex items-center gap-[clamp(8px,2svh,16px)] py-[clamp(4px,1.2svh,8px)]"
+      className={cn(
+        "flex items-center gap-[clamp(8px,2svh,16px)] py-[clamp(4px,1.2svh,8px)]",
+        disabled && "opacity-50",
+      )}
       animate={isAnimating ? { scale: [1, 1.02, 1] } : {}}
       transition={{ duration: 0.2 }}
     >
@@ -120,7 +124,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
         </div>
         <button
           type="button"
-          className="h-10 w-14 p-0 rounded-r-lg disabled:opacity-50"
+          className="h-10 w-14 p-0 rounded-r-lg"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
           disabled={disabled}
           onClick={handleAdd}
@@ -339,19 +343,10 @@ export const GameShop = ({
           className="flex flex-col gap-[clamp(8px,2svh,12px)] max-h-full overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
-          {/* Header */}
-          <div className="flex flex-col gap-[clamp(2px,0.8svh,6px)]">
-            <div className="flex items-center justify-between">
-              <h1 className="text-white uppercase font-primary text-[clamp(1.5rem,4.5svh,2rem)]">
-                ORB SHOP
-              </h1>
-            </div>
-
-            {/* Subtitle */}
-            <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
-              Spend Chips to add orbs to your bag
-            </p>
-          </div>
+          {/* Subtitle */}
+          <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
+            Spend Chips to add orbs to your bag
+          </p>
 
           {/* Shop items */}
           <div className="flex flex-col gap-1">
