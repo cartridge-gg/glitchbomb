@@ -27,7 +27,7 @@ export const RewardOverlay = ({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/70"
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/85"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
