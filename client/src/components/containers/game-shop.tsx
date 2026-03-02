@@ -322,15 +322,19 @@ export const GameShop = ({
           >
             ← BACK
           </Button>
-          <Button
-            variant="default"
-            gradient="green"
-            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
-            wrapperClassName="flex-1"
-            onClick={handleConfirmExit}
-          >
-            LEAVE SHOP
-          </Button>
+          <GradientBorder color="orange" className="flex-1">
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-bold font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all hover:brightness-125"
+              style={{
+                color: "#F1721C",
+                background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
+              }}
+              onClick={handleConfirmExit}
+            >
+              LEAVE SHOP
+            </button>
+          </GradientBorder>
         </div>
       </div>
     );
