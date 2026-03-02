@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useTokenPrice } from "@/hooks/token-price";
@@ -89,6 +90,15 @@ export const Game = () => {
     [tokenContract],
   );
   const target = config?.target_supply ?? 0n;
+
+  const formatCashOutValue = useMemo(() => {
+    if (!game || !tokenPrice) return undefined;
+    const score = game.moonrocks + game.points;
+    if (score <= 0) return undefined;
+    const rewards = cumulativeRewards(game.stake, supply, target);
+    const glitch = toTokens(rewards[Math.min(score, rewards.length) - 1] || 0);
+    return `$${(glitch * tokenPrice).toFixed(2)}`;
+  }, [game, tokenPrice, supply, target]);
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
@@ -521,6 +531,7 @@ export const Game = () => {
                 moonrocks={game.moonrocks}
                 points={game.points}
                 ante={milestoneCost(game.level + 1)}
+                cashOutValue={formatCashOutValue}
                 onCashOut={handleCashOut}
                 onEnterShop={handleEnterShop}
                 isEnteringShop={isEnteringShop}
