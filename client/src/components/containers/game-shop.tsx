@@ -401,8 +401,8 @@ export const GameShop = ({
         </Button>
         <Button
           variant="default"
-          gradient="green"
-          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
+          gradient="orange"
+          className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest bg-orange-950 hover:bg-orange-900 text-orange-100"
           wrapperClassName="flex-1"
           onClick={handleContinue}
           disabled={isLoading}
