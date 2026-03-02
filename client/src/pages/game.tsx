@@ -185,13 +185,18 @@ export const Game = () => {
     }
   }, [setGameId, searchParams]);
 
-  // Show reward overlay for fresh games
+  // Show reward overlay for fresh games (skip expired ones)
   useEffect(() => {
+    const isExpired =
+      game &&
+      game.created_at > 0 &&
+      game.created_at + 86400 <= Math.floor(Date.now() / 1000);
     if (
       game &&
       game.level === 1 &&
       game.pull_count === 0 &&
       !game.over &&
+      !isExpired &&
       rewardShownForGameRef.current !== game.id
     ) {
       rewardShownForGameRef.current = game.id;
