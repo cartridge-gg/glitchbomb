@@ -226,7 +226,50 @@ export const PayoutChart = ({
         strokeWidth={0.5}
       />
 
-      {/* Break-even crosshairs */}
+      {/* Base tier reference curve (dimmed staircase) */}
+      {showBaseCurve && (
+        <>
+          <path
+            d={basePath}
+            fill="none"
+            stroke="rgba(54, 248, 24, 0.20)"
+            strokeWidth={1}
+          />
+          <text
+            x={padL + plotW - 2}
+            y={toY(toTokens(cumulAt(baseRewardsArr, MAX_SCORE))) + 10}
+            textAnchor="end"
+            fill={labelColor}
+            fontSize={7}
+            className="font-secondary"
+          >
+            1x
+          </text>
+        </>
+      )}
+
+      {/* Main payout staircase — animated draw */}
+      <path
+        ref={pathRef}
+        d={curvePath}
+        fill="none"
+        stroke={lineColor}
+        strokeWidth={1.5}
+        className="glitch-icon"
+        style={
+          pathLength > 0
+            ? {
+                strokeDasharray: pathLength,
+                strokeDashoffset: animated ? 0 : pathLength,
+                transition: animated
+                  ? "stroke-dashoffset 1.2s ease-out"
+                  : "none",
+              }
+            : { opacity: 0 }
+        }
+      />
+
+      {/* Break-even crosshairs (rendered after curve so they appear on top) */}
       {showBreakEven && (
         <>
           {/* Vertical dashed line: top of chart → intersection */}
@@ -292,7 +335,7 @@ export const PayoutChart = ({
         </>
       )}
 
-      {/* Score marker crosshairs */}
+      {/* Score marker crosshairs (rendered after curve so they appear on top) */}
       {showScore &&
         (() => {
           const sx = toX(score);
@@ -390,49 +433,6 @@ export const PayoutChart = ({
             </>
           );
         })()}
-
-      {/* Base tier reference curve (dimmed staircase) */}
-      {showBaseCurve && (
-        <>
-          <path
-            d={basePath}
-            fill="none"
-            stroke="rgba(54, 248, 24, 0.20)"
-            strokeWidth={1}
-          />
-          <text
-            x={padL + plotW - 2}
-            y={toY(toTokens(cumulAt(baseRewardsArr, MAX_SCORE))) + 10}
-            textAnchor="end"
-            fill={labelColor}
-            fontSize={7}
-            className="font-secondary"
-          >
-            1x
-          </text>
-        </>
-      )}
-
-      {/* Main payout staircase — animated draw */}
-      <path
-        ref={pathRef}
-        d={curvePath}
-        fill="none"
-        stroke={lineColor}
-        strokeWidth={1.5}
-        className="glitch-icon"
-        style={
-          pathLength > 0
-            ? {
-                strokeDasharray: pathLength,
-                strokeDashoffset: animated ? 0 : pathLength,
-                transition: animated
-                  ? "stroke-dashoffset 1.2s ease-out"
-                  : "none",
-              }
-            : { opacity: 0 }
-        }
-      />
 
       {/* Y-axis ticks */}
       {yTicks.map((tick) => {
