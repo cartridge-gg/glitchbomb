@@ -150,6 +150,7 @@ export const GameHeader = ({
           <GradientBorder color="green">
             <Profile
               username={username || "..."}
+              onClick={onProfileClick}
               className="w-auto px-4 h-[clamp(36px,5.5svh,48px)]"
             />
           </GradientBorder>
