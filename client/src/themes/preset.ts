@@ -112,6 +112,7 @@ export const preset: Partial<Config> = {
       fontFamily: {
         body: ["Rubik One", "sans"],
         glitch: ["Rubik Glitch", "sans"],
+        rubik: ["Rubik One", "sans"],
         secondary: ["VCR OSD Mono", "sans"],
         primary: ["Pixel Game", "Rubik One", "sans"],
         sans: ["Inter", ...defaultTheme.fontFamily.sans],

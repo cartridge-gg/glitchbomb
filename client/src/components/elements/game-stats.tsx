@@ -91,7 +91,7 @@ export const GameStats = ({
       {/* Center - Points & Level */}
       <div className="flex flex-col items-center gap-1">
         <span
-          className="text-green-400 font-secondary text-[clamp(1.5rem,5svh,3rem)]"
+          className="text-green-400 font-rubik text-[clamp(1.5rem,5svh,3rem)]"
           style={{ textShadow: "0 0 20px rgba(74, 222, 128, 0.3)" }}
         >
           {points}
