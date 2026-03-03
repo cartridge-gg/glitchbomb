@@ -121,7 +121,8 @@ export const AppHeader = ({
         ) : (
           onConnect && (
             <Button
-              variant="default"
+              variant="secondary"
+              gradient="green"
               className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
               onClick={onConnect}
             >
