@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
-import { ArrowLeftIcon, GlitchBombIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  ControllerIcon,
+  GlitchBombIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
-import { SoundPopover } from "./sound-modal";
+import { SettingsModal, SoundPopover } from "./sound-modal";
 
 export interface AppHeaderProps {
   moonrocks: number;
@@ -40,6 +45,7 @@ export const AppHeader = ({
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
   const handleBack = onBack ?? (() => navigate(backPath));
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div className="relative flex items-center gap-2 px-4 py-4">
@@ -97,38 +103,66 @@ export const AppHeader = ({
             {Math.floor(moonrocks).toLocaleString()}
           </span>
         </button>
+        {/* Desktop: sound popover */}
         {audioSettings &&
           onMusicMutedChange &&
           onSfxMutedChange &&
           onMusicVolumeChange &&
           onSfxVolumeChange && (
-            <SoundPopover
-              settings={audioSettings}
-              onMusicMutedChange={onMusicMutedChange}
-              onSfxMutedChange={onSfxMutedChange}
-              onMusicVolumeChange={onMusicVolumeChange}
-              onSfxVolumeChange={onSfxVolumeChange}
-            />
+            <div className="hidden md:flex">
+              <SoundPopover
+                settings={audioSettings}
+                onMusicMutedChange={onMusicMutedChange}
+                onSfxMutedChange={onSfxMutedChange}
+                onMusicVolumeChange={onMusicVolumeChange}
+                onSfxVolumeChange={onSfxVolumeChange}
+              />
+            </div>
           )}
+        {/* Desktop: profile / login */}
         {username ? (
-          <GradientBorder color="green">
-            <Profile
-              username={username}
-              onClick={onProfileClick}
-              className="w-auto px-3 md:px-4"
-            />
-          </GradientBorder>
+          <div className="hidden md:flex">
+            <GradientBorder color="green">
+              <Profile
+                username={username}
+                onClick={onProfileClick}
+                className="w-auto px-3 md:px-4"
+              />
+            </GradientBorder>
+          </div>
         ) : (
           onConnect && (
-            <Button
-              variant="secondary"
-              gradient="green"
-              className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
-              onClick={onConnect}
-            >
-              LOG IN
-            </Button>
+            <div className="hidden md:flex">
+              <Button
+                variant="secondary"
+                gradient="green"
+                className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
+                onClick={onConnect}
+              >
+                LOG IN
+              </Button>
+            </div>
           )
+        )}
+        {/* Mobile: single controller settings button */}
+        <Button
+          variant="secondary"
+          gradient="green"
+          className="md:hidden h-12 w-12 p-0"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <ControllerIcon size="sm" />
+        </Button>
+        {audioSettings && onMusicMutedChange && onSfxMutedChange && (
+          <SettingsModal
+            open={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            audioSettings={audioSettings}
+            onMusicMutedChange={onMusicMutedChange}
+            onSfxMutedChange={onSfxMutedChange}
+            username={username}
+            onProfileClick={onProfileClick}
+          />
         )}
       </div>
     </div>
