@@ -74,6 +74,7 @@ export const Game = () => {
     setMusicVolume,
     setSfxVolume,
     playOrbSound,
+    playRewardSound,
     startMusic,
     stopMusic,
   } = useAudio();
@@ -659,6 +660,7 @@ export const Game = () => {
           setAnimateHeaderCount(false);
         }}
         onAnimationStart={() => setAnimateHeaderCount(true)}
+        onTakeAll={playRewardSound}
         targetRef={moonrocksRef}
         reward={{
           variant: "moonrock",

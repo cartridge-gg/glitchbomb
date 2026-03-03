@@ -233,6 +233,13 @@ export function useAudio() {
     [settings.sfxMuted, settings.sfxVolume],
   );
 
+  const playRewardSound = useCallback(() => {
+    if (settings.sfxMuted) return;
+    const file = "/assets/sounds/moonrock.wav";
+    // 6 staggered hits matching the particle animation
+    playSfxLayered(file, settings.sfxVolume, 5);
+  }, [settings.sfxMuted, settings.sfxVolume]);
+
   const setMusicMuted = useCallback((muted: boolean) => {
     setSettings((prev) => ({ ...prev, musicMuted: muted }));
   }, []);
@@ -256,6 +263,7 @@ export function useAudio() {
     setMusicVolume,
     setSfxVolume,
     playOrbSound,
+    playRewardSound,
     startMusic,
     stopMusic,
     isMusicPlaying,

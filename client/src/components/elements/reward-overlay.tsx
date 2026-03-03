@@ -14,6 +14,7 @@ export interface RewardOverlayProps {
   open: boolean;
   onDismiss: () => void;
   onAnimationStart?: () => void;
+  onTakeAll?: () => void;
   targetRef?: RefObject<HTMLElement | null>;
   heading?: string;
   actionLabel?: string;
@@ -29,6 +30,7 @@ export const RewardOverlay = ({
   open,
   onDismiss,
   onAnimationStart,
+  onTakeAll,
   targetRef,
   heading = "YOU RECEIVE",
   actionLabel = "TAKE ALL",
@@ -50,6 +52,7 @@ export const RewardOverlay = ({
   const handleTakeAll = () => {
     if (isExiting) return;
     setIsExiting(true);
+    onTakeAll?.();
 
     // Calculate particle start (orb center) and end (target pill) positions
     const orbRect = orbRef.current?.getBoundingClientRect();
