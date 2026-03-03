@@ -19,9 +19,14 @@ export const SpeakerIcon = forwardRef<SVGSVGElement, IconProps>(
           d="M8 2H7V3H6V4H5V5H2V6H1V10H2V11H5V12H6V13H7V14H8V2Z"
           fill="currentColor"
         />
+        {/* Inner arc */}
         <path d="M11 5H10V6H11V5Z" fill="currentColor" />
         <path d="M12 6H11V10H12V6Z" fill="currentColor" />
         <path d="M11 10H10V11H11V10Z" fill="currentColor" />
+        {/* Outer arc */}
+        <path d="M14 3H13V4H14V3Z" fill="currentColor" />
+        <path d="M15 4H14V12H15V4Z" fill="currentColor" />
+        <path d="M14 12H13V13H14V12Z" fill="currentColor" />
       </svg>
     );
   },
