@@ -73,7 +73,14 @@ export const InfoCard = ({
   const isClickable = !!onClick;
   const isDisabled = disabled || isLoading;
 
-  const cardContent = (
+  const cardContent = isLoading ? (
+    <div
+      className="flex-1 flex items-center justify-center w-full rounded-lg min-h-[clamp(80px,16svh,140px)]"
+      style={{ backgroundColor: styles.innerBg }}
+    >
+      <LoadingSpinner size="lg" className={styles.textColor} />
+    </div>
+  ) : (
     <>
       {label && (
         <span
@@ -87,32 +94,14 @@ export const InfoCard = ({
         <div
           className={`flex-1 flex flex-col items-center justify-center gap-3 w-full ${innerClassName}`}
         >
-          {isLoading ? (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <LoadingSpinner size="md" />
-              </div>
-              <div className="opacity-0 w-full">{children}</div>
-            </div>
-          ) : (
-            children
-          )}
+          {children}
         </div>
       ) : (
         <div
           className={`flex-1 flex flex-col items-center justify-center gap-3 w-full rounded-lg py-6 px-4 ${innerClassName}`}
           style={{ backgroundColor: styles.innerBg }}
         >
-          {isLoading ? (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <LoadingSpinner size="md" />
-              </div>
-              <div className="opacity-0 w-full">{children}</div>
-            </div>
-          ) : (
-            children
-          )}
+          {children}
         </div>
       )}
     </>
