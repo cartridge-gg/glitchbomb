@@ -20,6 +20,7 @@ import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
+import { useAudio } from "@/hooks/use-audio";
 import { createOfflineGame, resetOfflineState } from "@/offline/store";
 
 export const Home = () => {
@@ -30,6 +31,13 @@ export const Home = () => {
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
   const { games: ownedGames } = useOwnedGames();
+  const {
+    settings: audioSettings,
+    setMusicMuted,
+    setSfxMuted,
+    setMusicVolume,
+    setSfxVolume,
+  } = useAudio();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -406,6 +414,11 @@ export const Home = () => {
         onMint={() => mint(tokenAddress)}
         onProfileClick={onProfileClick}
         onConnect={isLoggedIn ? undefined : onConnectClick}
+        audioSettings={audioSettings}
+        onMusicMutedChange={setMusicMuted}
+        onSfxMutedChange={setSfxMuted}
+        onMusicVolumeChange={setMusicVolume}
+        onSfxVolumeChange={setSfxVolume}
       />
 
       {/* Content */}
@@ -1212,6 +1225,11 @@ export const Home = () => {
             onMint={() => mint(tokenAddress)}
             onProfileClick={onProfileClick}
             onConnect={isLoggedIn ? undefined : onConnectClick}
+            audioSettings={audioSettings}
+            onMusicMutedChange={setMusicMuted}
+            onSfxMutedChange={setSfxMuted}
+            onMusicVolumeChange={setMusicVolume}
+            onSfxVolumeChange={setSfxVolume}
           />
 
           {/* Scrollable content */}

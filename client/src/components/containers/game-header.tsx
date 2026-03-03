@@ -4,6 +4,8 @@ import { Profile } from "@/components/elements";
 import { ArrowLeftIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
+import type { AudioSettings } from "@/hooks/use-audio";
+import { SoundPopover } from "./sound-modal";
 
 export interface GameHeaderProps {
   moonrocks: number;
@@ -12,6 +14,11 @@ export interface GameHeaderProps {
   moonrocksRef?: RefObject<HTMLDivElement | null>;
   animateCount?: boolean;
   rewardOverlayOpen?: boolean;
+  audioSettings?: AudioSettings;
+  onMusicMutedChange?: (muted: boolean) => void;
+  onSfxMutedChange?: (muted: boolean) => void;
+  onMusicVolumeChange?: (vol: number) => void;
+  onSfxVolumeChange?: (vol: number) => void;
 }
 
 const COUNT_UP_DURATION_MS = 600;
@@ -27,6 +34,11 @@ export const GameHeader = ({
   moonrocksRef,
   animateCount,
   rewardOverlayOpen,
+  audioSettings,
+  onMusicMutedChange,
+  onSfxMutedChange,
+  onMusicVolumeChange,
+  onSfxVolumeChange,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
   const [displayCount, setDisplayCount] = useState<number | null>(null);
@@ -107,8 +119,22 @@ export const GameHeader = ({
         </div>
       </div>
 
-      {/* Right column - profile aligned right */}
-      <div className="flex justify-end">
+      {/* Right column - sound button + profile aligned right */}
+      <div className="flex justify-end gap-2">
+        {audioSettings &&
+          onMusicMutedChange &&
+          onSfxMutedChange &&
+          onMusicVolumeChange &&
+          onSfxVolumeChange && (
+            <SoundPopover
+              settings={audioSettings}
+              onMusicMutedChange={onMusicMutedChange}
+              onSfxMutedChange={onSfxMutedChange}
+              onMusicVolumeChange={onMusicVolumeChange}
+              onSfxVolumeChange={onSfxVolumeChange}
+              buttonClassName="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+            />
+          )}
         <GradientBorder color="green">
           <Profile
             username={username || "..."}

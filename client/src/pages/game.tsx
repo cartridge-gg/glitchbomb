@@ -28,6 +28,7 @@ import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useTokenPrice } from "@/hooks/token-price";
 import { useTokens } from "@/hooks/tokens";
+import { useAudio } from "@/hooks/use-audio";
 import { OrbType } from "@/models/orb";
 import { milestoneCost } from "@/offline/milestone";
 
@@ -66,6 +67,16 @@ export const Game = () => {
   const { chain } = useNetwork();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { game, config, setGameId } = useEntitiesContext();
+  const {
+    settings: audioSettings,
+    setMusicMuted,
+    setSfxMuted,
+    setMusicVolume,
+    setSfxVolume,
+    playOrbSound,
+    startMusic,
+    stopMusic,
+  } = useAudio();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -172,6 +183,13 @@ export const Game = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
+  // Start background music on mount, stop on unmount
+  useEffect(() => {
+    startMusic();
+    return () => stopMusic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Set game ID from URL params
   useEffect(() => {
     const gameId = searchParams.get("game");
@@ -266,6 +284,7 @@ export const Game = () => {
         variant: latestPull.orb.outcomeVariant(),
         content: latestPull.orb.outcome(),
       });
+      playOrbSound(latestPull.orb);
       setIsPulling(false);
 
       // Update the last seen pull id
@@ -278,7 +297,7 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [pulls]);
+  }, [pulls, playOrbSound]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
@@ -618,6 +637,11 @@ export const Game = () => {
         moonrocksRef={moonrocksRef}
         animateCount={animateHeaderCount}
         rewardOverlayOpen={showRewardOverlay}
+        audioSettings={audioSettings}
+        onMusicMutedChange={setMusicMuted}
+        onSfxMutedChange={setSfxMuted}
+        onMusicVolumeChange={setMusicVolume}
+        onSfxVolumeChange={setSfxVolume}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
