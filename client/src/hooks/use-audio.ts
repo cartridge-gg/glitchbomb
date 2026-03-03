@@ -64,44 +64,47 @@ function getOrbSoundFile(orb: Orb): string | null {
   return null;
 }
 
-// Returns 0 (base), 1 (mid), or 2 (high) for point orb impact scaling
-function getPointImpactTier(orb: Orb): number {
+// Number of extra echo layers for each point orb (on top of the base play)
+function getPointEchoLayers(orb: Orb): number {
   switch (orb.value) {
     case OrbType.Point5:
-    case OrbType.Point6:
       return 0;
-    case OrbType.Point7:
-    case OrbType.Point8:
+    case OrbType.Point6:
       return 1;
+    case OrbType.Point7:
+      return 2;
+    case OrbType.Point8:
+      return 3;
     case OrbType.Point9:
+      return 4;
     case OrbType.PointOrb1:
     case OrbType.PointBomb4:
-      return 2;
+      return 5;
     default:
       return 0;
   }
 }
 
+const ECHO_OFFSET_MS = 40;
+const ECHO_VOLUME_DECAY = 0.72; // each layer is 72% of the previous
+
 function playSfx(file: string, volume: number) {
   const audio = new Audio(file);
-  audio.volume = volume;
+  audio.volume = Math.min(volume, 1);
   audio.play().catch(() => {});
   audio.addEventListener("ended", () => {
     audio.src = "";
   });
 }
 
-function playSfxLayered(file: string, baseVolume: number, tier: number) {
-  // Primary layer — always plays at full volume
+function playSfxLayered(file: string, baseVolume: number, layers: number) {
   playSfx(file, baseVolume);
-
-  if (tier >= 1) {
-    // Echo layer — slightly quieter, delayed
-    setTimeout(() => playSfx(file, baseVolume * 0.45), 60);
-  }
-  if (tier >= 2) {
-    // Third layer — wider delay, softer
-    setTimeout(() => playSfx(file, baseVolume * 0.3), 130);
+  let vol = baseVolume;
+  for (let i = 1; i <= layers; i++) {
+    vol *= ECHO_VOLUME_DECAY;
+    const delay = i * ECHO_OFFSET_MS;
+    const layerVol = vol;
+    setTimeout(() => playSfx(file, layerVol), delay);
   }
 }
 
@@ -197,8 +200,7 @@ export function useAudio() {
       if (!file) return;
 
       if (orb.isPoint()) {
-        const tier = getPointImpactTier(orb);
-        playSfxLayered(file, settings.sfxVolume, tier);
+        playSfxLayered(file, settings.sfxVolume, getPointEchoLayers(orb));
       } else {
         playSfx(file, settings.sfxVolume);
       }
