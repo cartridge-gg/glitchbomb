@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { useEffect, useState } from "react";
 
 export interface ScoreProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -30,26 +29,6 @@ export const Score = ({
   style,
   ...props
 }: ScoreProps) => {
-  const [displayValue, setDisplayValue] = useState(value);
-  const [isGlitch, setIsGlitch] = useState(false);
-
-  useEffect(() => {
-    if (value !== displayValue) {
-      // Switch to glitch font
-      setIsGlitch(true);
-
-      // Update value after a short delay
-      setTimeout(() => {
-        setDisplayValue(value);
-
-        // Return to normal font
-        setTimeout(() => {
-          setIsGlitch(false);
-        }, 200);
-      }, 100);
-    }
-  }, [value, displayValue]);
-
   return (
     <div
       className={scoreVariants({ variant, size, className })}
@@ -59,15 +38,7 @@ export const Score = ({
       }}
       {...props}
     >
-      <span
-        className={
-          isGlitch
-            ? "font-glitch -translate-y-[1.5px] scale-[1.01]"
-            : "font-primary"
-        }
-      >
-        {displayValue}
-      </span>
+      <span className="font-primary">{value}</span>
     </div>
   );
 };
