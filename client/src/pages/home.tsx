@@ -814,30 +814,28 @@ export const Home = () => {
                   {activeGames.length}
                 </span>
               </div>
-              {totalSlides > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    gradient="green"
-                    className="h-12 w-12 p-0"
-                    onClick={handlePrev}
-                    disabled={activeGameIndex <= 0}
-                    aria-label="Previous game"
-                  >
-                    <BracketArrowIcon size="xs" direction="left" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    gradient="green"
-                    className="h-12 w-12 p-0"
-                    onClick={handleNext}
-                    disabled={activeGameIndex >= totalSlides - 1}
-                    aria-label="Next game"
-                  >
-                    <BracketArrowIcon size="xs" direction="right" />
-                  </Button>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="h-12 w-12 p-0"
+                  onClick={handlePrev}
+                  disabled={activeGameIndex <= 0}
+                  aria-label="Previous game"
+                >
+                  <BracketArrowIcon size="xs" direction="left" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="h-12 w-12 p-0"
+                  onClick={handleNext}
+                  disabled={activeGameIndex >= totalSlides - 1}
+                  aria-label="Next game"
+                >
+                  <BracketArrowIcon size="xs" direction="right" />
+                </Button>
+              </div>
             </div>
 
             {/* Game Cards — horizontal sliding carousel */}
