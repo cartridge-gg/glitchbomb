@@ -113,6 +113,7 @@ export function useAudio() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const currentTrackRef = useRef<MusicTrack | null>(null);
+  const resumeListenerRef = useRef<(() => void) | null>(null);
 
   // Persist settings whenever they change
   useEffect(() => {
@@ -166,7 +167,26 @@ export function useAudio() {
 
       musicRef.current = audio;
       currentTrackRef.current = track;
-      audio.play().catch(() => {});
+
+      // Remove any previous autoplay-retry listener
+      if (resumeListenerRef.current) {
+        document.removeEventListener("click", resumeListenerRef.current);
+        document.removeEventListener("touchstart", resumeListenerRef.current);
+        resumeListenerRef.current = null;
+      }
+
+      audio.play().catch(() => {
+        // Autoplay blocked — retry on first user interaction
+        const resume = () => {
+          audio.play().catch(() => {});
+          document.removeEventListener("click", resume);
+          document.removeEventListener("touchstart", resume);
+          resumeListenerRef.current = null;
+        };
+        resumeListenerRef.current = resume;
+        document.addEventListener("click", resume, { once: true });
+        document.addEventListener("touchstart", resume, { once: true });
+      });
       setIsMusicPlaying(true);
     },
     [settings.musicMuted, settings.musicVolume],
@@ -189,6 +209,11 @@ export function useAudio() {
         music.pause();
         music.src = "";
         musicRef.current = null;
+      }
+      if (resumeListenerRef.current) {
+        document.removeEventListener("click", resumeListenerRef.current);
+        document.removeEventListener("touchstart", resumeListenerRef.current);
+        resumeListenerRef.current = null;
       }
     };
   }, []);
