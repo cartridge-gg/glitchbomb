@@ -64,6 +64,47 @@ function getOrbSoundFile(orb: Orb): string | null {
   return null;
 }
 
+// Returns 0 (base), 1 (mid), or 2 (high) for point orb impact scaling
+function getPointImpactTier(orb: Orb): number {
+  switch (orb.value) {
+    case OrbType.Point5:
+    case OrbType.Point6:
+      return 0;
+    case OrbType.Point7:
+    case OrbType.Point8:
+      return 1;
+    case OrbType.Point9:
+    case OrbType.PointOrb1:
+    case OrbType.PointBomb4:
+      return 2;
+    default:
+      return 0;
+  }
+}
+
+function playSfx(file: string, volume: number) {
+  const audio = new Audio(file);
+  audio.volume = volume;
+  audio.play().catch(() => {});
+  audio.addEventListener("ended", () => {
+    audio.src = "";
+  });
+}
+
+function playSfxLayered(file: string, baseVolume: number, tier: number) {
+  // Primary layer — always plays at full volume
+  playSfx(file, baseVolume);
+
+  if (tier >= 1) {
+    // Echo layer — slightly quieter, delayed
+    setTimeout(() => playSfx(file, baseVolume * 0.45), 60);
+  }
+  if (tier >= 2) {
+    // Third layer — wider delay, softer
+    setTimeout(() => playSfx(file, baseVolume * 0.3), 130);
+  }
+}
+
 export function useAudio() {
   const [settings, setSettings] = useState<AudioSettings>(loadSettings);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -154,12 +195,13 @@ export function useAudio() {
       if (settings.sfxMuted) return;
       const file = getOrbSoundFile(orb);
       if (!file) return;
-      const audio = new Audio(file);
-      audio.volume = settings.sfxVolume;
-      audio.play().catch(() => {});
-      audio.addEventListener("ended", () => {
-        audio.src = "";
-      });
+
+      if (orb.isPoint()) {
+        const tier = getPointImpactTier(orb);
+        playSfxLayered(file, settings.sfxVolume, tier);
+      } else {
+        playSfx(file, settings.sfxVolume);
+      }
     },
     [settings.sfxMuted, settings.sfxVolume],
   );
