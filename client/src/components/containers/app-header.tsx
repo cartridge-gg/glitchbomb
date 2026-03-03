@@ -1,10 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
-import {
-  ArrowLeftIcon,
-  GlitchBombIcon,
-  MoonrockIcon,
-} from "@/components/icons";
+import { ArrowLeftIcon, GlitchBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 
@@ -84,7 +80,7 @@ export const AppHeader = ({
           disabled={!canMint}
           aria-label="Mint moonrocks"
         >
-          <MoonrockIcon className="w-5 h-5 text-yellow-400" />
+          <GlitchBombIcon className="w-5 h-5 text-yellow-400" />
           <span className="font-secondary text-sm tracking-widest text-yellow-400">
             {Math.floor(moonrocks).toLocaleString()}
           </span>
