@@ -3,6 +3,8 @@ import { Profile } from "@/components/elements";
 import { ArrowLeftIcon, GlitchBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
+import type { AudioSettings } from "@/hooks/use-audio";
+import { SoundPopover } from "./sound-modal";
 
 export interface AppHeaderProps {
   moonrocks: number;
@@ -13,6 +15,11 @@ export interface AppHeaderProps {
   onMint?: () => void;
   onProfileClick?: () => void;
   onConnect?: () => void;
+  audioSettings?: AudioSettings;
+  onMusicMutedChange?: (muted: boolean) => void;
+  onSfxMutedChange?: (muted: boolean) => void;
+  onMusicVolumeChange?: (vol: number) => void;
+  onSfxVolumeChange?: (vol: number) => void;
 }
 
 export const AppHeader = ({
@@ -24,6 +31,11 @@ export const AppHeader = ({
   onMint,
   onProfileClick,
   onConnect,
+  audioSettings,
+  onMusicMutedChange,
+  onSfxMutedChange,
+  onMusicVolumeChange,
+  onSfxVolumeChange,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -70,7 +82,7 @@ export const AppHeader = ({
       {/* Spacer to push right content */}
       <div className="flex-1" />
 
-      {/* Right: Moonrocks + Profile */}
+      {/* Right: Moonrocks + Sound + Profile */}
       <div className="flex gap-2 shrink-0">
         {/* Moonrocks display */}
         <button
@@ -85,6 +97,19 @@ export const AppHeader = ({
             {Math.floor(moonrocks).toLocaleString()}
           </span>
         </button>
+        {audioSettings &&
+          onMusicMutedChange &&
+          onSfxMutedChange &&
+          onMusicVolumeChange &&
+          onSfxVolumeChange && (
+            <SoundPopover
+              settings={audioSettings}
+              onMusicMutedChange={onMusicMutedChange}
+              onSfxMutedChange={onSfxMutedChange}
+              onMusicVolumeChange={onMusicVolumeChange}
+              onSfxVolumeChange={onSfxVolumeChange}
+            />
+          )}
         {username ? (
           <GradientBorder color="green">
             <Profile
@@ -96,7 +121,8 @@ export const AppHeader = ({
         ) : (
           onConnect && (
             <Button
-              variant="default"
+              variant="secondary"
+              gradient="green"
               className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
               onClick={onConnect}
             >
