@@ -158,7 +158,6 @@ export const GameHeader = ({
         {/* Mobile: single controller settings button */}
         <Button
           variant="secondary"
-          gradient="green"
           className="md:hidden h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
           onClick={() => setSettingsOpen(true)}
         >
