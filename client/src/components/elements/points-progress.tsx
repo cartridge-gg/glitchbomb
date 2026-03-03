@@ -19,7 +19,7 @@ export const PointsProgress = ({
     <div className={`flex items-center gap-6 ${className}`}>
       {/* Current Points */}
       <span
-        className="text-green-400 text-5xl font-glitch"
+        className="text-green-400 text-5xl font-primary"
         style={{ textShadow: "0 0 20px rgba(74, 222, 128, 0.3)" }}
       >
         {points}
