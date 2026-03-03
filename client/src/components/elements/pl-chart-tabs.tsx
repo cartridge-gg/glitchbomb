@@ -8,6 +8,7 @@ export interface PLChartTabsProps {
   data: PLDataPoint[];
   pulls: OrbPulled[];
   className?: string;
+  tabBarClassName?: string;
   mode?: "delta" | "absolute";
   title?: string;
   baseline?: number;
@@ -168,6 +169,7 @@ export const PLChartTabs = ({
   data,
   pulls,
   className = "",
+  tabBarClassName,
   mode = "absolute",
   title = "POTENTIAL",
   baseline,
@@ -187,7 +189,7 @@ export const PLChartTabs = ({
         items={tabItems}
         active={activeTab}
         onChange={setActiveTab}
-        className="[@media(max-height:1000px)]:hidden"
+        className={tabBarClassName ?? "[@media(max-height:1000px)]:hidden"}
         buttonClassName="py-[clamp(4px,1svh,8px)]"
         iconClassName="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]"
       />

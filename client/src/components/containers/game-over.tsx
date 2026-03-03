@@ -42,6 +42,10 @@ export const GameOver = ({
   supply,
   target,
 }: GameOverProps) => {
+  const bombsHit = useMemo(
+    () => pulls.filter((p) => p.orb.isBomb()).length,
+    [pulls],
+  );
   const [step, setStep] = useState<Step>("gameover");
 
   // Compute GLITCH tokens earned and USD value for rewards step
@@ -78,9 +82,13 @@ export const GameOver = ({
       <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)] overflow-y-auto">
         <div className="flex flex-col items-center gap-0">
           <h1
-            className={`${titleColor} ${titleFont} uppercase text-[clamp(2rem,6svh,3rem)] tracking-wider leading-tight text-center ${!cashedOut && !expired ? "glitch-text" : ""}`}
+            className={`${titleColor} ${titleFont} uppercase text-[clamp(1.9rem,5.5svh,2.75rem)] tracking-wider leading-tight text-center ${!cashedOut && !expired ? "glitch-text" : ""}`}
           >
-            {expired ? "EXPIRED" : cashedOut ? "CASHED OUT" : "GLITCHED OUT"}
+            {expired
+              ? "EXPIRED"
+              : cashedOut
+                ? "CASHED OUT"
+                : "GLITCHED\u00A0OUT"}
           </h1>
           <span className="text-green-600 font-secondary text-sm tracking-widest">
             Lvl {level}
@@ -107,6 +115,7 @@ export const GameOver = ({
               pulls={pulls}
               mode="absolute"
               title="P/L"
+              tabBarClassName=""
             />
 
             <InfoCard
@@ -115,14 +124,16 @@ export const GameOver = ({
               className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
               innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
             >
-              <MoonrockIcon
-                className={`w-[clamp(48px,8svh,72px)] h-[clamp(48px,8svh,72px)] ${textColor}`}
-              />
-              <span
-                className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em]`}
-              >
-                {moonrocksEarned} MOON ROCKS
-              </span>
+              <div className="flex flex-col items-center">
+                <MoonrockIcon
+                  className={`w-[clamp(32px,6svh,48px)] h-[clamp(32px,6svh,48px)] ${textColor}`}
+                />
+                <span
+                  className={`${textColor} font-secondary text-[clamp(0.8rem,2svh,1.1rem)] tracking-[0.2em]`}
+                >
+                  {moonrocksEarned} MOONROCKS
+                </span>
+              </div>
             </InfoCard>
           </>
         ) : (
@@ -268,6 +279,37 @@ export const GameOver = ({
                 )}
               </div>
             </InfoCard>
+
+            {/* Stats rows */}
+            <div className="flex flex-col gap-px bg-black rounded-lg overflow-hidden">
+              {[
+                { label: "Level Reached", value: level },
+                { label: "Orbs Pulled", value: pulls.length },
+                { label: "Bombs Hit", value: bombsHit },
+                { label: "Moonrocks Earned", value: moonrocksEarned },
+              ].map((stat, i, arr) => (
+                <div
+                  key={stat.label}
+                  className={`flex justify-between items-center px-4 py-3 ${
+                    i === 0 ? "rounded-t-lg" : ""
+                  } ${i === arr.length - 1 ? "rounded-b-lg" : ""}`}
+                  style={{ backgroundColor: "rgba(54, 248, 24, 0.04)" }}
+                >
+                  <span
+                    className="font-secondary text-sm"
+                    style={{ color: "#FFFFFF" }}
+                  >
+                    {stat.label}
+                  </span>
+                  <span
+                    className="font-secondary text-sm"
+                    style={{ color: "#36F818" }}
+                  >
+                    {stat.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </>
         )}
       </div>
