@@ -147,7 +147,9 @@ export const AppHeader = ({
         {/* Mobile: single controller settings button */}
         <Button
           variant="secondary"
-          className="md:hidden h-12 w-12 p-0"
+          gradient="green"
+          wrapperClassName="md:hidden"
+          className="h-12 w-12 p-0"
           onClick={() => setSettingsOpen(true)}
         >
           <ControllerIcon size="sm" />
