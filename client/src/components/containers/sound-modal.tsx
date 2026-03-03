@@ -173,8 +173,6 @@ export interface SettingsModalProps {
   audioSettings: AudioSettings;
   onMusicMutedChange: (muted: boolean) => void;
   onSfxMutedChange: (muted: boolean) => void;
-  onMusicVolumeChange: (vol: number) => void;
-  onSfxVolumeChange: (vol: number) => void;
   username?: string;
   onProfileClick?: () => void;
 }
@@ -185,18 +183,21 @@ export const SettingsModal = ({
   audioSettings,
   onMusicMutedChange,
   onSfxMutedChange,
-  onMusicVolumeChange,
-  onSfxVolumeChange,
   username,
   onProfileClick,
 }: SettingsModalProps) => {
   if (!open) return null;
 
+  const isMuted = audioSettings.musicMuted && audioSettings.sfxMuted;
+
+  const toggleMute = () => {
+    const next = !isMuted;
+    onMusicMutedChange(next);
+    onSfxMutedChange(next);
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      role="dialog"
-    >
+    <div className="fixed inset-0 z-50 flex flex-col" role="dialog">
       {/* Backdrop */}
       <button
         type="button"
@@ -204,77 +205,25 @@ export const SettingsModal = ({
         onClick={onClose}
         aria-label="Close settings"
       />
-      {/* Content — centered */}
-      <div className="relative flex flex-col gap-4 px-6 w-full max-w-sm">
+      {/* Content — anchored to bottom half, left-padded */}
+      <div className="relative mt-auto mb-[20svh] flex flex-col gap-3 px-6">
         <span className="font-secondary text-xs tracking-[0.2em] uppercase text-green-400 mb-1">
           Settings
         </span>
-        {/* Music slider row */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-            style={{ backgroundColor: "rgba(54, 248, 24, 0.06)" }}
-            onClick={() => onMusicMutedChange(!audioSettings.musicMuted)}
-          >
-            {audioSettings.musicMuted ? (
-              <SpeakerMutedIcon
-                size="sm"
-                style={{ color: "rgba(54, 248, 24, 0.3)" }}
-              />
-            ) : (
-              <SpeakerIcon size="sm" style={{ color: "#36F818" }} />
-            )}
-          </button>
-          <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <span
-              className="font-secondary text-[10px] tracking-[0.15em] uppercase"
-              style={{ color: "rgba(54, 248, 24, 0.6)" }}
-            >
-              Music
-            </span>
-            <VolumeSlider
-              value={audioSettings.musicVolume}
-              onChange={onMusicVolumeChange}
-            />
-          </div>
-        </div>
-        {/* SFX slider row */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-lg transition-colors"
-            style={{ backgroundColor: "rgba(54, 248, 24, 0.06)" }}
-            onClick={() => onSfxMutedChange(!audioSettings.sfxMuted)}
-          >
-            {audioSettings.sfxMuted ? (
-              <SpeakerMutedIcon
-                size="sm"
-                style={{ color: "rgba(54, 248, 24, 0.3)" }}
-              />
-            ) : (
-              <SpeakerIcon size="sm" style={{ color: "#36F818" }} />
-            )}
-          </button>
-          <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <span
-              className="font-secondary text-[10px] tracking-[0.15em] uppercase"
-              style={{ color: "rgba(54, 248, 24, 0.6)" }}
-            >
-              Effects
-            </span>
-            <VolumeSlider
-              value={audioSettings.sfxVolume}
-              onChange={onSfxVolumeChange}
-            />
-          </div>
-        </div>
-        {/* Controller / profile button */}
+        <Button
+          variant="secondary"
+          gradient="green"
+          className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+          onClick={toggleMute}
+        >
+          {isMuted ? <SpeakerMutedIcon size="sm" /> : <SpeakerIcon size="sm" />}
+          {isMuted ? "Volume Off" : "Volume On"}
+        </Button>
         {username && (
           <Button
             variant="secondary"
             gradient="green"
-            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase mt-1"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
             onClick={() => {
               onClose();
               onProfileClick?.();
