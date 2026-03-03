@@ -9,6 +9,13 @@ export interface AudioSettings {
   sfxVolume: number;
 }
 
+export type MusicTrack = "normal" | "glitched";
+
+const MUSIC_FILES: Record<MusicTrack, string> = {
+  normal: "/assets/sounds/music.wav",
+  glitched: "/assets/sounds/music-glitched.wav",
+};
+
 const STORAGE_KEY = "glitchbomb-audio";
 
 const DEFAULT_SETTINGS: AudioSettings = {
@@ -61,6 +68,7 @@ export function useAudio() {
   const [settings, setSettings] = useState<AudioSettings>(loadSettings);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const musicRef = useRef<HTMLAudioElement | null>(null);
+  const currentTrackRef = useRef<MusicTrack | null>(null);
 
   // Persist settings whenever they change
   useEffect(() => {
@@ -74,20 +82,46 @@ export function useAudio() {
     music.volume = settings.musicMuted ? 0 : settings.musicVolume;
   }, [settings.musicMuted, settings.musicVolume]);
 
-  const startMusic = useCallback(() => {
-    if (musicRef.current) {
-      musicRef.current.volume = settings.musicMuted ? 0 : settings.musicVolume;
-      musicRef.current.play().catch(() => {});
+  const startMusic = useCallback(
+    (track: MusicTrack = "normal") => {
+      const vol = settings.musicMuted ? 0 : settings.musicVolume;
+
+      // If same track is already playing, just resume
+      if (musicRef.current && currentTrackRef.current === track) {
+        musicRef.current.volume = vol;
+        musicRef.current.play().catch(() => {});
+        setIsMusicPlaying(true);
+        return;
+      }
+
+      // Different track or no music — stop current and create new
+      if (musicRef.current) {
+        musicRef.current.pause();
+        musicRef.current.src = "";
+      }
+
+      const audio = new Audio(MUSIC_FILES[track]);
+      audio.loop = true;
+      audio.volume = vol;
+
+      // Start from a random position once metadata is loaded
+      audio.addEventListener(
+        "loadedmetadata",
+        () => {
+          if (audio.duration > 0) {
+            audio.currentTime = Math.random() * audio.duration;
+          }
+        },
+        { once: true },
+      );
+
+      musicRef.current = audio;
+      currentTrackRef.current = track;
+      audio.play().catch(() => {});
       setIsMusicPlaying(true);
-      return;
-    }
-    const audio = new Audio("/assets/sounds/music.wav");
-    audio.loop = true;
-    audio.volume = settings.musicMuted ? 0 : settings.musicVolume;
-    musicRef.current = audio;
-    audio.play().catch(() => {});
-    setIsMusicPlaying(true);
-  }, [settings.musicMuted, settings.musicVolume]);
+    },
+    [settings.musicMuted, settings.musicVolume],
+  );
 
   const stopMusic = useCallback(() => {
     const music = musicRef.current;

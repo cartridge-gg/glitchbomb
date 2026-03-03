@@ -185,7 +185,7 @@ export const Game = () => {
 
   // Start background music on mount, stop on unmount
   useEffect(() => {
-    startMusic();
+    startMusic("glitched");
     return () => stopMusic();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

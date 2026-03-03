@@ -37,6 +37,8 @@ export const Home = () => {
     setSfxMuted,
     setMusicVolume,
     setSfxVolume,
+    startMusic,
+    stopMusic,
   } = useAudio();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
@@ -51,6 +53,13 @@ export const Home = () => {
       60_000,
     );
     return () => clearInterval(interval);
+  }, []);
+
+  // Start normal background music on homepage
+  useEffect(() => {
+    startMusic("normal");
+    return () => stopMusic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const GAME_EXPIRATION = 86400;
