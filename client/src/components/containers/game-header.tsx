@@ -1,11 +1,16 @@
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
-import { ArrowLeftIcon, ChipIcon, MoonrockIcon } from "@/components/icons";
+import {
+  ArrowLeftIcon,
+  ChipIcon,
+  ControllerIcon,
+  MoonrockIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
-import { SoundPopover } from "./sound-modal";
+import { SettingsModal, SoundPopover } from "./sound-modal";
 
 export interface GameHeaderProps {
   moonrocks: number;
@@ -19,6 +24,7 @@ export interface GameHeaderProps {
   onSfxMutedChange?: (muted: boolean) => void;
   onMusicVolumeChange?: (vol: number) => void;
   onSfxVolumeChange?: (vol: number) => void;
+  onProfileClick?: () => void;
 }
 
 const COUNT_UP_DURATION_MS = 600;
@@ -39,9 +45,11 @@ export const GameHeader = ({
   onSfxMutedChange,
   onMusicVolumeChange,
   onSfxVolumeChange,
+  onProfileClick,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
   const [displayCount, setDisplayCount] = useState<number | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
@@ -121,26 +129,53 @@ export const GameHeader = ({
 
       {/* Right column - sound button + profile aligned right */}
       <div className="flex justify-end gap-2">
+        {/* Desktop: sound popover + profile */}
         {audioSettings &&
           onMusicMutedChange &&
           onSfxMutedChange &&
           onMusicVolumeChange &&
           onSfxVolumeChange && (
-            <SoundPopover
-              settings={audioSettings}
-              onMusicMutedChange={onMusicMutedChange}
-              onSfxMutedChange={onSfxMutedChange}
-              onMusicVolumeChange={onMusicVolumeChange}
-              onSfxVolumeChange={onSfxVolumeChange}
-              buttonClassName="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
-            />
+            <div className="hidden md:flex">
+              <SoundPopover
+                settings={audioSettings}
+                onMusicMutedChange={onMusicMutedChange}
+                onSfxMutedChange={onSfxMutedChange}
+                onMusicVolumeChange={onMusicVolumeChange}
+                onSfxVolumeChange={onSfxVolumeChange}
+                buttonClassName="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+              />
+            </div>
           )}
-        <GradientBorder color="green">
-          <Profile
-            username={username || "..."}
-            className="w-auto px-4 h-[clamp(36px,5.5svh,48px)]"
+        <div className="hidden md:flex">
+          <GradientBorder color="green">
+            <Profile
+              username={username || "..."}
+              onClick={onProfileClick}
+              className="w-auto px-4 h-[clamp(36px,5.5svh,48px)]"
+            />
+          </GradientBorder>
+        </div>
+        {/* Mobile: single controller settings button */}
+        <Button
+          variant="secondary"
+          gradient="green"
+          wrapperClassName="md:hidden"
+          className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <ControllerIcon size="sm" />
+        </Button>
+        {audioSettings && onMusicMutedChange && onSfxMutedChange && (
+          <SettingsModal
+            open={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            audioSettings={audioSettings}
+            onMusicMutedChange={onMusicMutedChange}
+            onSfxMutedChange={onSfxMutedChange}
+            username={username}
+            onProfileClick={onProfileClick}
           />
-        </GradientBorder>
+        )}
       </div>
     </div>
   );

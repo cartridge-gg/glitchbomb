@@ -1,5 +1,9 @@
 import * as Popover from "@radix-ui/react-popover";
-import { SpeakerIcon, SpeakerMutedIcon } from "@/components/icons";
+import {
+  ControllerIcon,
+  SpeakerIcon,
+  SpeakerMutedIcon,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { AudioSettings } from "@/hooks/use-audio";
 
@@ -160,5 +164,79 @@ export const SoundPopover = ({
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
+  );
+};
+
+export interface SettingsModalProps {
+  open: boolean;
+  onClose: () => void;
+  audioSettings: AudioSettings;
+  onMusicMutedChange: (muted: boolean) => void;
+  onSfxMutedChange: (muted: boolean) => void;
+  username?: string;
+  onProfileClick?: () => void;
+}
+
+export const SettingsModal = ({
+  open,
+  onClose,
+  audioSettings,
+  onMusicMutedChange,
+  onSfxMutedChange,
+  username,
+  onProfileClick,
+}: SettingsModalProps) => {
+  if (!open) return null;
+
+  const isMuted = audioSettings.musicMuted && audioSettings.sfxMuted;
+
+  const toggleMute = () => {
+    const next = !isMuted;
+    onMusicMutedChange(next);
+    onSfxMutedChange(next);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+    >
+      {/* Backdrop */}
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+        onClick={onClose}
+        aria-label="Close settings"
+      />
+      {/* Content — centered */}
+      <div className="relative flex flex-col gap-3 px-6 w-full max-w-sm">
+        <span className="font-secondary text-xs tracking-[0.2em] uppercase text-green-400 mb-1">
+          Settings
+        </span>
+        <Button
+          variant="secondary"
+          gradient="green"
+          className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+          onClick={toggleMute}
+        >
+          {isMuted ? <SpeakerMutedIcon size="sm" /> : <SpeakerIcon size="sm" />}
+          {isMuted ? "Volume Off" : "Volume On"}
+        </Button>
+        {username && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() => {
+              onClose();
+              onProfileClick?.();
+            }}
+          >
+            <ControllerIcon size="sm" />
+            {username}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };

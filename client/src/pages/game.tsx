@@ -184,6 +184,12 @@ export const Game = () => {
       ?.then((name) => setUsername(name));
   }, [connector]);
 
+  const onProfileClick = useCallback(() => {
+    (connector as never as ControllerConnector)?.controller.openProfile(
+      "inventory",
+    );
+  }, [connector]);
+
   // Start background music on mount, stop on unmount
   useEffect(() => {
     startMusic("glitched");
@@ -643,6 +649,7 @@ export const Game = () => {
         onSfxMutedChange={setSfxMuted}
         onMusicVolumeChange={setMusicVolume}
         onSfxVolumeChange={setSfxVolume}
+        onProfileClick={onProfileClick}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
