@@ -53,7 +53,7 @@ export const CashOutCard = ({
               Value
             </span>
           </div>
-          <div className="w-px self-stretch bg-yellow-400/20" />
+          <div className="w-px self-stretch bg-yellow-100 opacity-5" />
           <div className="flex items-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
             <span className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
               {cashOutValue}

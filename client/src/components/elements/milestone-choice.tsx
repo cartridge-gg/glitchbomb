@@ -77,7 +77,7 @@ export const MilestoneChoice = ({
                   Ante
                 </span>
               </div>
-              <div className="w-px self-stretch bg-orange-400/20" />
+              <div className="w-px self-stretch bg-orange-100 opacity-5" />
               <div className="flex items-center gap-1 px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
                 <MoonrockIcon className="w-[clamp(10px,2svh,14px)] h-[clamp(10px,2svh,14px)] text-orange-400" />
                 <span className="text-orange-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
