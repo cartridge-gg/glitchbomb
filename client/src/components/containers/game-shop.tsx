@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LoadingSpinner,
   OrbCategorySummary,
@@ -60,14 +60,31 @@ const getOrbShortDescription = (orb: Orb): string => {
   return "";
 };
 
+const getParticleCategory = (orb: Orb) => {
+  if (orb.isBomb()) return "bomb";
+  if (orb.isPoint()) return "point";
+  if (orb.isMultiplier()) return "multiplier";
+  if (orb.isHealth()) return "health";
+  if (orb.isChips()) return "special";
+  if (orb.isMoonrock()) return "special";
+  return "point";
+};
+
 interface ShopItemProps {
   orb: Orb;
   price: number;
   disabled: boolean;
   onAdd: () => void;
+  buttonRef?: React.Ref<HTMLButtonElement>;
 }
 
-const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
+const ShopItem = ({
+  orb,
+  price,
+  disabled,
+  onAdd,
+  buttonRef,
+}: ShopItemProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleAdd = () => {
@@ -124,6 +141,7 @@ const ShopItem = ({ orb, price, disabled, onAdd }: ShopItemProps) => {
           </motion.span>
         </div>
         <button
+          ref={buttonRef}
           type="button"
           className="h-10 w-14 p-0 rounded-r-lg"
           style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
@@ -162,6 +180,30 @@ export const GameShop = ({
   // Show stash modal
   const [showStash, setShowStash] = useState(false);
   const [stashPulse, setStashPulse] = useState(0);
+
+  // Refs for particle animation
+  const stashRef = useRef<HTMLButtonElement>(null);
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const particleIdRef = useRef(0);
+
+  // Flying orb particles
+  const [particles, setParticles] = useState<
+    {
+      id: number;
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+      orb: Orb;
+    }[]
+  >([]);
+
+  const setButtonRef = useCallback(
+    (index: number) => (el: HTMLButtonElement | null) => {
+      buttonRefs.current[index] = el;
+    },
+    [],
+  );
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -251,6 +293,34 @@ export const GameShop = ({
       }));
       setHistory((prev) => [...prev, index]);
       setStashPulse((prev) => prev + 1);
+
+      // Spawn flying orb particle toward the matching category slot
+      const btnEl = buttonRefs.current[index];
+      const stashEl = stashRef.current;
+      if (btnEl && stashEl) {
+        const category = getParticleCategory(orb);
+        const targetEl =
+          stashEl.querySelector<HTMLElement>(
+            `[data-orb-category="${category}"]`,
+          ) ?? stashEl;
+        const btnRect = btnEl.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        const id = ++particleIdRef.current;
+        setParticles((prev) => [
+          ...prev,
+          {
+            id,
+            startX: btnRect.left + btnRect.width / 2,
+            startY: btnRect.top + btnRect.height / 2,
+            endX: targetRect.left + targetRect.width / 2,
+            endY: targetRect.top + targetRect.height / 2,
+            orb,
+          },
+        ]);
+        setTimeout(() => {
+          setParticles((prev) => prev.filter((p) => p.id !== id));
+        }, 600);
+      }
     }
   };
 
@@ -366,6 +436,7 @@ export const GameShop = ({
                   price={nextPrice}
                   disabled={!canAfford}
                   onAdd={() => handleIncrement(index)}
+                  buttonRef={setButtonRef(index)}
                 />
               );
             })}
@@ -385,6 +456,7 @@ export const GameShop = ({
           transition={{ duration: 0.25 }}
         >
           <OrbCategorySummary
+            ref={stashRef}
             orbs={displayBag}
             onClick={() => setShowStash(true)}
           />
@@ -425,6 +497,38 @@ export const GameShop = ({
         onOpenChange={setShowStash}
         orbs={displayBag}
       />
+
+      {/* Flying orb particles */}
+      <AnimatePresence>
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            className="fixed z-[60] pointer-events-none"
+            style={{ left: 0, top: 0 }}
+            initial={{
+              x: p.startX - 24,
+              y: p.startY - 24,
+              scale: 1.2,
+              opacity: 1,
+            }}
+            animate={{
+              x: p.endX - 24,
+              y: p.endY - 24,
+              scale: 0.6,
+              opacity: [1, 1, 0],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 120,
+              damping: 14,
+              opacity: { duration: 0.5, times: [0, 0.7, 1] },
+            }}
+          >
+            <OrbDisplay orb={p.orb} size="sm" showValue={false} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

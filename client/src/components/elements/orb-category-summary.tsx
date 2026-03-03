@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { BagIcon, MoonrockIcon } from "@/components/icons";
 import { Orb, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
@@ -65,10 +66,10 @@ const getOrbCategory = (orb: Orb): OrbCategory | null => {
   return null;
 };
 
-export const OrbCategorySummary = ({
-  orbs,
-  onClick,
-}: OrbCategorySummaryProps) => {
+export const OrbCategorySummary = forwardRef<
+  HTMLButtonElement,
+  OrbCategorySummaryProps
+>(({ orbs, onClick }, ref) => {
   // Count orbs by category
   const categoryCounts = orbs.reduce<Record<OrbCategory, number>>(
     (acc, orb) => {
@@ -93,6 +94,7 @@ export const OrbCategorySummary = ({
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClick}
       className="flex items-stretch w-full hover:brightness-110"
@@ -126,7 +128,11 @@ export const OrbCategorySummary = ({
             const count = categoryCounts[category] || 0;
 
             return (
-              <div key={category} className="relative flex-shrink-0">
+              <div
+                key={category}
+                className="relative flex-shrink-0"
+                data-orb-category={category}
+              >
                 {category === "special" ? (
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
@@ -180,4 +186,6 @@ export const OrbCategorySummary = ({
       </div>
     </button>
   );
-};
+});
+
+OrbCategorySummary.displayName = "OrbCategorySummary";
