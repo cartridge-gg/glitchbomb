@@ -94,8 +94,10 @@ export function useAudio() {
         return;
       }
 
-      // Different track or no music — stop current and create new
+      // Capture current position before switching, for time-synced crossfade
+      let seekPosition: number | null = null;
       if (musicRef.current) {
+        seekPosition = musicRef.current.currentTime;
         musicRef.current.pause();
         musicRef.current.src = "";
       }
@@ -104,12 +106,15 @@ export function useAudio() {
       audio.loop = true;
       audio.volume = vol;
 
-      // Start from a random position once metadata is loaded
+      // Seek to the same position as previous track, or random if fresh start
       audio.addEventListener(
         "loadedmetadata",
         () => {
           if (audio.duration > 0) {
-            audio.currentTime = Math.random() * audio.duration;
+            audio.currentTime =
+              seekPosition !== null
+                ? seekPosition % audio.duration
+                : Math.random() * audio.duration;
           }
         },
         { once: true },
