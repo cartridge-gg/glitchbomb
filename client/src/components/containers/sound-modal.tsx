@@ -197,7 +197,10 @@ export const SettingsModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" role="dialog">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+    >
       {/* Backdrop */}
       <button
         type="button"
@@ -205,8 +208,8 @@ export const SettingsModal = ({
         onClick={onClose}
         aria-label="Close settings"
       />
-      {/* Content — anchored to bottom half, left-padded */}
-      <div className="relative mt-auto mb-[20svh] flex flex-col gap-3 px-6">
+      {/* Content — centered */}
+      <div className="relative flex flex-col gap-3 px-6 w-full max-w-sm">
         <span className="font-secondary text-xs tracking-[0.2em] uppercase text-green-400 mb-1">
           Settings
         </span>
