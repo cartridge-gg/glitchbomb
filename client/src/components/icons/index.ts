@@ -61,6 +61,7 @@ export * from "./orb-point";
 export * from "./refresh";
 export * from "./sparkle";
 export * from "./sparkles";
+export * from "./speaker";
 export * from "./tick";
 export * from "./token";
 export * from "./trash";
