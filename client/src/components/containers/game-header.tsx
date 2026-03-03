@@ -163,17 +163,23 @@ export const GameHeader = ({
         >
           <ControllerIcon size="sm" />
         </Button>
-        {audioSettings && onMusicMutedChange && onSfxMutedChange && (
-          <SettingsModal
-            open={settingsOpen}
-            onClose={() => setSettingsOpen(false)}
-            audioSettings={audioSettings}
-            onMusicMutedChange={onMusicMutedChange}
-            onSfxMutedChange={onSfxMutedChange}
-            username={username}
-            onProfileClick={onProfileClick}
-          />
-        )}
+        {audioSettings &&
+          onMusicMutedChange &&
+          onSfxMutedChange &&
+          onMusicVolumeChange &&
+          onSfxVolumeChange && (
+            <SettingsModal
+              open={settingsOpen}
+              onClose={() => setSettingsOpen(false)}
+              audioSettings={audioSettings}
+              onMusicMutedChange={onMusicMutedChange}
+              onSfxMutedChange={onSfxMutedChange}
+              onMusicVolumeChange={onMusicVolumeChange}
+              onSfxVolumeChange={onSfxVolumeChange}
+              username={username}
+              onProfileClick={onProfileClick}
+            />
+          )}
       </div>
     </div>
   );
