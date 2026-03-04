@@ -43,19 +43,27 @@ export const RewardOverlay = ({
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
 
-  // Group identical orbs by value
-  const groupedOrbs = useMemo(() => {
+  // Deduplicate orbs by type and sort by kind
+  const uniqueOrbs = useMemo(() => {
     if (!orbs || orbs.length === 0) return [];
-    const map = new Map<string, { orb: OrbModel; count: number }>();
+    const seen = new Set<string>();
+    const deduped: OrbModel[] = [];
     for (const orb of orbs) {
-      const existing = map.get(orb.value);
-      if (existing) {
-        existing.count++;
-      } else {
-        map.set(orb.value, { orb, count: 1 });
+      if (!seen.has(orb.value)) {
+        seen.add(orb.value);
+        deduped.push(orb);
       }
     }
-    return Array.from(map.values());
+    const kindOrder = (o: OrbModel) => {
+      if (o.isBomb()) return 0;
+      if (o.isPoint()) return 1;
+      if (o.isMultiplier()) return 2;
+      if (o.isHealth()) return 3;
+      if (o.isChips()) return 4;
+      if (o.isMoonrock()) return 5;
+      return 6;
+    };
+    return deduped.sort((a, b) => kindOrder(a) - kindOrder(b));
   }, [orbs]);
 
   const [particles, setParticles] = useState<
@@ -153,23 +161,30 @@ export const RewardOverlay = ({
                   : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
               }
             >
-              {/* Moonrocks — large */}
-              <OrbDisplay
-                orb={moonrockOrb}
-                size="lg"
-                count={reward.count}
-                glowScale={1}
-              />
+              {/* Moonrocks — large, yellow override */}
+              <div
+                style={
+                  {
+                    "--orb-moonrock": "var(--yellow-100)",
+                  } as React.CSSProperties
+                }
+              >
+                <OrbDisplay
+                  orb={moonrockOrb}
+                  size="lg"
+                  count={reward.count}
+                  glowScale={1}
+                />
+              </div>
 
               {/* Orb grid */}
-              {groupedOrbs.length > 0 && (
+              {uniqueOrbs.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-2">
-                  {groupedOrbs.map(({ orb, count }) => (
+                  {uniqueOrbs.map((orb) => (
                     <OrbDisplay
                       key={orb.value}
                       orb={orb}
                       size="sm"
-                      count={count}
                       glowScale={0.5}
                     />
                   ))}
