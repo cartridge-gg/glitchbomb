@@ -209,8 +209,15 @@ export const OrbDisplay = ({
           style={{ backgroundColor: color }}
         >
           <span className="font-bold font-secondary text-black">
-            {displayValue}
-          </span>
+          {displayValue.startsWith("X") ? (
+              <>
+                <span className="font-bold opacity-50 font-secondary text-2xs">X</span>
+                {displayValue.slice(1)}
+              </>
+            ) : (
+              displayValue
+            )}
+            </span>
         </div>
       )}
     </div>
