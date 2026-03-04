@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   OrbDisplay,
   RarityPill,
@@ -145,12 +145,32 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
   );
 };
 
+const kindOrder = (orb: Orb): number => {
+  if (orb.isBomb()) return 0;
+  if (orb.isPoint()) return 1;
+  if (orb.isMultiplier()) return 2;
+  if (orb.isHealth()) return 3;
+  if (orb.isChips()) return 4;
+  if (orb.isMoonrock()) return 5;
+  if (orb.isCurse()) return 6;
+  return 7;
+};
+
 export const GameStash = ({ orbs, discards }: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
   const tabItems: Array<TabBarItem<TabType>> = [
     { id: "orbs", Icon: GridIcon },
     { id: "list", Icon: ListIcon },
   ];
+
+  const sorted = useMemo(() => {
+    const indices = orbs.map((_, i) => i);
+    indices.sort((a, b) => kindOrder(orbs[a]) - kindOrder(orbs[b]));
+    return {
+      orbs: indices.map((i) => orbs[i]),
+      discards: discards ? indices.map((i) => discards[i]) : undefined,
+    };
+  }, [orbs, discards]);
 
   return (
     <div className="flex flex-col gap-[clamp(6px,1.6svh,12px)] w-full max-w-[420px] mx-auto px-5 py-[clamp(8px,2svh,16px)] h-full min-h-0 text-left">
@@ -178,9 +198,9 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
         >
           {/* Tab Content */}
           {activeTab === "orbs" ? (
-            <OrbsTab orbs={orbs} discards={discards} />
+            <OrbsTab orbs={sorted.orbs} discards={sorted.discards} />
           ) : (
-            <ListTab orbs={orbs} discards={discards} />
+            <ListTab orbs={sorted.orbs} discards={sorted.discards} />
           )}
         </div>
       </div>
