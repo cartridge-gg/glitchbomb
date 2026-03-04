@@ -55,6 +55,13 @@ interface OrbParticle {
   distributionKey: DistributionKey;
 }
 
+const bombDamage = (orb: OrbModel): number | undefined => {
+  if (orb.value === OrbType.Bomb1 || orb.value === OrbType.StickyBomb) return 1;
+  if (orb.value === OrbType.Bomb2) return 2;
+  if (orb.value === OrbType.Bomb3) return 3;
+  return undefined;
+};
+
 const orbToDistributionKey = (orb: OrbModel): DistributionKey => {
   if (orb.isBomb()) return "bombs";
   if (orb.isMultiplier()) return "multipliers";
@@ -275,7 +282,12 @@ export const RewardOverlay = ({
                 <div className="grid grid-cols-4 gap-2 mt-2">
                   {uniqueOrbs.map((orb) => (
                     <div key={orb.value} ref={setOrbElementRef(orb.value)}>
-                      <OrbDisplay orb={orb} size="sm" glowScale={0.5} />
+                      <OrbDisplay
+                        orb={orb}
+                        size="sm"
+                        glowScale={0.5}
+                        count={bombDamage(orb)}
+                      />
                     </div>
                   ))}
                 </div>
