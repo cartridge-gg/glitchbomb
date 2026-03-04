@@ -2,8 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { type RefObject, useMemo, useRef, useState } from "react";
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import type { Orb as OrbModel } from "@/models";
-import { Orb } from "./orb";
+import { Orb as OrbModel, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 
 export interface RewardItem {
@@ -23,6 +22,8 @@ export interface RewardOverlayProps {
   reward: RewardItem;
   orbs?: OrbModel[];
 }
+
+const moonrockOrb = new OrbModel(OrbType.Moonrock15);
 
 const PARTICLE_COUNT = 6;
 const PARTICLE_STAGGER_MS = 50;
@@ -137,15 +138,10 @@ export const RewardOverlay = ({
               {heading}
             </motion.p>
 
-            {/* Stacked orb icons — two coins */}
+            {/* Rewards grid — moonrocks large in center, orbs below */}
             <motion.div
               ref={orbRef}
-              className="relative w-32 h-32"
-              style={
-                {
-                  "--orb-moonrock": "var(--yellow-100)",
-                } as React.CSSProperties
-              }
+              className="flex flex-col items-center gap-4"
               initial={{ scale: 0, opacity: 0 }}
               animate={{
                 scale: isExiting ? 0.5 : 1,
@@ -157,58 +153,29 @@ export const RewardOverlay = ({
                   : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
               }
             >
-              {/* Back orb — offset slightly right and down */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[46%] -translate-y-[48%] opacity-60">
-                <Orb variant={reward.variant} className="scale-[0.44]" />
-              </div>
-              {/* Front orb with black border */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[54%] -translate-y-[52%]">
-                <Orb
-                  variant={reward.variant}
-                  className="scale-[0.44]"
-                  style={{
-                    boxShadow: "0 0 0 12px black",
-                    borderRadius: "9999px",
-                  }}
-                />
-              </div>
-            </motion.div>
+              {/* Moonrocks — large */}
+              <OrbDisplay
+                orb={moonrockOrb}
+                size="lg"
+                count={reward.count}
+                glowScale={1}
+              />
 
-            {/* Count + label pill */}
-            <motion.div
-              className="flex items-center gap-2 rounded-full px-5 py-2"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.5 }}
-            >
-              <span className="font-secondary text-lg tracking-widest font-bold text-green-400">
-                {reward.count}
-              </span>
-              <span className="font-secondary text-lg tracking-widest text-green-400">
-                {reward.label}
-              </span>
+              {/* Orb grid */}
+              {groupedOrbs.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {groupedOrbs.map(({ orb, count }) => (
+                    <OrbDisplay
+                      key={orb.value}
+                      orb={orb}
+                      size="sm"
+                      count={count}
+                      glowScale={0.5}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
-
-            {/* Orb grid */}
-            {groupedOrbs.length > 0 && (
-              <motion.div
-                className="grid grid-cols-4 gap-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-                transition={isExiting ? { duration: 0.2 } : { delay: 0.6 }}
-              >
-                {groupedOrbs.map(({ orb, count }) => (
-                  <OrbDisplay
-                    key={orb.value}
-                    orb={orb}
-                    size="sm"
-                    count={count}
-                    glowScale={0.5}
-                  />
-                ))}
-              </motion.div>
-            )}
 
             {/* LET'S GO button */}
             <motion.div
