@@ -12,6 +12,7 @@ import {
 import {
   BombTracker,
   CashOutChoice,
+  type DistributionKey,
   GameStats,
   MilestoneChoice,
   PLChartTabs,
@@ -116,6 +117,10 @@ export const Game = () => {
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
   const [animateHeaderCount, setAnimateHeaderCount] = useState(false);
   const moonrocksRef = useRef<HTMLDivElement>(null);
+  const gameSceneRef = useRef<HTMLDivElement>(null);
+  const [revealedSegments, setRevealedSegments] = useState<Set<string>>(
+    new Set(),
+  );
   const rewardShownForGameRef = useRef<number | null>(null);
   const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
@@ -211,6 +216,7 @@ export const Game = () => {
       setIsPulling(false);
       setShowRewardOverlay(false);
       setAnimateHeaderCount(false);
+      setRevealedSegments(new Set());
     }
   }, [setGameId, searchParams]);
 
@@ -362,6 +368,28 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
+  const progressiveDistribution = useMemo(() => {
+    if (!showRewardOverlay || revealedSegments.size === 0) {
+      return {
+        points: 0,
+        bombs: 0,
+        multipliers: 0,
+        health: 0,
+        chips: 0,
+        moonrocks: 0,
+      };
+    }
+    return {
+      points: revealedSegments.has("points") ? distribution.points : 0,
+      bombs: revealedSegments.has("bombs") ? distribution.bombs : 0,
+      multipliers: revealedSegments.has("multipliers")
+        ? distribution.multipliers
+        : 0,
+      health: revealedSegments.has("health") ? distribution.health : 0,
+      chips: revealedSegments.has("chips") ? distribution.chips : 0,
+      moonrocks: revealedSegments.has("moonrocks") ? distribution.moonrocks : 0,
+    };
+  }, [showRewardOverlay, revealedSegments, distribution]);
   const bombDetails = useMemo(
     () =>
       game
@@ -593,11 +621,14 @@ export const Game = () => {
               />
               <GameScene
                 className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
+                sceneRef={gameSceneRef}
                 lives={game.health}
                 bombs={distribution.bombs}
                 orbs={game.pullables.length}
                 multiplier={game.multiplier}
-                values={distribution}
+                values={
+                  showRewardOverlay ? progressiveDistribution : distribution
+                }
                 hasCurse={hasCurse}
                 curseLabel={curseLabel}
                 orb={currentOrb}
@@ -667,8 +698,12 @@ export const Game = () => {
           setAnimateHeaderCount(false);
         }}
         onAnimationStart={() => setAnimateHeaderCount(true)}
+        onOrbArrive={(key: DistributionKey) =>
+          setRevealedSegments((prev) => new Set([...prev, key]))
+        }
         onTakeAll={playRewardSound}
         targetRef={moonrocksRef}
+        orbTargetRef={gameSceneRef}
         reward={{
           variant: "moonrock",
           count: game?.moonrocks ?? 0,
