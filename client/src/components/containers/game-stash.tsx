@@ -7,6 +7,7 @@ import {
 } from "@/components/elements";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
+import { OrbType } from "@/models/orb";
 
 export interface GameStashProps {
   orbs: Orb[];
@@ -47,53 +48,34 @@ const ListIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-interface OrbGroup {
-  orb: Orb;
-  count: number;
-  discardedCount: number;
-}
-
-const groupOrbs = (orbs: Orb[], discards?: boolean[]): OrbGroup[] => {
-  const map = new Map<string, OrbGroup>();
-  for (let i = 0; i < orbs.length; i++) {
-    const orb = orbs[i];
-    const key = orb.value;
-    const isDiscarded = Boolean(discards?.[i]);
-    const existing = map.get(key);
-    if (existing) {
-      existing.count += 1;
-      if (isDiscarded) existing.discardedCount += 1;
-    } else {
-      map.set(key, { orb, count: 1, discardedCount: isDiscarded ? 1 : 0 });
-    }
-  }
-  return Array.from(map.values());
+const bombDamage = (orb: Orb): number | undefined => {
+  if (orb.value === OrbType.Bomb1 || orb.value === OrbType.StickyBomb) return 1;
+  if (orb.value === OrbType.Bomb2) return 2;
+  if (orb.value === OrbType.Bomb3) return 3;
+  return undefined;
 };
 
 const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
-  const groups = groupOrbs(orbs, discards);
-
   return (
     <div className="flex flex-col items-start w-full">
-      {groups.length > 0 ? (
+      {orbs.length > 0 ? (
         <div className="flex justify-center w-full">
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
-            {groups.map((group) => {
-              const allDiscarded = group.discardedCount === group.count;
+            {orbs.map((orb, i) => {
+              const isDiscarded = Boolean(discards?.[i]);
               return (
                 <div
-                  key={group.orb.value}
+                  key={`${orb.value}-${i}`}
                   className={cn(
                     "flex flex-col items-center",
-                    allDiscarded && "opacity-25",
+                    isDiscarded && "opacity-25",
                   )}
                 >
                   <OrbDisplay
-                    orb={group.orb}
+                    orb={orb}
                     size="sm"
                     bombTierIcons
-                    valuePosition="top-right"
-                    count={group.count}
+                    count={bombDamage(orb)}
                   />
                 </div>
               );
@@ -112,45 +94,39 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
 };
 
 const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
-  const groups = groupOrbs(orbs, discards);
-
   return (
     <div className="flex flex-col gap-1 pb-4 w-full">
-      {groups.length > 0 ? (
-        groups.map((group) => {
-          const allDiscarded = group.discardedCount === group.count;
+      {orbs.length > 0 ? (
+        orbs.map((orb, i) => {
+          const isDiscarded = Boolean(discards?.[i]);
           return (
             <div
-              key={group.orb.value}
+              key={`${orb.value}-${i}`}
               className={cn(
                 "flex items-center gap-3 px-2 py-1.5 rounded-md bg-green-950/30 w-full",
-                allDiscarded && "opacity-25",
+                isDiscarded && "opacity-25",
               )}
             >
               {/* Orb icon */}
               <OrbDisplay
-                orb={group.orb}
+                orb={orb}
                 size="xs"
                 bombTierIcons
-                valuePosition="top-right"
-                count={group.count}
+                count={bombDamage(orb)}
               />
 
               {/* Orb info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-white font-secondary text-[11px] tracking-[0.3em] uppercase flex-1 min-w-0">
-                    {group.orb.name()}
+                    {orb.name()}
                   </h3>
-                  {!group.orb.isBomb() && (
-                    <RarityPill
-                      rarity={group.orb.rarity()}
-                      className="ml-auto"
-                    />
+                  {!orb.isBomb() && (
+                    <RarityPill rarity={orb.rarity()} className="ml-auto" />
                   )}
                 </div>
                 <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">
-                  {group.orb.description()}
+                  {orb.description()}
                 </p>
               </div>
             </div>
