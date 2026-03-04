@@ -520,8 +520,8 @@ export const GameShop = ({
             exit={{ opacity: 0 }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 20,
+              stiffness: 200,
+              damping: 24,
               opacity: { duration: 0.5, times: [0, 0.7, 1] },
             }}
           >
