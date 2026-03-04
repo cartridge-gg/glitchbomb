@@ -168,8 +168,8 @@ export const OrbCategorySummary = forwardRef<
                   }}
                 >
                   <span
-                    className="font-secondary"
-                    style={{ color: hexToRgba(config.color, 0.25) }}
+                    className="font-secondary font-bold"
+                    style={{ color: hexToRgba(config.color, 0.25), fontSize: "8px" }}
                   >
                     X
                   </span>
