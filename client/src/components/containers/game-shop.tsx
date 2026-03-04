@@ -415,7 +415,7 @@ export const GameShop = ({
       <div className="flex-1 min-h-0 flex flex-col justify-center">
         {/* Scrollable content */}
         <div
-          className="flex flex-col gap-[clamp(8px,2svh,12px)] max-h-full overflow-y-auto"
+          className="flex flex-col gap-[clamp(8px,2svh,12px)] max-h-full overflow-y-auto px-1 -mx-1"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Subtitle */}
