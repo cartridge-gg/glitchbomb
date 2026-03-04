@@ -165,11 +165,11 @@ export class Orb {
       case OrbType.Health3:
         return "Triple Health";
       case OrbType.Multiplier50:
-        return "Multiplier 50%";
+        return "Multiplier x2";
       case OrbType.Multiplier100:
-        return "Multiplier 100%";
+        return "Multiplier x3";
       case OrbType.Multiplier150:
-        return "Multiplier 150%";
+        return "Multiplier x4";
       case OrbType.Point5:
         return "Point 5";
       case OrbType.Point6:
@@ -214,11 +214,11 @@ export class Orb {
       case OrbType.Health3:
         return "Restore 3 health points.";
       case OrbType.Multiplier50:
-        return "Boost your score by 50%.";
+        return "Double your score multiplier.";
       case OrbType.Multiplier100:
-        return "Boost your score by 100%.";
+        return "Triple your score multiplier.";
       case OrbType.Multiplier150:
-        return "Boost your score by 150%.";
+        return "Quadruple your score multiplier.";
       case OrbType.Point5:
         return "Earn 5 points.";
       case OrbType.Point6:
