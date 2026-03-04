@@ -86,17 +86,9 @@ export const RewardOverlay = ({
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
 
-  // Deduplicate orbs by type and sort by kind
-  const uniqueOrbs = useMemo(() => {
+  // Sort orbs by kind
+  const sortedOrbs = useMemo(() => {
     if (!orbs || orbs.length === 0) return [];
-    const seen = new Set<string>();
-    const deduped: OrbModel[] = [];
-    for (const orb of orbs) {
-      if (!seen.has(orb.value)) {
-        seen.add(orb.value);
-        deduped.push(orb);
-      }
-    }
     const kindOrder = (o: OrbModel) => {
       if (o.isBomb()) return 0;
       if (o.isPoint()) return 1;
@@ -106,7 +98,7 @@ export const RewardOverlay = ({
       if (o.isMoonrock()) return 5;
       return 6;
     };
-    return deduped.sort((a, b) => kindOrder(a) - kindOrder(b));
+    return [...orbs].sort((a, b) => kindOrder(a) - kindOrder(b));
   }, [orbs]);
 
   const [particles, setParticles] = useState<
@@ -120,15 +112,15 @@ export const RewardOverlay = ({
     }[]
   >([]);
   const orbRef = useRef<HTMLDivElement>(null);
-  const orbElementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const orbElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [orbParticles, setOrbParticles] = useState<OrbParticle[]>([]);
 
   const setOrbElementRef = useCallback(
-    (value: string) => (el: HTMLDivElement | null) => {
+    (index: number) => (el: HTMLDivElement | null) => {
       if (el) {
-        orbElementRefs.current.set(value, el);
+        orbElementRefs.current.set(index, el);
       } else {
-        orbElementRefs.current.delete(value);
+        orbElementRefs.current.delete(index);
       }
     },
     [],
@@ -166,15 +158,15 @@ export const RewardOverlay = ({
 
     // Orb icons → chart center (direct flight)
     const orbTargetRect = orbTargetRef?.current?.getBoundingClientRect();
-    if (orbTargetRect && uniqueOrbs.length > 0) {
+    if (orbTargetRect && sortedOrbs.length > 0) {
       const chartCenterX = orbTargetRect.left + orbTargetRect.width / 2;
       const chartCenterY = orbTargetRect.top + orbTargetRect.height / 2;
 
-      const newOrbParticles: OrbParticle[] = uniqueOrbs.map((orb, i) => {
-        const el = orbElementRefs.current.get(orb.value);
+      const newOrbParticles: OrbParticle[] = sortedOrbs.map((orb, i) => {
+        const el = orbElementRefs.current.get(i);
         const elRect = el?.getBoundingClientRect();
         return {
-          id: orb.value,
+          id: `${orb.value}-${i}`,
           startX: elRect
             ? elRect.left + elRect.width / 2
             : window.innerWidth / 2,
@@ -206,8 +198,8 @@ export const RewardOverlay = ({
 
     // Dismiss
     const lastOrbMs =
-      uniqueOrbs.length > 0
-        ? (uniqueOrbs.length - 1) * ORB_STAGGER_MS + ORB_FLIGHT_S * 1000 + 150
+      sortedOrbs.length > 0
+        ? (sortedOrbs.length - 1) * ORB_STAGGER_MS + ORB_FLIGHT_S * 1000 + 150
         : 600;
     setTimeout(
       () => {
@@ -278,10 +270,10 @@ export const RewardOverlay = ({
               </div>
 
               {/* Orb grid */}
-              {uniqueOrbs.length > 0 && (
+              {sortedOrbs.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-2">
-                  {uniqueOrbs.map((orb) => (
-                    <div key={orb.value} ref={setOrbElementRef(orb.value)}>
+                  {sortedOrbs.map((orb, i) => (
+                    <div key={`${orb.value}-${i}`} ref={setOrbElementRef(i)}>
                       <OrbDisplay
                         orb={orb}
                         size="sm"
