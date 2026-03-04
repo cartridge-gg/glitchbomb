@@ -41,7 +41,7 @@ export const RewardOverlay = ({
   onTakeAll,
   targetRef,
   heading = "YOU RECEIVE",
-  actionLabel = "TAKE ALL",
+  actionLabel = "LET'S GO",
   reward,
   orbs,
 }: RewardOverlayProps) => {
@@ -146,8 +146,7 @@ export const RewardOverlay = ({
           <div className="flex flex-col items-center gap-6">
             {/* Heading */}
             <motion.p
-              className="font-secondary text-sm tracking-[0.3em]"
-              style={{ color: "#FFF121" }}
+              className="font-secondary text-sm tracking-[0.3em] text-green-400"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
               transition={isExiting ? { duration: 0.2 } : { delay: 0.1 }}
@@ -157,7 +156,7 @@ export const RewardOverlay = ({
 
             {/* Slide carousel: orb circles + count pill, with arrows */}
             <motion.div
-              className="flex items-center gap-3"
+              className="flex flex-col items-center gap-6"
               initial={{ scale: 0, opacity: 0 }}
               animate={{
                 scale: isExiting ? 0.5 : 1,
@@ -169,26 +168,26 @@ export const RewardOverlay = ({
                   : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
               }
             >
-              {/* Left arrow */}
-              {hasMultipleSlides && (
-                <Button
-                  variant="secondary"
-                  gradient="green"
-                  className="h-10 w-10 p-0 shrink-0 relative z-10"
-                  onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
-                  disabled={slideIndex <= 0}
-                  aria-label="Previous reward"
-                >
-                  <BracketArrowIcon size="xs" direction="left" />
-                </Button>
-              )}
+              {/* Orb icon row with arrows centered on icon */}
+              <div className="flex items-center gap-8">
+                {/* Left arrow */}
+                {hasMultipleSlides && (
+                  <Button
+                    variant="secondary"
+                    gradient="green"
+                    className="h-10 w-10 p-0 shrink-0 relative z-10"
+                    onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
+                    disabled={slideIndex <= 0}
+                    aria-label="Previous reward"
+                  >
+                    <BracketArrowIcon size="xs" direction="left" />
+                  </Button>
+                )}
 
-              {/* Slide content — fixed width, pointer-events-none so scaled orbs don't block arrows */}
-              <div className="flex flex-col items-center gap-6 w-40 pointer-events-none">
                 {/* Stacked orb icons — two coins */}
                 <div
                   ref={orbRef}
-                  className="relative w-32 h-32"
+                  className="relative w-32 h-32 pointer-events-none"
                   style={
                     {
                       "--orb-moonrock": "var(--yellow-100)",
@@ -226,48 +225,42 @@ export const RewardOverlay = ({
                   </AnimatePresence>
                 </div>
 
-                {/* Count + label pill */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={slideIndex}
-                    className="flex items-center gap-2 rounded-full px-5 py-2"
-                    style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2 }}
+                {/* Right arrow */}
+                {hasMultipleSlides && (
+                  <Button
+                    variant="secondary"
+                    gradient="green"
+                    className="h-10 w-10 p-0 shrink-0 relative z-10"
+                    onClick={() =>
+                      setSlideIndex((i) => Math.min(maxSlide, i + 1))
+                    }
+                    disabled={slideIndex >= maxSlide}
+                    aria-label="Next reward"
                   >
-                    <span
-                      className="font-secondary text-lg tracking-widest font-bold"
-                      style={{ color: "#FFF121" }}
-                    >
-                      {slides[slideIndex].count}
-                    </span>
-                    <span
-                      className="font-secondary text-lg tracking-widest"
-                      style={{ color: "#FFF121" }}
-                    >
-                      {slides[slideIndex].label}
-                    </span>
-                  </motion.div>
-                </AnimatePresence>
+                    <BracketArrowIcon size="xs" direction="right" />
+                  </Button>
+                )}
               </div>
 
-              {/* Right arrow */}
-              {hasMultipleSlides && (
-                <Button
-                  variant="secondary"
-                  gradient="green"
-                  className="h-10 w-10 p-0 shrink-0 relative z-10"
-                  onClick={() =>
-                    setSlideIndex((i) => Math.min(maxSlide, i + 1))
-                  }
-                  disabled={slideIndex >= maxSlide}
-                  aria-label="Next reward"
+              {/* Count + label pill */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={slideIndex}
+                  className="flex items-center gap-2 rounded-full px-5 py-2"
+                  style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <BracketArrowIcon size="xs" direction="right" />
-                </Button>
-              )}
+                  <span className="font-secondary text-lg tracking-widest font-bold text-green-400">
+                    {slides[slideIndex].count}
+                  </span>
+                  <span className="font-secondary text-lg tracking-widest text-green-400">
+                    {slides[slideIndex].label}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
             </motion.div>
 
             {/* TAKE ALL button — matches homepage style */}
