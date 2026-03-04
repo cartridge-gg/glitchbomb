@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { type RefObject, useRef, useState } from "react";
+import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Orb } from "./orb";
+import { Orb as OrbModel, OrbType } from "@/models";
+import { OrbDisplay } from "./orb-display";
+import { getOrbColor, getOrbIcon } from "./orb-utils";
 
 export interface RewardItem {
   variant: "moonrock" | "chip" | "point" | "multiplier";
@@ -10,33 +12,96 @@ export interface RewardItem {
   label: string;
 }
 
+export type DistributionKey =
+  | "bombs"
+  | "points"
+  | "multipliers"
+  | "health"
+  | "chips"
+  | "moonrocks";
+
 export interface RewardOverlayProps {
   open: boolean;
   onDismiss: () => void;
   onAnimationStart?: () => void;
+  onOrbArrive?: (key: DistributionKey) => void;
   onTakeAll?: () => void;
   targetRef?: RefObject<HTMLElement | null>;
+  orbTargetRef?: RefObject<HTMLElement | null>;
   heading?: string;
   actionLabel?: string;
   reward: RewardItem;
+  orbs?: OrbModel[];
 }
+
+const moonrockOrb = new OrbModel(OrbType.Moonrock15);
 
 const PARTICLE_COUNT = 6;
 const PARTICLE_STAGGER_MS = 50;
 const ANIMATION_START_DELAY_MS = 300;
-const ANIMATION_TOTAL_MS = 800;
+
+const ORB_STAGGER_MS = 60;
+const ORB_FLIGHT_S = 0.4;
+const ORB_ARRIVE_OFFSET_MS = 250;
+
+interface OrbParticle {
+  id: string;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  delay: number;
+  orb: OrbModel;
+  distributionKey: DistributionKey;
+}
+
+const orbToDistributionKey = (orb: OrbModel): DistributionKey => {
+  if (orb.isBomb()) return "bombs";
+  if (orb.isMultiplier()) return "multipliers";
+  if (orb.isHealth()) return "health";
+  if (orb.isChips()) return "chips";
+  if (orb.isMoonrock()) return "moonrocks";
+  return "points";
+};
 
 export const RewardOverlay = ({
   open,
   onDismiss,
   onAnimationStart,
+  onOrbArrive,
   onTakeAll,
   targetRef,
+  orbTargetRef,
   heading = "YOU RECEIVE",
-  actionLabel = "TAKE ALL",
+  actionLabel = "LET'S GO",
   reward,
+  orbs,
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
+
+  // Deduplicate orbs by type and sort by kind
+  const uniqueOrbs = useMemo(() => {
+    if (!orbs || orbs.length === 0) return [];
+    const seen = new Set<string>();
+    const deduped: OrbModel[] = [];
+    for (const orb of orbs) {
+      if (!seen.has(orb.value)) {
+        seen.add(orb.value);
+        deduped.push(orb);
+      }
+    }
+    const kindOrder = (o: OrbModel) => {
+      if (o.isBomb()) return 0;
+      if (o.isPoint()) return 1;
+      if (o.isMultiplier()) return 2;
+      if (o.isHealth()) return 3;
+      if (o.isChips()) return 4;
+      if (o.isMoonrock()) return 5;
+      return 6;
+    };
+    return deduped.sort((a, b) => kindOrder(a) - kindOrder(b));
+  }, [orbs]);
+
   const [particles, setParticles] = useState<
     {
       id: number;
@@ -48,13 +113,26 @@ export const RewardOverlay = ({
     }[]
   >([]);
   const orbRef = useRef<HTMLDivElement>(null);
+  const orbElementRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [orbParticles, setOrbParticles] = useState<OrbParticle[]>([]);
+
+  const setOrbElementRef = useCallback(
+    (value: string) => (el: HTMLDivElement | null) => {
+      if (el) {
+        orbElementRefs.current.set(value, el);
+      } else {
+        orbElementRefs.current.delete(value);
+      }
+    },
+    [],
+  );
 
   const handleTakeAll = () => {
     if (isExiting) return;
     setIsExiting(true);
     onTakeAll?.();
 
-    // Calculate particle start (orb center) and end (target pill) positions
+    // Moonrock particles → header
     const orbRect = orbRef.current?.getBoundingClientRect();
     const targetRect = targetRef?.current?.getBoundingClientRect();
 
@@ -79,27 +157,71 @@ export const RewardOverlay = ({
     }));
     setParticles(newParticles);
 
-    // Trigger header count-up mid-flight
+    // Orb icons → chart center (direct flight)
+    const orbTargetRect = orbTargetRef?.current?.getBoundingClientRect();
+    if (orbTargetRect && uniqueOrbs.length > 0) {
+      const chartCenterX = orbTargetRect.left + orbTargetRect.width / 2;
+      const chartCenterY = orbTargetRect.top + orbTargetRect.height / 2;
+
+      const newOrbParticles: OrbParticle[] = uniqueOrbs.map((orb, i) => {
+        const el = orbElementRefs.current.get(orb.value);
+        const elRect = el?.getBoundingClientRect();
+        return {
+          id: orb.value,
+          startX: elRect
+            ? elRect.left + elRect.width / 2
+            : window.innerWidth / 2,
+          startY: elRect
+            ? elRect.top + elRect.height / 2
+            : window.innerHeight / 2,
+          endX: chartCenterX,
+          endY: chartCenterY,
+          delay: i * ORB_STAGGER_MS,
+          orb,
+          distributionKey: orbToDistributionKey(orb),
+        };
+      });
+      setOrbParticles(newOrbParticles);
+
+      // Fire onOrbArrive as each icon lands
+      for (const p of newOrbParticles) {
+        setTimeout(
+          () => onOrbArrive?.(p.distributionKey),
+          p.delay + ORB_ARRIVE_OFFSET_MS,
+        );
+      }
+    }
+
+    // Header count-up
     setTimeout(() => {
       onAnimationStart?.();
     }, ANIMATION_START_DELAY_MS);
 
-    // Dismiss after full animation
-    setTimeout(() => {
-      setIsExiting(false);
-      setParticles([]);
-      onDismiss();
-    }, ANIMATION_TOTAL_MS);
+    // Dismiss
+    const lastOrbMs =
+      uniqueOrbs.length > 0
+        ? (uniqueOrbs.length - 1) * ORB_STAGGER_MS + ORB_FLIGHT_S * 1000 + 150
+        : 600;
+    setTimeout(
+      () => {
+        setIsExiting(false);
+        setParticles([]);
+        setOrbParticles([]);
+        onDismiss();
+      },
+      Math.max(600, lastOrbMs),
+    );
   };
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
+          className={`fixed inset-0 z-50 flex items-center justify-center ${isExiting ? "" : "backdrop-blur-md"}`}
           style={{
-            background:
-              "radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, transparent 70%)",
+            background: isExiting
+              ? "transparent"
+              : "radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, transparent 70%)",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -109,8 +231,7 @@ export const RewardOverlay = ({
           <div className="flex flex-col items-center gap-6">
             {/* Heading */}
             <motion.p
-              className="font-secondary text-sm tracking-[0.3em]"
-              style={{ color: "#FFF121" }}
+              className="font-secondary text-sm tracking-[0.3em] text-green-400"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
               transition={isExiting ? { duration: 0.2 } : { delay: 0.1 }}
@@ -118,15 +239,10 @@ export const RewardOverlay = ({
               {heading}
             </motion.p>
 
-            {/* Stacked orb icons — two coins */}
+            {/* Rewards grid — moonrocks large in center, orbs below */}
             <motion.div
               ref={orbRef}
-              className="relative w-32 h-32"
-              style={
-                {
-                  "--orb-moonrock": "var(--yellow-100)",
-                } as React.CSSProperties
-              }
+              className="flex flex-col items-center gap-4"
               initial={{ scale: 0, opacity: 0 }}
               animate={{
                 scale: isExiting ? 0.5 : 1,
@@ -138,50 +254,39 @@ export const RewardOverlay = ({
                   : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
               }
             >
-              {/* Back orb — offset slightly right and down */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[46%] -translate-y-[48%] opacity-60">
-                <Orb variant={reward.variant} className="scale-[0.44]" />
-              </div>
-              {/* Front orb with black border */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[54%] -translate-y-[52%]">
-                <Orb
-                  variant={reward.variant}
-                  className="scale-[0.44]"
-                  style={{
-                    boxShadow: "0 0 0 12px black",
-                    borderRadius: "9999px",
-                  }}
+              {/* Moonrocks — large, yellow override */}
+              <div
+                style={
+                  {
+                    "--orb-moonrock": "var(--yellow-100)",
+                  } as React.CSSProperties
+                }
+              >
+                <OrbDisplay
+                  orb={moonrockOrb}
+                  size="lg"
+                  count={reward.count}
+                  glowScale={1}
                 />
               </div>
+
+              {/* Orb grid */}
+              {uniqueOrbs.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {uniqueOrbs.map((orb) => (
+                    <div key={orb.value} ref={setOrbElementRef(orb.value)}>
+                      <OrbDisplay orb={orb} size="sm" glowScale={0.5} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
 
-            {/* Count + label pill */}
-            <motion.div
-              className="flex items-center gap-2 rounded-full px-5 py-2"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.5 }}
-            >
-              <span
-                className="font-secondary text-lg tracking-widest font-bold"
-                style={{ color: "#FFF121" }}
-              >
-                {reward.count}
-              </span>
-              <span
-                className="font-secondary text-lg tracking-widest"
-                style={{ color: "#FFF121" }}
-              >
-                {reward.label}
-              </span>
-            </motion.div>
-
-            {/* TAKE ALL button — matches homepage style */}
+            {/* LET'S GO button */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.65 }}
+              transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
             >
               <Button
                 variant="secondary"
@@ -223,6 +328,45 @@ export const RewardOverlay = ({
               <MoonrockIcon className="w-6 h-6 text-yellow-400" />
             </motion.div>
           ))}
+
+          {/* Flying orb icons → chart center */}
+          {orbParticles.map((p) => {
+            const Icon = getOrbIcon(p.orb);
+            const color = getOrbColor(p.orb);
+            const half = 14;
+            return (
+              <motion.div
+                key={p.id}
+                className="fixed z-[60] pointer-events-none"
+                style={{ left: 0, top: 0 }}
+                initial={{
+                  x: p.startX - half,
+                  y: p.startY - half,
+                  scale: 1,
+                  opacity: 1,
+                }}
+                animate={{
+                  x: p.endX - half,
+                  y: p.endY - half,
+                  scale: 0.3,
+                  opacity: 0,
+                }}
+                transition={{
+                  delay: p.delay / 1000,
+                  duration: ORB_FLIGHT_S,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
+                <Icon
+                  className="w-7 h-7"
+                  style={{
+                    color,
+                    filter: `drop-shadow(0 0 6px ${color})`,
+                  }}
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
       )}
     </AnimatePresence>

@@ -150,7 +150,7 @@ export const Distribution = ({
               strokeLinecap="butt"
               style={{
                 transition:
-                  "stroke-dasharray 0.5s ease-in-out, stroke-dashoffset 0.5s ease-in-out",
+                  "stroke-dasharray 0.8s cubic-bezier(0.22, 1, 0.36, 1), stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
               }}
             />
           );
@@ -174,13 +174,16 @@ export const Distribution = ({
           return (
             <div
               key={`icon-${segment.config.key}`}
-              className="absolute transition-transform duration-500 ease-in-out"
+              className="absolute"
               style={{
                 top: "50%",
                 left: "50%",
                 transform: `rotate(${angleInDegrees}deg) translateY(-${radius}px) rotate(-${angleInDegrees}deg) translate(-50%, -50%)`,
                 transformOrigin: "center",
                 color: segment.config.iconColor,
+                transition:
+                  "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease-out",
+                opacity: segment.percentage > 0 ? 1 : 0,
               }}
             >
               <IconComponent size="lg" />

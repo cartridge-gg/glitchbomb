@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import {
   Distribution,
   type DistributionValues,
@@ -34,6 +34,7 @@ export interface GameSceneProps
   };
   pullLoading?: boolean;
   onPull: () => void;
+  sceneRef?: RefObject<HTMLDivElement | null>;
 }
 
 const useViewportSize = () => {
@@ -79,6 +80,7 @@ export const GameScene = ({
   variant,
   className,
   onPull,
+  sceneRef,
   ...props
 }: GameSceneProps) => {
   const { height } = useViewportSize();
@@ -131,6 +133,7 @@ export const GameScene = ({
     <div className={gameSceneVariants({ variant, className })} {...props}>
       {/* Distribution */}
       <div
+        ref={sceneRef}
         className={cn(
           "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
           phase === 0 && "opacity-100",
