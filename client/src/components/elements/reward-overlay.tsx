@@ -4,10 +4,15 @@ import { BracketArrowIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { Orb as OrbModel } from "@/models";
 import { Orb } from "./orb";
-import { OrbDisplay } from "./orb-display";
 
 export interface RewardItem {
   variant: "moonrock" | "chip" | "point" | "multiplier";
+  count: number;
+  label: string;
+}
+
+interface Slide {
+  variant: "moonrock" | "chip" | "point" | "multiplier" | "bomb" | "health";
   count: number;
   label: string;
 }
@@ -29,8 +34,6 @@ const PARTICLE_STAGGER_MS = 50;
 const ANIMATION_START_DELAY_MS = 300;
 const ANIMATION_TOTAL_MS = 800;
 
-const VISIBLE_ORBS = 4;
-
 export const RewardOverlay = ({
   open,
   onDismiss,
@@ -43,11 +46,12 @@ export const RewardOverlay = ({
   orbs,
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [slideIndex, setSlideIndex] = useState(0);
 
-  // Group identical orbs by value
-  const groupedOrbs = useMemo(() => {
-    if (!orbs || orbs.length === 0) return [];
+  // Build slides: first is the reward (moonrocks), rest are grouped orbs
+  const slides = useMemo<Slide[]>(() => {
+    const result: Slide[] = [reward];
+    if (!orbs || orbs.length === 0) return result;
     const map = new Map<string, { orb: OrbModel; count: number }>();
     for (const orb of orbs) {
       const existing = map.get(orb.value);
@@ -57,10 +61,18 @@ export const RewardOverlay = ({
         map.set(orb.value, { orb, count: 1 });
       }
     }
-    return Array.from(map.values());
-  }, [orbs]);
+    for (const { orb, count } of map.values()) {
+      result.push({
+        variant: orb.outcomeVariant(),
+        count,
+        label: orb.name(),
+      });
+    }
+    return result;
+  }, [reward, orbs]);
 
-  const maxIndex = Math.max(0, groupedOrbs.length - VISIBLE_ORBS);
+  const maxSlide = slides.length - 1;
+  const hasMultipleSlides = slides.length > 1;
 
   const [particles, setParticles] = useState<
     {
@@ -143,15 +155,9 @@ export const RewardOverlay = ({
               {heading}
             </motion.p>
 
-            {/* Stacked orb icons — two coins */}
+            {/* Slide carousel: orb circles + count pill, with arrows */}
             <motion.div
-              ref={orbRef}
-              className="relative w-32 h-32"
-              style={
-                {
-                  "--orb-moonrock": "var(--yellow-100)",
-                } as React.CSSProperties
-              }
+              className="flex items-center gap-3"
               initial={{ scale: 0, opacity: 0 }}
               animate={{
                 scale: isExiting ? 0.5 : 1,
@@ -163,95 +169,127 @@ export const RewardOverlay = ({
                   : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
               }
             >
-              {/* Back orb — offset slightly right and down */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[46%] -translate-y-[48%] opacity-60">
-                <Orb variant={reward.variant} className="scale-[0.44]" />
-              </div>
-              {/* Front orb with black border */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-[54%] -translate-y-[52%]">
-                <Orb
-                  variant={reward.variant}
-                  className="scale-[0.44]"
-                  style={{
-                    boxShadow: "0 0 0 12px black",
-                    borderRadius: "9999px",
-                  }}
-                />
-              </div>
-            </motion.div>
-
-            {/* Count + label pill */}
-            <motion.div
-              className="flex items-center gap-2 rounded-full px-5 py-2"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.5 }}
-            >
-              <span
-                className="font-secondary text-lg tracking-widest font-bold"
-                style={{ color: "#FFF121" }}
-              >
-                {reward.count}
-              </span>
-              <span
-                className="font-secondary text-lg tracking-widest"
-                style={{ color: "#FFF121" }}
-              >
-                {reward.label}
-              </span>
-            </motion.div>
-
-            {/* Orb carousel */}
-            {groupedOrbs.length > 0 && (
-              <motion.div
-                className="flex items-center gap-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-                transition={isExiting ? { duration: 0.2 } : { delay: 0.6 }}
-              >
+              {/* Left arrow */}
+              {hasMultipleSlides && (
                 <Button
                   variant="secondary"
                   gradient="green"
                   className="h-10 w-10 p-0 shrink-0"
-                  onClick={() => setCarouselIndex((i) => Math.max(0, i - 1))}
-                  disabled={carouselIndex <= 0}
-                  aria-label="Previous orbs"
+                  onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
+                  disabled={slideIndex <= 0}
+                  aria-label="Previous reward"
                 >
                   <BracketArrowIcon size="xs" direction="left" />
                 </Button>
+              )}
+
+              {/* Slide content */}
+              <div className="flex flex-col items-center gap-6">
+                {/* Stacked orb icons — two coins */}
                 <div
-                  className="overflow-hidden"
-                  style={{ width: `${VISIBLE_ORBS * 56}px` }}
+                  ref={orbRef}
+                  className="relative w-32 h-32"
+                  style={
+                    {
+                      "--orb-moonrock": "var(--yellow-100)",
+                    } as React.CSSProperties
+                  }
                 >
-                  <motion.div
-                    className="flex gap-1"
-                    animate={{ x: -carouselIndex * 56 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  >
-                    {groupedOrbs.map(({ orb, count }) => (
-                      <OrbDisplay
-                        key={orb.value}
-                        orb={orb}
-                        size="sm"
-                        count={count}
-                        glowScale={0.5}
-                      />
-                    ))}
-                  </motion.div>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={slideIndex}
+                      className="absolute inset-0"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {/* Back orb — offset slightly right and down */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-[46%] -translate-y-[48%] opacity-60">
+                        <Orb
+                          variant={slides[slideIndex].variant}
+                          className="scale-[0.44]"
+                        />
+                      </div>
+                      {/* Front orb with black border */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-[54%] -translate-y-[52%]">
+                        <Orb
+                          variant={slides[slideIndex].variant}
+                          className="scale-[0.44]"
+                          style={{
+                            boxShadow: "0 0 0 12px black",
+                            borderRadius: "9999px",
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
+
+                {/* Count + label pill */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={slideIndex}
+                    className="flex items-center gap-2 rounded-full px-5 py-2"
+                    style={{ backgroundColor: "rgba(0, 0, 0, 0.20)" }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <span
+                      className="font-secondary text-lg tracking-widest font-bold"
+                      style={{ color: "#FFF121" }}
+                    >
+                      {slides[slideIndex].count}
+                    </span>
+                    <span
+                      className="font-secondary text-lg tracking-widest"
+                      style={{ color: "#FFF121" }}
+                    >
+                      {slides[slideIndex].label}
+                    </span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Right arrow */}
+              {hasMultipleSlides && (
                 <Button
                   variant="secondary"
                   gradient="green"
                   className="h-10 w-10 p-0 shrink-0"
                   onClick={() =>
-                    setCarouselIndex((i) => Math.min(maxIndex, i + 1))
+                    setSlideIndex((i) => Math.min(maxSlide, i + 1))
                   }
-                  disabled={carouselIndex >= maxIndex}
-                  aria-label="Next orbs"
+                  disabled={slideIndex >= maxSlide}
+                  aria-label="Next reward"
                 >
                   <BracketArrowIcon size="xs" direction="right" />
                 </Button>
+              )}
+            </motion.div>
+
+            {/* Dot indicators */}
+            {hasMultipleSlides && (
+              <motion.div
+                className="flex gap-1.5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isExiting ? 0 : 1 }}
+                transition={isExiting ? { duration: 0.2 } : { delay: 0.5 }}
+              >
+                {slides.map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full transition-colors duration-200"
+                    style={{
+                      backgroundColor:
+                        i === slideIndex
+                          ? "#FFF121"
+                          : "rgba(255, 255, 255, 0.3)",
+                    }}
+                  />
+                ))}
               </motion.div>
             )}
 
@@ -259,7 +297,7 @@ export const RewardOverlay = ({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.75 }}
+              transition={isExiting ? { duration: 0.2 } : { delay: 0.65 }}
             >
               <Button
                 variant="secondary"
