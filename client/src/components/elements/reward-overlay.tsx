@@ -174,7 +174,7 @@ export const RewardOverlay = ({
                 <Button
                   variant="secondary"
                   gradient="green"
-                  className="h-10 w-10 p-0 shrink-0"
+                  className="h-10 w-10 p-0 shrink-0 relative z-10"
                   onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
                   disabled={slideIndex <= 0}
                   aria-label="Previous reward"
@@ -183,8 +183,8 @@ export const RewardOverlay = ({
                 </Button>
               )}
 
-              {/* Slide content — fixed width so arrows don't shift */}
-              <div className="flex flex-col items-center gap-6 w-40">
+              {/* Slide content — fixed width, pointer-events-none so scaled orbs don't block arrows */}
+              <div className="flex flex-col items-center gap-6 w-40 pointer-events-none">
                 {/* Stacked orb icons — two coins */}
                 <div
                   ref={orbRef}
@@ -258,7 +258,7 @@ export const RewardOverlay = ({
                 <Button
                   variant="secondary"
                   gradient="green"
-                  className="h-10 w-10 p-0 shrink-0"
+                  className="h-10 w-10 p-0 shrink-0 relative z-10"
                   onClick={() =>
                     setSlideIndex((i) => Math.min(maxSlide, i + 1))
                   }
