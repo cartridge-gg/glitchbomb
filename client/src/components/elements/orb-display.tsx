@@ -100,16 +100,14 @@ const getOrbColor = (orb: Orb) => {
 };
 
 // Get display value for orb (the number shown in the icon)
-const getOrbDisplayValue = (
-  orb: Orb,
-): { prefix?: string; value: string } | null => {
+const getOrbDisplayValue = (orb: Orb): string => {
   const name = orb.name();
   if (orb.isMultiplier()) {
     const match = name.match(/x(\d+)/i);
-    return match ? { prefix: "x", value: match[1] } : null;
+    return match ? `X${match[1]}` : "";
   }
   const match = name.match(/(\d+)/);
-  return match ? { value: match[1] } : null;
+  return match ? match[1] : "";
 };
 
 export interface OrbDisplayProps
@@ -137,8 +135,7 @@ export const OrbDisplay = ({
 }: OrbDisplayProps) => {
   const Icon = getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
-  const displayData =
-    count != null ? { value: String(count) } : getOrbDisplayValue(orb);
+  const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
   const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (
@@ -200,7 +197,7 @@ export const OrbDisplay = ({
         />
       </div>
       {/* Value pill - outside the clipped area */}
-      {showValue && displayData && (
+      {showValue && displayValue && (
         <div
           className={cn(
             "absolute z-30 rounded-full flex items-center justify-center",
@@ -212,12 +209,7 @@ export const OrbDisplay = ({
           style={{ backgroundColor: color }}
         >
           <span className="font-bold font-secondary text-black">
-            {displayData.prefix && (
-              <span className="opacity-50 text-[0.75em] uppercase">
-                {displayData.prefix}
-              </span>
-            )}
-            {displayData.value}
+            {displayValue}
           </span>
         </div>
       )}
