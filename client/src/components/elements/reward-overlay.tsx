@@ -271,7 +271,7 @@ export const RewardOverlay = ({
 
               {/* Orb grid */}
               {sortedOrbs.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-2">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
                   {sortedOrbs.map((orb, i) => (
                     <div key={`${orb.value}-${i}`} ref={setOrbElementRef(i)}>
                       <OrbDisplay
