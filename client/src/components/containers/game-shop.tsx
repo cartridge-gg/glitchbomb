@@ -521,7 +521,7 @@ export const GameShop = ({
             transition={{
               type: "spring",
               stiffness: 120,
-              damping: 14,
+              damping: 20,
               opacity: { duration: 0.5, times: [0, 0.7, 1] },
             }}
           >
