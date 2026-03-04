@@ -183,8 +183,8 @@ export const RewardOverlay = ({
                 </Button>
               )}
 
-              {/* Slide content */}
-              <div className="flex flex-col items-center gap-6">
+              {/* Slide content — fixed width so arrows don't shift */}
+              <div className="flex flex-col items-center gap-6 w-40">
                 {/* Stacked orb icons — two coins */}
                 <div
                   ref={orbRef}
@@ -269,29 +269,6 @@ export const RewardOverlay = ({
                 </Button>
               )}
             </motion.div>
-
-            {/* Dot indicators */}
-            {hasMultipleSlides && (
-              <motion.div
-                className="flex gap-1.5"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isExiting ? 0 : 1 }}
-                transition={isExiting ? { duration: 0.2 } : { delay: 0.5 }}
-              >
-                {slides.map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-1.5 h-1.5 rounded-full transition-colors duration-200"
-                    style={{
-                      backgroundColor:
-                        i === slideIndex
-                          ? "#FFF121"
-                          : "rgba(255, 255, 255, 0.3)",
-                    }}
-                  />
-                ))}
-              </motion.div>
-            )}
 
             {/* TAKE ALL button — matches homepage style */}
             <motion.div
