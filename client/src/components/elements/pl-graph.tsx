@@ -362,7 +362,7 @@ export const PLGraph = ({
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Graph container */}
       <div
-        className="relative w-full h-[clamp(80px,16svh,160px)]"
+        className="relative w-full h-[clamp(100px,20svh,200px)]"
         aria-label={title}
         role="img"
       >
