@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { type RefObject, useRef, useState } from "react";
-import { MoonrockIcon } from "@/components/icons";
+import { type RefObject, useMemo, useRef, useState } from "react";
+import { BracketArrowIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import type { Orb as OrbModel } from "@/models";
 import { Orb } from "./orb";
+import { OrbDisplay } from "./orb-display";
 
 export interface RewardItem {
   variant: "moonrock" | "chip" | "point" | "multiplier";
@@ -19,12 +21,15 @@ export interface RewardOverlayProps {
   heading?: string;
   actionLabel?: string;
   reward: RewardItem;
+  orbs?: OrbModel[];
 }
 
 const PARTICLE_COUNT = 6;
 const PARTICLE_STAGGER_MS = 50;
 const ANIMATION_START_DELAY_MS = 300;
 const ANIMATION_TOTAL_MS = 800;
+
+const VISIBLE_ORBS = 4;
 
 export const RewardOverlay = ({
   open,
@@ -35,8 +40,28 @@ export const RewardOverlay = ({
   heading = "YOU RECEIVE",
   actionLabel = "TAKE ALL",
   reward,
+  orbs,
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Group identical orbs by value
+  const groupedOrbs = useMemo(() => {
+    if (!orbs || orbs.length === 0) return [];
+    const map = new Map<string, { orb: OrbModel; count: number }>();
+    for (const orb of orbs) {
+      const existing = map.get(orb.value);
+      if (existing) {
+        existing.count++;
+      } else {
+        map.set(orb.value, { orb, count: 1 });
+      }
+    }
+    return Array.from(map.values());
+  }, [orbs]);
+
+  const maxIndex = Math.max(0, groupedOrbs.length - VISIBLE_ORBS);
+
   const [particles, setParticles] = useState<
     {
       id: number;
@@ -177,11 +202,64 @@ export const RewardOverlay = ({
               </span>
             </motion.div>
 
+            {/* Orb carousel */}
+            {groupedOrbs.length > 0 && (
+              <motion.div
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
+                transition={isExiting ? { duration: 0.2 } : { delay: 0.6 }}
+              >
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="h-10 w-10 p-0 shrink-0"
+                  onClick={() => setCarouselIndex((i) => Math.max(0, i - 1))}
+                  disabled={carouselIndex <= 0}
+                  aria-label="Previous orbs"
+                >
+                  <BracketArrowIcon size="xs" direction="left" />
+                </Button>
+                <div
+                  className="overflow-hidden"
+                  style={{ width: `${VISIBLE_ORBS * 56}px` }}
+                >
+                  <motion.div
+                    className="flex gap-1"
+                    animate={{ x: -carouselIndex * 56 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    {groupedOrbs.map(({ orb, count }) => (
+                      <OrbDisplay
+                        key={orb.value}
+                        orb={orb}
+                        size="sm"
+                        count={count}
+                        glowScale={0.5}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="h-10 w-10 p-0 shrink-0"
+                  onClick={() =>
+                    setCarouselIndex((i) => Math.min(maxIndex, i + 1))
+                  }
+                  disabled={carouselIndex >= maxIndex}
+                  aria-label="Next orbs"
+                >
+                  <BracketArrowIcon size="xs" direction="right" />
+                </Button>
+              </motion.div>
+            )}
+
             {/* TAKE ALL button — matches homepage style */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.65 }}
+              transition={isExiting ? { duration: 0.2 } : { delay: 0.75 }}
             >
               <Button
                 variant="secondary"

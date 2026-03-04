@@ -674,6 +674,7 @@ export const Game = () => {
           count: game?.moonrocks ?? 0,
           label: "Moonrocks",
         }}
+        orbs={game?.bag ?? []}
       />
     </div>
   );
