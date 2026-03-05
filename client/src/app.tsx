@@ -110,6 +110,7 @@ function App() {
         duration={5000}
         expand
         visibleToasts={4}
+        gap={8}
         richColors
       />
     </>

@@ -31,7 +31,7 @@ function ToastTrigger({
         duration: 5000,
         unstyled: true,
         className:
-          "w-full rounded-xl bg-[#092604] px-4 py-3 relative overflow-hidden",
+          "w-full rounded-xl bg-[#051a02] px-4 py-3 relative overflow-hidden",
       },
     );
   }, [gameId, username, stake]);
@@ -51,7 +51,7 @@ function ToastTrigger({
         duration: 5000,
         unstyled: true,
         className:
-          "w-full rounded-xl bg-[#092604] px-4 py-3 relative overflow-hidden",
+          "w-full rounded-xl bg-[#051a02] px-4 py-3 relative overflow-hidden",
       },
     );
   }, []);
@@ -105,7 +105,13 @@ const meta = {
     (Story) => (
       <BrowserRouter>
         <Story />
-        <Toaster position="top-center" expand visibleToasts={4} richColors />
+        <Toaster
+          position="top-center"
+          expand
+          visibleToasts={4}
+          gap={8}
+          richColors
+        />
       </BrowserRouter>
     ),
   ],
