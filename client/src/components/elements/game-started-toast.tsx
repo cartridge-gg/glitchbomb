@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { EyeIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 
 interface GameStartedToastProps {
   gameId: number;
@@ -56,14 +57,15 @@ export function GameStartedToast({
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          className="shrink-0 h-11 w-11 flex items-center justify-center rounded-lg border border-green-400/30 bg-green-400/10 hover:bg-green-400/20 transition-colors text-green-400"
+        <Button
+          variant="secondary"
+          gradient="green"
+          className="shrink-0 h-12 w-12 p-0"
           onClick={() => navigate(`/play?game=${gameId}&view=true`)}
           aria-label="Watch game"
         >
           <EyeIcon size="sm" />
-        </button>
+        </Button>
       </div>
       {/* Progress bar */}
       <div
