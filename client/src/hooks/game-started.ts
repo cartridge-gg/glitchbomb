@@ -57,26 +57,44 @@ const getSubscriptionQuery = () => {
     .includeHashedKeys();
 };
 
+const OWNER_RETRY_DELAY = 2000;
+const OWNER_MAX_RETRIES = 3;
+
 async function lookupOwner(
   client: torii.ToriiClient,
   gameId: number,
   chainId: bigint,
 ): Promise<string | null> {
   const collectionAddress = getCollectionAddress(chainId);
+  const paddedContract = addAddressPadding(num.toHex64(collectionAddress));
   const gameIdHex = `0x${gameId.toString(16)}`;
-  const balances = await client.getTokenBalances({
-    contract_addresses: [addAddressPadding(num.toHex64(collectionAddress))],
-    account_addresses: [],
-    token_ids: [gameIdHex],
-    pagination: {
-      cursor: undefined,
-      direction: "Backward",
-      limit: 1,
-      order_by: [],
-    },
+  console.log("[useGameStarted] lookupOwner", {
+    collectionAddress,
+    paddedContract,
+    gameIdHex,
   });
-  const balance = balances.items.find((b) => BigInt(b.balance || "0") > 0n);
-  return balance ? balance.account_address : null;
+
+  for (let attempt = 0; attempt < OWNER_MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      console.log(`[useGameStarted] retry ${attempt}/${OWNER_MAX_RETRIES}...`);
+      await new Promise((r) => setTimeout(r, OWNER_RETRY_DELAY));
+    }
+    const balances = await client.getTokenBalances({
+      contract_addresses: [paddedContract],
+      account_addresses: [],
+      token_ids: [gameIdHex],
+      pagination: {
+        cursor: undefined,
+        direction: "Backward",
+        limit: 10,
+        order_by: [],
+      },
+    });
+    console.log("[useGameStarted] token balances:", balances.items);
+    const balance = balances.items.find((b) => BigInt(b.balance || "0") > 0n);
+    if (balance) return balance.account_address;
+  }
+  return null;
 }
 
 async function lookupUsername(address: string): Promise<string> {
@@ -86,13 +104,19 @@ async function lookupUsername(address: string): Promise<string> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ addresses: [address] }),
     });
+    if (!res.ok) {
+      console.warn("[useGameStarted] lookup API returned", res.status);
+      return shortenAddress(address);
+    }
     const data = await res.json();
+    console.log("[useGameStarted] lookup response:", data);
     const results = data?.results ?? data;
     if (Array.isArray(results) && results.length > 0) {
       return results[0].name ?? results[0].username ?? shortenAddress(address);
     }
     return shortenAddress(address);
-  } catch {
+  } catch (err) {
+    console.warn("[useGameStarted] lookup failed:", err);
     return shortenAddress(address);
   }
 }
@@ -117,6 +141,7 @@ async function lookupStake(
     .includeHashedKeys()
     .build();
   const result = await client.getEntities(query);
+  console.log("[useGameStarted] game entity:", result.items);
   for (const entity of result.items) {
     const model = entity.models[gameModel] as
       | { stake: { value: string } }
@@ -153,35 +178,62 @@ export function useGameStarted(
   useEffect(() => {
     if (!client || !accountAddress) return;
 
+    console.log("[useGameStarted] subscribing...", { accountAddress });
     const query = getSubscriptionQuery().build();
 
     const onUpdate = async (
       data: SubscriptionCallbackArgs<torii.Entity[], Error>,
     ) => {
-      if (!data || data.error) return;
-      for (const entity of data.data || [data] || []) {
-        if (!entity.models[EVENT_MODEL]) continue;
+      if (!data || data.error) {
+        console.warn("[useGameStarted] subscription error", data?.error);
+        return;
+      }
+      console.log("[useGameStarted] event received:", data);
+      const entities = data.data || [data] || [];
+      for (const entity of entities) {
+        if (!entity.models[EVENT_MODEL]) {
+          console.log(
+            "[useGameStarted] no matching model in entity, models:",
+            Object.keys(entity.models),
+          );
+          continue;
+        }
         const raw = entity.models[EVENT_MODEL] as unknown as RawGameStarted;
         const gameId = Number(raw.game_id.value);
-        if (gameId === 0 || seenRef.current.has(gameId)) continue;
+        console.log("[useGameStarted] GameStarted event, gameId:", gameId);
+        if (gameId === 0 || seenRef.current.has(gameId)) {
+          console.log("[useGameStarted] skipping (zero or seen)");
+          continue;
+        }
         seenRef.current.add(gameId);
 
         try {
           const ownerAddress = await lookupOwner(client, gameId, chainId);
-          if (!ownerAddress) continue;
+          console.log("[useGameStarted] owner:", ownerAddress);
+          if (!ownerAddress) {
+            console.log("[useGameStarted] no owner found, skipping");
+            continue;
+          }
 
           // Skip own games
           if (
             BigInt(addAddressPadding(ownerAddress)) ===
             BigInt(addAddressPadding(accountAddress))
-          )
+          ) {
+            console.log("[useGameStarted] own game, skipping");
             continue;
+          }
 
           const [username, stake] = await Promise.all([
             lookupUsername(ownerAddress),
             lookupStake(client, gameId),
           ]);
 
+          console.log("[useGameStarted] firing toast:", {
+            gameId,
+            username,
+            stake,
+          });
           callbackRef.current({ gameId, username, stake });
         } catch (err) {
           console.warn("[useGameStarted] lookup failed", err);
@@ -192,6 +244,7 @@ export function useGameStarted(
     client
       .onEventMessageUpdated(query.clause, [], onUpdate)
       .then((sub) => {
+        console.log("[useGameStarted] subscribed successfully");
         subscriptionRef.current = sub;
       })
       .catch((err) => console.error("[useGameStarted] subscribe error:", err));
