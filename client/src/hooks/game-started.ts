@@ -92,11 +92,6 @@ export function useGameStarted(
     const collectionAddress = getCollectionAddress(chainId);
     const paddedContract = addAddressPadding(num.toHex64(collectionAddress));
 
-    console.log("[useGameStarted] subscribing to token balance updates", {
-      collectionAddress: paddedContract,
-      accountAddress,
-    });
-
     const onBalanceUpdate = async (balance: TokenBalance) => {
       const rawBalance = BigInt(balance.balance || "0");
       if (rawBalance === 0n) return;
@@ -107,19 +102,13 @@ export function useGameStarted(
       seenRef.current.add(gameId);
 
       const ownerAddress = balance.account_address;
-      console.log("[useGameStarted] new game detected:", {
-        gameId,
-        owner: ownerAddress,
-      });
 
       // Skip own games
       if (
         BigInt(addAddressPadding(ownerAddress)) ===
         BigInt(addAddressPadding(accountAddress))
-      ) {
-        console.log("[useGameStarted] own game, skipping");
+      )
         return;
-      }
 
       try {
         const [username, stake] = await Promise.all([
@@ -127,11 +116,6 @@ export function useGameStarted(
           lookupStake(client, gameId),
         ]);
 
-        console.log("[useGameStarted] firing toast:", {
-          gameId,
-          username,
-          stake,
-        });
         callbackRef.current({ gameId, username, stake });
       } catch (err) {
         console.warn("[useGameStarted] lookup failed", err);
@@ -146,10 +130,9 @@ export function useGameStarted(
         onBalanceUpdate,
       )
       .then((sub) => {
-        console.log("[useGameStarted] subscribed successfully");
         subscriptionRef.current = sub;
       })
-      .catch((err) => console.error("[useGameStarted] subscribe error:", err));
+      .catch((err) => console.warn("[useGameStarted] subscribe error:", err));
 
     return () => {
       cancelSubscription();
