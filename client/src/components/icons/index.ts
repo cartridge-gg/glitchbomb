@@ -42,6 +42,7 @@ export * from "./controller";
 export * from "./credits";
 export * from "./cross";
 export * from "./dot";
+export * from "./eye";
 export * from "./fire";
 export * from "./gear";
 export * from "./glitch-bomb";
