@@ -106,7 +106,7 @@ function App() {
         </EntitiesProvider>
       </StarknetConfig>
       <Toaster
-        position="top-center"
+        position="top-left"
         duration={5000}
         expand
         visibleToasts={4}
