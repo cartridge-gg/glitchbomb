@@ -19,11 +19,11 @@ export function GameStartedNotifier() {
         ),
         {
           duration: 5000,
+          unstyled: true,
+          className:
+            "w-full rounded-xl bg-[#0a0a0a] border border-green-400/20 px-4 py-3 relative overflow-hidden",
           style: {
-            background: "#0a0a0a",
-            border: "1px solid #22c55e40",
-            borderRadius: "0.75rem",
-            padding: "0.75rem 1rem",
+            boxShadow: "0 0 20px rgba(34, 197, 94, 0.08)",
           },
         },
       );

@@ -105,7 +105,13 @@ function App() {
           <Router />
         </EntitiesProvider>
       </StarknetConfig>
-      <Toaster position="top-center" duration={5000} richColors />
+      <Toaster
+        position="top-center"
+        duration={5000}
+        expand
+        visibleToasts={4}
+        richColors
+      />
     </>
   );
 }

@@ -1,8 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { GameStartedToast } from "./game-started-toast";
+
+const players = [
+  { username: "Clicksave", stake: 1 },
+  { username: "Nasr", stake: 5 },
+  { username: "Bal7hazar", stake: 3 },
+  { username: "Shinobi", stake: 10 },
+];
 
 function ToastTrigger({
   gameId,
@@ -13,6 +20,8 @@ function ToastTrigger({
   username: string;
   stake: number;
 }) {
+  const counterRef = useRef(0);
+
   const fire = useCallback(() => {
     toast.custom(
       () => (
@@ -20,33 +29,74 @@ function ToastTrigger({
       ),
       {
         duration: 5000,
+        unstyled: true,
+        className:
+          "w-full rounded-xl bg-[#0a0a0a] border border-green-400/20 px-4 py-3 relative overflow-hidden",
         style: {
-          background: "#0a0a0a",
-          border: "1px solid rgba(34, 197, 94, 0.25)",
-          borderRadius: "0.75rem",
-          padding: "0.75rem 1rem",
+          boxShadow: "0 0 20px rgba(34, 197, 94, 0.08)",
         },
       },
     );
   }, [gameId, username, stake]);
 
+  const fireRandom = useCallback(() => {
+    const player = players[counterRef.current % players.length];
+    counterRef.current += 1;
+    toast.custom(
+      () => (
+        <GameStartedToast
+          gameId={Math.floor(Math.random() * 1000)}
+          username={player.username}
+          stake={player.stake}
+        />
+      ),
+      {
+        duration: 5000,
+        unstyled: true,
+        className:
+          "w-full rounded-xl bg-[#0a0a0a] border border-green-400/20 px-4 py-3 relative overflow-hidden",
+        style: {
+          boxShadow: "0 0 20px rgba(34, 197, 94, 0.08)",
+        },
+      },
+    );
+  }, []);
+
   return (
-    <button
-      type="button"
-      onClick={fire}
-      style={{
-        background: "#22c55e",
-        color: "#000",
-        padding: "0.75rem 1.5rem",
-        borderRadius: "0.5rem",
-        fontWeight: 700,
-        cursor: "pointer",
-        border: "none",
-        fontSize: "0.875rem",
-      }}
-    >
-      Fire Toast
-    </button>
+    <div style={{ display: "flex", gap: 12 }}>
+      <button
+        type="button"
+        onClick={fire}
+        style={{
+          background: "#22c55e",
+          color: "#000",
+          padding: "0.75rem 1.5rem",
+          borderRadius: "0.5rem",
+          fontWeight: 700,
+          cursor: "pointer",
+          border: "none",
+          fontSize: "0.875rem",
+        }}
+      >
+        Fire Toast
+      </button>
+      <button
+        type="button"
+        onClick={fireRandom}
+        style={{
+          background: "#6366F1",
+          color: "#fff",
+          padding: "0.75rem 1.5rem",
+          borderRadius: "0.5rem",
+          fontWeight: 700,
+          cursor: "pointer",
+          border: "none",
+          fontSize: "0.875rem",
+        }}
+      >
+        Fire Random
+      </button>
+    </div>
   );
 }
 
@@ -61,13 +111,13 @@ const meta = {
     (Story) => (
       <BrowserRouter>
         <Story />
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" expand visibleToasts={4} richColors />
       </BrowserRouter>
     ),
   ],
   args: {
     gameId: 42,
-    username: "ControllerFren",
+    username: "Clicksave",
     stake: 1,
   },
 } satisfies Meta<typeof ToastTrigger>;
@@ -75,20 +125,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Stake1X: Story = {};
+export const Default: Story = {};
 
-export const Stake2X: Story = {
-  args: {
-    gameId: 108,
-    username: "0xDeadBeef",
-    stake: 2,
-  },
-};
-
-export const Stake3X: Story = {
+export const HighStake: Story = {
   args: {
     gameId: 999,
-    username: "LongUsernamePlayer123",
-    stake: 3,
+    username: "Nasr",
+    stake: 10,
   },
 };
