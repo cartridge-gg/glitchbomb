@@ -84,9 +84,13 @@ body {
   }
 }
 
-/* Sonner toast spacing override */
+/* Sonner toast spacing and position overrides */
 [data-sonner-toaster] [data-sonner-toast] {
   --offset: 0px !important;
+}
+
+[data-sonner-toaster][data-x-position="left"] {
+  left: 0 !important;
 }
 
 /* Puller orb rotation animation - CSS for Safari compatibility */
