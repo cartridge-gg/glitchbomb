@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useCallback, useRef } from "react";
-import { BrowserRouter } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { GameStartedToast } from "./game-started-toast";
 
@@ -103,7 +102,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <BrowserRouter>
+      <>
         <Story />
         <Toaster
           position="top-center"
@@ -112,7 +111,7 @@ const meta = {
           gap={8}
           richColors
         />
-      </BrowserRouter>
+      </>
     ),
   ],
   args: {

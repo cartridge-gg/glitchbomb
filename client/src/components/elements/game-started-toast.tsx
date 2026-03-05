@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { EyeIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 
@@ -32,7 +31,6 @@ export function GameStartedToast({
   stake,
   duration = 5000,
 }: GameStartedToastProps) {
-  const navigate = useNavigate();
   const stakeColor = getStakeColor(stake);
 
   return (
@@ -61,7 +59,9 @@ export function GameStartedToast({
           variant="secondary"
           gradient="green"
           className="shrink-0 h-12 w-12 p-0"
-          onClick={() => navigate(`/play?game=${gameId}&view=true`)}
+          onClick={() => {
+            window.location.href = `/play?game=${gameId}&view=true`;
+          }}
           aria-label="Watch game"
         >
           <EyeIcon size="sm" />
