@@ -107,10 +107,11 @@ function App() {
       </StarknetConfig>
       <Toaster
         position="top-left"
-        duration={5000}
+        duration={3000}
         expand
         visibleToasts={4}
         gap={8}
+        offset={80}
         richColors
       />
     </>

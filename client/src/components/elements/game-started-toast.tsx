@@ -29,7 +29,7 @@ export function GameStartedToast({
   gameId,
   username,
   stake,
-  duration = 5000,
+  duration = 3000,
 }: GameStartedToastProps) {
   const stakeColor = getStakeColor(stake);
 
