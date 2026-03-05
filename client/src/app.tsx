@@ -8,6 +8,7 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { Toaster } from "sonner";
+import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
 import {
   chains,
   DEFAULT_CHAIN_ID,
@@ -100,10 +101,19 @@ function App() {
         provider={provider}
       >
         <EntitiesProvider>
+          <GameStartedNotifier />
           <Router />
         </EntitiesProvider>
       </StarknetConfig>
-      <Toaster position="top-right" richColors />
+      <Toaster
+        position="top-left"
+        duration={3000}
+        expand
+        visibleToasts={4}
+        gap={8}
+        offset={80}
+        richColors
+      />
     </>
   );
 }
