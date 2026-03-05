@@ -35,22 +35,22 @@ export function GameStartedToast({
 
   return (
     <>
-      <div className="flex items-center gap-3 w-full">
-        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-          <span className="font-primary text-green-400 text-base truncate">
+      <div className="flex items-center gap-2 w-full">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <span className="font-primary text-green-400 text-xs truncate">
             {username}
           </span>
-          <div className="flex items-center gap-2">
-            <span className="font-secondary text-white text-sm tracking-wide">
+          <div className="flex items-center gap-1.5">
+            <span className="font-secondary text-white text-xs tracking-wide">
               is playing a
             </span>
             <span
-              className="font-secondary text-sm font-bold tracking-wide"
+              className="font-secondary text-xs font-bold tracking-wide"
               style={{ color: stakeColor }}
             >
               {stake}X
             </span>
-            <span className="font-secondary text-white text-sm tracking-wide">
+            <span className="font-secondary text-white text-xs tracking-wide">
               game
             </span>
           </div>
@@ -58,13 +58,13 @@ export function GameStartedToast({
         <Button
           variant="secondary"
           gradient="green"
-          className="shrink-0 h-12 w-12 p-0"
+          className="shrink-0 h-9 w-9 p-0"
           onClick={() => {
             window.location.href = `/play?game=${gameId}&view=true`;
           }}
           aria-label="Watch game"
         >
-          <EyeIcon size="sm" />
+          <EyeIcon size="xs" />
         </Button>
       </div>
       {/* Progress bar */}
