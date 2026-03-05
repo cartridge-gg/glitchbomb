@@ -5,6 +5,7 @@ interface GameStartedToastProps {
   gameId: number;
   username: string;
   stake: number;
+  duration?: number;
 }
 
 const stakeColors: Record<number, string> = {
@@ -28,6 +29,7 @@ export function GameStartedToast({
   gameId,
   username,
   stake,
+  duration = 5000,
 }: GameStartedToastProps) {
   const navigate = useNavigate();
   const stakeColor = getStakeColor(stake);
@@ -63,14 +65,21 @@ export function GameStartedToast({
           <EyeIcon size="sm" />
         </button>
       </div>
-      {/* Bottom gradient bar */}
+      {/* Progress bar */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-[3px]"
+        className="absolute bottom-0 left-0 h-[3px]"
         style={{
           background:
             "linear-gradient(90deg, #6366F1 0%, #818CF8 50%, #6366F1 100%)",
+          animation: `toast-progress ${duration}ms linear forwards`,
         }}
       />
+      <style>
+        {`@keyframes toast-progress {
+          from { width: 100%; }
+          to { width: 0%; }
+        }`}
+      </style>
     </>
   );
 }

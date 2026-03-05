@@ -31,10 +31,7 @@ function ToastTrigger({
         duration: 5000,
         unstyled: true,
         className:
-          "w-full rounded-xl bg-[#0a0a0a] border border-green-400/20 px-4 py-3 relative overflow-hidden",
-        style: {
-          boxShadow: "0 0 20px rgba(34, 197, 94, 0.08)",
-        },
+          "w-full rounded-xl bg-[#0a0a0a] px-4 py-3 relative overflow-hidden",
       },
     );
   }, [gameId, username, stake]);
@@ -54,10 +51,7 @@ function ToastTrigger({
         duration: 5000,
         unstyled: true,
         className:
-          "w-full rounded-xl bg-[#0a0a0a] border border-green-400/20 px-4 py-3 relative overflow-hidden",
-        style: {
-          boxShadow: "0 0 20px rgba(34, 197, 94, 0.08)",
-        },
+          "w-full rounded-xl bg-[#0a0a0a] px-4 py-3 relative overflow-hidden",
       },
     );
   }, []);
