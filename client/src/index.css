@@ -89,8 +89,10 @@ body {
   --offset: 0px !important;
 }
 
-[data-sonner-toaster][data-x-position="left"] {
-  left: 0 !important;
+@media (min-width: 601px) {
+  [data-sonner-toaster][data-x-position="left"] {
+    left: 12px !important;
+  }
 }
 
 /* Puller orb rotation animation - CSS for Safari compatibility */
