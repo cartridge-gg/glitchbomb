@@ -121,41 +121,41 @@ export const AppHeader = ({
             </span>
           </button>
         </GradientBorder>
-        {/* Desktop: profile / login */}
+        {/* Profile / login */}
         {username ? (
-          <div className="hidden md:flex">
-            <GradientBorder color="green">
-              <Profile
-                username={username}
-                onClick={onProfileClick}
-                className="w-auto px-3 md:px-4"
-              />
-            </GradientBorder>
-          </div>
+          <>
+            <div className="hidden md:flex">
+              <GradientBorder color="green">
+                <Profile
+                  username={username}
+                  onClick={onProfileClick}
+                  className="w-auto px-3 md:px-4"
+                />
+              </GradientBorder>
+            </div>
+            {/* Mobile: settings button (only when logged in) */}
+            <Button
+              variant="secondary"
+              gradient="green"
+              wrapperClassName="md:hidden"
+              className="h-12 w-12 p-0"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <ControllerIcon size="sm" />
+            </Button>
+          </>
         ) : (
           onConnect && (
-            <div className="hidden md:flex">
-              <Button
-                variant="secondary"
-                gradient="green"
-                className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
-                onClick={onConnect}
-              >
-                LOG IN
-              </Button>
-            </div>
+            <Button
+              variant="secondary"
+              gradient="green"
+              className="h-12 px-4 font-secondary uppercase text-sm tracking-widest"
+              onClick={onConnect}
+            >
+              LOG IN
+            </Button>
           )
         )}
-        {/* Mobile: single controller settings button */}
-        <Button
-          variant="secondary"
-          gradient="green"
-          wrapperClassName="md:hidden"
-          className="h-12 w-12 p-0"
-          onClick={() => setSettingsOpen(true)}
-        >
-          <ControllerIcon size="sm" />
-        </Button>
         {audioSettings && onMusicMutedChange && onSfxMutedChange && (
           <SettingsModal
             open={settingsOpen}
