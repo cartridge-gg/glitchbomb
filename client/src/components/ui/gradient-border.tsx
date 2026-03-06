@@ -8,6 +8,7 @@ export type GradientColor =
   | "purple"
   | "yellow"
   | "red"
+  | "pink"
   | "none";
 
 const gradientColors: Record<GradientColor, string> = {
@@ -18,6 +19,7 @@ const gradientColors: Record<GradientColor, string> = {
     "linear-gradient(180deg, rgba(89, 31, 255, 0.3) 0%, rgba(89, 31, 255, 0.00) 100%)",
   yellow: "linear-gradient(180deg, #FACC1540 0%, #FACC1500 100%)",
   red: "linear-gradient(180deg, #EF444440 0%, #EF444400 100%)",
+  pink: "linear-gradient(180deg, #FF009940 0%, #FF009900 100%)",
   none: "transparent",
 };
 

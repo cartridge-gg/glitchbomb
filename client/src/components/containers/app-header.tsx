@@ -88,21 +88,8 @@ export const AppHeader = ({
       {/* Spacer to push right content */}
       <div className="flex-1" />
 
-      {/* Right: Moonrocks + Sound + Profile */}
+      {/* Right: Sound + Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
-        {/* Moonrocks display */}
-        <button
-          type="button"
-          className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg bg-[#302A10] transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
-          onClick={onMint}
-          disabled={!canMint}
-          aria-label="Mint moonrocks"
-        >
-          <GlitchBombIcon className="w-5 h-5 text-yellow-400" />
-          <span className="font-secondary text-sm tracking-widest text-yellow-400">
-            {Math.floor(moonrocks).toLocaleString()}
-          </span>
-        </button>
         {/* Desktop: sound popover */}
         {audioSettings &&
           onMusicMutedChange &&
@@ -119,6 +106,21 @@ export const AppHeader = ({
               />
             </div>
           )}
+        {/* Moonrocks display */}
+        <GradientBorder color="pink">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg bg-[#2B052E] transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+            onClick={onMint}
+            disabled={!canMint}
+            aria-label="Mint moonrocks"
+          >
+            <GlitchBombIcon className="w-4 h-4 text-[#F09]" />
+            <span className="font-secondary text-sm tracking-widest text-[#F09]">
+              {Math.floor(moonrocks).toLocaleString()}
+            </span>
+          </button>
+        </GradientBorder>
         {/* Desktop: profile / login */}
         {username ? (
           <div className="hidden md:flex">
