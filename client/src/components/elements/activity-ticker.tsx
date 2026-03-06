@@ -55,14 +55,14 @@ function formatItem(item: ActivityItem): React.ReactNode {
           >
             {item.username}
           </span>
-          <span className="text-white/60"> started a </span>
+          <span className="text-white/60">started a</span>
           <span
             className="rounded px-2 py-0.5 text-yellow-400 font-bold"
             style={pillStyle}
           >
             {item.stake}X
           </span>
-          <span className="text-white/60"> game</span>
+          <span className="text-white/60">game</span>
         </>
       );
     case "cash_out":
@@ -74,14 +74,14 @@ function formatItem(item: ActivityItem): React.ReactNode {
           >
             {item.username}
           </span>
-          <span className="text-white/60"> cashed out </span>
+          <span className="text-white/60">cashed out</span>
           <span
             className="rounded px-2 py-0.5 text-yellow-400 font-bold"
             style={pillStyle}
           >
             {item.moonrocks}
           </span>
-          <span className="text-white/60"> moonrocks</span>
+          <span className="text-white/60">moonrocks</span>
         </>
       );
   }
@@ -112,7 +112,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
           oneCopy.map((item, i) => (
             <span
               key={`${copy}-${item.id}-${i}`}
-              className="inline-flex items-center font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
+              className="inline-flex items-center gap-1 font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
             >
               <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
               {formatItem(item)}
