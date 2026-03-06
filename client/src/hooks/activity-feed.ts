@@ -147,11 +147,13 @@ export function useActivityFeed(chainId: bigint) {
   }, []);
 
   useEffect(() => {
-    if (!client || !accountAddress) return;
+    if (!client) return;
 
     const collectionAddress = getCollectionAddress(chainId);
     const paddedContract = addAddressPadding(num.toHex64(collectionAddress));
-    const paddedAccount = addAddressPadding(accountAddress);
+    const paddedAccount = accountAddress
+      ? addAddressPadding(accountAddress)
+      : null;
 
     // --- Initial fetch of historical data ---
     const fetchInitialData = async () => {
@@ -189,7 +191,10 @@ export function useActivityFeed(chainId: bigint) {
           ownerMapRef.current.set(gameId, ownerAddress);
 
           // Skip own games
-          if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+          if (
+            paddedAccount &&
+            BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+          )
             continue;
 
           gameStartEntries.push({ gameId, owner: ownerAddress });
@@ -228,7 +233,10 @@ export function useActivityFeed(chainId: bigint) {
           const moonrocks = Number(model.points.value);
           const ownerAddress = ownerMapRef.current.get(gameId);
           if (!ownerAddress) continue;
-          if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+          if (
+            paddedAccount &&
+            BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+          )
             continue;
 
           cashOutEntries.push({ gameId, moonrocks, owner: ownerAddress });
@@ -308,7 +316,10 @@ export function useActivityFeed(chainId: bigint) {
       ownerMapRef.current.set(gameId, ownerAddress);
 
       // Skip own games
-      if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+      if (
+        paddedAccount &&
+        BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+      )
         return;
 
       const itemId = `start-${gameId}`;
@@ -374,7 +385,10 @@ export function useActivityFeed(chainId: bigint) {
         if (!ownerAddress) continue;
 
         // Skip own games
-        if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+        if (
+          paddedAccount &&
+          BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+        )
           continue;
 
         try {
