@@ -431,15 +431,16 @@ export const Home = () => {
         onSfxVolumeChange={setSfxVolume}
       />
 
+      <ActivityTickerBanner />
+
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
-        <ActivityTickerBanner />
         <div
           className={`flex flex-col gap-4 w-full max-w-[500px] min-h-0 flex-1 ${activityGroups.length > 0 ? "md:flex-initial" : ""}`}
         >
           {/* Banner Carousel */}
           <div
-            className="overflow-hidden rounded-xl touch-pan-y"
+            className="overflow-hidden rounded-xl touch-pan-y shrink-0"
             onPointerDown={handleBannerPointerDown}
             onPointerMove={handleBannerPointerMove}
             onPointerUp={handleBannerPointerUp}
