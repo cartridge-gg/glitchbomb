@@ -90,7 +90,9 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
               className="inline-flex items-center font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
             >
               <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
-              {formatItem(item)}
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5">
+                {formatItem(item)}
+              </span>
             </span>
           )),
         )}
