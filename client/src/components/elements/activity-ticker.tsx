@@ -75,7 +75,10 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
   const duration = oneCopy.length * 6;
 
   return (
-    <div className="w-full overflow-hidden shrink-0 py-1.5 mb-2">
+    <div
+      className="w-full overflow-hidden shrink-0 py-1.5 mb-2"
+      style={{ backgroundColor: "rgba(4, 6, 3, 0.64)" }}
+    >
       <div
         className="inline-flex whitespace-nowrap items-center"
         style={{
