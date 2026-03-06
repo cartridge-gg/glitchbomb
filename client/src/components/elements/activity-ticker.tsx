@@ -87,15 +87,9 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
           oneCopy.map((item, i) => (
             <span
               key={`${copy}-${item.id}-${i}`}
-              className="inline-flex items-center gap-1.5 mx-3 font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
+              className="inline-flex items-center font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
             >
-              <span
-                className="w-1 h-1 rounded-full shrink-0"
-                style={{
-                  backgroundColor:
-                    item.type === "game_started" ? "#22c55e" : "#FACC15",
-                }}
-              />
+              <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
               {formatItem(item)}
             </span>
           )),
