@@ -13,6 +13,7 @@ import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 
 const MAX_ITEMS = 20;
+const INITIAL_FETCH_LIMIT = 20;
 const GAME_OVER_MODEL: `${string}-${string}` = `${NAMESPACE}-GameOver`;
 const GAME_MODEL: `${string}-${string}` = `${NAMESPACE}-Game`;
 
@@ -27,23 +28,43 @@ export interface ActivityItem {
   timestamp: number;
 }
 
-async function lookupUsername(address: string): Promise<string> {
+async function lookupUsernames(
+  addresses: string[],
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  if (addresses.length === 0) return map;
   try {
     const res = await fetch("https://api.cartridge.gg/lookup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ addresses: [address] }),
+      body: JSON.stringify({ addresses }),
     });
-    if (!res.ok) return shortenAddress(address);
+    if (!res.ok) {
+      for (const a of addresses) map.set(a, shortenAddress(a));
+      return map;
+    }
     const data = await res.json();
     const results = data?.results ?? data;
-    if (Array.isArray(results) && results.length > 0) {
-      return results[0].name ?? results[0].username ?? shortenAddress(address);
+    if (Array.isArray(results)) {
+      for (const r of results) {
+        const addr = r.address ?? r.addresses?.[0];
+        const name = r.name ?? r.username ?? shortenAddress(addr ?? "");
+        if (addr) map.set(addr, name);
+      }
     }
-    return shortenAddress(address);
+    // Fill any missing
+    for (const a of addresses) {
+      if (!map.has(a)) map.set(a, shortenAddress(a));
+    }
   } catch {
-    return shortenAddress(address);
+    for (const a of addresses) map.set(a, shortenAddress(a));
   }
+  return map;
+}
+
+async function lookupUsername(address: string): Promise<string> {
+  const map = await lookupUsernames([address]);
+  return map.get(address) ?? shortenAddress(address);
 }
 
 function shortenAddress(address: string): string {
@@ -51,10 +72,10 @@ function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-async function lookupStake(
+async function lookupGameInfo(
   client: torii.ToriiClient,
   gameId: number,
-): Promise<number> {
+): Promise<{ stake: number; points: number } | null> {
   const clauses = new ClauseBuilder().keys(
     [GAME_MODEL],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
@@ -67,13 +88,20 @@ async function lookupStake(
   const result = await client.getEntities(query);
   for (const entity of result.items) {
     const model = entity.models[GAME_MODEL] as
-      | { stake: { value: string }; points: { value: string } }
+      | {
+          stake: { value: string };
+          points: { value: string };
+          over: { value: boolean };
+        }
       | undefined;
     if (model) {
-      return Number(model.stake.value);
+      return {
+        stake: Number(model.stake.value),
+        points: Number(model.points.value),
+      };
     }
   }
-  return 1;
+  return null;
 }
 
 interface RawGameOver {
@@ -90,11 +118,19 @@ export function useActivityFeed(chainId: bigint) {
   const eventSubRef = useRef<torii.Subscription | null>(null);
   const seenRef = useRef<Set<string>>(new Set());
   const ownerMapRef = useRef<Map<number, string>>(new Map());
+  const initialFetchDone = useRef(false);
 
   const addItem = useCallback((item: ActivityItem) => {
     if (seenRef.current.has(item.id)) return;
     seenRef.current.add(item.id);
     setItems((prev) => [item, ...prev].slice(0, MAX_ITEMS));
+  }, []);
+
+  const addItems = useCallback((newItems: ActivityItem[]) => {
+    const unseen = newItems.filter((item) => !seenRef.current.has(item.id));
+    if (unseen.length === 0) return;
+    for (const item of unseen) seenRef.current.add(item.id);
+    setItems((prev) => [...unseen, ...prev].slice(0, MAX_ITEMS));
   }, []);
 
   const cancelSubscriptions = useCallback(() => {
@@ -115,6 +151,148 @@ export function useActivityFeed(chainId: bigint) {
 
     const collectionAddress = getCollectionAddress(chainId);
     const paddedContract = addAddressPadding(num.toHex64(collectionAddress));
+    const paddedAccount = addAddressPadding(accountAddress);
+
+    // --- Initial fetch of historical data ---
+    const fetchInitialData = async () => {
+      if (initialFetchDone.current) return;
+      initialFetchDone.current = true;
+
+      try {
+        // Fetch recent token balances (game starts)
+        const balances = await client.getTokenBalances({
+          contract_addresses: [paddedContract],
+          account_addresses: [],
+          token_ids: [],
+          pagination: {
+            cursor: undefined,
+            direction: "Backward",
+            limit: INITIAL_FETCH_LIMIT,
+            order_by: [],
+          },
+        });
+
+        // Build owner map and collect game starts
+        const gameStartEntries: {
+          gameId: number;
+          owner: string;
+        }[] = [];
+
+        for (const balance of balances.items) {
+          const rawBalance = BigInt(balance.balance || "0");
+          if (rawBalance === 0n) continue;
+          const tokenId = balance.token_id || "0x0";
+          const gameId = Number.parseInt(tokenId, 16);
+          if (gameId === 0) continue;
+
+          const ownerAddress = balance.account_address;
+          ownerMapRef.current.set(gameId, ownerAddress);
+
+          // Skip own games
+          if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+            continue;
+
+          gameStartEntries.push({ gameId, owner: ownerAddress });
+        }
+
+        // Fetch GameOver events (cash outs)
+        const gameOverClauses = new ClauseBuilder().keys(
+          [GAME_OVER_MODEL],
+          [],
+          "VariableLen",
+        );
+        const gameOverQuery = new ToriiQueryBuilder()
+          .withClause(gameOverClauses.build())
+          .includeHashedKeys()
+          .withLimit(INITIAL_FETCH_LIMIT)
+          .build();
+
+        const gameOverResult = await client.getEventMessages(gameOverQuery);
+
+        const cashOutEntries: {
+          gameId: number;
+          moonrocks: number;
+          owner: string;
+        }[] = [];
+
+        for (const entity of gameOverResult.items) {
+          const model = entity.models[GAME_OVER_MODEL] as unknown as
+            | RawGameOver
+            | undefined;
+          if (!model) continue;
+          const reason = Number(model.reason.value);
+          if (reason !== 1) continue;
+
+          const gameId = Number(model.game_id.value);
+          const moonrocks = Number(model.points.value);
+          const ownerAddress = ownerMapRef.current.get(gameId);
+          if (!ownerAddress) continue;
+          if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
+            continue;
+
+          cashOutEntries.push({ gameId, moonrocks, owner: ownerAddress });
+        }
+
+        // Batch lookup all usernames
+        const allAddresses = [
+          ...new Set([
+            ...gameStartEntries.map((e) => e.owner),
+            ...cashOutEntries.map((e) => e.owner),
+          ]),
+        ];
+        const usernameMap = await lookupUsernames(allAddresses);
+
+        // Batch lookup game info for stakes
+        const gameInfoMap = new Map<
+          number,
+          { stake: number; points: number }
+        >();
+        await Promise.all(
+          gameStartEntries.map(async (entry) => {
+            const info = await lookupGameInfo(client, entry.gameId);
+            if (info) gameInfoMap.set(entry.gameId, info);
+          }),
+        );
+
+        // Build activity items
+        const historicalItems: ActivityItem[] = [];
+
+        for (const entry of gameStartEntries) {
+          const username =
+            usernameMap.get(entry.owner) ?? shortenAddress(entry.owner);
+          const info = gameInfoMap.get(entry.gameId);
+          historicalItems.push({
+            id: `start-${entry.gameId}`,
+            type: "game_started",
+            username,
+            stake: info?.stake ?? 1,
+            timestamp: 0,
+          });
+        }
+
+        for (const entry of cashOutEntries) {
+          const username =
+            usernameMap.get(entry.owner) ?? shortenAddress(entry.owner);
+          historicalItems.push({
+            id: `cashout-${entry.gameId}`,
+            type: "cash_out",
+            username,
+            moonrocks: entry.moonrocks,
+            timestamp: 0,
+          });
+        }
+
+        if (historicalItems.length > 0) {
+          addItems(historicalItems);
+        }
+      } catch (err) {
+        console.warn("[useActivityFeed] initial fetch error:", err);
+      }
+    };
+
+    fetchInitialData();
+
+    // --- Live subscriptions ---
 
     // 1. Subscribe to token balance updates (game starts)
     const onBalanceUpdate = async (balance: TokenBalance) => {
@@ -129,25 +307,22 @@ export function useActivityFeed(chainId: bigint) {
       ownerMapRef.current.set(gameId, ownerAddress);
 
       // Skip own games
-      if (
-        BigInt(addAddressPadding(ownerAddress)) ===
-        BigInt(addAddressPadding(accountAddress))
-      )
+      if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
         return;
 
       const itemId = `start-${gameId}`;
       if (seenRef.current.has(itemId)) return;
 
       try {
-        const [username, stake] = await Promise.all([
+        const [username, info] = await Promise.all([
           lookupUsername(ownerAddress),
-          lookupStake(client, gameId),
+          lookupGameInfo(client, gameId),
         ]);
         addItem({
           id: itemId,
           type: "game_started",
           username,
-          stake,
+          stake: info?.stake ?? 1,
           timestamp: Date.now(),
         });
       } catch {
@@ -198,10 +373,7 @@ export function useActivityFeed(chainId: bigint) {
         if (!ownerAddress) continue;
 
         // Skip own games
-        if (
-          BigInt(addAddressPadding(ownerAddress)) ===
-          BigInt(addAddressPadding(accountAddress))
-        )
+        if (BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount))
           continue;
 
         try {
@@ -227,7 +399,7 @@ export function useActivityFeed(chainId: bigint) {
       .catch((err) => console.warn("[useActivityFeed] event sub error:", err));
 
     return () => cancelSubscriptions();
-  }, [client, accountAddress, chainId, cancelSubscriptions, addItem]);
+  }, [client, accountAddress, chainId, cancelSubscriptions, addItem, addItems]);
 
   return items;
 }
