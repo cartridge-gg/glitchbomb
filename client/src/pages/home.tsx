@@ -271,7 +271,7 @@ export const Home = () => {
   const handleBannerPointerMove = useCallback((e: React.PointerEvent) => {
     if (!bannerDragStart.current) return;
     const dx = e.clientX - bannerDragStart.current.x;
-    if (Math.abs(dx) > 5) bannerDidDrag.current = true;
+    if (Math.abs(dx) > 10) bannerDidDrag.current = true;
     setBannerDragOffset(dx);
   }, []);
 
@@ -292,6 +292,15 @@ export const Home = () => {
     setBannerDragOffset(0);
     setIsBannerDragging(false);
   }, []);
+
+  // Auto-rotate banner carousel
+  useEffect(() => {
+    if (isBannerDragging) return;
+    const id = setInterval(() => {
+      setBannerIndex((i) => (i + 1) % bannerCount);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [isBannerDragging, bannerCount]);
 
   const [activeGameIndex, setActiveGameIndex] = useState(0);
 
@@ -447,7 +456,7 @@ export const Home = () => {
             onPointerCancel={handleBannerPointerUp}
           >
             <div
-              className={`flex ${isBannerDragging ? "" : "transition-transform duration-300 ease-out"}`}
+              className={`flex ${isBannerDragging ? "" : "transition-transform duration-700 ease-in-out"}`}
               style={{
                 transform: `translateX(calc(-${bannerIndex * 100}% + ${bannerDragOffset}px))`,
               }}
