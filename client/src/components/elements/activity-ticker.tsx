@@ -87,7 +87,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
           oneCopy.map((item, i) => (
             <span
               key={`${copy}-${item.id}-${i}`}
-              className="inline-flex items-center gap-1.5 mx-3 font-primary text-[11px] tracking-wide"
+              className="inline-flex items-center gap-1.5 mx-3 font-primary text-[11px] tracking-wide [&>span]:font-primary"
             >
               <span
                 className="w-1 h-1 rounded-full shrink-0"
