@@ -10,6 +10,7 @@ import {
   BracketArrowIcon,
   NumsLogoIcon,
 } from "@/components/icons";
+import { ActivityTickerBanner } from "@/components/modules/activity-ticker-banner";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GradientBorder } from "@/components/ui/gradient-border";
@@ -430,6 +431,8 @@ export const Home = () => {
         onSfxVolumeChange={setSfxVolume}
       />
 
+      <ActivityTickerBanner />
+
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
         <div
@@ -437,7 +440,7 @@ export const Home = () => {
         >
           {/* Banner Carousel */}
           <div
-            className="overflow-hidden rounded-xl touch-pan-y"
+            className="overflow-hidden rounded-xl touch-pan-y shrink-0"
             onPointerDown={handleBannerPointerDown}
             onPointerMove={handleBannerPointerMove}
             onPointerUp={handleBannerPointerUp}
