@@ -12,7 +12,7 @@ import { getCollectionAddress } from "@/config";
 import { NAMESPACE } from "@/constants";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 
-const MAX_ITEMS = 20;
+const MAX_ITEMS = 10;
 const GAME_OVER_MODEL: `${string}-${string}` = `${NAMESPACE}-GameOver`;
 const GAME_MODEL: `${string}-${string}` = `${NAMESPACE}-Game`;
 
@@ -228,6 +228,109 @@ export function useActivityFeed(chainId: bigint) {
         eventSubRef.current = sub;
       })
       .catch((err) => console.warn("[useActivityFeed] event sub error:", err));
+
+    // 3. Fetch historical data as fallback
+    const fetchHistorical = async () => {
+      try {
+        // Fetch recent game NFT balances (game starts)
+        const balances = await client.getTokenBalances({
+          contract_addresses: [paddedContract],
+          account_addresses: [],
+          token_ids: [],
+          pagination: {
+            cursor: undefined,
+            direction: "Backward",
+            limit: 10,
+            order_by: [],
+          },
+        });
+
+        for (const balance of balances.items) {
+          const rawBalance = BigInt(balance.balance || "0");
+          if (rawBalance === 0n) continue;
+
+          const tokenId = balance.token_id || "0x0";
+          const gameId = Number.parseInt(tokenId, 16);
+          if (gameId === 0) continue;
+
+          const ownerAddress = balance.account_address;
+          ownerMapRef.current.set(gameId, ownerAddress);
+
+          if (
+            paddedAccount &&
+            BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+          )
+            continue;
+
+          const itemId = `start-${gameId}`;
+          if (seenRef.current.has(itemId)) continue;
+
+          try {
+            const [username, stake] = await Promise.all([
+              lookupUsername(ownerAddress),
+              lookupStake(client, gameId),
+            ]);
+            addItem({
+              id: itemId,
+              type: "game_started",
+              username,
+              stake,
+              timestamp: Date.now(),
+            });
+          } catch {
+            // ignore individual lookup failures
+          }
+        }
+
+        // Fetch recent GameOver events (cash outs)
+        const gameOverQuery = new ToriiQueryBuilder()
+          .withClause(clauses.build())
+          .includeHashedKeys()
+          .build();
+
+        const result = await client.getEventMessages(gameOverQuery);
+        for (const entity of result.items) {
+          const model = entity.models[GAME_OVER_MODEL] as unknown as
+            | RawGameOver
+            | undefined;
+          if (!model) continue;
+
+          const reason = Number(model.reason.value);
+          if (reason !== 1) continue;
+
+          const gameId = Number(model.game_id.value);
+          const moonrocks = Number(model.points.value);
+          const itemId = `cashout-${gameId}`;
+          if (seenRef.current.has(itemId)) continue;
+
+          const ownerAddress = ownerMapRef.current.get(gameId);
+          if (!ownerAddress) continue;
+
+          if (
+            paddedAccount &&
+            BigInt(addAddressPadding(ownerAddress)) === BigInt(paddedAccount)
+          )
+            continue;
+
+          try {
+            const username = await lookupUsername(ownerAddress);
+            addItem({
+              id: itemId,
+              type: "cash_out",
+              username,
+              moonrocks,
+              timestamp: Date.now(),
+            });
+          } catch {
+            // ignore individual lookup failures
+          }
+        }
+      } catch (err) {
+        console.warn("[useActivityFeed] historical fetch error:", err);
+      }
+    };
+
+    fetchHistorical();
 
     return () => cancelSubscriptions();
   }, [client, accountAddress, chainId, cancelSubscriptions, addItem]);

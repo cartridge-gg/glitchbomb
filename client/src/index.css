@@ -105,6 +105,15 @@ body {
   }
 }
 
+.ticker-track {
+  animation: ticker-scroll var(--ticker-duration) linear infinite;
+}
+
+.ticker-container:hover .ticker-track,
+.ticker-container:active .ticker-track {
+  animation-play-state: paused;
+}
+
 /* Puller orb rotation animation - CSS for Safari compatibility */
 @keyframes puller-spin {
   from {

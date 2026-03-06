@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import type { ActivityItem } from "@/hooks/activity-feed";
 
 interface ActivityTickerProps {
@@ -50,25 +51,74 @@ function formatItem(item: ActivityItem): React.ReactNode {
 }
 
 export function ActivityTicker({ items }: ActivityTickerProps) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    const track = trackRef.current;
+    if (!track) return;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    const matrix = new DOMMatrix(getComputedStyle(track).transform);
+    track.style.animationPlayState = "paused";
+    track.style.transform = `translateX(${matrix.m41}px)`;
+    track.style.animation = "none";
+    dragRef.current = {
+      active: true,
+      startX: e.clientX,
+      scrollLeft: matrix.m41,
+    };
+  }, []);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current.active || !trackRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    trackRef.current.style.transform = `translateX(${dragRef.current.scrollLeft + dx}px)`;
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    dragRef.current.active = false;
+    const track = trackRef.current;
+    if (!track) return;
+    // Calculate current position as a fraction of the animation cycle
+    // Animation moves from translateX(0) to translateX(-50%)
+    const currentX = Number.parseFloat(
+      track.style.transform.replace(/[^-\d.]/g, "") || "0",
+    );
+    const halfWidth = track.scrollWidth / 2;
+    // progress 0..1 through the cycle
+    const progress = halfWidth > 0 ? (-currentX % halfWidth) / halfWidth : 0;
+    const dur = Number.parseFloat(
+      getComputedStyle(track).getPropertyValue("--ticker-duration") || "1",
+    );
+    // Resume animation from current position via negative delay
+    track.style.transform = "";
+    track.style.animation = "none";
+    // Force reflow so the animation restarts
+    void track.offsetWidth;
+    track.style.animation = "";
+    track.style.animationDelay = `-${progress * dur}s`;
+  }, []);
+
   if (items.length === 0) return null;
 
-  // Ensure each copy has enough items to fill the viewport width
   const minPerCopy = Math.max(1, Math.ceil(8 / items.length));
   const oneCopy = Array.from({ length: minPerCopy }, () => items).flat();
   const duration = oneCopy.length * 6;
 
   return (
     <div
-      className="w-full overflow-hidden shrink-0 mb-4 flex items-center"
+      className="ticker-container w-full overflow-hidden shrink-0 mb-4 flex items-center select-none touch-pan-x"
       style={{ backgroundColor: "rgba(4, 6, 3, 0.64)", height: 28 }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
     >
       <div
-        className="inline-flex whitespace-nowrap items-center h-full"
-        style={{
-          animation: `ticker-scroll ${duration}s linear infinite`,
-        }}
+        ref={trackRef}
+        className="ticker-track inline-flex whitespace-nowrap items-center h-full"
+        style={{ "--ticker-duration": `${duration}s` } as React.CSSProperties}
       >
-        {/* Two identical copies for seamless looping */}
         {[0, 1].map((copy) =>
           oneCopy.map((item, i) => (
             <span
