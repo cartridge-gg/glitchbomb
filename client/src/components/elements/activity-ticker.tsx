@@ -50,14 +50,14 @@ function formatItem(item: ActivityItem): React.ReactNode {
       return (
         <>
           <span
-            className="rounded px-2 py-0.5 text-green-400 font-bold"
+            className="rounded px-1 py-0.5 text-green-400 font-bold"
             style={pillStyle}
           >
             {item.username}
           </span>
           <span className="text-white/60">started a</span>
           <span
-            className="rounded px-2 py-0.5 text-yellow-400 font-bold"
+            className="rounded px-1 py-0.5 text-yellow-400 font-bold"
             style={pillStyle}
           >
             {item.stake}X
@@ -69,14 +69,14 @@ function formatItem(item: ActivityItem): React.ReactNode {
       return (
         <>
           <span
-            className="rounded px-2 py-0.5 text-green-400 font-bold"
+            className="rounded px-1 py-0.5 text-green-400 font-bold"
             style={pillStyle}
           >
             {item.username}
           </span>
           <span className="text-white/60">cashed out</span>
           <span
-            className="rounded px-2 py-0.5 text-yellow-400 font-bold"
+            className="rounded px-1 py-0.5 text-yellow-400 font-bold"
             style={pillStyle}
           >
             {item.moonrocks}
