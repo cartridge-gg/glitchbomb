@@ -10,6 +10,7 @@ import {
   BracketArrowIcon,
   NumsLogoIcon,
 } from "@/components/icons";
+import { ActivityTickerBanner } from "@/components/modules/activity-ticker-banner";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GradientBorder } from "@/components/ui/gradient-border";
@@ -429,6 +430,8 @@ export const Home = () => {
         onMusicVolumeChange={setMusicVolume}
         onSfxVolumeChange={setSfxVolume}
       />
+
+      <ActivityTickerBanner />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
