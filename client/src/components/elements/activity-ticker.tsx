@@ -42,16 +42,24 @@ const SEED_ITEMS: ActivityItem[] = [
   },
 ];
 
+const pillStyle = { backgroundColor: "rgba(255, 255, 255, 0.04)" };
+
 function formatItem(item: ActivityItem): React.ReactNode {
   switch (item.type) {
     case "game_started":
       return (
         <>
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-green-400 font-bold">
+          <span
+            className="rounded px-2 py-0.5 text-green-400 font-bold"
+            style={pillStyle}
+          >
             {item.username}
           </span>
           <span className="text-white/60"> started a </span>
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-yellow-400 font-bold">
+          <span
+            className="rounded px-2 py-0.5 text-yellow-400 font-bold"
+            style={pillStyle}
+          >
             {item.stake}X
           </span>
           <span className="text-white/60"> game</span>
@@ -60,11 +68,17 @@ function formatItem(item: ActivityItem): React.ReactNode {
     case "cash_out":
       return (
         <>
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-green-400 font-bold">
+          <span
+            className="rounded px-2 py-0.5 text-green-400 font-bold"
+            style={pillStyle}
+          >
             {item.username}
           </span>
           <span className="text-white/60"> cashed out </span>
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-yellow-400 font-bold">
+          <span
+            className="rounded px-2 py-0.5 text-yellow-400 font-bold"
+            style={pillStyle}
+          >
             {item.moonrocks}
           </span>
           <span className="text-white/60"> moonrocks</span>
