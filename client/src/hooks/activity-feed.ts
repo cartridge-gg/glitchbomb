@@ -204,6 +204,7 @@ export function useActivityFeed(chainId: bigint) {
         const gameOverQuery = new ToriiQueryBuilder()
           .withClause(gameOverClauses.build())
           .includeHashedKeys()
+          .addOrderBy(`${GAME_OVER_MODEL}-game_id`, "Desc")
           .withLimit(INITIAL_FETCH_LIMIT)
           .build();
 
