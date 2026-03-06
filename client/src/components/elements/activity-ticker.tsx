@@ -4,6 +4,44 @@ interface ActivityTickerProps {
   items: ActivityItem[];
 }
 
+const SEED_ITEMS: ActivityItem[] = [
+  {
+    id: "seed-1",
+    type: "game_started",
+    username: "Clicksave",
+    stake: 1,
+    timestamp: 0,
+  },
+  {
+    id: "seed-2",
+    type: "cash_out",
+    username: "Bal7hazar",
+    moonrocks: 120,
+    timestamp: 0,
+  },
+  {
+    id: "seed-3",
+    type: "game_started",
+    username: "Shinobi",
+    stake: 5,
+    timestamp: 0,
+  },
+  {
+    id: "seed-4",
+    type: "cash_out",
+    username: "0xDev",
+    moonrocks: 340,
+    timestamp: 0,
+  },
+  {
+    id: "seed-5",
+    type: "game_started",
+    username: "LordFelt",
+    stake: 3,
+    timestamp: 0,
+  },
+];
+
 function formatItem(item: ActivityItem): React.ReactNode {
   switch (item.type) {
     case "game_started":
@@ -28,15 +66,16 @@ function formatItem(item: ActivityItem): React.ReactNode {
 }
 
 export function ActivityTicker({ items }: ActivityTickerProps) {
-  if (items.length === 0) return null;
+  // Use live items if available, otherwise show seed data
+  const displayItems = items.length > 0 ? items : SEED_ITEMS;
 
   // Ensure each copy has enough items to fill the viewport width
-  const minPerCopy = Math.max(1, Math.ceil(8 / items.length));
-  const oneCopy = Array.from({ length: minPerCopy }, () => items).flat();
+  const minPerCopy = Math.max(1, Math.ceil(8 / displayItems.length));
+  const oneCopy = Array.from({ length: minPerCopy }, () => displayItems).flat();
   const duration = oneCopy.length * 6;
 
   return (
-    <div className="w-full overflow-hidden py-1.5">
+    <div className="w-full overflow-hidden shrink-0 py-1.5">
       <div
         className="inline-flex whitespace-nowrap items-center"
         style={{
