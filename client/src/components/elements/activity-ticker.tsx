@@ -47,18 +47,26 @@ function formatItem(item: ActivityItem): React.ReactNode {
     case "game_started":
       return (
         <>
-          <span className="text-green-400 font-bold">{item.username}</span>
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-green-400 font-bold">
+            {item.username}
+          </span>
           <span className="text-white/60"> started a </span>
-          <span className="text-yellow-400 font-bold">{item.stake}X</span>
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-yellow-400 font-bold">
+            {item.stake}X
+          </span>
           <span className="text-white/60"> game</span>
         </>
       );
     case "cash_out":
       return (
         <>
-          <span className="text-green-400 font-bold">{item.username}</span>
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-green-400 font-bold">
+            {item.username}
+          </span>
           <span className="text-white/60"> cashed out </span>
-          <span className="text-yellow-400 font-bold">{item.moonrocks}</span>
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-yellow-400 font-bold">
+            {item.moonrocks}
+          </span>
           <span className="text-white/60"> moonrocks</span>
         </>
       );
@@ -93,9 +101,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
               className="inline-flex items-center font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
             >
               <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5">
-                {formatItem(item)}
-              </span>
+              {formatItem(item)}
             </span>
           )),
         )}
