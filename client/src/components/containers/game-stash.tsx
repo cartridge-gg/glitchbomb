@@ -5,6 +5,12 @@ import {
   TabBar,
   type TabBarItem,
 } from "@/components/elements";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { OrbType } from "@/models/orb";
@@ -60,28 +66,47 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
     <div className="flex flex-col items-start w-full">
       {orbs.length > 0 ? (
         <div className="flex justify-center w-full">
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
-            {orbs.map((orb, i) => {
-              const isDiscarded = Boolean(discards?.[i]);
-              return (
-                <div
-                  key={`${orb.value}-${i}`}
-                  className={cn(
-                    "flex flex-col items-center",
-                    isDiscarded && "opacity-25",
-                  )}
-                >
-                  <OrbDisplay
-                    orb={orb}
-                    size="sm"
-                    bombTierIcons
-                    valuePosition="top-right"
-                    count={bombDamage(orb)}
-                  />
-                </div>
-              );
-            })}
-          </div>
+          <TooltipProvider delayDuration={0}>
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 w-full gap-x-[clamp(8px,3vw,16px)] gap-y-4 pb-3 place-items-center">
+              {orbs.map((orb, i) => {
+                const isDiscarded = Boolean(discards?.[i]);
+                return (
+                  <Tooltip key={`${orb.value}-${i}`}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "flex flex-col items-center",
+                          isDiscarded && "opacity-25",
+                        )}
+                      >
+                        <OrbDisplay
+                          orb={orb}
+                          size="sm"
+                          bombTierIcons
+                          valuePosition="top-right"
+                          count={bombDamage(orb)}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                      <p
+                        className="font-secondary text-xs font-bold"
+                        style={{ color: orb.color() }}
+                      >
+                        {orb.name()}
+                      </p>
+                      <p
+                        className="font-secondary text-xs mt-0.5 opacity-50"
+                        style={{ color: orb.color() }}
+                      >
+                        {orb.description()}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
         </div>
       ) : (
         <div className="flex items-center justify-center h-full">
