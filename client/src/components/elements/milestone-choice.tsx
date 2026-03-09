@@ -41,7 +41,7 @@ export const MilestoneChoice = ({
       {/* Cash Out Card */}
       <CashOutCard
         moonrocks={moonrocks}
-        totalMoonrocks={moonrocks + points}
+        reward={points}
         cashOutValue={cashOutValue}
         onClick={onCashOut}
         disabled={isLoading}

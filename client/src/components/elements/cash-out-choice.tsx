@@ -24,7 +24,7 @@ export const CashOutChoice = ({
       {/* Cash Out Card */}
       <CashOutCard
         moonrocks={moonrocks}
-        totalMoonrocks={moonrocks + points}
+        reward={points}
         cashOutValue={cashOutValue}
         onClick={onConfirm}
         disabled={isConfirming}

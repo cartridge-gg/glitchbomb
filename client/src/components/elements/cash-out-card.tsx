@@ -10,7 +10,7 @@ const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
 export interface CashOutCardProps {
   moonrocks: number;
-  totalMoonrocks: number;
+  reward: number;
   cashOutValue?: string;
   onClick: () => void;
   disabled?: boolean;
@@ -19,7 +19,7 @@ export interface CashOutCardProps {
 
 export const CashOutCard = ({
   moonrocks,
-  totalMoonrocks,
+  reward,
   cashOutValue,
   onClick,
   disabled = false,
@@ -103,7 +103,7 @@ export const CashOutCard = ({
           <div className="flex items-center justify-center gap-1">
             <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
             <span className={`text-yellow-400 ${rewardValueClass}`}>
-              {totalMoonrocks}
+              +{reward}
             </span>
           </div>
           <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
