@@ -992,9 +992,9 @@ export const Home = () => {
                 {/* New Game placeholder card */}
                 <div key="new-game" className="w-full shrink-0">
                   <ElectricBorder
-                    color="#FACC15"
+                    color="#FF0099"
                     gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
-                    borderGradient="linear-gradient(0deg, #FACC15, #FCE360)"
+                    borderGradient="linear-gradient(0deg, #FF0099, #FF33AD)"
                     seed={99}
                     cornerRadius={3}
                     noiseAmplitude={0.15}
@@ -1017,7 +1017,7 @@ export const Home = () => {
                       <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
                         <span
                           className="font-secondary text-3xl"
-                          style={{ color: "#FACC15" }}
+                          style={{ color: "#FF0099" }}
                         >
                           +
                         </span>
@@ -1029,13 +1029,13 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
                               Game ID
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
-                              style={{ color: "#FACC15" }}
+                              style={{ color: "#FF0099" }}
                             >
                               ---
                             </p>
@@ -1043,13 +1043,13 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
                               Expires In
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
-                              style={{ color: "#FACC15" }}
+                              style={{ color: "#FF0099" }}
                             >
                               ---
                             </p>
@@ -1057,13 +1057,13 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
                               Level
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
-                              style={{ color: "#FACC15" }}
+                              style={{ color: "#FF0099" }}
                             >
                               ---
                             </p>
@@ -1071,13 +1071,13 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(250, 204, 21, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
                               Payout
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
-                              style={{ color: "#FACC15" }}
+                              style={{ color: "#FF0099" }}
                             >
                               ---
                             </p>
@@ -1215,10 +1215,10 @@ export const Home = () => {
           </Button>
           <Button
             variant="secondary"
-            gradient={isOnNewGameCard ? "yellow" : "green"}
-            wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-yellow-100" : "!bg-green-900"}`}
-            style={isOnNewGameCard ? { backgroundColor: "#3D3200" } : undefined}
+            gradient={isOnNewGameCard ? "pink" : "green"}
+            wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
+            style={isOnNewGameCard ? { backgroundColor: "#2B052E" } : undefined}
             onClick={() =>
               requireLogin(() => {
                 if (isOnNewGameCard) {
