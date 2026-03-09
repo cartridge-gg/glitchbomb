@@ -2,6 +2,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Orb as OrbModel, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 import { getOrbColor, getOrbIcon } from "./orb-utils";
@@ -227,81 +233,124 @@ export const RewardOverlay = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="flex flex-col items-center gap-6">
-            {/* Heading */}
-            <motion.p
-              className="font-secondary text-sm tracking-[0.3em] text-green-400"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.1 }}
-            >
-              {heading}
-            </motion.p>
+          <TooltipProvider delayDuration={0}>
+            <div className="flex flex-col items-center gap-6">
+              {/* Heading */}
+              <motion.p
+                className="font-secondary text-sm tracking-[0.3em] text-green-400"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
+                transition={isExiting ? { duration: 0.2 } : { delay: 0.1 }}
+              >
+                {heading}
+              </motion.p>
 
-            {/* Rewards grid — moonrocks large in center, orbs below */}
-            <motion.div
-              ref={orbRef}
-              className="flex flex-col items-center gap-4"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{
-                scale: isExiting ? 0.5 : 1,
-                opacity: isExiting ? 0 : 1,
-              }}
-              transition={
-                isExiting
-                  ? { duration: 0.2 }
-                  : { delay: 0.25, type: "spring", stiffness: 300, damping: 20 }
-              }
-            >
-              {/* Moonrocks — large, yellow override */}
-              <div
-                style={
-                  {
-                    "--orb-moonrock": "var(--yellow-100)",
-                  } as React.CSSProperties
+              {/* Rewards grid — moonrocks large in center, orbs below */}
+              <motion.div
+                ref={orbRef}
+                className="flex flex-col items-center gap-4"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{
+                  scale: isExiting ? 0.5 : 1,
+                  opacity: isExiting ? 0 : 1,
+                }}
+                transition={
+                  isExiting
+                    ? { duration: 0.2 }
+                    : {
+                        delay: 0.25,
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      }
                 }
               >
-                <OrbDisplay
-                  orb={moonrockOrb}
-                  size="lg"
-                  count={reward.count}
-                  glowScale={1}
-                />
-              </div>
-
-              {/* Orb grid */}
-              {sortedOrbs.length > 0 && (
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
-                  {sortedOrbs.map((orb, i) => (
-                    <div key={`${orb.value}-${i}`} ref={setOrbElementRef(i)}>
+                {/* Moonrocks — large, yellow override */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      style={
+                        {
+                          "--orb-moonrock": "var(--yellow-100)",
+                        } as React.CSSProperties
+                      }
+                    >
                       <OrbDisplay
-                        orb={orb}
-                        size="sm"
-                        glowScale={0.5}
-                        count={bombDamage(orb)}
+                        orb={moonrockOrb}
+                        size="lg"
+                        count={reward.count}
+                        glowScale={1}
                       />
                     </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                    <p
+                      className="font-secondary text-xs font-bold"
+                      style={{ color: "var(--yellow-100)" }}
+                    >
+                      Moonrocks
+                    </p>
+                    <p
+                      className="font-secondary text-xs mt-0.5 opacity-50"
+                      style={{ color: "var(--yellow-100)" }}
+                    >
+                      In-game currency earned by playing. Can be cashed out for GLITCH tokens.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
 
-            {/* LET'S GO button */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
-              transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
-            >
-              <Button
-                variant="secondary"
-                gradient="green"
-                className="h-12 px-12 font-secondary uppercase text-sm tracking-widest"
-                onClick={handleTakeAll}
+                {/* Orb grid */}
+                {sortedOrbs.length > 0 && (
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
+                    {sortedOrbs.map((orb, i) => (
+                      <Tooltip key={`${orb.value}-${i}`}>
+                        <TooltipTrigger asChild>
+                          <div ref={setOrbElementRef(i)}>
+                            <OrbDisplay
+                              orb={orb}
+                              size="sm"
+                              glowScale={0.5}
+                              count={bombDamage(orb)}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                          <p
+                            className="font-secondary text-xs font-bold"
+                            style={{ color: orb.color() }}
+                          >
+                            {orb.name()}
+                          </p>
+                          <p
+                            className="font-secondary text-xs mt-0.5 opacity-50"
+                            style={{ color: orb.color() }}
+                          >
+                            {orb.description()}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* LET'S GO button */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
+                transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
               >
-                {actionLabel}
-              </Button>
-            </motion.div>
-          </div>
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  className="h-12 px-12 font-secondary uppercase text-sm tracking-widest"
+                  onClick={handleTakeAll}
+                >
+                  {actionLabel}
+                </Button>
+              </motion.div>
+            </div>
+          </TooltipProvider>
 
           {/* Flying moonrock particles */}
           {particles.map((p) => (
