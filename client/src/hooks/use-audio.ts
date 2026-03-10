@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Orb } from "@/models/orb";
 import { OrbType } from "@/models/orb";
 
@@ -85,6 +85,33 @@ function getPointEchoLayers(orb: Orb): number {
   }
 }
 
+const FADE_DURATION_MS = 800;
+const FADE_INTERVAL_MS = 30;
+
+function fadeAudio(
+  audio: HTMLAudioElement,
+  from: number,
+  to: number,
+  duration: number,
+  onDone?: () => void,
+) {
+  const steps = Math.ceil(duration / FADE_INTERVAL_MS);
+  const delta = (to - from) / steps;
+  let step = 0;
+  audio.volume = from;
+  const id = setInterval(() => {
+    step++;
+    if (step >= steps) {
+      audio.volume = to;
+      clearInterval(id);
+      onDone?.();
+    } else {
+      audio.volume = Math.min(Math.max(from + delta * step, 0), 1);
+    }
+  }, FADE_INTERVAL_MS);
+  return id;
+}
+
 const ECHO_OFFSET_MS = 40;
 const ECHO_VOLUME_DECAY = 0.72; // each layer is 72% of the previous
 
@@ -108,48 +135,80 @@ function playSfxLayered(file: string, baseVolume: number, layers: number) {
   }
 }
 
+// Module-level music state so audio persists across page navigations
+let gMusic: HTMLAudioElement | null = null;
+let gCurrentTrack: MusicTrack | null = null;
+let gResumeListener: (() => void) | null = null;
+let gFadeInterval: ReturnType<typeof setInterval> | null = null;
+let gOldFadeInterval: ReturnType<typeof setInterval> | null = null;
+let gOldAudio: HTMLAudioElement | null = null;
+
 export function useAudio() {
   const [settings, setSettings] = useState<AudioSettings>(loadSettings);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const musicRef = useRef<HTMLAudioElement | null>(null);
-  const currentTrackRef = useRef<MusicTrack | null>(null);
-  const resumeListenerRef = useRef<(() => void) | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(gMusic !== null);
 
   // Persist settings whenever they change
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
 
-  // Sync music volume/mute with the audio element
+  // Sync music volume/mute with the audio element (skip during fades)
   useEffect(() => {
-    const music = musicRef.current;
-    if (!music) return;
-    music.volume = settings.musicMuted ? 0 : settings.musicVolume;
+    if (!gMusic || gFadeInterval) return;
+    gMusic.volume = settings.musicMuted ? 0 : settings.musicVolume;
   }, [settings.musicMuted, settings.musicVolume]);
 
   const startMusic = useCallback(
     (track: MusicTrack = "normal") => {
       const vol = settings.musicMuted ? 0 : settings.musicVolume;
 
+      // Cancel any in-progress fade on the new track
+      if (gFadeInterval) {
+        clearInterval(gFadeInterval);
+        gFadeInterval = null;
+      }
+
       // If same track is already playing, just resume
-      if (musicRef.current && currentTrackRef.current === track) {
-        musicRef.current.volume = vol;
-        musicRef.current.play().catch(() => {});
+      if (gMusic && gCurrentTrack === track) {
+        gMusic.volume = vol;
+        gMusic.play().catch(() => {});
         setIsMusicPlaying(true);
         return;
       }
 
-      // Capture current position before switching, for time-synced crossfade
+      // Kill any previous old track that's still fading out
+      if (gOldFadeInterval) {
+        clearInterval(gOldFadeInterval);
+        gOldFadeInterval = null;
+      }
+      if (gOldAudio) {
+        gOldAudio.pause();
+        gOldAudio.src = "";
+        gOldAudio = null;
+      }
+
+      // Capture current position and fade out old track
       let seekPosition: number | null = null;
-      if (musicRef.current) {
-        seekPosition = musicRef.current.currentTime;
-        musicRef.current.pause();
-        musicRef.current.src = "";
+      if (gMusic) {
+        seekPosition = gMusic.currentTime;
+        gOldAudio = gMusic;
+        gOldFadeInterval = fadeAudio(
+          gOldAudio,
+          gOldAudio.volume,
+          0,
+          FADE_DURATION_MS,
+          () => {
+            gOldAudio?.pause();
+            if (gOldAudio) gOldAudio.src = "";
+            gOldAudio = null;
+            gOldFadeInterval = null;
+          },
+        );
       }
 
       const audio = new Audio(MUSIC_FILES[track]);
       audio.loop = true;
-      audio.volume = vol;
+      audio.volume = 0;
 
       // Seek to the same position as previous track, or random if fresh start
       audio.addEventListener(
@@ -165,58 +224,86 @@ export function useAudio() {
         { once: true },
       );
 
-      musicRef.current = audio;
-      currentTrackRef.current = track;
+      gMusic = audio;
+      gCurrentTrack = track;
 
       // Remove any previous autoplay-retry listener
-      if (resumeListenerRef.current) {
-        document.removeEventListener("click", resumeListenerRef.current);
-        document.removeEventListener("touchstart", resumeListenerRef.current);
-        resumeListenerRef.current = null;
+      if (gResumeListener) {
+        document.removeEventListener("click", gResumeListener);
+        document.removeEventListener("touchstart", gResumeListener);
+        gResumeListener = null;
       }
 
-      audio.play().catch(() => {
-        // Autoplay blocked — retry on first user interaction
-        const resume = () => {
-          audio.play().catch(() => {});
-          document.removeEventListener("click", resume);
-          document.removeEventListener("touchstart", resume);
-          resumeListenerRef.current = null;
-        };
-        resumeListenerRef.current = resume;
-        document.addEventListener("click", resume, { once: true });
-        document.addEventListener("touchstart", resume, { once: true });
-      });
+      const fadeIn = () => {
+        gFadeInterval = fadeAudio(audio, 0, vol, FADE_DURATION_MS, () => {
+          gFadeInterval = null;
+        });
+      };
+
+      audio
+        .play()
+        .then(fadeIn)
+        .catch(() => {
+          // Autoplay blocked — retry on first user interaction
+          const resume = () => {
+            audio
+              .play()
+              .then(fadeIn)
+              .catch(() => {});
+            document.removeEventListener("click", resume);
+            document.removeEventListener("touchstart", resume);
+            gResumeListener = null;
+          };
+          gResumeListener = resume;
+          document.addEventListener("click", resume, { once: true });
+          document.addEventListener("touchstart", resume, { once: true });
+        });
       setIsMusicPlaying(true);
     },
     [settings.musicMuted, settings.musicVolume],
   );
 
   const stopMusic = useCallback(() => {
-    const music = musicRef.current;
+    if (gFadeInterval) {
+      clearInterval(gFadeInterval);
+      gFadeInterval = null;
+    }
+    const music = gMusic;
     if (music) {
-      music.pause();
-      music.currentTime = 0;
+      fadeAudio(music, music.volume, 0, FADE_DURATION_MS, () => {
+        music.pause();
+        music.currentTime = 0;
+      });
+      gMusic = null;
+      gCurrentTrack = null;
     }
     setIsMusicPlaying(false);
   }, []);
 
-  // Cleanup on unmount
+  // Global tap sound on every click/tap
   useEffect(() => {
-    return () => {
-      const music = musicRef.current;
-      if (music) {
-        music.pause();
-        music.src = "";
-        musicRef.current = null;
-      }
-      if (resumeListenerRef.current) {
-        document.removeEventListener("click", resumeListenerRef.current);
-        document.removeEventListener("touchstart", resumeListenerRef.current);
-        resumeListenerRef.current = null;
-      }
+    if (settings.sfxMuted) return;
+    let recentTouch = false;
+    const playTap = () => {
+      playSfx("/assets/sounds/tap.wav", settings.sfxVolume * 0.5);
     };
-  }, []);
+    const onTouch = () => {
+      recentTouch = true;
+      playTap();
+      setTimeout(() => {
+        recentTouch = false;
+      }, 300);
+    };
+    const onClick = () => {
+      if (!recentTouch) playTap();
+    };
+    document.addEventListener("touchstart", onTouch, { passive: true });
+    document.addEventListener("click", onClick, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouch);
+      document.removeEventListener("click", onClick);
+    };
+  }, [settings.sfxMuted, settings.sfxVolume]);
 
   const playOrbSound = useCallback(
     (orb: Orb) => {
