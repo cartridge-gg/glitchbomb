@@ -52,6 +52,7 @@ export const GameDetails = ({
     {
       label: "Reward Multiplier",
       value: `${stake}X`,
+      color: "#FF0099",
     },
     ...(hasPrice
       ? [
