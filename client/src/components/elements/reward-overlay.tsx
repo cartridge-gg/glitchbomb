@@ -294,7 +294,8 @@ export const RewardOverlay = ({
                       className="font-secondary text-xs mt-0.5 opacity-50"
                       style={{ color: "var(--yellow-100)" }}
                     >
-                      In-game currency earned by playing. Can be cashed out for GLITCH tokens.
+                      In-game currency earned by playing. Can be cashed out for
+                      GLITCH tokens.
                     </p>
                   </TooltipContent>
                 </Tooltip>
