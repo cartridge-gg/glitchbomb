@@ -13,6 +13,7 @@ import {
 import { ActivityTickerBanner } from "@/components/modules/activity-ticker-banner";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
@@ -50,7 +51,7 @@ export const Home = () => {
   useEffect(() => {
     const interval = setInterval(
       () => setNow(Math.floor(Date.now() / 1000)),
-      60_000,
+      60_000
     );
     return () => clearInterval(interval);
   }, []);
@@ -73,7 +74,7 @@ export const Home = () => {
       if (hours > 0) return `${hours}h ${minutes}m`;
       return `${minutes}m`;
     },
-    [now],
+    [now]
   );
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -87,18 +88,18 @@ export const Home = () => {
   const { price: tokenPrice } = useTokenPrice(
     glitchAddress,
     config?.quote,
-    chain.id.toString(),
+    chain.id.toString()
   );
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
     return tokenContracts.find(
-      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress),
+      (contract) => BigInt(contract.contract_address) === BigInt(tokenAddress)
     );
   }, [tokenContracts, tokenAddress]);
 
   const supply = useMemo(
     () => BigInt(tokenContract?.total_supply ?? "0"),
-    [tokenContract],
+    [tokenContract]
   );
   const target = config?.target_supply ?? 0n;
 
@@ -107,18 +108,18 @@ export const Home = () => {
       if (score <= 0) return "$0.00";
       const rewards = cumulativeRewards(stake, supply, target);
       const glitch = toTokens(
-        rewards[Math.min(score, rewards.length) - 1] || 0,
+        rewards[Math.min(score, rewards.length) - 1] || 0
       );
       if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
       return `${glitch.toFixed(1)} GLITCH`;
     },
-    [supply, target, tokenPrice],
+    [supply, target, tokenPrice]
   );
 
   const balance = useMemo(() => {
     if (!tokenContract) return 0;
     const tokenBalance = tokenBalances.find(
-      (b) => BigInt(b.contract_address) === BigInt(tokenAddress),
+      (b) => BigInt(b.contract_address) === BigInt(tokenAddress)
     );
     if (!tokenBalance) return 0;
     return toDecimal(tokenContract, tokenBalance);
@@ -128,7 +129,7 @@ export const Home = () => {
 
   const onProfileClick = useCallback(() => {
     (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
+      "inventory"
     );
   }, [connector]);
 
@@ -167,23 +168,23 @@ export const Home = () => {
       !game.over &&
       game.created_at > 0 &&
       game.created_at + GAME_EXPIRATION <= now,
-    [now],
+    [now]
   );
 
   // Split into active, expired, and completed games
   const activeGames = useMemo(
     () => gameList.filter((g) => !g.over && !isExpired(g)),
-    [gameList, isExpired],
+    [gameList, isExpired]
   );
 
   const expiredGames = useMemo(
     () => gameList.filter((g) => isExpired(g)),
-    [gameList, isExpired],
+    [gameList, isExpired]
   );
 
   const completedGames = useMemo(
     () => gameList.filter((g) => g.over),
-    [gameList],
+    [gameList]
   );
 
   // Group completed + expired games by dynamic date labels
@@ -308,7 +309,7 @@ export const Home = () => {
   // Clamp index when the list changes
   useEffect(() => {
     setActiveGameIndex((prev) =>
-      prev >= totalSlides ? totalSlides - 1 : prev,
+      prev >= totalSlides ? totalSlides - 1 : prev
     );
   }, [totalSlides]);
 
@@ -341,7 +342,7 @@ export const Home = () => {
       dragStart.current = { x: e.clientX, time: Date.now() };
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     },
-    [totalSlides],
+    [totalSlides]
   );
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
@@ -372,7 +373,7 @@ export const Home = () => {
       setDragOffset(0);
       setIsDragging(false);
     },
-    [totalSlides],
+    [totalSlides]
   );
 
   const handlePlay = async (gameId: number) => {
@@ -394,7 +395,7 @@ export const Home = () => {
   useEffect(() => {
     if (!purchaseGameIdsRef.current) return;
     const newGame = ownedGames.find(
-      (g) => !purchaseGameIdsRef.current!.has(g.id),
+      (g) => !purchaseGameIdsRef.current!.has(g.id)
     );
     if (newGame) {
       purchaseGameIdsRef.current = null;
@@ -425,7 +426,7 @@ export const Home = () => {
       }
       action();
     },
-    [isLoggedIn, onConnectClick],
+    [isLoggedIn, onConnectClick]
   );
 
   return (
@@ -979,7 +980,7 @@ export const Home = () => {
                               >
                                 {formatPayout(
                                   game.moonrocks + game.points,
-                                  game.stake,
+                                  game.stake
                                 )}
                               </p>
                             </div>
@@ -1234,7 +1235,10 @@ export const Home = () => {
               })
             }
           >
-            {isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
+            <GlitchText
+              className="font-secondary"
+              text={isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
+            />
           </Button>
         </div>
       </div>
