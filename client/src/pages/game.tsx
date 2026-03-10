@@ -77,7 +77,6 @@ export const Game = () => {
     playOrbSound,
     playRewardSound,
     startMusic,
-    stopMusic,
   } = useAudio();
 
   // Payout chart data
@@ -195,10 +194,9 @@ export const Game = () => {
     );
   }, [connector]);
 
-  // Start background music on mount, stop on unmount
+  // Start glitched music on mount (crossfades from home track)
   useEffect(() => {
     startMusic("glitched");
-    return () => stopMusic();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

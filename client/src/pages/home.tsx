@@ -39,7 +39,6 @@ export const Home = () => {
     setMusicVolume,
     setSfxVolume,
     startMusic,
-    stopMusic,
   } = useAudio();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
@@ -56,10 +55,9 @@ export const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Start normal background music on homepage
+  // Start normal background music on homepage (crossfades from game track)
   useEffect(() => {
     startMusic("normal");
-    return () => stopMusic();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
