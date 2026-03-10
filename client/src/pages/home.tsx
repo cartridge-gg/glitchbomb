@@ -400,6 +400,13 @@ export const Home = () => {
     );
     if (newGame) {
       purchaseGameIdsRef.current = null;
+      // Close the controller iframe before navigating
+      const controllerEl = document.getElementById("controller");
+      if (controllerEl) {
+        document.body.style.overflow = "auto";
+        controllerEl.style.opacity = "0";
+        controllerEl.style.display = "none";
+      }
       navigate(`/play?game=${newGame.id}`);
     }
   }, [ownedGames, navigate]);
