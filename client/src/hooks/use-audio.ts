@@ -140,6 +140,8 @@ let gMusic: HTMLAudioElement | null = null;
 let gCurrentTrack: MusicTrack | null = null;
 let gResumeListener: (() => void) | null = null;
 let gFadeInterval: ReturnType<typeof setInterval> | null = null;
+let gOldFadeInterval: ReturnType<typeof setInterval> | null = null;
+let gOldAudio: HTMLAudioElement | null = null;
 
 export function useAudio() {
   const [settings, setSettings] = useState<AudioSettings>(loadSettings);
@@ -174,15 +176,34 @@ export function useAudio() {
         return;
       }
 
+      // Kill any previous old track that's still fading out
+      if (gOldFadeInterval) {
+        clearInterval(gOldFadeInterval);
+        gOldFadeInterval = null;
+      }
+      if (gOldAudio) {
+        gOldAudio.pause();
+        gOldAudio.src = "";
+        gOldAudio = null;
+      }
+
       // Capture current position and fade out old track
       let seekPosition: number | null = null;
-      const oldAudio = gMusic;
-      if (oldAudio) {
-        seekPosition = oldAudio.currentTime;
-        fadeAudio(oldAudio, oldAudio.volume, 0, FADE_DURATION_MS, () => {
-          oldAudio.pause();
-          oldAudio.src = "";
-        });
+      if (gMusic) {
+        seekPosition = gMusic.currentTime;
+        gOldAudio = gMusic;
+        gOldFadeInterval = fadeAudio(
+          gOldAudio,
+          gOldAudio.volume,
+          0,
+          FADE_DURATION_MS,
+          () => {
+            gOldAudio?.pause();
+            if (gOldAudio) gOldAudio.src = "";
+            gOldAudio = null;
+            gOldFadeInterval = null;
+          },
+        );
       }
 
       const audio = new Audio(MUSIC_FILES[track]);
