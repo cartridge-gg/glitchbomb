@@ -85,7 +85,7 @@ function getPointEchoLayers(orb: Orb): number {
   }
 }
 
-const FADE_DURATION_MS = 1500;
+const FADE_DURATION_MS = 800;
 const FADE_INTERVAL_MS = 30;
 
 function fadeAudio(
