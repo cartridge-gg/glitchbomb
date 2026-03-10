@@ -1215,29 +1215,45 @@ export const Home = () => {
             gradient="green"
             wrapperClassName="flex-1"
             className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-            onClick={handlePractice}
+            onClick={showDetails ? () => setShowDetails(false) : handlePractice}
           >
-            PRACTICE
+            <GlitchText
+              className="font-secondary"
+              text={showDetails ? "BACK" : "PRACTICE"}
+            />
           </Button>
           <Button
             variant="secondary"
-            gradient={isOnNewGameCard ? "pink" : "green"}
-            wrapperClassName={`flex-1 ${isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
-            style={isOnNewGameCard ? { backgroundColor: "#2B052E" } : undefined}
-            onClick={() =>
-              requireLogin(() => {
-                if (isOnNewGameCard) {
-                  handleNewGame();
-                } else if (activeGame) {
-                  handlePlay(activeGame.id);
-                }
-              })
+            gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
+            wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
+            style={
+              showDetails || isOnNewGameCard
+                ? { backgroundColor: "#2B052E" }
+                : undefined
+            }
+            onClick={
+              showDetails
+                ? handleBuyGame
+                : () =>
+                    requireLogin(() => {
+                      if (isOnNewGameCard) {
+                        handleNewGame();
+                      } else if (activeGame) {
+                        handlePlay(activeGame.id);
+                      }
+                    })
             }
           >
             <GlitchText
               className="font-secondary"
-              text={isOnNewGameCard ? "NEW GAME" : "CONTINUE"}
+              text={
+                showDetails
+                  ? "PURCHASE"
+                  : isOnNewGameCard
+                    ? "NEW GAME"
+                    : "CONTINUE"
+              }
             />
           </Button>
         </div>
@@ -1272,31 +1288,6 @@ export const Home = () => {
                 supply={supply}
                 target={target}
               />
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="shrink-0 pt-4 pb-4 px-4">
-            <div className="flex gap-3 w-full max-w-[500px] mx-auto">
-              <Button
-                variant="secondary"
-                gradient="green"
-                wrapperClassName="flex-1"
-                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-                onClick={() => setShowDetails(false)}
-              >
-                BACK
-              </Button>
-              <Button
-                variant="secondary"
-                gradient="pink"
-                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]"
-                className="w-full h-12 font-secondary uppercase text-sm tracking-widest !text-[#FF0099] hover:!brightness-125"
-                style={{ backgroundColor: "#2B052E" }}
-                onClick={handleBuyGame}
-              >
-                PURCHASE
-              </Button>
             </div>
           </div>
         </div>
