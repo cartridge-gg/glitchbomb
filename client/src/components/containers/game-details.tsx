@@ -47,7 +47,7 @@ export const GameDetails = ({
     {
       label: "Cost",
       value: `$${cost.toFixed(2)}`,
-      color: "#FACC15",
+      color: "#FF0099",
     },
     {
       label: "Reward Multiplier",

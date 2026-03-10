@@ -1280,10 +1280,10 @@ export const Home = () => {
               </Button>
               <Button
                 variant="secondary"
-                gradient="yellow"
-                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FACC1560_0%,#FACC1500_100%)]"
-                className="w-full h-12 font-secondary uppercase text-sm tracking-widest !text-yellow-100 hover:!brightness-125"
-                style={{ backgroundColor: "#3D3200" }}
+                gradient="pink"
+                wrapperClassName="flex-1 !bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest !text-[#FF0099] hover:!brightness-125"
+                style={{ backgroundColor: "#2B052E" }}
                 onClick={handleBuyGame}
               >
                 PURCHASE
