@@ -12,8 +12,8 @@ export interface AudioSettings {
 export type MusicTrack = "normal" | "glitched";
 
 const MUSIC_FILES: Record<MusicTrack, string> = {
-  normal: "/assets/sounds/music.wav",
-  glitched: "/assets/sounds/music-glitched.wav",
+  normal: "/assets/sounds/music.ogg",
+  glitched: "/assets/sounds/music-glitched.ogg",
 };
 
 const STORAGE_KEY = "glitchbomb-audio";
@@ -21,7 +21,7 @@ const STORAGE_KEY = "glitchbomb-audio";
 const DEFAULT_SETTINGS: AudioSettings = {
   musicMuted: false,
   sfxMuted: false,
-  musicVolume: 0.8,
+  musicVolume: 0.4,
   sfxVolume: 0.8,
 };
 
