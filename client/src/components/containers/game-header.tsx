@@ -101,7 +101,7 @@ export const GameHeader = ({
       </div>
 
       {/* Center column - Moonrocks + Chips (max 420px, shrinks on mobile) */}
-      <div className="flex items-stretch gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
         {/* Moonrocks (yellow) */}
         <div
           className={`flex-1 min-w-0 ${rewardOverlayOpen ? "relative z-[51]" : ""}`}
