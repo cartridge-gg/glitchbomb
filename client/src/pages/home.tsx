@@ -1208,7 +1208,7 @@ export const Home = () => {
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 pt-4 pb-4 px-4">
+      <div className="shrink-0 pt-4 pb-4 px-4 relative z-[51]">
         <div className="flex gap-3 w-full max-w-[500px] mx-auto">
           <Button
             variant="secondary"
