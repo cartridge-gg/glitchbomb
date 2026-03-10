@@ -25,7 +25,7 @@ export const GlitchText = ({ text, className, style }: GlitchTextProps) => {
     }
 
     let step = 0;
-    const maxLen = Math.max(display.length, text.length);
+    const maxLen = Math.max(prevText.current.length, text.length);
 
     const tick = () => {
       step++;
