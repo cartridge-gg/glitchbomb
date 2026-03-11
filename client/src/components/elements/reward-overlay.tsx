@@ -3,7 +3,7 @@ import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
-  Tooltip,
+  TapTooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
@@ -266,7 +266,7 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — large, yellow override */}
-                <Tooltip>
+                <TapTooltip>
                   <TooltipTrigger asChild>
                     <div
                       style={
@@ -298,13 +298,13 @@ export const RewardOverlay = ({
                       GLITCH tokens.
                     </p>
                   </TooltipContent>
-                </Tooltip>
+                </TapTooltip>
 
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
                   <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
                     {sortedOrbs.map((orb, i) => (
-                      <Tooltip key={`${orb.value}-${i}`}>
+                      <TapTooltip key={`${orb.value}-${i}`}>
                         <TooltipTrigger asChild>
                           <div ref={setOrbElementRef(i)}>
                             <OrbDisplay
@@ -329,7 +329,7 @@ export const RewardOverlay = ({
                             {orb.description()}
                           </p>
                         </TooltipContent>
-                      </Tooltip>
+                      </TapTooltip>
                     ))}
                   </div>
                 )}
