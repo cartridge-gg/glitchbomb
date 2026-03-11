@@ -4,9 +4,9 @@ const GLITCH_CHARS = "!@#$%&*<>{}[]=/\\|~^";
 const STEP_MS = 35;
 const GLITCH_STEPS = 6;
 
-const SCRAMBLE_STEP_MS = 50;
-const SCRAMBLE_GLITCH_STEPS = 6;
-const SCRAMBLE_HOLD_MS = 600;
+const SCRAMBLE_STEP_MS = 100;
+const SCRAMBLE_GLITCH_STEPS = 8;
+const SCRAMBLE_HOLD_MS = 800;
 
 interface GlitchTextProps {
   text: string;

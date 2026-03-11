@@ -190,7 +190,7 @@ export const Puller = memo(function Puller({
   const resolvedSizePx = sizePx ?? defaultSizePx;
   const labelFontSize = Math.round(resolvedSizePx * 0.19);
   const labelLineHeight = Math.round(labelFontSize * 0.86);
-  const loadingLabelFontSize = Math.round(resolvedSizePx * 0.12);
+  const loadingLabelFontSize = Math.round(resolvedSizePx * 0.14);
   const loadingLabelLineHeight = Math.round(loadingLabelFontSize * 0.9);
   const mergedStyle = {
     boxShadow: "0px 0px 50px 30px #000000",
