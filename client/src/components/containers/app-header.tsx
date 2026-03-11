@@ -7,6 +7,7 @@ import {
   GlitchBombIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
 import { SettingsModal, SoundPopover } from "./sound-modal";
@@ -116,9 +117,10 @@ export const AppHeader = ({
             aria-label="Mint moonrocks"
           >
             <GlitchBombIcon className="w-4 h-4 text-[#F09]" />
-            <span className="font-secondary text-sm tracking-widest text-[#F09]">
-              {Math.floor(moonrocks).toLocaleString()}
-            </span>
+            <GlitchText
+              className="font-secondary text-sm tracking-widest text-[#F09]"
+              text={Math.floor(moonrocks).toLocaleString()}
+            />
           </button>
         </GradientBorder>
         {/* Profile / login */}

@@ -1,4 +1,5 @@
 import { HeartIcon } from "@/components/icons";
+import { GlitchText } from "@/components/ui/glitch-text";
 
 interface ProgressBarProps {
   progress: number;
@@ -74,9 +75,10 @@ export const GameStats = ({
                 filter: "drop-shadow(0 0 4px #FF0080)",
               }}
             />
-            <span className="text-pink-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)]">
-              {health}
-            </span>
+            <GlitchText
+              className="text-pink-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)]"
+              text={String(health)}
+            />
           </div>
         </div>
         {/* Health Bar */}
@@ -90,16 +92,16 @@ export const GameStats = ({
 
       {/* Center - Points & Level */}
       <div className="flex flex-col items-center">
-        <span
+        <GlitchText
           className="text-green-400 font-rubik text-[clamp(1.5rem,5svh,3rem)]"
           style={{ textShadow: "0 0 20px rgba(74, 222, 128, 0.3)" }}
-        >
-          {points}
-        </span>
+          text={String(points)}
+        />
         <div className="flex items-center justify-center px-3 py-0.5 rounded-full border border-green-700 -mt-3">
-          <span className="font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-wider">
-            Lvl {level}
-          </span>
+          <GlitchText
+            className="font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-wider"
+            text={`Lvl ${level}`}
+          />
         </div>
       </div>
 
@@ -111,9 +113,10 @@ export const GameStats = ({
           </span>
           <div className="flex items-center gap-1">
             <span className="text-green-400 text-sm">✦</span>
-            <span className="text-green-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)]">
-              {milestone}
-            </span>
+            <GlitchText
+              className="text-green-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)]"
+              text={String(milestone)}
+            />
           </div>
         </div>
         {/* Goal Progress Bar */}

@@ -1,4 +1,5 @@
 import { MoonrockIcon } from "@/components/icons";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
@@ -55,9 +56,10 @@ export const CashOutCard = ({
           </div>
           <div className="w-px self-stretch bg-yellow-100 opacity-5" />
           <div className="flex items-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
-            <span className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
-              {cashOutValue}
-            </span>
+            <GlitchText
+              className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none"
+              text={cashOutValue}
+            />
           </div>
         </div>
       )}
@@ -78,9 +80,10 @@ export const CashOutCard = ({
         <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
           <div className="flex items-center justify-center gap-1">
             <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
-            <span className={`text-yellow-400 ${rewardValueClass}`}>
-              {moonrocks}
-            </span>
+            <GlitchText
+              className={`text-yellow-400 ${rewardValueClass}`}
+              text={String(moonrocks)}
+            />
           </div>
           <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
             Moon Rocks
@@ -102,9 +105,10 @@ export const CashOutCard = ({
         <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
           <div className="flex items-center justify-center gap-1">
             <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
-            <span className={`text-yellow-400 ${rewardValueClass}`}>
-              +{reward}
-            </span>
+            <GlitchText
+              className={`text-yellow-400 ${rewardValueClass}`}
+              text={`+${reward}`}
+            />
           </div>
           <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
             Moon Rocks

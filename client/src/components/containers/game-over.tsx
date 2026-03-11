@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { GlitchBombIcon, MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import type { OrbPulled } from "@/models";
@@ -131,7 +132,7 @@ export const GameOver = ({
                 <span
                   className={`${textColor} font-secondary text-[clamp(0.8rem,2svh,1.1rem)] tracking-[0.2em]`}
                 >
-                  {moonrocksEarned} MOONROCKS
+                  <GlitchText text={`${moonrocksEarned} MOONROCKS`} />
                 </span>
               </div>
             </InfoCard>
@@ -200,7 +201,7 @@ export const GameOver = ({
                       <span
                         className={`${textColor} font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none`}
                       >
-                        ${usd.toFixed(2)}
+                        <GlitchText text={`$${usd.toFixed(2)}`} />
                       </span>
                     </div>
                   </div>
@@ -228,11 +229,10 @@ export const GameOver = ({
                       <MoonrockIcon
                         className={`w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)] ${textColor}`}
                       />
-                      <span
+                      <GlitchText
                         className={`${textColor} font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none`}
-                      >
-                        {moonrocksEarned}
-                      </span>
+                        text={String(moonrocksEarned)}
+                      />
                     </div>
                     <span
                       className={`${textColor} opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider`}
@@ -263,11 +263,10 @@ export const GameOver = ({
                         <GlitchBombIcon
                           className={`w-[clamp(14px,3svh,18px)] h-[clamp(14px,3svh,18px)] ${textColor}`}
                         />
-                        <span
+                        <GlitchText
                           className={`${textColor} font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none`}
-                        >
-                          {glitch.toFixed(1)}
-                        </span>
+                          text={glitch.toFixed(1)}
+                        />
                       </div>
                       <span
                         className={`${textColor} opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider`}
@@ -301,12 +300,11 @@ export const GameOver = ({
                   >
                     {stat.label}
                   </span>
-                  <span
+                  <GlitchText
                     className="font-secondary text-sm"
                     style={{ color: "#36F818" }}
-                  >
-                    {stat.value}
-                  </span>
+                    text={String(stat.value)}
+                  />
                 </div>
               ))}
             </div>

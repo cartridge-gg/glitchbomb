@@ -1,5 +1,6 @@
 import { CostStepper } from "@/components/elements/cost-stepper";
 import { PayoutChart } from "@/components/elements/payout-chart";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import {
   breakEvenScore,
@@ -130,12 +131,11 @@ export const GameDetails = ({
               >
                 {stat.label}
               </span>
-              <span
+              <GlitchText
                 className="font-secondary text-sm"
                 style={{ color: stat.color ?? valueColor }}
-              >
-                {stat.value}
-              </span>
+                text={stat.value}
+              />
             </div>
           ))}
         </div>
