@@ -4,13 +4,15 @@ const GLITCH_CHARS = "!@#$%&*<>{}[]=/\\|~^";
 const STEP_MS = 35;
 const GLITCH_STEPS = 6;
 
-const SCRAMBLE_MS = 60;
+const SCRAMBLE_STEP_MS = 50;
+const SCRAMBLE_GLITCH_STEPS = 6;
+const SCRAMBLE_HOLD_MS = 600;
 
 interface GlitchTextProps {
   text: string;
   className?: string;
   style?: React.CSSProperties;
-  /** When true, continuously scrambles the text */
+  /** When true, loops: readable → glitch → readable → glitch */
   scramble?: boolean;
 }
 
@@ -68,23 +70,46 @@ export const GlitchText = ({
     };
   }, [text]);
 
-  // Continuous scramble loop
+  // Scramble loop: hold readable → glitch out → hold readable → repeat
   useEffect(() => {
     if (!scramble) {
       setDisplay(text);
       return;
     }
 
+    let step = 0;
+    let phase: "hold" | "glitch" = "hold";
+
     const tick = () => {
+      if (phase === "hold") {
+        setDisplay(text);
+        phase = "glitch";
+        step = 0;
+        frameRef.current = setTimeout(tick, SCRAMBLE_HOLD_MS);
+        return;
+      }
+
+      // Glitch phase: progressively corrupt then resolve
+      step++;
+      const half = SCRAMBLE_GLITCH_STEPS / 2;
+      // First half corrupts more, second half resolves back
+      const corruption = step <= half ? step / half : 1 - (step - half) / half;
+
       let result = "";
       for (let i = 0; i < text.length; i++) {
         result +=
-          Math.random() < 0.4
-            ? text[i]
-            : GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+          Math.random() < corruption
+            ? GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+            : text[i];
       }
       setDisplay(result);
-      frameRef.current = setTimeout(tick, SCRAMBLE_MS);
+
+      if (step >= SCRAMBLE_GLITCH_STEPS) {
+        phase = "hold";
+        frameRef.current = setTimeout(tick, SCRAMBLE_STEP_MS);
+      } else {
+        frameRef.current = setTimeout(tick, SCRAMBLE_STEP_MS);
+      }
     };
 
     tick();
