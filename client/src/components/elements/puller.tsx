@@ -10,6 +10,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { memo, useEffect, useState } from "react";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { cn } from "@/lib/utils";
 
 const pullerVariants = cva(
@@ -337,7 +338,7 @@ export const Puller = memo(function Puller({
           }}
         >
           {isLoading ? (
-            "PULLING"
+            <GlitchText text="PULLING" scramble />
           ) : (
             <>
               PULL
