@@ -5,6 +5,7 @@ export * from "./card-divider";
 export * from "./cash-out-choice";
 export * from "./connect";
 export * from "./counter";
+export * from "./curse-badge";
 export * from "./distribution";
 export * from "./game-graph";
 export * from "./game-recap";

@@ -27,6 +27,7 @@ export interface MultiplierProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof multiplierVariants> {
   count: number;
+  children?: React.ReactNode;
   electricColor?: string;
   electricGradient?: string;
   electricBorderGradient?: string;
@@ -77,6 +78,7 @@ const multiplierContainerVariants = cva(
 
 export const Multiplier = ({
   count,
+  children,
   variant,
   size,
   className,
@@ -181,11 +183,13 @@ export const Multiplier = ({
           "flex items-center justify-center",
         )}
       >
-        <GlitchText
-          className="font-secondary tracking-widest select-none leading-none"
-          style={{ color: resolvedColor }}
-          text={`${count}X`}
-        />
+        {children ?? (
+          <GlitchText
+            className="font-secondary tracking-widest select-none leading-none"
+            style={{ color: resolvedColor }}
+            text={`${count}X`}
+          />
+        )}
       </div>
     </ElectricBorder>
   );

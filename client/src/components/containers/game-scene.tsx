@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { type RefObject, useEffect, useState } from "react";
 import {
+  CurseBadge,
   Distribution,
   type DistributionValues,
   Multiplier,
@@ -9,7 +10,6 @@ import {
   Outcome,
   Puller,
 } from "@/components/elements";
-import { FireIcon } from "@/components/icons";
 import {
   Tooltip,
   TooltipContent,
@@ -100,8 +100,6 @@ export const GameScene = ({
   );
   const badgeOffsetX = 104;
   const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
-  const fireIconSize = Math.round(badgeSizePx * 0.4);
-
   // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
 
@@ -183,24 +181,7 @@ export const GameScene = ({
                     className="absolute z-30"
                     style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
                   >
-                    <div style={{ width: badgeSizePx, height: badgeSizePx }}>
-                      <Multiplier
-                        count={3}
-                        cornerRadius={50}
-                        className="h-full w-full [&_p]:opacity-0"
-                        electricGradient="linear-gradient(180deg, #F89149CC 0%, #D10D07CC 100%)"
-                        electricBorderGradient="linear-gradient(180deg, #F89149 0%, #D10D07 100%)"
-                        electricColor="#F89149"
-                        contentOpacity={0.55}
-                        borderWidthMin={1.25}
-                        borderWidthMax={2.5}
-                      />
-                      <div className="absolute inset-0 z-20 flex items-center justify-center">
-                        <FireIcon
-                          style={{ width: fireIconSize, height: fireIconSize }}
-                        />
-                      </div>
-                    </div>
+                    <CurseBadge size={badgeSizePx} />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent
