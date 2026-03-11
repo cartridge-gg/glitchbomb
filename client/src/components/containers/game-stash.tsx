@@ -6,7 +6,7 @@ import {
   type TabBarItem,
 } from "@/components/elements";
 import {
-  Tooltip,
+  TapTooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
@@ -71,7 +71,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
               {orbs.map((orb, i) => {
                 const isDiscarded = Boolean(discards?.[i]);
                 return (
-                  <Tooltip key={`${orb.value}-${i}`}>
+                  <TapTooltip key={`${orb.value}-${i}`}>
                     <TooltipTrigger asChild>
                       <div
                         className={cn(
@@ -102,7 +102,7 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                         {orb.description()}
                       </p>
                     </TooltipContent>
-                  </Tooltip>
+                  </TapTooltip>
                 );
               })}
             </div>
