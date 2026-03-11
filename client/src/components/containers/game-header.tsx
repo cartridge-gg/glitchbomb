@@ -8,6 +8,7 @@ import {
   MoonrockIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
 import { SettingsModal, SoundPopover } from "./sound-modal";
@@ -111,18 +112,20 @@ export const GameHeader = ({
             className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] min-w-0 px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10]"
           >
             <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
-            <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400 truncate">
-              {shownMoonrocks.toLocaleString()}
-            </span>
+            <GlitchText
+              className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400 truncate"
+              text={shownMoonrocks.toLocaleString()}
+            />
           </div>
         </div>
         {/* Chips (orange) */}
         <div className="flex-1 min-w-0">
           <div className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] min-w-0 px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302510]">
             <ChipIcon className="w-5 h-5 text-orange-400 shrink-0" />
-            <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-orange-400 truncate">
-              {chips.toLocaleString()}
-            </span>
+            <GlitchText
+              className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-orange-400 truncate"
+              text={chips.toLocaleString()}
+            />
           </div>
         </div>
       </div>

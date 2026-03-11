@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { ElectricBorder } from "@/components/ui/electric-border";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
 
@@ -180,10 +181,11 @@ export const Multiplier = ({
           "flex items-center justify-center",
         )}
       >
-        <p
+        <GlitchText
           className="font-secondary tracking-widest select-none leading-none"
           style={{ color: resolvedColor }}
-        >{`${count}X`}</p>
+          text={`${count}X`}
+        />
       </div>
     </ElectricBorder>
   );

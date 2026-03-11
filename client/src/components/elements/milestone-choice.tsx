@@ -1,4 +1,5 @@
 import { ChipIcon, GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { GlitchText } from "@/components/ui/glitch-text";
 import { CardDivider } from "./card-divider";
 import { CashOutCard } from "./cash-out-card";
 import { InfoCard } from "./info-card";
@@ -80,9 +81,10 @@ export const MilestoneChoice = ({
               <div className="w-px self-stretch bg-orange-100 opacity-5" />
               <div className="flex items-center gap-1 px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
                 <MoonrockIcon className="w-[clamp(10px,2svh,14px)] h-[clamp(10px,2svh,14px)] text-orange-400" />
-                <span className="text-orange-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none">
-                  -{ante}
-                </span>
+                <GlitchText
+                  className="text-orange-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none"
+                  text={`-${ante}`}
+                />
               </div>
             </div>
           )}
@@ -109,9 +111,10 @@ export const MilestoneChoice = ({
                   size="md"
                   className={`text-orange-400 ${rewardIconClass}`}
                 />
-                <span className={`text-orange-400 ${rewardValueClass}`}>
-                  +{points}
-                </span>
+                <GlitchText
+                  className={`text-orange-400 ${rewardValueClass}`}
+                  text={`+${points}`}
+                />
               </div>
               <span className={`text-orange-400/70 ${rewardLabelClass}`}>
                 Gain Chips
@@ -137,9 +140,10 @@ export const MilestoneChoice = ({
               <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
                 <div className="flex items-center gap-2">
                   <GlitchBombIcon className="w-[clamp(16px,3.6svh,22px)] h-[clamp(16px,3.6svh,22px)] text-red-400" />
-                  <span className="text-red-400 font-secondary text-[clamp(0.7rem,2.1svh,0.95rem)] text-center leading-tight">
-                    {curseLabel}
-                  </span>
+                  <GlitchText
+                    className="text-red-400 font-secondary text-[clamp(0.7rem,2.1svh,0.95rem)] text-center leading-tight"
+                    text={curseLabel ?? ""}
+                  />
                 </div>
                 <span className="text-red-400/70 font-secondary text-[clamp(0.45rem,1svh,0.6rem)] tracking-[0.3em]">
                   Applied next level
