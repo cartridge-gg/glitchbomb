@@ -85,43 +85,55 @@ function getPointEchoLayers(orb: Orb): number {
   }
 }
 
-const FADE_DURATION_MS = 800;
-const FADE_INTERVAL_MS = 30;
+const FADE_DURATION_S = 0.8;
+const ECHO_OFFSET_MS = 40;
+const ECHO_VOLUME_DECAY = 0.72;
 
-function fadeAudio(
-  audio: HTMLAudioElement,
-  from: number,
-  to: number,
-  duration: number,
-  onDone?: () => void,
-) {
-  const steps = Math.ceil(duration / FADE_INTERVAL_MS);
-  const delta = (to - from) / steps;
-  let step = 0;
-  audio.volume = from;
-  const id = setInterval(() => {
-    step++;
-    if (step >= steps) {
-      audio.volume = to;
-      clearInterval(id);
-      onDone?.();
-    } else {
-      audio.volume = Math.min(Math.max(from + delta * step, 0), 1);
-    }
-  }, FADE_INTERVAL_MS);
-  return id;
+// ── Shared Web Audio context ──
+
+function getAudioCtx(): AudioContext {
+  if (!gAudioCtx) {
+    gAudioCtx = new AudioContext();
+  }
+  if (gAudioCtx.state === "suspended") {
+    void gAudioCtx.resume();
+  }
+  return gAudioCtx;
 }
 
-const ECHO_OFFSET_MS = 40;
-const ECHO_VOLUME_DECAY = 0.72; // each layer is 72% of the previous
+let gAudioCtx: AudioContext | null = null;
+
+// SFX buffer cache
+const gSfxCache = new Map<string, AudioBuffer>();
+
+async function fetchBuffer(url: string): Promise<AudioBuffer | null> {
+  const cached = gSfxCache.get(url);
+  if (cached) return cached;
+  try {
+    const ctx = getAudioCtx();
+    const res = await fetch(url);
+    const arrayBuf = await res.arrayBuffer();
+    const audioBuf = await ctx.decodeAudioData(arrayBuf);
+    gSfxCache.set(url, audioBuf);
+    return audioBuf;
+  } catch {
+    return null;
+  }
+}
 
 function playSfx(file: string, volume: number) {
-  const audio = new Audio(file);
-  audio.volume = Math.min(volume, 1);
-  audio.play().catch(() => {});
-  audio.addEventListener("ended", () => {
-    audio.src = "";
-  });
+  void (async () => {
+    const buffer = await fetchBuffer(file);
+    if (!buffer) return;
+    const ctx = getAudioCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = Math.min(volume, 1);
+    gain.connect(ctx.destination);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(gain);
+    source.start(0);
+  })();
 }
 
 function playSfxLayered(file: string, baseVolume: number, layers: number) {
@@ -135,96 +147,96 @@ function playSfxLayered(file: string, baseVolume: number, layers: number) {
   }
 }
 
-// Module-level music state so audio persists across page navigations
-let gMusic: HTMLAudioElement | null = null;
+// ── Module-level music state ──
+
+let gMusicSource: AudioBufferSourceNode | null = null;
+let gMusicGain: GainNode | null = null;
 let gCurrentTrack: MusicTrack | null = null;
 let gResumeListener: (() => void) | null = null;
-let gFadeInterval: ReturnType<typeof setInterval> | null = null;
-let gOldFadeInterval: ReturnType<typeof setInterval> | null = null;
-let gOldAudio: HTMLAudioElement | null = null;
+// Track playback position for crossfading
+let gMusicStartTime = 0; // ctx.currentTime when source.start() was called
+let gMusicOffset = 0; // offset into the buffer
+
+let gOldSource: AudioBufferSourceNode | null = null;
+let gOldGain: GainNode | null = null;
+
+function stopSource(
+  source: AudioBufferSourceNode | null,
+  gain: GainNode | null,
+) {
+  if (source) {
+    try {
+      source.onended = null;
+      source.stop();
+    } catch {
+      /* already stopped */
+    }
+  }
+  if (gain) {
+    gain.disconnect();
+  }
+}
 
 export function useAudio() {
   const [settings, setSettings] = useState<AudioSettings>(loadSettings);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(gMusic !== null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(gMusicSource !== null);
 
   // Persist settings whenever they change
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
 
-  // Sync music volume/mute with the audio element (skip during fades)
+  // Sync music volume/mute with gain node
   useEffect(() => {
-    if (!gMusic || gFadeInterval) return;
-    gMusic.volume = settings.musicMuted ? 0 : settings.musicVolume;
+    if (!gMusicGain) return;
+    const vol = settings.musicMuted ? 0 : settings.musicVolume;
+    gMusicGain.gain.setValueAtTime(vol, getAudioCtx().currentTime);
   }, [settings.musicMuted, settings.musicVolume]);
 
   const startMusic = useCallback(
     (track: MusicTrack = "normal") => {
       const vol = settings.musicMuted ? 0 : settings.musicVolume;
+      const ctx = getAudioCtx();
 
-      // Cancel any in-progress fade on the new track
-      if (gFadeInterval) {
-        clearInterval(gFadeInterval);
-        gFadeInterval = null;
-      }
-
-      // If same track is already playing, just resume
-      if (gMusic && gCurrentTrack === track) {
-        gMusic.volume = vol;
-        gMusic.play().catch(() => {});
+      // If same track is already playing, just update volume
+      if (gMusicSource && gCurrentTrack === track) {
+        if (gMusicGain) {
+          gMusicGain.gain.setValueAtTime(vol, ctx.currentTime);
+        }
         setIsMusicPlaying(true);
         return;
       }
 
       // Kill any previous old track that's still fading out
-      if (gOldFadeInterval) {
-        clearInterval(gOldFadeInterval);
-        gOldFadeInterval = null;
-      }
-      if (gOldAudio) {
-        gOldAudio.pause();
-        gOldAudio.src = "";
-        gOldAudio = null;
-      }
+      stopSource(gOldSource, gOldGain);
+      gOldSource = null;
+      gOldGain = null;
 
-      // Capture current position and fade out old track
+      // Capture current playback position for seeking
       let seekPosition: number | null = null;
-      if (gMusic) {
-        seekPosition = gMusic.currentTime;
-        gOldAudio = gMusic;
-        gOldFadeInterval = fadeAudio(
-          gOldAudio,
-          gOldAudio.volume,
+      if (gMusicSource && gMusicGain) {
+        seekPosition = gMusicOffset + (ctx.currentTime - gMusicStartTime);
+        // Fade out old track
+        gOldSource = gMusicSource;
+        gOldGain = gMusicGain;
+        gOldGain.gain.setValueAtTime(gOldGain.gain.value, ctx.currentTime);
+        gOldGain.gain.linearRampToValueAtTime(
           0,
-          FADE_DURATION_MS,
-          () => {
-            gOldAudio?.pause();
-            if (gOldAudio) gOldAudio.src = "";
-            gOldAudio = null;
-            gOldFadeInterval = null;
-          },
+          ctx.currentTime + FADE_DURATION_S,
         );
+        const oldSrc = gOldSource;
+        const oldGn = gOldGain;
+        setTimeout(() => {
+          stopSource(oldSrc, oldGn);
+          if (gOldSource === oldSrc) {
+            gOldSource = null;
+            gOldGain = null;
+          }
+        }, FADE_DURATION_S * 1000 + 50);
       }
 
-      const audio = new Audio(MUSIC_FILES[track]);
-      audio.loop = true;
-      audio.volume = 0;
-
-      // Seek to the same position as previous track, or random if fresh start
-      audio.addEventListener(
-        "loadedmetadata",
-        () => {
-          if (audio.duration > 0) {
-            audio.currentTime =
-              seekPosition !== null
-                ? seekPosition % audio.duration
-                : Math.random() * audio.duration;
-          }
-        },
-        { once: true },
-      );
-
-      gMusic = audio;
+      gMusicSource = null;
+      gMusicGain = null;
       gCurrentTrack = track;
 
       // Remove any previous autoplay-retry listener
@@ -234,49 +246,72 @@ export function useAudio() {
         gResumeListener = null;
       }
 
-      const fadeIn = () => {
-        gFadeInterval = fadeAudio(audio, 0, vol, FADE_DURATION_MS, () => {
-          gFadeInterval = null;
-        });
+      const playBuffer = async () => {
+        const buffer = await fetchBuffer(MUSIC_FILES[track]);
+        if (!buffer) return;
+        // Bail if track changed while loading
+        if (gCurrentTrack !== track) return;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(
+          vol,
+          ctx.currentTime + FADE_DURATION_S,
+        );
+        gain.connect(ctx.destination);
+
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        source.connect(gain);
+
+        const offset =
+          seekPosition !== null
+            ? seekPosition % buffer.duration
+            : Math.random() * buffer.duration;
+
+        source.start(0, offset);
+        gMusicSource = source;
+        gMusicGain = gain;
+        gMusicStartTime = ctx.currentTime;
+        gMusicOffset = offset;
       };
 
-      audio
-        .play()
-        .then(fadeIn)
-        .catch(() => {
-          // Autoplay blocked — retry on first user interaction
-          const resume = () => {
-            audio
-              .play()
-              .then(fadeIn)
-              .catch(() => {});
-            document.removeEventListener("click", resume);
-            document.removeEventListener("touchstart", resume);
-            gResumeListener = null;
-          };
-          gResumeListener = resume;
-          document.addEventListener("click", resume, { once: true });
-          document.addEventListener("touchstart", resume, { once: true });
-        });
+      // Resume AudioContext (may be suspended due to autoplay policy)
+      if (ctx.state === "suspended") {
+        const resume = () => {
+          void ctx.resume().then(playBuffer);
+          document.removeEventListener("click", resume);
+          document.removeEventListener("touchstart", resume);
+          gResumeListener = null;
+        };
+        gResumeListener = resume;
+        document.addEventListener("click", resume, { once: true });
+        document.addEventListener("touchstart", resume, { once: true });
+      } else {
+        void playBuffer();
+      }
+
       setIsMusicPlaying(true);
     },
     [settings.musicMuted, settings.musicVolume],
   );
 
   const stopMusic = useCallback(() => {
-    if (gFadeInterval) {
-      clearInterval(gFadeInterval);
-      gFadeInterval = null;
+    const ctx = getAudioCtx();
+    if (gMusicSource && gMusicGain) {
+      gMusicGain.gain.setValueAtTime(gMusicGain.gain.value, ctx.currentTime);
+      gMusicGain.gain.linearRampToValueAtTime(
+        0,
+        ctx.currentTime + FADE_DURATION_S,
+      );
+      const src = gMusicSource;
+      const gn = gMusicGain;
+      setTimeout(() => stopSource(src, gn), FADE_DURATION_S * 1000 + 50);
     }
-    const music = gMusic;
-    if (music) {
-      fadeAudio(music, music.volume, 0, FADE_DURATION_MS, () => {
-        music.pause();
-        music.currentTime = 0;
-      });
-      gMusic = null;
-      gCurrentTrack = null;
-    }
+    gMusicSource = null;
+    gMusicGain = null;
+    gCurrentTrack = null;
     setIsMusicPlaying(false);
   }, []);
 
