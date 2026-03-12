@@ -14,6 +14,7 @@ import { SettingsModal, SoundPopover } from "./sound-modal";
 
 export interface AppHeaderProps {
   moonrocks: number;
+  hideBalance?: boolean;
   username?: string;
   showBack?: boolean;
   backPath?: string;
@@ -30,6 +31,7 @@ export interface AppHeaderProps {
 
 export const AppHeader = ({
   moonrocks,
+  hideBalance,
   username,
   showBack = true,
   backPath = "/",
@@ -108,21 +110,23 @@ export const AppHeader = ({
             </div>
           )}
         {/* Moonrocks display */}
-        <GradientBorder color="pink">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg bg-[#2B052E] transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
-            onClick={onMint}
-            disabled={!canMint}
-            aria-label="Mint moonrocks"
-          >
-            <GlitchBombIcon className="w-4 h-4 text-[#F09]" />
-            <GlitchText
-              className="font-secondary text-sm tracking-widest text-[#F09]"
-              text={Math.floor(moonrocks).toLocaleString()}
-            />
-          </button>
-        </GradientBorder>
+        {!hideBalance && (
+          <GradientBorder color="pink">
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 h-12 px-3 md:px-4 rounded-lg bg-[#2B052E] transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+              onClick={onMint}
+              disabled={!canMint}
+              aria-label="Mint moonrocks"
+            >
+              <GlitchBombIcon className="w-4 h-4 text-[#F09]" />
+              <GlitchText
+                className="font-secondary text-sm tracking-widest text-[#F09]"
+                text={Math.floor(moonrocks).toLocaleString()}
+              />
+            </button>
+          </GradientBorder>
+        )}
         {/* Profile / login */}
         {username ? (
           <>

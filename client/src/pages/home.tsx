@@ -23,7 +23,12 @@ import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
-import { createOfflineGame, resetOfflineState } from "@/offline/store";
+import {
+  createOfflineGame,
+  resetOfflineState,
+  selectGame,
+  useOfflineStore,
+} from "@/offline/store";
 import { isMobile } from "@/utils/mobile";
 
 export const Home = () => {
@@ -33,7 +38,18 @@ export const Home = () => {
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
-  const { games: ownedGames } = useOwnedGames();
+  const { games: onchainGames } = useOwnedGames();
+  const offlineState = useOfflineStore();
+
+  // On mobile, use practice games from localStorage; on desktop, use on-chain games
+  const ownedGames = useMemo(() => {
+    if (!isMobile) return onchainGames;
+    return Object.keys(offlineState.games)
+      .map(Number)
+      .map((id) => selectGame(offlineState, id))
+      .filter((g): g is NonNullable<typeof g> => !!g)
+      .sort((a, b) => b.id - a.id);
+  }, [isMobile ? offlineState : onchainGames]);
   const {
     settings: audioSettings,
     setMusicMuted,
@@ -437,11 +453,12 @@ export const Home = () => {
       {/* Header */}
       <AppHeader
         moonrocks={displayMoonrocks}
-        username={username}
+        hideBalance={isMobile}
+        username={isMobile ? undefined : username}
         showBack={false}
-        onMint={() => mint(tokenAddress)}
-        onProfileClick={onProfileClick}
-        onConnect={isLoggedIn ? undefined : onConnectClick}
+        onMint={isMobile ? undefined : () => mint(tokenAddress)}
+        onProfileClick={isMobile ? undefined : onProfileClick}
+        onConnect={isMobile || isLoggedIn ? undefined : onConnectClick}
         audioSettings={audioSettings}
         onMusicMutedChange={setMusicMuted}
         onSfxMutedChange={setSfxMuted}
@@ -917,7 +934,11 @@ export const Home = () => {
                         className="w-full p-3 flex items-center gap-3 text-left cursor-default"
                         onClick={() => {
                           if (didDrag.current) return;
-                          requireLogin(() => handlePlay(game.id));
+                          if (isMobile) {
+                            handlePlay(game.id);
+                          } else {
+                            requireLogin(() => handlePlay(game.id));
+                          }
                         }}
                       >
                         {/* Icon container */}
@@ -953,7 +974,9 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {formatExpiry(game.created_at)}
+                                {isMobile
+                                  ? "---"
+                                  : formatExpiry(game.created_at)}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -975,16 +998,18 @@ export const Home = () => {
                                 className="font-secondary text-sm leading-none"
                                 style={{ color: "rgba(54, 248, 24, 0.24)" }}
                               >
-                                Payout
+                                {isMobile ? "Score" : "Payout"}
                               </p>
                               <p
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {formatPayout(
-                                  game.moonrocks + game.points,
-                                  game.stake,
-                                )}
+                                {isMobile
+                                  ? game.moonrocks + game.points
+                                  : formatPayout(
+                                      game.moonrocks + game.points,
+                                      game.stake,
+                                    )}
                               </p>
                             </div>
                           </div>
@@ -1178,7 +1203,9 @@ export const Home = () => {
                               {expired
                                 ? "EXPIRED"
                                 : cashedOut
-                                  ? formatPayout(game.moonrocks, game.stake)
+                                  ? isMobile
+                                    ? `${game.moonrocks} PTS`
+                                    : formatPayout(game.moonrocks, game.stake)
                                   : "GLITCHED"}
                             </span>
                           </button>
@@ -1215,53 +1242,80 @@ export const Home = () => {
       {/* Footer */}
       <div className="shrink-0 pt-4 pb-4 px-4 relative z-[51]">
         <div className="flex gap-3 w-full max-w-[500px] mx-auto">
-          <Button
-            variant="secondary"
-            gradient="green"
-            wrapperClassName="flex-1"
-            className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-            onClick={showDetails ? () => setShowDetails(false) : handlePractice}
-          >
-            <GlitchText
-              className="font-secondary"
-              text={showDetails ? "BACK" : "PRACTICE"}
-            />
-          </Button>
-          {!isMobile && (
-            <Button
-              variant="secondary"
-              gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
-              wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-              className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
-              style={
-                showDetails || isOnNewGameCard
-                  ? { backgroundColor: "#2B052E" }
-                  : undefined
-              }
-              onClick={
-                showDetails
-                  ? handleBuyGame
-                  : () =>
-                      requireLogin(() => {
-                        if (isOnNewGameCard) {
-                          handleNewGame();
-                        } else if (activeGame) {
-                          handlePlay(activeGame.id);
-                        }
-                      })
-              }
-            >
-              <GlitchText
-                className="font-secondary"
-                text={
-                  showDetails
-                    ? "PURCHASE"
-                    : isOnNewGameCard
-                      ? "NEW GAME"
-                      : "CONTINUE"
+          {isMobile ? (
+            <>
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="flex-1"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={handlePractice}
+              >
+                <GlitchText className="font-secondary" text="NEW GAME" />
+              </Button>
+              {activeGame && (
+                <Button
+                  variant="secondary"
+                  gradient="green"
+                  wrapperClassName="flex-1"
+                  className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                  onClick={() => handlePlay(activeGame.id)}
+                >
+                  <GlitchText className="font-secondary" text="CONTINUE" />
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="flex-1"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={
+                  showDetails ? () => setShowDetails(false) : handlePractice
                 }
-              />
-            </Button>
+              >
+                <GlitchText
+                  className="font-secondary"
+                  text={showDetails ? "BACK" : "PRACTICE"}
+                />
+              </Button>
+              <Button
+                variant="secondary"
+                gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
+                wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+                className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
+                style={
+                  showDetails || isOnNewGameCard
+                    ? { backgroundColor: "#2B052E" }
+                    : undefined
+                }
+                onClick={
+                  showDetails
+                    ? handleBuyGame
+                    : () =>
+                        requireLogin(() => {
+                          if (isOnNewGameCard) {
+                            handleNewGame();
+                          } else if (activeGame) {
+                            handlePlay(activeGame.id);
+                          }
+                        })
+                }
+              >
+                <GlitchText
+                  className="font-secondary"
+                  text={
+                    showDetails
+                      ? "PURCHASE"
+                      : isOnNewGameCard
+                        ? "NEW GAME"
+                        : "CONTINUE"
+                  }
+                />
+              </Button>
+            </>
           )}
         </div>
       </div>
