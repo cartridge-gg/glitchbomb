@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
+import { mobilePath } from "@/utils/mobile";
 import { SettingsModal, SoundPopover } from "./sound-modal";
 
 export interface AppHeaderProps {
@@ -47,7 +48,7 @@ export const AppHeader = ({
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
-  const handleBack = onBack ?? (() => navigate(backPath));
+  const handleBack = onBack ?? (() => navigate(mobilePath(backPath)));
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (

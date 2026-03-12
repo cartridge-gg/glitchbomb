@@ -32,6 +32,7 @@ import { useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { OrbType } from "@/models/orb";
 import { milestoneCost } from "@/offline/milestone";
+import { mobilePath } from "@/utils/mobile";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -497,7 +498,7 @@ export const Game = () => {
           pulls={pulls}
           cashedOut={false}
           expired={true}
-          onPlayAgain={() => navigate("/")}
+          onPlayAgain={() => navigate(mobilePath("/"))}
         />
       );
     }
@@ -519,7 +520,7 @@ export const Game = () => {
           plData={plData}
           pulls={pulls}
           cashedOut={cashedOut}
-          onPlayAgain={() => navigate("/")}
+          onPlayAgain={() => navigate(mobilePath("/"))}
           stake={game.stake}
           tokenPrice={tokenPrice}
           supply={supply}

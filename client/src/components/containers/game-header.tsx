@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
+import { mobilePath } from "@/utils/mobile";
 import { SettingsModal, SoundPopover } from "./sound-modal";
 
 export interface GameHeaderProps {
@@ -95,7 +96,7 @@ export const GameHeader = ({
           variant="secondary"
           gradient="green"
           className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(mobilePath("/"))}
         >
           <ArrowLeftIcon size="sm" />
         </Button>

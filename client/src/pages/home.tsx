@@ -29,7 +29,7 @@ import {
   selectGame,
   useOfflineStore,
 } from "@/offline/store";
-import { isMobile } from "@/utils/mobile";
+import { isMobile, mobilePath } from "@/utils/mobile";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -395,7 +395,7 @@ export const Home = () => {
 
   const handlePlay = async (gameId: number) => {
     setLoadingGameId(gameId);
-    navigate(`/play?game=${gameId}`);
+    navigate(mobilePath(`/play?game=${gameId}`));
   };
 
   const handleNewGame = useCallback(() => {
@@ -423,7 +423,7 @@ export const Home = () => {
         controllerEl.style.opacity = "0";
         controllerEl.style.display = "none";
       }
-      navigate(`/play?game=${newGame.id}`);
+      navigate(mobilePath(`/play?game=${newGame.id}`));
     }
   }, [ownedGames, navigate]);
 
@@ -432,7 +432,7 @@ export const Home = () => {
       resetOfflineState();
     }
     const gameId = createOfflineGame();
-    navigate(`/play?game=${gameId}`);
+    navigate(mobilePath(`/play?game=${gameId}`));
   }, [navigate]);
 
   const isLoggedIn = !!account && !!username;
@@ -1177,7 +1177,9 @@ export const Home = () => {
                                   : "#1A0505",
                             }}
                             onClick={() =>
-                              navigate(`/play?game=${game.id}&view=true`)
+                              navigate(
+                                mobilePath(`/play?game=${game.id}&view=true`),
+                              )
                             }
                           >
                             <BombIcon
@@ -1222,7 +1224,9 @@ export const Home = () => {
                                   : "!bg-[#1A0505] hover:!bg-[#2A0808] !text-red-100"
                             }`}
                             onClick={() =>
-                              navigate(`/play?game=${game.id}&view=true`)
+                              navigate(
+                                mobilePath(`/play?game=${game.id}&view=true`),
+                              )
                             }
                             aria-label="View game"
                           >
