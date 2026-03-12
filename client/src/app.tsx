@@ -18,6 +18,7 @@ import {
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
 import Router from "@/routes";
+import { isMobile } from "@/utils/mobile";
 
 const provider = jsonRpcProvider({
   rpc: (chain: Chain) => {
@@ -78,8 +79,6 @@ const buildChains = () => {
       throw new Error(`Unsupported chain: ${chain.network}`);
   }
 };
-
-const isMobile = new URLSearchParams(window.location.search).has("mobile");
 
 const options: ControllerOptions = {
   defaultChainId: DEFAULT_CHAIN_ID,
