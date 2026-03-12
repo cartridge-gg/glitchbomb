@@ -320,8 +320,8 @@ export const Home = () => {
 
   const [activeGameIndex, setActiveGameIndex] = useState(0);
 
-  // Total slides = active games + 1 placeholder "New Game" card (desktop only)
-  const totalSlides = activeGames.length + (isMobile ? 0 : 1);
+  // Total slides = active games + 1 placeholder "New Game" card
+  const totalSlides = activeGames.length + 1;
 
   // Clamp index when the list changes
   useEffect(() => {
@@ -454,11 +454,11 @@ export const Home = () => {
       <AppHeader
         moonrocks={displayMoonrocks}
         hideBalance={isMobile}
-        username={isMobile ? undefined : username}
+        username={username}
         showBack={false}
         onMint={isMobile ? undefined : () => mint(tokenAddress)}
-        onProfileClick={isMobile ? undefined : onProfileClick}
-        onConnect={isMobile || isLoggedIn ? undefined : onConnectClick}
+        onProfileClick={onProfileClick}
+        onConnect={isLoggedIn ? undefined : onConnectClick}
         audioSettings={audioSettings}
         onMusicMutedChange={setMusicMuted}
         onSfxMutedChange={setSfxMuted}
@@ -1024,105 +1024,107 @@ export const Home = () => {
                 ))}
 
                 {/* New Game placeholder card */}
-                {!isMobile && (
-                  <div key="new-game" className="w-full shrink-0">
-                    <ElectricBorder
-                      color="#FF0099"
-                      gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
-                      borderGradient="linear-gradient(0deg, #FF0099, #FF33AD)"
-                      seed={99}
-                      cornerRadius={3}
-                      noiseAmplitude={0.15}
-                      borderWidth={2}
-                      safetyMargin={1}
-                      noisePoints={400}
-                      noiseFrequency={20}
-                      glowOpacity={0}
-                      className="rounded-md"
-                    >
-                      <button
-                        type="button"
-                        className="w-full p-3 flex items-center gap-3 text-left cursor-default"
-                        onClick={() => {
-                          if (didDrag.current) return;
+                <div key="new-game" className="w-full shrink-0">
+                  <ElectricBorder
+                    color="#FF0099"
+                    gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
+                    borderGradient="linear-gradient(0deg, #FF0099, #FF33AD)"
+                    seed={99}
+                    cornerRadius={3}
+                    noiseAmplitude={0.15}
+                    borderWidth={2}
+                    safetyMargin={1}
+                    noisePoints={400}
+                    noiseFrequency={20}
+                    glowOpacity={0}
+                    className="rounded-md"
+                  >
+                    <button
+                      type="button"
+                      className="w-full p-3 flex items-center gap-3 text-left cursor-default"
+                      onClick={() => {
+                        if (didDrag.current) return;
+                        if (isMobile) {
+                          handlePractice();
+                        } else {
                           requireLogin(() => handleNewGame());
-                        }}
-                      >
-                        {/* Icon container */}
-                        <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
-                          <span
-                            className="font-secondary text-3xl"
-                            style={{ color: "#FF0099" }}
-                          >
-                            +
-                          </span>
-                        </div>
+                        }
+                      }}
+                    >
+                      {/* Icon container */}
+                      <div className="shrink-0 self-stretch flex items-center justify-center rounded bg-white/[0.04] px-3">
+                        <span
+                          className="font-secondary text-3xl"
+                          style={{ color: "#FF0099" }}
+                        >
+                          +
+                        </span>
+                      </div>
 
-                        {/* 2x2 grid */}
-                        <div className="flex-1 min-w-0">
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-2">
-                            <div className="flex flex-col gap-1">
-                              <p
-                                className="font-secondary text-sm leading-none"
-                                style={{ color: "rgba(255, 0, 153, 0.24)" }}
-                              >
-                                Game ID
-                              </p>
-                              <p
-                                className="font-secondary text-sm uppercase leading-none"
-                                style={{ color: "#FF0099" }}
-                              >
-                                ---
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <p
-                                className="font-secondary text-sm leading-none"
-                                style={{ color: "rgba(255, 0, 153, 0.24)" }}
-                              >
-                                Expires In
-                              </p>
-                              <p
-                                className="font-secondary text-sm uppercase leading-none"
-                                style={{ color: "#FF0099" }}
-                              >
-                                ---
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <p
-                                className="font-secondary text-sm leading-none"
-                                style={{ color: "rgba(255, 0, 153, 0.24)" }}
-                              >
-                                Level
-                              </p>
-                              <p
-                                className="font-secondary text-sm uppercase leading-none"
-                                style={{ color: "#FF0099" }}
-                              >
-                                ---
-                              </p>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <p
-                                className="font-secondary text-sm leading-none"
-                                style={{ color: "rgba(255, 0, 153, 0.24)" }}
-                              >
-                                Payout
-                              </p>
-                              <p
-                                className="font-secondary text-sm uppercase leading-none"
-                                style={{ color: "#FF0099" }}
-                              >
-                                ---
-                              </p>
-                            </div>
+                      {/* 2x2 grid */}
+                      <div className="flex-1 min-w-0">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                            >
+                              Game ID
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FF0099" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                            >
+                              Expires In
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FF0099" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                            >
+                              Level
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FF0099" }}
+                            >
+                              ---
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p
+                              className="font-secondary text-sm leading-none"
+                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                            >
+                              Payout
+                            </p>
+                            <p
+                              className="font-secondary text-sm uppercase leading-none"
+                              style={{ color: "#FF0099" }}
+                            >
+                              ---
+                            </p>
                           </div>
                         </div>
-                      </button>
-                    </ElectricBorder>
-                  </div>
-                )}
+                      </div>
+                    </button>
+                  </ElectricBorder>
+                </div>
               </div>
             </div>
           </div>
@@ -1242,81 +1244,68 @@ export const Home = () => {
       {/* Footer */}
       <div className="shrink-0 pt-4 pb-4 px-4 relative z-[51]">
         <div className="flex gap-3 w-full max-w-[500px] mx-auto">
-          {isMobile ? (
-            <>
-              <Button
-                variant="secondary"
-                gradient="green"
-                wrapperClassName="flex-1"
-                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-                onClick={handlePractice}
-              >
-                <GlitchText className="font-secondary" text="NEW GAME" />
-              </Button>
-              {activeGame && (
-                <Button
-                  variant="secondary"
-                  gradient="green"
-                  wrapperClassName="flex-1"
-                  className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-                  onClick={() => handlePlay(activeGame.id)}
-                >
-                  <GlitchText className="font-secondary" text="CONTINUE" />
-                </Button>
-              )}
-            </>
-          ) : (
-            <>
-              <Button
-                variant="secondary"
-                gradient="green"
-                wrapperClassName="flex-1"
-                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-                onClick={
-                  showDetails ? () => setShowDetails(false) : handlePractice
-                }
-              >
-                <GlitchText
-                  className="font-secondary"
-                  text={showDetails ? "BACK" : "PRACTICE"}
-                />
-              </Button>
-              <Button
-                variant="secondary"
-                gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
-                wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-                className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
-                style={
-                  showDetails || isOnNewGameCard
-                    ? { backgroundColor: "#2B052E" }
-                    : undefined
-                }
-                onClick={
-                  showDetails
-                    ? handleBuyGame
-                    : () =>
-                        requireLogin(() => {
-                          if (isOnNewGameCard) {
-                            handleNewGame();
-                          } else if (activeGame) {
-                            handlePlay(activeGame.id);
-                          }
-                        })
-                }
-              >
-                <GlitchText
-                  className="font-secondary"
-                  text={
-                    showDetails
-                      ? "PURCHASE"
-                      : isOnNewGameCard
-                        ? "NEW GAME"
-                        : "CONTINUE"
-                  }
-                />
-              </Button>
-            </>
+          {!isMobile && (
+            <Button
+              variant="secondary"
+              gradient="green"
+              wrapperClassName="flex-1"
+              className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+              onClick={
+                showDetails ? () => setShowDetails(false) : handlePractice
+              }
+            >
+              <GlitchText
+                className="font-secondary"
+                text={showDetails ? "BACK" : "PRACTICE"}
+              />
+            </Button>
           )}
+          <Button
+            variant="secondary"
+            gradient={
+              !isMobile && (showDetails || isOnNewGameCard) ? "pink" : "green"
+            }
+            wrapperClassName={`flex-1 ${!isMobile && (showDetails || isOnNewGameCard) ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${!isMobile && (showDetails || isOnNewGameCard) ? "!text-[#FF0099]" : "!bg-green-900"}`}
+            style={
+              !isMobile && (showDetails || isOnNewGameCard)
+                ? { backgroundColor: "#2B052E" }
+                : undefined
+            }
+            onClick={
+              isMobile
+                ? isOnNewGameCard
+                  ? handlePractice
+                  : activeGame
+                    ? () => handlePlay(activeGame.id)
+                    : handlePractice
+                : showDetails
+                  ? handleBuyGame
+                  : () =>
+                      requireLogin(() => {
+                        if (isOnNewGameCard) {
+                          handleNewGame();
+                        } else if (activeGame) {
+                          handlePlay(activeGame.id);
+                        }
+                      })
+            }
+          >
+            <GlitchText
+              className="font-secondary"
+              text={
+                isMobile
+                  ? isOnNewGameCard
+                    ? "NEW GAME"
+                    : "CONTINUE"
+                  : showDetails
+                    ? "PURCHASE"
+                    : isOnNewGameCard
+                      ? "NEW GAME"
+                      : "CONTINUE"
+              }
+            />
+          </Button>
         </div>
       </div>
 
