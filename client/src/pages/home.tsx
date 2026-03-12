@@ -1260,13 +1260,11 @@ export const Home = () => {
           )}
           <Button
             variant="secondary"
-            gradient={
-              !isMobile && (showDetails || isOnNewGameCard) ? "pink" : "green"
-            }
-            wrapperClassName={`flex-1 ${!isMobile && (showDetails || isOnNewGameCard) ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${!isMobile && (showDetails || isOnNewGameCard) ? "!text-[#FF0099]" : "!bg-green-900"}`}
+            gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
+            wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
             style={
-              !isMobile && (showDetails || isOnNewGameCard)
+              showDetails || isOnNewGameCard
                 ? { backgroundColor: "#2B052E" }
                 : undefined
             }
