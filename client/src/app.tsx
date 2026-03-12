@@ -79,11 +79,13 @@ const buildChains = () => {
   }
 };
 
+const isMobile = new URLSearchParams(window.location.search).has("mobile");
+
 const options: ControllerOptions = {
   defaultChainId: DEFAULT_CHAIN_ID,
   chains: buildChains(),
-  policies: buildPolicies(),
-  preset: "glitch-bomb",
+  ...(isMobile ? {} : { policies: buildPolicies() }),
+  preset: isMobile ? "glitch-bomb-mobile" : "glitch-bomb",
   // namespace: "GLITCHBOMB",
   slot: "gb-bal",
 };
