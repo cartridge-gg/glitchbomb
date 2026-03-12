@@ -226,13 +226,16 @@ export function useAudio() {
         );
         const oldSrc = gOldSource;
         const oldGn = gOldGain;
-        setTimeout(() => {
-          stopSource(oldSrc, oldGn);
-          if (gOldSource === oldSrc) {
-            gOldSource = null;
-            gOldGain = null;
-          }
-        }, FADE_DURATION_S * 1000 + 50);
+        setTimeout(
+          () => {
+            stopSource(oldSrc, oldGn);
+            if (gOldSource === oldSrc) {
+              gOldSource = null;
+              gOldGain = null;
+            }
+          },
+          FADE_DURATION_S * 1000 + 50,
+        );
       }
 
       gMusicSource = null;
