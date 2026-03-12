@@ -934,11 +934,7 @@ export const Home = () => {
                         className="w-full p-3 flex items-center gap-3 text-left cursor-default"
                         onClick={() => {
                           if (didDrag.current) return;
-                          if (isMobile) {
-                            handlePlay(game.id);
-                          } else {
-                            requireLogin(() => handlePlay(game.id));
-                          }
+                          requireLogin(() => handlePlay(game.id));
                         }}
                       >
                         {/* Icon container */}
@@ -1044,11 +1040,13 @@ export const Home = () => {
                       className="w-full p-3 flex items-center gap-3 text-left cursor-default"
                       onClick={() => {
                         if (didDrag.current) return;
-                        if (isMobile) {
-                          handlePractice();
-                        } else {
-                          requireLogin(() => handleNewGame());
-                        }
+                        requireLogin(() => {
+                          if (isMobile) {
+                            handlePractice();
+                          } else {
+                            handleNewGame();
+                          }
+                        });
                       }}
                     >
                       {/* Icon container */}
@@ -1274,11 +1272,14 @@ export const Home = () => {
             }
             onClick={
               isMobile
-                ? isOnNewGameCard
-                  ? handlePractice
-                  : activeGame
-                    ? () => handlePlay(activeGame.id)
-                    : handlePractice
+                ? () =>
+                    requireLogin(() => {
+                      if (isOnNewGameCard) {
+                        handlePractice();
+                      } else if (activeGame) {
+                        handlePlay(activeGame.id);
+                      }
+                    })
                 : showDetails
                   ? handleBuyGame
                   : () =>
