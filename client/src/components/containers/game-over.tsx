@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import { GlitchBombIcon, MoonrockIcon } from "@/components/icons";
+import { GlitchBombIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
-import type { OrbPulled } from "@/models";
+import { Orb, type OrbPulled, OrbType } from "@/models";
 import {
-  CardDivider,
   InfoCard,
+  OrbDisplay,
   PayoutChart,
   PLChartTabs,
   type PLDataPoint,
@@ -29,6 +29,47 @@ export interface GameOverProps {
 }
 
 type Step = "gameover" | "rewards";
+
+const moonrockOrb = new Orb(OrbType.Moonrock15);
+
+/** Two overlapping orbs — back one has no icon, front has the full display */
+const OrbStack = ({
+  orb,
+  size,
+  style,
+  iconOverride,
+}: {
+  orb: Orb;
+  size: "xs" | "sm" | "md" | "lg";
+  style?: React.CSSProperties;
+  iconOverride?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}) => (
+  <div
+    className="relative pb-3 pr-3"
+    style={{ width: "fit-content", ...style }}
+  >
+    <div className="absolute bottom-0 right-0 opacity-60">
+      <OrbDisplay
+        orb={orb}
+        size={size}
+        showValue={false}
+        glowScale={0.5}
+        hideIcon
+        className="bg-black"
+      />
+    </div>
+    <div className="relative top-1.5 left-1">
+      <OrbDisplay
+        orb={orb}
+        size={size}
+        showValue={false}
+        glowScale={0.8}
+        className="bg-black"
+        iconOverride={iconOverride}
+      />
+    </div>
+  </div>
+);
 
 export const GameOver = ({
   level,
@@ -125,15 +166,25 @@ export const GameOver = ({
               className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
               innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
             >
-              <div className="flex flex-col items-center">
-                <MoonrockIcon
-                  className={`w-[clamp(32px,6svh,48px)] h-[clamp(32px,6svh,48px)] ${textColor}`}
+              <div className="flex flex-col items-center gap-[clamp(4px,1svh,8px)]">
+                <OrbStack
+                  orb={moonrockOrb}
+                  size="lg"
+                  style={
+                    {
+                      "--orb-moonrock": "var(--yellow-100)",
+                    } as React.CSSProperties
+                  }
                 />
-                <span
-                  className={`${textColor} font-secondary text-[clamp(0.8rem,2svh,1.1rem)] tracking-[0.2em]`}
-                >
-                  <GlitchText text={`${moonrocksEarned} MOONROCKS`} />
-                </span>
+                <div className="flex flex-col items-center gap-1">
+                  <GlitchText
+                    className="text-yellow-400 font-secondary text-[clamp(0.9rem,2.5svh,1.3rem)] tracking-[0.2em]"
+                    text={String(moonrocksEarned)}
+                  />
+                  <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.3em] uppercase opacity-70">
+                    Moonrocks
+                  </span>
+                </div>
               </div>
             </InfoCard>
           </>
@@ -198,11 +249,10 @@ export const GameOver = ({
                       className={`w-px self-stretch ${cashedOut ? "bg-green-100" : "bg-red-100"} opacity-5`}
                     />
                     <div className="flex items-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
-                      <span
+                      <GlitchText
                         className={`${textColor} font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none`}
-                      >
-                        <GlitchText text={`$${usd.toFixed(2)}`} />
-                      </span>
+                        text={`$${usd.toFixed(2)}`}
+                      />
                     </div>
                   </div>
                 )}
@@ -214,29 +264,21 @@ export const GameOver = ({
                   className="flex-1 flex flex-col rounded-lg overflow-hidden"
                   style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
                 >
-                  <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-                    <span
-                      className={`${textColor} opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase`}
-                    >
-                      Moonrocks
-                    </span>
-                  </div>
-                  <CardDivider
-                    className={cashedOut ? "bg-green-100" : "bg-red-100"}
-                  />
-                  <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-                    <div className="flex items-center justify-center gap-1">
-                      <MoonrockIcon
-                        className={`w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)] ${textColor}`}
-                      />
-                      <GlitchText
-                        className={`${textColor} font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none`}
-                        text={String(moonrocksEarned)}
-                      />
-                    </div>
-                    <span
-                      className={`${textColor} opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider`}
-                    >
+                  <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+                    <OrbStack
+                      orb={moonrockOrb}
+                      size="md"
+                      style={
+                        {
+                          "--orb-moonrock": "var(--yellow-100)",
+                        } as React.CSSProperties
+                      }
+                    />
+                    <GlitchText
+                      className="text-yellow-400 font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none"
+                      text={String(moonrocksEarned)}
+                    />
+                    <span className="text-yellow-400 opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider">
                       Moonrocks
                     </span>
                   </div>
@@ -248,29 +290,20 @@ export const GameOver = ({
                     className="flex-1 flex flex-col rounded-lg overflow-hidden"
                     style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
                   >
-                    <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-                      <span
-                        className={`${textColor} font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase`}
-                      >
-                        Reward
-                      </span>
-                    </div>
-                    <CardDivider
-                      className={cashedOut ? "bg-green-100" : "bg-red-100"}
-                    />
-                    <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-                      <div className="flex items-center justify-center gap-1">
-                        <GlitchBombIcon
-                          className={`w-[clamp(14px,3svh,18px)] h-[clamp(14px,3svh,18px)] ${textColor}`}
-                        />
-                        <GlitchText
-                          className={`${textColor} font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none`}
-                          text={glitch.toFixed(1)}
-                        />
-                      </div>
-                      <span
-                        className={`${textColor} opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider`}
-                      >
+                    <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
+                      <OrbStack
+                        orb={moonrockOrb}
+                        size="md"
+                        style={
+                          { "--orb-moonrock": "#FF0099" } as React.CSSProperties
+                        }
+                        iconOverride={GlitchBombIcon}
+                      />
+                      <GlitchText
+                        className="text-[#FF0099] font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none"
+                        text={String(Math.floor(glitch))}
+                      />
+                      <span className="text-[#FF0099] opacity-70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider">
                         GLITCH
                       </span>
                     </div>
