@@ -120,6 +120,10 @@ export interface OrbDisplayProps
   glowScale?: number;
   /** When set, the pill shows this count instead of the orb value */
   count?: number;
+  /** Hide the center icon (keeps border, background, and tint) */
+  hideIcon?: boolean;
+  /** Override the default icon component */
+  iconOverride?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 export const OrbDisplay = ({
@@ -130,10 +134,12 @@ export const OrbDisplay = ({
   showValue = true,
   glowScale = 1,
   count,
+  hideIcon = false,
+  iconOverride,
   className,
   ...props
 }: OrbDisplayProps) => {
-  const Icon = getOrbIcon(orb, bombTierIcons);
+  const Icon = iconOverride ?? getOrbIcon(orb, bombTierIcons);
   const color = getOrbColor(orb);
   const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
   const glowSize = glowSizeMap[size ?? "md"] * glowScale;
@@ -185,16 +191,20 @@ export const OrbDisplay = ({
           }}
         />
         {/* Icon */}
-        <Icon
-          className={cn(
-            "relative z-10",
-            orb.isBomb() ? "w-3/5 h-3/5" : "w-full h-full",
-          )}
-          style={{
-            color,
-            filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
-          }}
-        />
+        {!hideIcon && (
+          <Icon
+            className={cn(
+              "relative z-10",
+              orb.isBomb() || iconOverride
+                ? "w-[60%] h-[60%]"
+                : "w-full h-full",
+            )}
+            style={{
+              color,
+              filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
+            }}
+          />
+        )}
       </div>
       {/* Value pill - outside the clipped area */}
       {showValue && displayValue && (
