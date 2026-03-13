@@ -176,7 +176,7 @@ export const PLChartTabs = ({
 }: PLChartTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("chart");
   const tabItems: Array<TabBarItem<TabType>> = [
-    { id: "chart", label: "P/L", Icon: ChartIcon },
+    { id: "chart", label: "CHART", Icon: ChartIcon },
     { id: "logs", label: "HISTORY", Icon: LogsIcon },
   ];
 
@@ -189,7 +189,7 @@ export const PLChartTabs = ({
         items={tabItems}
         active={activeTab}
         onChange={setActiveTab}
-        className={tabBarClassName ?? "[@media(max-height:1000px)]:hidden"}
+        className={tabBarClassName ?? "[@media(max-height:900px)]:hidden"}
         buttonClassName="py-[clamp(4px,1svh,8px)]"
         iconClassName="w-[clamp(16px,2.2svh,20px)] h-[clamp(16px,2.2svh,20px)]"
       />
