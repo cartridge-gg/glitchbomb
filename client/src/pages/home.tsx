@@ -49,7 +49,7 @@ export const Home = () => {
       .map((id) => selectGame(offlineState, id))
       .filter((g): g is NonNullable<typeof g> => !!g)
       .sort((a, b) => b.id - a.id);
-  }, [isMobile ? offlineState : onchainGames]);
+  }, [offlineState, onchainGames]);
   const {
     settings: audioSettings,
     setMusicMuted,
