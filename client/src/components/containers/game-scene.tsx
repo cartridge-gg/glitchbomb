@@ -221,6 +221,8 @@ export const GameScene = ({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
+                align="center"
+                collisionPadding={16}
                 className="bg-[#0A0E1A] font-secondary text-[10px] tracking-[0.25em] uppercase border"
                 style={{
                   color: multiplierColor,
