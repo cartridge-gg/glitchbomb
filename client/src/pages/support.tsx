@@ -14,7 +14,7 @@ export function Support() {
         onBack={() => navigate(mobilePath("/"))}
       />
 
-      <div className="flex-1 overflow-y-auto px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-white/70 [&_*]:font-secondary">
+      <div className="flex-1 overflow-y-auto px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-green-500 [&_*]:font-secondary">
         {/* How to Play */}
         <h2 className="text-lg tracking-widest text-green-400 uppercase mt-6 mb-3">
           How to Play
