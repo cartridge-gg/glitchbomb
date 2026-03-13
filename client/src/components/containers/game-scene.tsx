@@ -203,13 +203,13 @@ export const GameScene = ({
             </TooltipProvider>
           )}
           {/* Multiplier Badge - top right of puller */}
-          <TooltipProvider delayDuration={0}>
-            <TapTooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute z-30"
-                  style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
-                >
+          <div
+            className="absolute z-30"
+            style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
+          >
+            <TooltipProvider delayDuration={0}>
+              <TapTooltip>
+                <TooltipTrigger asChild>
                   <div style={{ width: badgeSizePx, height: badgeSizePx }}>
                     <Multiplier
                       count={multiplier}
@@ -217,22 +217,22 @@ export const GameScene = ({
                       className="h-full w-full"
                     />
                   </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                align="center"
-                collisionPadding={16}
-                className="bg-[#0A0E1A] font-secondary text-[10px] tracking-[0.25em] uppercase border"
-                style={{
-                  color: multiplierColor,
-                  borderColor: `${multiplierColor}40`,
-                }}
-              >
-                Your current multiplier
-              </TooltipContent>
-            </TapTooltip>
-          </TooltipProvider>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  collisionPadding={16}
+                  className="bg-[#0A0E1A] font-secondary text-[10px] tracking-[0.25em] uppercase border"
+                  style={{
+                    color: multiplierColor,
+                    borderColor: `${multiplierColor}40`,
+                  }}
+                >
+                  Your current multiplier
+                </TooltipContent>
+              </TapTooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 
