@@ -436,7 +436,7 @@ export function useAudio() {
 
   const startPulling = useCallback(() => {
     if (settings.sfxMuted) return;
-    startPullingLoop(settings.sfxVolume * 0.6);
+    startPullingLoop(settings.sfxVolume * 0.25);
   }, [settings.sfxMuted, settings.sfxVolume]);
 
   const stopPulling = useCallback(() => {
