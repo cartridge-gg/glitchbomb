@@ -303,6 +303,7 @@ export const Game = () => {
         content: latestPull.orb.outcome(),
       });
       playOrbSound(latestPull.orb);
+      stopPulling();
       setIsPulling(false);
 
       // Update the last seen pull id

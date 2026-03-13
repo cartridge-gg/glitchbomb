@@ -154,12 +154,14 @@ function playTapSfx(volume: number) {
 
 let gPullingSource: AudioBufferSourceNode | null = null;
 let gPullingGain: GainNode | null = null;
+let gPullingGeneration = 0;
 
 function startPullingLoop(volume: number) {
   stopPullingLoop();
+  const gen = ++gPullingGeneration;
   void (async () => {
     const buffer = await fetchBuffer("/assets/sounds/pulling.wav");
-    if (!buffer) return;
+    if (!buffer || gen !== gPullingGeneration) return;
     const ctx = getAudioCtx();
     const gain = ctx.createGain();
     gain.gain.value = Math.min(volume, 1);
@@ -175,6 +177,7 @@ function startPullingLoop(volume: number) {
 }
 
 function stopPullingLoop() {
+  gPullingGeneration++;
   if (gPullingSource) {
     try {
       if (gPullingGain) {
