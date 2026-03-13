@@ -77,6 +77,8 @@ export const Game = () => {
     setSfxVolume,
     playOrbSound,
     playRewardSound,
+    startPulling,
+    stopPulling,
     startMusic,
   } = useAudio();
 
@@ -256,11 +258,15 @@ export const Game = () => {
 
   useEffect(() => {
     if (!isPulling) return;
+    startPulling();
     const timer = setTimeout(() => {
       setIsPulling(false);
     }, 15000);
-    return () => clearTimeout(timer);
-  }, [isPulling]);
+    return () => {
+      clearTimeout(timer);
+      stopPulling();
+    };
+  }, [isPulling, startPulling, stopPulling]);
 
   // Initialize lastPullIdRef when initial fetch completes
   useEffect(() => {
