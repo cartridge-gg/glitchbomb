@@ -198,8 +198,8 @@ export function useAudio() {
       const vol = settings.musicMuted ? 0 : settings.musicVolume;
       const ctx = getAudioCtx();
 
-      // If same track is already playing, just update volume
-      if (gMusicSource && gCurrentTrack === track) {
+      // If same track is already playing (or loading), just update volume
+      if (gCurrentTrack === track) {
         if (gMusicGain) {
           gMusicGain.gain.setValueAtTime(vol, ctx.currentTime);
         }
