@@ -194,18 +194,30 @@ export const GameScene = ({
             </TooltipProvider>
           )}
           {/* Multiplier Badge - top right of puller */}
-          <div
-            className="absolute z-30"
-            style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
-          >
-            <div style={{ width: badgeSizePx, height: badgeSizePx }}>
-              <Multiplier
-                count={multiplier}
-                cornerRadius={50}
-                className="h-full w-full"
-              />
-            </div>
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className="absolute z-30"
+                  style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
+                >
+                  <div style={{ width: badgeSizePx, height: badgeSizePx }}>
+                    <Multiplier
+                      count={multiplier}
+                      cornerRadius={50}
+                      className="h-full w-full"
+                    />
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-[#0A0E1A] text-orb-multiplier font-secondary text-[10px] tracking-[0.25em] uppercase border border-orb-multiplier/50"
+              >
+                Your current multiplier for point orbs
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
