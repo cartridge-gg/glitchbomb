@@ -1,17 +1,14 @@
-import { useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/containers";
 import { mobilePath } from "@/utils/mobile";
 
 export function Support() {
-  const navigate = useNavigate();
-
   return (
     <div className="absolute inset-0 flex flex-col">
       <AppHeader
         moonrocks={0}
         hideBalance
         showBack
-        onBack={() => navigate(mobilePath("/"))}
+        backPath={mobilePath("/")}
       />
 
       <div className="flex-1 overflow-y-auto px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-green-700 [&_*]:font-secondary">
