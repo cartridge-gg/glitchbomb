@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useEffect, useMemo, useState } from "react";
 import {
   CurseBadge,
   Distribution,
@@ -11,11 +11,13 @@ import {
   Puller,
 } from "@/components/elements";
 import {
+  TapTooltip,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
 
 export interface GameSceneProps
@@ -99,6 +101,13 @@ export const GameScene = ({
     (badgeSizePx * 1.05 + pullerSizePx * 0.22) * heightScale,
   );
   const badgeOffsetX = 104;
+  const multiplierMagnitude = Math.floor(
+    Math.min(Math.max(1, multiplier), 5),
+  ) as 1 | 2 | 3 | 4 | 5;
+  const multiplierColor = useMemo(
+    () => MultiplierMath.getMagnitudeColor(multiplierMagnitude),
+    [multiplierMagnitude],
+  );
   const outcomeScale = clamp(1.05, pullerSizePx / 120, 1.5);
   // 0: initial, 1: orb visible, 2: orb + outcome, 3: fade-out
   const [phase, setPhase] = useState(0);
@@ -194,8 +203,8 @@ export const GameScene = ({
             </TooltipProvider>
           )}
           {/* Multiplier Badge - top right of puller */}
-          <TooltipProvider>
-            <Tooltip>
+          <TooltipProvider delayDuration={0}>
+            <TapTooltip>
               <TooltipTrigger asChild>
                 <div
                   className="absolute z-30"
@@ -212,11 +221,15 @@ export const GameScene = ({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-[#0A0E1A] text-orb-multiplier font-secondary text-[10px] tracking-[0.25em] uppercase border border-orb-multiplier-faded"
+                className="bg-[#0A0E1A] font-secondary text-[10px] tracking-[0.25em] uppercase border"
+                style={{
+                  color: multiplierColor,
+                  borderColor: `${multiplierColor}40`,
+                }}
               >
                 Your current multiplier
               </TooltipContent>
-            </Tooltip>
+            </TapTooltip>
           </TooltipProvider>
         </div>
       </div>
