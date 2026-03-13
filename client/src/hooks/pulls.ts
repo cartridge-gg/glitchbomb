@@ -29,10 +29,18 @@ export function usePulls({ gameId }: { gameId: number }) {
   const { client } = useEntitiesContext();
   const offlineState = useOfflineStore();
   const isPractice = !!offlineState.games[gameId];
-  const offlinePulls = useMemo(
+  const offlinePullsRaw = useMemo(
     () => selectPulls(offlineState, gameId),
     [offlineState, gameId],
   );
+  // Stabilize reference: only update when pull count actually changes
+  const offlinePullCountRef = useRef(0);
+  const offlinePullsStable = useRef<OrbPulled[]>([]);
+  if (offlinePullsRaw.length !== offlinePullCountRef.current) {
+    offlinePullCountRef.current = offlinePullsRaw.length;
+    offlinePullsStable.current = offlinePullsRaw;
+  }
+  const offlinePulls = offlinePullsStable.current;
   const [pulls, setPulls] = useState<OrbPulled[]>([]);
   const [initialFetchComplete, setInitialFetchComplete] = useState(false);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
