@@ -393,25 +393,15 @@ export function useAudio() {
   // Global tap sound on every click/tap
   useEffect(() => {
     if (settings.sfxMuted) return;
-    let recentTouch = false;
-    const playTap = () => {
-      playTapSfx(settings.sfxVolume * 0.5);
+    const onPointerDown = (e: PointerEvent) => {
+      // Only respond to direct taps/clicks, not synthetic events
+      if (e.isPrimary) {
+        playTapSfx(settings.sfxVolume * 0.5);
+      }
     };
-    const onTouch = () => {
-      recentTouch = true;
-      playTap();
-      setTimeout(() => {
-        recentTouch = false;
-      }, 300);
-    };
-    const onClick = () => {
-      if (!recentTouch) playTap();
-    };
-    document.addEventListener("touchstart", onTouch, { passive: true });
-    document.addEventListener("click", onClick, { passive: true });
+    document.addEventListener("pointerdown", onPointerDown, { passive: true });
     return () => {
-      document.removeEventListener("touchstart", onTouch);
-      document.removeEventListener("click", onClick);
+      document.removeEventListener("pointerdown", onPointerDown);
     };
   }, [settings.sfxMuted, settings.sfxVolume]);
 
