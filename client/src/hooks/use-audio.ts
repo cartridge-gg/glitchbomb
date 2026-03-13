@@ -121,7 +121,12 @@ async function fetchBuffer(url: string): Promise<AudioBuffer | null> {
   }
 }
 
-function playSfx(file: string, volume: number) {
+function playSfx(
+  file: string,
+  volume: number,
+  playbackRate?: number,
+): AudioBufferSourceNode | null {
+  let src: AudioBufferSourceNode | null = null;
   void (async () => {
     const buffer = await fetchBuffer(file);
     if (!buffer) return;
@@ -131,9 +136,76 @@ function playSfx(file: string, volume: number) {
     gain.connect(ctx.destination);
     const source = ctx.createBufferSource();
     source.buffer = buffer;
+    if (playbackRate) source.playbackRate.value = playbackRate;
     source.connect(gain);
     source.start(0);
+    src = source;
   })();
+  return src;
+}
+
+function playTapSfx(volume: number) {
+  // Random pitch between 0.9 and 1.1
+  const rate = 0.9 + Math.random() * 0.2;
+  playSfx("/assets/sounds/tap.wav", volume, rate);
+}
+
+// ── Pulling loop state ──
+
+let gPullingSource: AudioBufferSourceNode | null = null;
+let gPullingGain: GainNode | null = null;
+let gPullingGeneration = 0;
+
+function startPullingLoop(volume: number) {
+  stopPullingLoop();
+  const gen = ++gPullingGeneration;
+  void (async () => {
+    const buffer = await fetchBuffer("/assets/sounds/pulling.wav");
+    if (!buffer || gen !== gPullingGeneration) return;
+    const ctx = getAudioCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = Math.min(volume, 1);
+    gain.connect(ctx.destination);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gain);
+    source.start(0);
+    gPullingSource = source;
+    gPullingGain = gain;
+  })();
+}
+
+function stopPullingLoop() {
+  gPullingGeneration++;
+  if (gPullingSource) {
+    try {
+      if (gPullingGain) {
+        const ctx = getAudioCtx();
+        gPullingGain.gain.setValueAtTime(
+          gPullingGain.gain.value,
+          ctx.currentTime,
+        );
+        gPullingGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
+        const src = gPullingSource;
+        const gn = gPullingGain;
+        setTimeout(() => {
+          try {
+            src.stop();
+          } catch {
+            /* already stopped */
+          }
+          gn.disconnect();
+        }, 200);
+      } else {
+        gPullingSource.stop();
+      }
+    } catch {
+      /* already stopped */
+    }
+  }
+  gPullingSource = null;
+  gPullingGain = null;
 }
 
 function playSfxLayered(file: string, baseVolume: number, layers: number) {
@@ -323,7 +395,7 @@ export function useAudio() {
     if (settings.sfxMuted) return;
     let recentTouch = false;
     const playTap = () => {
-      playSfx("/assets/sounds/tap.wav", settings.sfxVolume * 0.5);
+      playTapSfx(settings.sfxVolume * 0.5);
     };
     const onTouch = () => {
       recentTouch = true;
@@ -365,6 +437,15 @@ export function useAudio() {
     playSfxLayered(file, settings.sfxVolume, 5);
   }, [settings.sfxMuted, settings.sfxVolume]);
 
+  const startPulling = useCallback(() => {
+    if (settings.sfxMuted) return;
+    startPullingLoop(settings.sfxVolume * 0.25);
+  }, [settings.sfxMuted, settings.sfxVolume]);
+
+  const stopPulling = useCallback(() => {
+    stopPullingLoop();
+  }, []);
+
   const setMusicMuted = useCallback((muted: boolean) => {
     setSettings((prev) => ({ ...prev, musicMuted: muted }));
   }, []);
@@ -389,6 +470,8 @@ export function useAudio() {
     setSfxVolume,
     playOrbSound,
     playRewardSound,
+    startPulling,
+    stopPulling,
     startMusic,
     stopMusic,
     isMusicPlaying,

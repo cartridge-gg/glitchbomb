@@ -77,6 +77,8 @@ export const Game = () => {
     setSfxVolume,
     playOrbSound,
     playRewardSound,
+    startPulling,
+    stopPulling,
     startMusic,
   } = useAudio();
 
@@ -256,11 +258,15 @@ export const Game = () => {
 
   useEffect(() => {
     if (!isPulling) return;
+    startPulling();
     const timer = setTimeout(() => {
       setIsPulling(false);
     }, 15000);
-    return () => clearTimeout(timer);
-  }, [isPulling]);
+    return () => {
+      clearTimeout(timer);
+      stopPulling();
+    };
+  }, [isPulling, startPulling, stopPulling]);
 
   // Initialize lastPullIdRef when initial fetch completes
   useEffect(() => {
@@ -297,6 +303,7 @@ export const Game = () => {
         content: latestPull.orb.outcome(),
       });
       playOrbSound(latestPull.orb);
+      stopPulling();
       setIsPulling(false);
 
       // Update the last seen pull id
@@ -309,7 +316,7 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, playOrbSound]);
+  }, [pulls, playOrbSound, stopPulling]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
