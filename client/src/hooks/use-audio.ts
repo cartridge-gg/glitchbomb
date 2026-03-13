@@ -144,13 +144,10 @@ function playSfx(
   return src;
 }
 
-const TAP_FILES = ["/assets/sounds/tap.wav", "/assets/sounds/tap-glitch.wav"];
-
 function playTapSfx(volume: number) {
-  const file = TAP_FILES[Math.floor(Math.random() * TAP_FILES.length)];
-  // Random pitch between 0.85 and 1.15
-  const rate = 0.85 + Math.random() * 0.3;
-  playSfx(file, volume, rate);
+  // Random pitch between 0.9 and 1.1
+  const rate = 0.9 + Math.random() * 0.2;
+  playSfx("/assets/sounds/tap.wav", volume, rate);
 }
 
 // ── Pulling loop state ──
