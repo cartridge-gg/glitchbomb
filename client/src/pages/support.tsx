@@ -7,7 +7,7 @@ export function Support() {
       <AppHeader
         moonrocks={0}
         hideBalance
-        showBack
+        showBack={false}
         backPath={mobilePath("/")}
       />
 

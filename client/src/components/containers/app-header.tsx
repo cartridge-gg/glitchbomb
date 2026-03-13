@@ -67,12 +67,12 @@ export const AppHeader = ({
             </Button>
           </div>
         )}
-        {/* Logo on mobile - clickable to go back if showBack is true */}
+        {/* Logo on mobile - clickable to navigate back */}
         {!onBack && (
           <button
             type="button"
             className="md:hidden h-12 w-12 p-0 flex items-center justify-center"
-            onClick={showBack ? handleBack : undefined}
+            onClick={handleBack}
           >
             <GlitchBombIcon size="xl" className="text-white glitch-icon" />
           </button>
@@ -81,7 +81,8 @@ export const AppHeader = ({
 
       {/* GlitchBomb text - only on md+ screens, hidden when onBack is set */}
       <h1
-        className={`${onBack ? "hidden" : "hidden md:flex"} items-center gap-1 uppercase leading-none glitch-text`}
+        className={`${onBack ? "hidden" : "hidden md:flex"} items-center gap-1 uppercase leading-none glitch-text cursor-pointer`}
+        onClick={handleBack}
       >
         <span className="text-green-400 text-2xl font-glitch font-thin tracking-tight">
           Glitch
