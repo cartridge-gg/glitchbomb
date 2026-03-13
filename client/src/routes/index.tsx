@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useMemo } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Game, Home } from "@/pages";
+import { Game, Home, Support } from "@/pages";
 
 function RouterView() {
   const { pathname } = useLocation();
@@ -61,6 +61,7 @@ function RouterView() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play" element={<Game />} />
+          <Route path="/support" element={<Support />} />
         </Routes>
       </div>
     </div>
