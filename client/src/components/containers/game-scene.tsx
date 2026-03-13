@@ -214,7 +214,7 @@ export const GameScene = ({
                 side="top"
                 className="bg-[#0A0E1A] text-orb-multiplier font-secondary text-[10px] tracking-[0.25em] uppercase border border-orb-multiplier-faded"
               >
-                Your current multiplier for point orbs
+                Your current multiplier
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
