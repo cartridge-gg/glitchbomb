@@ -316,7 +316,7 @@ export const Game = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, playOrbSound]);
+  }, [pulls, playOrbSound, stopPulling]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
