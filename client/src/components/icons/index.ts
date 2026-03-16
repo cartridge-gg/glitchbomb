@@ -31,6 +31,7 @@ export * from "./arrow-down";
 export * from "./arrow-left";
 export * from "./arrow-right";
 export * from "./bag";
+export * from "./bolt";
 export * from "./bomb";
 export * from "./bomb-1x";
 export * from "./bomb-2x";

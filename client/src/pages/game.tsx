@@ -48,8 +48,7 @@ const INITIAL_GAME_VALUES = {
     bombs: 4,
     multipliers: 0,
     health: 0,
-    chips: 0,
-    moonrocks: 0,
+    special: 0,
   },
   orbsCount: 11,
 };
@@ -399,8 +398,7 @@ export const Game = () => {
         bombs: 0,
         multipliers: 0,
         health: 0,
-        chips: 0,
-        moonrocks: 0,
+        special: 0,
       };
     }
     return {
@@ -410,8 +408,7 @@ export const Game = () => {
         ? distribution.multipliers
         : 0,
       health: revealedSegments.has("health") ? distribution.health : 0,
-      chips: revealedSegments.has("chips") ? distribution.chips : 0,
-      moonrocks: revealedSegments.has("moonrocks") ? distribution.moonrocks : 0,
+      special: revealedSegments.has("special") ? distribution.special : 0,
     };
   }, [showRewardOverlay, revealedSegments, distribution]);
   const bombDetails = useMemo(

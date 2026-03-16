@@ -13,7 +13,7 @@ const meta: Meta<typeof Distribution> = {
     values: {
       control: "object",
       description:
-        "Object with bombs, points, multipliers, chips, and moonrocks values",
+        "Object with bombs, points, multipliers, health, and special values",
     },
     size: {
       control: { type: "range", min: 100, max: 400, step: 10 },
@@ -29,8 +29,7 @@ const meta: Meta<typeof Distribution> = {
       bombs: 40,
       points: 30,
       multipliers: 30,
-      chips: 30,
-      moonrocks: 30,
+      special: 30,
       health: 30,
     },
   },
@@ -47,8 +46,7 @@ export const SingleType: Story = {
       bombs: 100,
       points: 0,
       multipliers: 0,
-      chips: 0,
-      moonrocks: 0,
+      special: 0,
       health: 0,
     },
   },
@@ -60,8 +58,7 @@ export const SkewedDistribution: Story = {
       bombs: 5,
       points: 80,
       multipliers: 10,
-      chips: 5,
-      moonrocks: 0,
+      special: 5,
       health: 0,
     },
   },
@@ -73,8 +70,7 @@ export const Animated = () => {
     bombs: 30,
     points: 20,
     multipliers: 50,
-    chips: 15,
-    moonrocks: 10,
+    special: 15,
     health: 15,
   });
 
@@ -83,8 +79,7 @@ export const Animated = () => {
       bombs: Math.floor(Math.random() * 50) + 10,
       points: Math.floor(Math.random() * 50) + 10,
       multipliers: Math.floor(Math.random() * 50) + 10,
-      chips: Math.floor(Math.random() * 50) + 10,
-      moonrocks: Math.floor(Math.random() * 50) + 10,
+      special: Math.floor(Math.random() * 50) + 10,
       health: Math.floor(Math.random() * 50) + 10,
     });
   };
@@ -103,8 +98,8 @@ export const Animated = () => {
         </button>
 
         <div className="text-sm text-gray-400">
-          B:{values.bombs} P:{values.points} M:{values.multipliers} C:
-          {values.chips} MR:{values.moonrocks}
+          B:{values.bombs} P:{values.points} M:{values.multipliers} S:
+          {values.special}
         </div>
       </div>
     </div>

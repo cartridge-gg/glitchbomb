@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import {
+  BoltIcon,
   BombOrbIcon,
-  ChipIcon,
   CrossIcon,
   HeartIcon,
-  MoonrockIcon,
   SparklesIcon,
 } from "@/components/icons";
 import { DistributionMath, type SegmentConfig } from "@/helpers/distribution";
@@ -15,8 +14,7 @@ export interface DistributionValues {
   points: number;
   multipliers: number;
   health: number;
-  chips: number;
-  moonrocks: number;
+  special: number;
 }
 
 interface DistributionProps {
@@ -57,17 +55,10 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
     order: 2,
   },
   {
-    key: "chips",
-    bgColor: "var(--orb-chips-faded)",
-    iconColor: "var(--orb-chips)",
-    Icon: ChipIcon,
-    order: 5,
-  },
-  {
-    key: "moonrocks",
+    key: "special",
     bgColor: "var(--orb-moonrock-faded)",
     iconColor: "var(--orb-moonrock)",
-    Icon: MoonrockIcon,
+    Icon: BoltIcon,
     order: 4,
   },
 ];
@@ -186,7 +177,9 @@ export const Distribution = ({
                 opacity: segment.percentage > 0 ? 1 : 0,
               }}
             >
-              <IconComponent size="lg" />
+              <IconComponent
+                size={segment.config.key === "special" ? "md" : "lg"}
+              />
             </div>
           );
         })}

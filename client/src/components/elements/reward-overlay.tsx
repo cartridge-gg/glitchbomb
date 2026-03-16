@@ -23,8 +23,7 @@ export type DistributionKey =
   | "points"
   | "multipliers"
   | "health"
-  | "chips"
-  | "moonrocks";
+  | "special";
 
 export interface RewardOverlayProps {
   open: boolean;
@@ -72,8 +71,8 @@ const orbToDistributionKey = (orb: OrbModel): DistributionKey => {
   if (orb.isBomb()) return "bombs";
   if (orb.isMultiplier()) return "multipliers";
   if (orb.isHealth()) return "health";
-  if (orb.isChips()) return "chips";
-  if (orb.isMoonrock()) return "moonrocks";
+  if (orb.isChips()) return "special";
+  if (orb.isMoonrock()) return "special";
   return "points";
 };
 

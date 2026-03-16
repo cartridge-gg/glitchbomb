@@ -157,8 +157,8 @@ export class Game {
       points: this.pullables.filter((orb) => orb.isPoint()).length,
       multipliers: this.pullables.filter((orb) => orb.isMultiplier()).length,
       health: this.pullables.filter((orb) => orb.isHealth()).length,
-      chips: this.pullables.filter((orb) => orb.isChips()).length,
-      moonrocks: this.pullables.filter((orb) => orb.isMoonrock()).length,
+      special: this.pullables.filter((orb) => orb.isChips() || orb.isMoonrock())
+        .length,
     };
   }
 }
