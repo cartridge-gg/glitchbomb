@@ -196,17 +196,37 @@ pub mod PlayableComponent {
                 store.pl_data_point(pl_base_id + 1, @game, potential_moonrocks, orb_type);
             }
 
-            // [Event] Emit GameOver if dead
-            if game.over {
-                store.game_over(@game, 0);
+            // [Effect] Update game earnings if exists
+            if earnings > 0 {
+                game.earn_moonrocks(earnings);
             }
 
-            // [Effect] Update game earnings if exists
-            if (earnings == 0) {
+            // [Event] Emit GameOver if dead and cash out moonrocks
+            if game.over {
+                store.game_over(@game, 0);
+
+                // [Effect] Compute reward from existing moonrocks (no points conversion)
+                let score: u16 = if game.moonrocks > MAX_SCORE {
+                    MAX_SCORE
+                } else {
+                    game.moonrocks
+                };
+                let config = store.config();
+                let token = config.token();
+                let supply = token.total_supply();
+                let target = config.target_supply;
+                let reward: u64 = RewarderImpl::amount(score, supply, target);
+                let reward: u64 = reward * game.stake.into();
+
                 store.set_game(@game);
+
+                if reward > 0 {
+                    let caller = starknet::get_caller_address();
+                    token.mint(caller, reward.into());
+                }
                 return;
             }
-            game.earn_moonrocks(earnings);
+
             store.set_game(@game);
         }
 

@@ -172,3 +172,76 @@ fn test_play_cash_out_max_stake() {
     let balance = systems.token.balance_of(context.player);
     assert(balance >= 1_u16.into(), 'Token: should mint tokens');
 }
+
+#[test]
+fn test_play_death_cashes_out_moonrocks() {
+    // [Setup] Mint one token
+    let (world, systems, context) = spawn_game();
+    set_contract_address(systems.registry.contract_address);
+    systems.starterpack.on_issue(context.player, 0, 1);
+
+    let game_id: u64 = 1;
+    set_contract_address(context.player);
+    set_transaction_hash(0x0);
+
+    // [Action] Complete level 1 (milestone=12 points)
+    systems.play.pull(game_id); // Bomb 1 → health 4
+    systems.play.pull(game_id); // Bomb 1 → health 3
+    systems.play.pull(game_id); // Point 5 → points 5
+    systems.play.pull(game_id); // Point 5 → points 10
+    systems.play.pull(game_id); // Bomb 2 → health 1
+    systems.play.pull(game_id); // PointBomb 4 → points 22, stage completed
+
+    // [Action] Enter shop (converts points to chips, costs 1 moonrock for level 2)
+    systems.play.enter(game_id);
+    // [Action] Exit shop (restores health to 5, level up to 2, milestone=18)
+    systems.play.exit(game_id);
+
+    // [Assert] No tokens minted yet
+    let balance_before = systems.token.balance_of(context.player);
+    assert(balance_before == 0_u8.into(), 'Token: no tokens before death');
+
+    // [Action] Pull in level 2 until death (health 5, bombs total 7 damage in bag)
+    // Use a seed that sequences bombs early to kill before milestone
+    set_transaction_hash(0x1);
+    systems.play.pull(game_id);
+    systems.play.pull(game_id);
+    systems.play.pull(game_id);
+    systems.play.pull(game_id);
+    systems.play.pull(game_id);
+
+    let store = StoreTrait::new(world);
+    let game_check = store.game(game_id);
+    if !game_check.over {
+        systems.play.pull(game_id);
+        let game_check2 = store.game(game_id);
+        if !game_check2.over {
+            systems.play.pull(game_id);
+            let game_check3 = store.game(game_id);
+            if !game_check3.over {
+                systems.play.pull(game_id);
+                let game_check4 = store.game(game_id);
+                if !game_check4.over {
+                    systems.play.pull(game_id);
+                    let game_check5 = store.game(game_id);
+                    if !game_check5.over {
+                        systems.play.pull(game_id);
+                    }
+                }
+            }
+        }
+    }
+
+    // [Assert] Game is over (death)
+    let game = store.game(game_id);
+    assert(game.over, 'Game: should be dead');
+    assert(game.health == 0, 'Game: health should be 0');
+
+    // [Assert] Points were NOT converted to moonrocks on death
+    // Moonrocks = 100 (initial) - 10 (level 1 cost) - 1 (level 2 cost) = 89
+    assert(game.moonrocks == 89, 'Game: moonrocks should be 89');
+
+    // [Assert] Tokens were minted based on moonrocks only (not points)
+    let balance_after = systems.token.balance_of(context.player);
+    assert(balance_after > 0_u8.into(), 'Token: should mint on death');
+}
