@@ -158,57 +158,48 @@ export const Game = () => {
   });
 
   // Convert PLDataPoint events to graph format
-  // Track cumulative moonrock orb earnings to exclude from chart values
-  const { plData, moonrockOrbOffset } = useMemo(() => {
-    if (dataPoints.length === 0)
-      return { plData: [] as PLDataPointComponent[], moonrockOrbOffset: 0 };
+  const plData: PLDataPointComponent[] = useMemo(() => {
+    if (dataPoints.length === 0) return [];
 
     const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
-    let offset = 0;
 
-    const plData: PLDataPointComponent[] = sorted.map((point, index) => {
+    return sorted.map((point, index) => {
       const orbType = point.orb;
-
-      // Accumulate moonrock orb earnings to subtract from chart
-      if (orbType === 17) offset += 15; // Moonrock15
-      if (orbType === 18) offset += 40; // Moonrock40
-
-      const adjustedValue = point.potentialMoonrocks - offset;
 
       // Level cost / game start entries (orb=0) → grey
       if (orbType === 0) {
-        return { value: adjustedValue, variant: "grey" as const, id: point.id };
+        return {
+          value: point.potentialMoonrocks,
+          variant: "grey" as const,
+          id: point.id,
+        };
       }
 
       // Determine color from orb type
       let variant = point.variant();
 
-      // If adjusted value decreased from previous adjusted point, override to red
+      // If value decreased from previous point, override to red
       if (index > 0) {
-        // Calculate previous adjusted value with offset at that point
-        // (offset already includes this point's moonrock, so we need pre-current offset)
-        let prevOffset = offset;
-        if (orbType === 17) prevOffset -= 15;
-        if (orbType === 18) prevOffset -= 40;
-        const prevAdjusted = sorted[index - 1].potentialMoonrocks - prevOffset;
-        if (adjustedValue < prevAdjusted) {
+        const prevValue = sorted[index - 1].potentialMoonrocks;
+        if (point.potentialMoonrocks < prevValue) {
           variant = "red";
         }
       }
 
-      return { value: adjustedValue, variant, id: point.id };
+      return { value: point.potentialMoonrocks, variant, id: point.id };
     });
-
-    return { plData, moonrockOrbOffset: offset };
   }, [dataPoints]);
 
   // Compute goal line for chart: baseMoonrocks + milestone
+  // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
   const chartGoal = useMemo(() => {
     if (!game) return undefined;
     if (game.over) return undefined;
-    const baseMoonrocks = game.moonrocks - moonrockOrbOffset;
-    return baseMoonrocks + game.milestone;
-  }, [game, moonrockOrbOffset]);
+    // Last chart value reflects current moonrocks (pre-orb-earnings) + points
+    // Goal = that baseline + remaining points needed
+    const lastValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
+    return lastValue - game.points + game.milestone;
+  }, [game, plData]);
 
   // Fetch username from controller
   useEffect(() => {

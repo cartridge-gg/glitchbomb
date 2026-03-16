@@ -151,13 +151,14 @@ export function pull(gameId: number): boolean {
       const seed = createSeed();
       const { game: nextGame, orbs, earnings } = pullOrbs(game, seed);
 
+      // Compute potential BEFORE applying moonrock earnings (matches contract)
+      nextGame.moonrocks = game.moonrocks;
+      const potential = nextGame.moonrocks + nextGame.points;
+
+      // Apply moonrock earnings after capturing potential
       if (earnings) {
         nextGame.moonrocks = game.moonrocks + earnings;
-      } else {
-        nextGame.moonrocks = game.moonrocks;
       }
-
-      const potential = nextGame.moonrocks + nextGame.points;
       const plBaseId = nextPlId(prev, gameId);
 
       const pulls: OfflineOrbPulled[] = [];
