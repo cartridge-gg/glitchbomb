@@ -373,10 +373,6 @@ export const Game = () => {
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
     [game],
   );
-  const specialBreakdown = useMemo(
-    () => (game ? game.specialBreakdown() : undefined),
-    [game],
-  );
   const progressiveDistribution = useMemo(() => {
     if (!showRewardOverlay || revealedSegments.size === 0) {
       return {
@@ -636,7 +632,6 @@ export const Game = () => {
                 values={
                   showRewardOverlay ? progressiveDistribution : distribution
                 }
-                specialBreakdown={specialBreakdown}
                 hasCurse={hasCurse}
                 curseLabel={curseLabel}
                 orb={currentOrb}

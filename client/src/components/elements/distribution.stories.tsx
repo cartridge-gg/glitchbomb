@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import {
-  Distribution,
-  type DistributionValues,
-  type SpecialBreakdown,
-} from "./distribution";
+import { Distribution, type DistributionValues } from "./distribution";
 
 const meta: Meta<typeof Distribution> = {
   title: "Elements/Distribution",
@@ -18,10 +14,6 @@ const meta: Meta<typeof Distribution> = {
       control: "object",
       description:
         "Object with bombs, points, multipliers, health, and special values",
-    },
-    specialBreakdown: {
-      control: "object",
-      description: "Breakdown of special orbs into chips and moonrocks",
     },
     size: {
       control: { type: "range", min: 100, max: 400, step: 10 },
@@ -40,7 +32,6 @@ const meta: Meta<typeof Distribution> = {
       special: 30,
       health: 30,
     },
-    specialBreakdown: { chips: 15, moonrocks: 15 },
   },
 };
 
@@ -58,7 +49,6 @@ export const SingleType: Story = {
       special: 0,
       health: 0,
     },
-    specialBreakdown: { chips: 0, moonrocks: 0 },
   },
 };
 
@@ -71,33 +61,6 @@ export const SkewedDistribution: Story = {
       special: 5,
       health: 0,
     },
-    specialBreakdown: { chips: 3, moonrocks: 2 },
-  },
-};
-
-export const ChipsOnly: Story = {
-  args: {
-    values: {
-      bombs: 30,
-      points: 30,
-      multipliers: 20,
-      special: 20,
-      health: 10,
-    },
-    specialBreakdown: { chips: 20, moonrocks: 0 },
-  },
-};
-
-export const MoonrocksOnly: Story = {
-  args: {
-    values: {
-      bombs: 30,
-      points: 30,
-      multipliers: 20,
-      special: 20,
-      health: 10,
-    },
-    specialBreakdown: { chips: 0, moonrocks: 20 },
   },
 };
 
@@ -110,32 +73,20 @@ export const Animated = () => {
     special: 15,
     health: 15,
   });
-  const [breakdown, setBreakdown] = useState<SpecialBreakdown>({
-    chips: 8,
-    moonrocks: 7,
-  });
 
   const randomize = () => {
-    const chips = Math.floor(Math.random() * 30);
-    const moonrocks = Math.floor(Math.random() * 30);
     setValues({
       bombs: Math.floor(Math.random() * 50) + 10,
       points: Math.floor(Math.random() * 50) + 10,
       multipliers: Math.floor(Math.random() * 50) + 10,
-      special: chips + moonrocks,
+      special: Math.floor(Math.random() * 50) + 10,
       health: Math.floor(Math.random() * 50) + 10,
     });
-    setBreakdown({ chips, moonrocks });
   };
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <Distribution
-        values={values}
-        specialBreakdown={breakdown}
-        size={450}
-        thickness={75}
-      />
+      <Distribution values={values} size={450} thickness={75} />
 
       <div className="flex flex-col items-center gap-4">
         <button
@@ -147,8 +98,8 @@ export const Animated = () => {
         </button>
 
         <div className="text-sm text-gray-400">
-          B:{values.bombs} P:{values.points} M:{values.multipliers} C:
-          {breakdown.chips} MR:{breakdown.moonrocks}
+          B:{values.bombs} P:{values.points} M:{values.multipliers} S:
+          {values.special}
         </div>
       </div>
     </div>

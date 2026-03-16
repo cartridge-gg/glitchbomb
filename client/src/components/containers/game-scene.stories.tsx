@@ -106,6 +106,5 @@ export const Default: Story = {
       special: 23,
       health: 5,
     },
-    specialBreakdown: { chips: 15, moonrocks: 8 },
   },
 };

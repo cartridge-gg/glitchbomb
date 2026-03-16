@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import {
+  BoltIcon,
   BombOrbIcon,
-  ChipIcon,
   CrossIcon,
   HeartIcon,
-  MoonrockIcon,
   SparklesIcon,
 } from "@/components/icons";
 import { DistributionMath, type SegmentConfig } from "@/helpers/distribution";
@@ -18,14 +17,8 @@ export interface DistributionValues {
   special: number;
 }
 
-export interface SpecialBreakdown {
-  chips: number;
-  moonrocks: number;
-}
-
 interface DistributionProps {
   values: DistributionValues;
-  specialBreakdown?: SpecialBreakdown;
   size?: number;
   thickness?: number;
   className?: string;
@@ -65,39 +58,13 @@ const SEGMENT_CONFIGS: SegmentConfig[] = [
     key: "special",
     bgColor: "var(--orb-moonrock-faded)",
     iconColor: "var(--orb-moonrock)",
-    Icon: MoonrockIcon,
+    Icon: BoltIcon,
     order: 4,
   },
 ];
 
-const SpecialIcon = ({
-  breakdown,
-}: {
-  breakdown: SpecialBreakdown | undefined;
-}) => {
-  const hasChips = breakdown ? breakdown.chips > 0 : false;
-  const hasMoonrocks = breakdown ? breakdown.moonrocks > 0 : false;
-
-  if (hasChips && hasMoonrocks) {
-    return (
-      <div
-        className="flex items-center gap-px"
-        style={{ transform: "rotate(20deg)" }}
-      >
-        <ChipIcon className="h-[26px] w-[26px]" />
-        <div className="h-4 w-px bg-current opacity-25 shrink-0" />
-        <MoonrockIcon className="h-[26px] w-[26px]" />
-      </div>
-    );
-  }
-
-  if (hasChips) return <ChipIcon size="lg" />;
-  return <MoonrockIcon size="lg" />;
-};
-
 export const Distribution = ({
   values,
-  specialBreakdown,
   size = 300,
   thickness = 50,
   className,
@@ -194,7 +161,6 @@ export const Distribution = ({
           );
 
           const IconComponent = segment.config.Icon;
-          const isSpecial = segment.config.key === "special";
 
           return (
             <div
@@ -211,11 +177,9 @@ export const Distribution = ({
                 opacity: segment.percentage > 0 ? 1 : 0,
               }}
             >
-              {isSpecial ? (
-                <SpecialIcon breakdown={specialBreakdown} />
-              ) : (
-                <IconComponent size="lg" />
-              )}
+              <IconComponent
+                size={segment.config.key === "special" ? "md" : "lg"}
+              />
             </div>
           );
         })}
