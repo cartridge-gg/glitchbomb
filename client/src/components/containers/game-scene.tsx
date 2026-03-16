@@ -9,6 +9,7 @@ import {
   Orb,
   Outcome,
   Puller,
+  type SpecialBreakdown,
 } from "@/components/elements";
 import {
   TapTooltip,
@@ -28,6 +29,7 @@ export interface GameSceneProps
   orbs: number;
   multiplier: number;
   values: DistributionValues;
+  specialBreakdown?: SpecialBreakdown;
   hasCurse?: boolean;
   curseLabel?: string;
   orb?: {
@@ -75,6 +77,7 @@ export const GameScene = ({
   orbs,
   multiplier,
   values,
+  specialBreakdown,
   hasCurse = false,
   curseLabel,
   orb,
@@ -150,6 +153,7 @@ export const GameScene = ({
       >
         <Distribution
           values={values}
+          specialBreakdown={specialBreakdown}
           size={distributionSize}
           thickness={distributionThickness}
         />

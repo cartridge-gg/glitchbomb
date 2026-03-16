@@ -1,4 +1,8 @@
-import type { BombDetails, DistributionValues } from "@/components/elements";
+import type {
+  BombDetails,
+  DistributionValues,
+  SpecialBreakdown,
+} from "@/components/elements";
 import { Packer } from "@/helpers/packer";
 import type { RawGame } from "@/models";
 import { Orb, OrbType } from "./orb";
@@ -151,14 +155,21 @@ export class Game {
     };
   }
 
+  specialBreakdown(): SpecialBreakdown {
+    return {
+      chips: this.pullables.filter((orb) => orb.isChips()).length,
+      moonrocks: this.pullables.filter((orb) => orb.isMoonrock()).length,
+    };
+  }
+
   distribution(): DistributionValues {
+    const breakdown = this.specialBreakdown();
     return {
       bombs: this.pullables.filter((orb) => orb.isBomb()).length,
       points: this.pullables.filter((orb) => orb.isPoint()).length,
       multipliers: this.pullables.filter((orb) => orb.isMultiplier()).length,
       health: this.pullables.filter((orb) => orb.isHealth()).length,
-      chips: this.pullables.filter((orb) => orb.isChips()).length,
-      moonrocks: this.pullables.filter((orb) => orb.isMoonrock()).length,
+      special: breakdown.chips + breakdown.moonrocks,
     };
   }
 }
