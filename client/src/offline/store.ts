@@ -103,6 +103,12 @@ function ensureGame(prev: OfflineState, gameId: number): OfflineGame {
   return game;
 }
 
+function nextPlId(prev: OfflineState, gameId: number): number {
+  const existing = prev.plDataPoints.filter((p) => p.game_id === gameId);
+  if (existing.length === 0) return 0;
+  return Math.max(...existing.map((p) => p.id)) + 1;
+}
+
 export function createOfflineGame(): number {
   let createdId = 0;
   setState((prev) => {
@@ -114,15 +120,16 @@ export function createOfflineGame(): number {
     const { game: started, cost } = startGame(game);
     started.moonrocks = game.moonrocks - cost;
 
+    const plBaseId = nextPlId(prev, id);
     const plStart: OfflinePLDataPoint = {
       game_id: id,
-      id: 0,
+      id: plBaseId,
       potential_moonrocks: game.moonrocks,
       orb: 0,
     };
     const plAfter: OfflinePLDataPoint = {
       game_id: id,
-      id: 1,
+      id: plBaseId + 1,
       potential_moonrocks: started.moonrocks + started.points,
       orb: 0,
     };
@@ -151,8 +158,7 @@ export function pull(gameId: number): boolean {
       }
 
       const potential = nextGame.moonrocks + nextGame.points;
-      const previousCount = nextGame.pull_count - orbs.length;
-      const baseId = 2 + previousCount * 2;
+      const plBaseId = nextPlId(prev, gameId);
 
       const pulls: OfflineOrbPulled[] = [];
       const plPoints: OfflinePLDataPoint[] = [];
@@ -166,7 +172,7 @@ export function pull(gameId: number): boolean {
         });
         plPoints.push({
           game_id: gameId,
-          id: baseId + index,
+          id: plBaseId + index,
           potential_moonrocks: potential,
           orb: orbId,
         });
@@ -211,7 +217,7 @@ export function enter(gameId: number): boolean {
       const seed = createSeed();
       const { game: nextGame } = enterShop(game, seed);
 
-      const plId = 2 + nextGame.pull_count * 2 + nextGame.level;
+      const plId = nextPlId(prev, gameId);
       const potential = nextGame.moonrocks + nextGame.points;
       const plPoint: OfflinePLDataPoint = {
         game_id: gameId,

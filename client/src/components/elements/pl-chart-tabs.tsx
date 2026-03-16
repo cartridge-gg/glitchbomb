@@ -12,6 +12,7 @@ export interface PLChartTabsProps {
   mode?: "delta" | "absolute";
   title?: string;
   baseline?: number;
+  goal?: number;
 }
 
 type TabType = "chart" | "logs";
@@ -173,6 +174,7 @@ export const PLChartTabs = ({
   mode = "absolute",
   title = "POTENTIAL",
   baseline,
+  goal,
 }: PLChartTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("chart");
   const tabItems: Array<TabBarItem<TabType>> = [
@@ -196,7 +198,13 @@ export const PLChartTabs = ({
 
       {/* Tab Content */}
       {activeTab === "chart" ? (
-        <PLGraph data={data} mode={mode} title={title} baseline={baseline} />
+        <PLGraph
+          data={data}
+          mode={mode}
+          title={title}
+          baseline={baseline}
+          goal={goal}
+        />
       ) : (
         <div
           className="h-[clamp(80px,16svh,160px)] overflow-y-auto"

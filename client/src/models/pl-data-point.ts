@@ -33,7 +33,7 @@ export class PLDataPoint {
    *   20 = CurseScoreDecrease (red)
    *   21 = StickyBomb (red)
    */
-  variant(): "green" | "red" | "yellow" | "blue" {
+  variant(): "green" | "red" | "yellow" | "blue" | "pink" {
     const orbType = this.orb;
 
     // Non-orb events (level cost, game start)
@@ -46,9 +46,9 @@ export class PLDataPoint {
       return "red";
     }
 
-    // Health (4-6) - green
+    // Health (4-6) - pink
     if (orbType >= 4 && orbType <= 6) {
-      return "green";
+      return "pink";
     }
 
     // Multipliers (7-9) - yellow
@@ -66,9 +66,9 @@ export class PLDataPoint {
       return "blue";
     }
 
-    // Chips (19) - yellow
+    // Chips (19) - blue (renders as purple, matching --orb-chips)
     if (orbType === 19) {
-      return "yellow";
+      return "blue";
     }
 
     // CurseScoreDecrease (20) - red

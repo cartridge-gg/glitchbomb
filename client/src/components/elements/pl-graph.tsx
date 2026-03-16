@@ -10,7 +10,7 @@ import {
 
 export interface PLDataPoint {
   value: number; // The P/L value at this point (delta or absolute based on mode)
-  variant: "green" | "red" | "yellow" | "blue"; // Color of the dot
+  variant: "green" | "red" | "yellow" | "blue" | "grey" | "pink"; // Color of the dot
   id?: number; // Optional unique ID for animation keys
 }
 
@@ -20,6 +20,7 @@ export interface PLGraphProps {
   mode?: "delta" | "absolute"; // delta = value is change per point, absolute = value is total at each point
   title?: string; // Custom title (default: "P/L")
   baseline?: number; // The baseline value (default: 0 for delta, 100 for absolute)
+  goal?: number; // Goal value for the level — sets the chart's y-axis max
 }
 
 // Map variant to actual color
@@ -33,6 +34,10 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
       return "#9747FF"; // --blue-100
     case "yellow":
       return "#4C91FF"; // --yellow-100
+    case "grey":
+      return "#AAAAAA";
+    case "pink":
+      return "#FF0099"; // --orb-heart
     default:
       return "#36F818";
   }
@@ -44,6 +49,7 @@ export const PLGraph = ({
   mode = "delta",
   title = "P/L",
   baseline: baselineProp,
+  goal,
 }: PLGraphProps) => {
   const interactionEnabled = false;
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
@@ -100,7 +106,7 @@ export const PLGraph = ({
     return { wins, losses, netPL };
   }, [data, mode, baseline]);
 
-  // Calculate Y-axis range - baseline position moves based on data
+  // Calculate Y-axis range — fit tightly to data, use goal as max when provided
   const yRange = useMemo(() => {
     if (cumulativeData.length === 0) {
       return {
@@ -112,37 +118,35 @@ export const PLGraph = ({
     }
 
     const values = cumulativeData.map((d) => d.cumulative);
-    const maxVal = Math.max(...values, baseline);
-    const minVal = Math.min(...values, baseline);
-    const hasBelowBaseline = minVal < baseline;
+    const dataMin = Math.min(...values);
+    const dataMax = Math.max(...values);
 
-    // Add padding to the top
-    const topPadding = Math.max((maxVal - baseline) * 0.2, 10);
-    let max = Math.ceil((maxVal + topPadding) / 10) * 10;
-    let min: number;
+    // Min = lowest data point; Max = goal (or highest data point if it exceeds goal)
+    let min = dataMin;
+    let max = goal != null ? Math.max(goal, dataMax) : dataMax;
 
-    if (hasBelowBaseline) {
-      // If there are values below baseline, include them
-      const bottomPadding = Math.max((baseline - minVal) * 0.2, 10);
-      min = Math.floor((minVal - bottomPadding) / 10) * 10;
-    } else {
-      // No values below baseline - min is baseline
-      min = baseline;
-    }
+    // Add small padding (5%) so dots aren't right on the edge
+    const range = max - min || 1;
+    const padding = range * 0.08;
+    min = Math.floor(min - padding);
+    max = Math.ceil(max + padding);
 
     // Enforce minimum range to prevent cramped graph
-    const minRange = 50;
-    const currentRange = max - min;
-    if (currentRange < minRange) {
-      max = Math.ceil((max + (minRange - currentRange)) / 10) * 10;
+    const minRange = 20;
+    if (max - min < minRange) {
+      const midpoint = (max + min) / 2;
+      min = Math.floor(midpoint - minRange / 2);
+      max = Math.ceil(midpoint + minRange / 2);
     }
 
+    const hasBelowBaseline = min < baseline;
+
     // Calculate baseline position as percentage from top
-    const range = max - min;
-    const baselinePos = ((max - baseline) / range) * 100;
+    const finalRange = max - min;
+    const baselinePos = ((max - baseline) / finalRange) * 100;
 
     return { min, max, baselinePos, hasBelowBaseline };
-  }, [cumulativeData, baseline]);
+  }, [cumulativeData, baseline, goal]);
 
   // Calculate Y-axis labels (max 3 labels: top, middle, bottom)
   const yAxisLabels = useMemo(() => {
@@ -520,6 +524,32 @@ export const PLGraph = ({
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
+                  <filter
+                    id="glow-grey"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter
+                    id="glow-pink"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
                   {/* Glitch filter for chart lines — red/blue chromatic split */}
                   <filter
                     id="glitch-line"
@@ -603,7 +633,7 @@ export const PLGraph = ({
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
-                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#9747FF" ? "blue" : "yellow"}`;
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
                   return (
                     <motion.circle

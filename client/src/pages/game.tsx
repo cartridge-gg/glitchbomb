@@ -158,30 +158,57 @@ export const Game = () => {
   });
 
   // Convert PLDataPoint events to graph format
-  const plData: PLDataPointComponent[] = useMemo(() => {
-    if (dataPoints.length === 0) return [];
+  // Track cumulative moonrock orb earnings to exclude from chart values
+  const { plData, moonrockOrbOffset } = useMemo(() => {
+    if (dataPoints.length === 0)
+      return { plData: [] as PLDataPointComponent[], moonrockOrbOffset: 0 };
 
-    // Sort by id and convert to graph format
     const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
-    return sorted.map((point, index) => {
-      // Get the orb-based color
+    let offset = 0;
+
+    const plData: PLDataPointComponent[] = sorted.map((point, index) => {
+      const orbType = point.orb;
+
+      // Accumulate moonrock orb earnings to subtract from chart
+      if (orbType === 17) offset += 15; // Moonrock15
+      if (orbType === 18) offset += 40; // Moonrock40
+
+      const adjustedValue = point.potentialMoonrocks - offset;
+
+      // Level cost / game start entries (orb=0) → grey
+      if (orbType === 0) {
+        return { value: adjustedValue, variant: "grey" as const, id: point.id };
+      }
+
+      // Determine color from orb type
       let variant = point.variant();
 
-      // If value decreased from previous point, override to red
+      // If adjusted value decreased from previous adjusted point, override to red
       if (index > 0) {
-        const prevValue = sorted[index - 1].potentialMoonrocks;
-        if (point.potentialMoonrocks < prevValue) {
+        // Calculate previous adjusted value with offset at that point
+        // (offset already includes this point's moonrock, so we need pre-current offset)
+        let prevOffset = offset;
+        if (orbType === 17) prevOffset -= 15;
+        if (orbType === 18) prevOffset -= 40;
+        const prevAdjusted = sorted[index - 1].potentialMoonrocks - prevOffset;
+        if (adjustedValue < prevAdjusted) {
           variant = "red";
         }
       }
 
-      return {
-        value: point.potentialMoonrocks,
-        variant,
-        id: point.id,
-      };
+      return { value: adjustedValue, variant, id: point.id };
     });
+
+    return { plData, moonrockOrbOffset: offset };
   }, [dataPoints]);
+
+  // Compute goal line for chart: baseMoonrocks + milestone
+  const chartGoal = useMemo(() => {
+    if (!game) return undefined;
+    if (game.over) return undefined;
+    const baseMoonrocks = game.moonrocks - moonrockOrbOffset;
+    return baseMoonrocks + game.milestone;
+  }, [game, moonrockOrbOffset]);
 
   // Fetch username from controller
   useEffect(() => {
@@ -513,12 +540,9 @@ export const Game = () => {
     // Game over (terminal state) - both view mode and immediate game over
     if (game.over) {
       const cashedOut = game.health > 0;
-      // When cashed out, points were converted to moonrocks (game.points is now 0)
-      // Calculate from the final P/L value (last data point before cash out)
-      // When died (health = 0), no moonrocks earned
-      const lastPLValue =
-        plData.length > 0 ? plData[plData.length - 1].value : 0;
-      const moonrocksEarned = cashedOut ? Math.max(0, lastPLValue) : 0;
+      // When died (health = 0), moonrocks earned on death (from recent PR #148)
+      // When cashed out, game.moonrocks has the full score
+      const moonrocksEarned = game.moonrocks;
 
       return (
         <GameOver
@@ -570,6 +594,7 @@ export const Game = () => {
               pulls={pulls}
               mode="absolute"
               title="POTENTIAL"
+              goal={chartGoal}
             />
             <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
               <CashOutChoice
@@ -595,6 +620,7 @@ export const Game = () => {
               pulls={pulls}
               mode="absolute"
               title="POTENTIAL"
+              goal={chartGoal}
             />
             <div className="flex-1 min-h-0 flex items-center justify-center">
               <MilestoneChoice
@@ -624,6 +650,7 @@ export const Game = () => {
                 pulls={pulls}
                 mode="absolute"
                 title="POTENTIAL"
+                goal={chartGoal}
               />
               <GameScene
                 className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
