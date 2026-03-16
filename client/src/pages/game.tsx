@@ -161,10 +161,21 @@ export const Game = () => {
   const plData: PLDataPointComponent[] = useMemo(() => {
     if (dataPoints.length === 0) return [];
 
-    // Sort by id and convert to graph format
     const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
+
     return sorted.map((point, index) => {
-      // Get the orb-based color
+      const orbType = point.orb;
+
+      // Level cost / game start entries (orb=0) → grey
+      if (orbType === 0) {
+        return {
+          value: point.potentialMoonrocks,
+          variant: "grey" as const,
+          id: point.id,
+        };
+      }
+
+      // Determine color from orb type
       let variant = point.variant();
 
       // If value decreased from previous point, override to red
@@ -175,13 +186,20 @@ export const Game = () => {
         }
       }
 
-      return {
-        value: point.potentialMoonrocks,
-        variant,
-        id: point.id,
-      };
+      return { value: point.potentialMoonrocks, variant, id: point.id };
     });
   }, [dataPoints]);
+
+  // Compute goal line for chart: baseMoonrocks + milestone
+  // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
+  const chartGoal = useMemo(() => {
+    if (!game) return undefined;
+    if (game.over) return undefined;
+    // Last chart value reflects current moonrocks (pre-orb-earnings) + points
+    // Goal = that baseline + remaining points needed
+    const lastValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
+    return lastValue - game.points + game.milestone;
+  }, [game, plData]);
 
   // Fetch username from controller
   useEffect(() => {
@@ -513,12 +531,9 @@ export const Game = () => {
     // Game over (terminal state) - both view mode and immediate game over
     if (game.over) {
       const cashedOut = game.health > 0;
-      // When cashed out, points were converted to moonrocks (game.points is now 0)
-      // Calculate from the final P/L value (last data point before cash out)
-      // When died (health = 0), no moonrocks earned
-      const lastPLValue =
-        plData.length > 0 ? plData[plData.length - 1].value : 0;
-      const moonrocksEarned = cashedOut ? Math.max(0, lastPLValue) : 0;
+      // When died (health = 0), moonrocks earned on death (from recent PR #148)
+      // When cashed out, game.moonrocks has the full score
+      const moonrocksEarned = game.moonrocks;
 
       return (
         <GameOver
@@ -570,6 +585,7 @@ export const Game = () => {
               pulls={pulls}
               mode="absolute"
               title="POTENTIAL"
+              goal={chartGoal}
             />
             <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
               <CashOutChoice
@@ -595,6 +611,7 @@ export const Game = () => {
               pulls={pulls}
               mode="absolute"
               title="POTENTIAL"
+              goal={chartGoal}
             />
             <div className="flex-1 min-h-0 flex items-center justify-center">
               <MilestoneChoice
@@ -624,6 +641,7 @@ export const Game = () => {
                 pulls={pulls}
                 mode="absolute"
                 title="POTENTIAL"
+                goal={chartGoal}
               />
               <GameScene
                 className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
