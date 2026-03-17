@@ -30,6 +30,7 @@ import { useActions } from "@/hooks/actions";
 import { useTokenPrice } from "@/hooks/token-price";
 import { useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
+import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { OrbType } from "@/models/orb";
 import { milestoneCost } from "@/offline/milestone";
 import { mobilePath } from "@/utils/mobile";
@@ -80,6 +81,7 @@ export const Game = () => {
     stopPulling,
     startMusic,
   } = useAudio();
+  const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -471,6 +473,7 @@ export const Game = () => {
                 multiplier={INITIAL_GAME_VALUES.multiplier}
                 values={INITIAL_GAME_VALUES.distribution}
                 hasCurse={false}
+                showPercentages={displaySettings.showDistributionPercent}
                 onPull={() => {}} // No-op while loading
               />
             </div>
@@ -654,6 +657,7 @@ export const Game = () => {
                 curseLabel={curseLabel}
                 orb={currentOrb}
                 pullLoading={isPulling}
+                showPercentages={displaySettings.showDistributionPercent}
                 onPull={handlePull}
               />
             </div>
@@ -701,6 +705,8 @@ export const Game = () => {
         onSfxMutedChange={setSfxMuted}
         onMusicVolumeChange={setMusicVolume}
         onSfxVolumeChange={setSfxVolume}
+        showDistributionPercent={displaySettings.showDistributionPercent}
+        onShowDistributionPercentChange={setShowDistributionPercent}
         onProfileClick={onProfileClick}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">

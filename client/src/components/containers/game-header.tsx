@@ -26,6 +26,8 @@ export interface GameHeaderProps {
   onSfxMutedChange?: (muted: boolean) => void;
   onMusicVolumeChange?: (vol: number) => void;
   onSfxVolumeChange?: (vol: number) => void;
+  showDistributionPercent?: boolean;
+  onShowDistributionPercentChange?: (show: boolean) => void;
   onProfileClick?: () => void;
 }
 
@@ -47,6 +49,8 @@ export const GameHeader = ({
   onSfxMutedChange,
   onMusicVolumeChange,
   onSfxVolumeChange,
+  showDistributionPercent,
+  onShowDistributionPercentChange,
   onProfileClick,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
@@ -169,17 +173,25 @@ export const GameHeader = ({
         >
           <ControllerIcon size="sm" />
         </Button>
-        {audioSettings && onMusicMutedChange && onSfxMutedChange && (
-          <SettingsModal
-            open={settingsOpen}
-            onClose={() => setSettingsOpen(false)}
-            audioSettings={audioSettings}
-            onMusicMutedChange={onMusicMutedChange}
-            onSfxMutedChange={onSfxMutedChange}
-            username={username}
-            onProfileClick={onProfileClick}
-          />
-        )}
+        {audioSettings &&
+          onMusicMutedChange &&
+          onSfxMutedChange &&
+          onMusicVolumeChange &&
+          onSfxVolumeChange && (
+            <SettingsModal
+              open={settingsOpen}
+              onClose={() => setSettingsOpen(false)}
+              audioSettings={audioSettings}
+              onMusicMutedChange={onMusicMutedChange}
+              onSfxMutedChange={onSfxMutedChange}
+              onMusicVolumeChange={onMusicVolumeChange}
+              onSfxVolumeChange={onSfxVolumeChange}
+              showDistributionPercent={showDistributionPercent}
+              onShowDistributionPercentChange={onShowDistributionPercentChange}
+              username={username}
+              onProfileClick={onProfileClick}
+            />
+          )}
       </div>
     </div>
   );
