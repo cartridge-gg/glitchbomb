@@ -38,7 +38,7 @@ export const MilestoneChoice = ({
   const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
 
   return (
-    <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full h-full">
+    <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full">
       {/* Continue Card - clickable */}
       <InfoCard
         variant="orange"

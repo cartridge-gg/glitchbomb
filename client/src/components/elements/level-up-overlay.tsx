@@ -51,7 +51,7 @@ export const LevelUpOverlay = ({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto backdrop-blur-md"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto backdrop-blur-md"
           style={{
             background:
               "radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 100%)",
@@ -64,7 +64,7 @@ export const LevelUpOverlay = ({
           onClick={hasChoice ? undefined : onDismiss}
         >
           {/* Title section */}
-          <div className="flex flex-col items-center gap-4 pt-[clamp(40px,12svh,80px)]">
+          <div className="flex flex-col items-center gap-4">
             {/* Decorative line */}
             <motion.div
               className={`h-px bg-gradient-to-r from-transparent ${variant === "complete" ? "via-green-400" : "via-purple-400"} to-transparent`}
@@ -115,7 +115,7 @@ export const LevelUpOverlay = ({
           {/* Choice content */}
           {hasChoice && (
             <motion.div
-              className="w-full max-w-[420px] px-4 flex-1 flex flex-col pb-[clamp(16px,3svh,32px)] mt-[clamp(16px,3svh,28px)]"
+              className="w-full max-w-[420px] px-4 pb-[clamp(16px,3svh,32px)] mt-[clamp(16px,3svh,28px)]"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.4, ease: "easeOut" }}
