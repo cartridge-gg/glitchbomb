@@ -272,9 +272,10 @@ export const Game = () => {
   // Reset loading states when data changes
   useEffect(() => {
     if (game?.shop && game.shop.length > 0) {
-      // Shop loaded - reset entering shop loading state and close milestone
+      // Shop loaded - reset entering shop loading state and close milestone/overlay
       setIsEnteringShop(false);
       setOverlay("none");
+      setShowLevelComplete(false);
     } else if (game?.shop && game.shop.length === 0) {
       // Shop cleared - reset exiting shop loading state
       setIsExitingShop(false);
@@ -423,6 +424,26 @@ export const Game = () => {
     [],
   );
   const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
+
+  const handleEnterShopFromOverlay = useCallback(async () => {
+    if (!game) return;
+    setIsEnteringShop(true);
+    const success = await enter(game.id);
+    if (!success) {
+      setIsEnteringShop(false);
+    }
+    // On success, overlay closes when shop loads (via the shop useEffect)
+  }, [enter, game]);
+
+  const handleCashOutFromOverlay = useCallback(async () => {
+    if (!game) return;
+    setIsCashingOut(true);
+    const success = await cashOut(game.id);
+    if (success) {
+      setShowLevelComplete(false);
+    }
+    setIsCashingOut(false);
+  }, [cashOut, game]);
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
@@ -601,8 +622,7 @@ export const Game = () => {
       );
     }
 
-    // Check if milestone reached or cashout confirmation
-    const milestoneReached = game.points >= game.milestone;
+    // Check cashout confirmation
     const showCashoutChoice = overlay === "cashout";
 
     // Main gameplay view - inlined to prevent remount on re-render
@@ -631,35 +651,6 @@ export const Game = () => {
                 onConfirm={handleCashOut}
                 onCancel={closeOverlay}
                 isConfirming={isCashingOut}
-              />
-            </div>
-          </div>
-        ) : milestoneReached ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
-            <GameStats
-              points={game.points}
-              milestone={game.milestone}
-              health={game.health}
-              level={game.level}
-            />
-            <PLChartTabs
-              data={plData}
-              pulls={pulls}
-              mode="absolute"
-              title="POTENTIAL"
-              goal={chartGoal}
-            />
-            <div className="flex-1 min-h-0 flex items-center justify-center">
-              <MilestoneChoice
-                moonrocks={game.moonrocks}
-                points={game.points}
-                ante={milestoneCost(game.level + 1)}
-                cashOutValue={formatCashOutValue}
-                onCashOut={handleCashOut}
-                onEnterShop={handleEnterShop}
-                isEnteringShop={isEnteringShop}
-                isCashingOut={isCashingOut}
-                nextCurseLabel={nextCurseLabel}
               />
             </div>
           </div>
@@ -779,7 +770,21 @@ export const Game = () => {
         level={game?.level ?? 1}
         variant="complete"
         onDismiss={dismissLevelComplete}
-      />
+      >
+        {game && (
+          <MilestoneChoice
+            moonrocks={game.moonrocks}
+            points={game.points}
+            ante={milestoneCost(game.level + 1)}
+            cashOutValue={formatCashOutValue}
+            onCashOut={handleCashOutFromOverlay}
+            onEnterShop={handleEnterShopFromOverlay}
+            isEnteringShop={isEnteringShop}
+            isCashingOut={isCashingOut}
+            nextCurseLabel={nextCurseLabel}
+          />
+        )}
+      </LevelUpOverlay>
       <LevelUpOverlay
         open={showLevelEnter}
         level={game?.level ?? 1}

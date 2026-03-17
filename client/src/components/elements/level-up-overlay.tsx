@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { GlitchText } from "@/components/ui/glitch-text";
 
 const AUTO_DISMISS_MS = 2500;
@@ -11,6 +11,7 @@ export interface LevelUpOverlayProps {
   level: number;
   variant: LevelUpVariant;
   onDismiss: () => void;
+  children?: ReactNode;
 }
 
 const CONFIG: Record<
@@ -34,31 +35,36 @@ export const LevelUpOverlay = ({
   level,
   variant,
   onDismiss,
+  children,
 }: LevelUpOverlayProps) => {
   const cfg = CONFIG[variant];
+  const hasChoice = Boolean(children);
 
+  // Auto-dismiss only when there's no choice to make
   useEffect(() => {
-    if (!open) return;
+    if (!open || hasChoice) return;
     const timer = setTimeout(onDismiss, AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
-  }, [open, onDismiss]);
+  }, [open, onDismiss, hasChoice]);
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto backdrop-blur-md"
           style={{
             background:
-              "radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%)",
+              "radial-gradient(circle, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 100%)",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          onClick={onDismiss}
+          // Only click-to-dismiss when there's no choice
+          onClick={hasChoice ? undefined : onDismiss}
         >
-          <div className="flex flex-col items-center gap-4">
+          {/* Title section */}
+          <div className="flex flex-col items-center gap-4 pt-[clamp(40px,12svh,80px)]">
             {/* Decorative line */}
             <motion.div
               className={`h-px bg-gradient-to-r from-transparent ${variant === "complete" ? "via-green-400" : "via-purple-400"} to-transparent`}
@@ -105,6 +111,18 @@ export const LevelUpOverlay = ({
               transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
             />
           </div>
+
+          {/* Choice content */}
+          {hasChoice && (
+            <motion.div
+              className="w-full max-w-[420px] px-4 flex-1 flex flex-col pb-[clamp(16px,3svh,32px)] mt-[clamp(16px,3svh,28px)]"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.4, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
