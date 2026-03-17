@@ -39,16 +39,6 @@ export const MilestoneChoice = ({
 
   return (
     <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full h-full">
-      {/* Cash Out Card */}
-      <CashOutCard
-        moonrocks={moonrocks}
-        reward={points}
-        cashOutValue={cashOutValue}
-        onClick={onCashOut}
-        disabled={isLoading}
-        isLoading={isCashingOut}
-      />
-
       {/* Continue Card - clickable */}
       <InfoCard
         variant="orange"
@@ -153,6 +143,16 @@ export const MilestoneChoice = ({
           )}
         </div>
       </InfoCard>
+
+      {/* Cash Out Card */}
+      <CashOutCard
+        moonrocks={moonrocks}
+        reward={points}
+        cashOutValue={cashOutValue}
+        onClick={onCashOut}
+        disabled={isLoading}
+        isLoading={isCashingOut}
+      />
     </div>
   );
 };
