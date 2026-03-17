@@ -14,6 +14,7 @@ import {
   CashOutChoice,
   type DistributionKey,
   GameStats,
+  LevelUpOverlay,
   MilestoneChoice,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
@@ -149,6 +150,10 @@ export const Game = () => {
   const [isExitingShop, setIsExitingShop] = useState(false);
   const [isCashingOut, setIsCashingOut] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
+  const [showLevelComplete, setShowLevelComplete] = useState(false);
+  const [showLevelEnter, setShowLevelEnter] = useState(false);
+  const prevLevelRef = useRef<number | null>(null);
+  const milestoneShownRef = useRef(false);
 
   const { dataPoints } = usePLDataPoints({
     gameId: game?.id ?? 0,
@@ -229,11 +234,15 @@ export const Game = () => {
       setGameId(Number(gameId));
       // Reset all local state when game changes
       lastPullIdRef.current = null;
+      prevLevelRef.current = null;
+      milestoneShownRef.current = false;
       setCurrentOrb(undefined);
       setOverlay("none");
       setIsEnteringShop(false);
       setIsExitingShop(false);
       setIsPulling(false);
+      setShowLevelComplete(false);
+      setShowLevelEnter(false);
       setShowRewardOverlay(false);
       setAnimateHeaderCount(false);
       setRevealedSegments(new Set());
@@ -274,6 +283,28 @@ export const Game = () => {
       setShopBalanceOverride(null);
     }
   }, [game?.shop]);
+
+  // Detect milestone reached — show "Level X Complete" before MilestoneChoice
+  useEffect(() => {
+    if (!game || game.over) return;
+    const reached = game.points >= game.milestone && game.milestone > 0;
+    if (reached && !milestoneShownRef.current) {
+      milestoneShownRef.current = true;
+      setShowLevelComplete(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.points, game?.milestone]);
+
+  // Detect level-up after exiting shop — show "Entering Level X"
+  useEffect(() => {
+    if (!game) return;
+    if (prevLevelRef.current !== null && game.level > prevLevelRef.current) {
+      milestoneShownRef.current = false;
+      setShowLevelEnter(true);
+    }
+    prevLevelRef.current = game.level;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.level]);
 
   useEffect(() => {
     if (!isPulling) return;
@@ -387,6 +418,11 @@ export const Game = () => {
 
   const openStash = useCallback(() => setOverlay("stash"), []);
   const openCashout = useCallback(() => setOverlay("cashout"), []);
+  const dismissLevelComplete = useCallback(
+    () => setShowLevelComplete(false),
+    [],
+  );
+  const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
@@ -737,6 +773,18 @@ export const Game = () => {
           label: "Moonrocks",
         }}
         orbs={game?.bag ?? []}
+      />
+      <LevelUpOverlay
+        open={showLevelComplete}
+        level={game?.level ?? 1}
+        variant="complete"
+        onDismiss={dismissLevelComplete}
+      />
+      <LevelUpOverlay
+        open={showLevelEnter}
+        level={game?.level ?? 1}
+        variant="enter"
+        onDismiss={dismissLevelEnter}
       />
     </div>
   );
