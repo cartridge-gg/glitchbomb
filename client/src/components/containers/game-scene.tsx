@@ -35,6 +35,7 @@ export interface GameSceneProps
     content: string;
   };
   pullLoading?: boolean;
+  showPercentages?: boolean;
   onPull: () => void;
   sceneRef?: RefObject<HTMLDivElement | null>;
 }
@@ -79,6 +80,7 @@ export const GameScene = ({
   curseLabel,
   orb,
   pullLoading = false,
+  showPercentages = false,
   variant,
   className,
   onPull,
@@ -152,6 +154,7 @@ export const GameScene = ({
           values={values}
           size={distributionSize}
           thickness={distributionThickness}
+          showPercentages={showPercentages}
         />
       </div>
 

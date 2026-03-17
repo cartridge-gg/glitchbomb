@@ -22,6 +22,7 @@ interface DistributionProps {
   size?: number;
   thickness?: number;
   className?: string;
+  showPercentages?: boolean;
 }
 
 // Configuration for each segment type
@@ -68,6 +69,7 @@ export const Distribution = ({
   size = 300,
   thickness = 50,
   className,
+  showPercentages = false,
 }: DistributionProps) => {
   const segments = useMemo(
     () => DistributionMath.calculateSegments(values, SEGMENT_CONFIGS),
@@ -177,9 +179,19 @@ export const Distribution = ({
                 opacity: segment.percentage > 0 ? 1 : 0,
               }}
             >
-              <IconComponent
-                size={segment.config.key === "special" ? "md" : "lg"}
-              />
+              <div className="flex flex-col items-center gap-0.5">
+                <IconComponent
+                  size={segment.config.key === "special" ? "md" : "lg"}
+                />
+                {showPercentages && (
+                  <span
+                    className="font-secondary text-[9px] tracking-wider leading-none whitespace-nowrap"
+                    style={{ color: segment.config.iconColor, opacity: 0.8 }}
+                  >
+                    {Math.round(segment.percentage)}%
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}

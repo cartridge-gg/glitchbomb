@@ -173,9 +173,47 @@ export interface SettingsModalProps {
   audioSettings: AudioSettings;
   onMusicMutedChange: (muted: boolean) => void;
   onSfxMutedChange: (muted: boolean) => void;
+  onMusicVolumeChange: (vol: number) => void;
+  onSfxVolumeChange: (vol: number) => void;
+  showDistributionPercent?: boolean;
+  onShowDistributionPercentChange?: (show: boolean) => void;
   username?: string;
   onProfileClick?: () => void;
 }
+
+const ToggleSwitch = ({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <div className="flex shrink-0 rounded-md overflow-hidden border border-green-900">
+    <button
+      type="button"
+      className={`px-2.5 py-1 font-secondary text-[10px] tracking-widest uppercase transition-colors ${
+        !checked
+          ? "bg-green-950 text-green-400"
+          : "bg-green-1000 text-green-600"
+      }`}
+      onClick={() => onChange(false)}
+    >
+      Off
+    </button>
+    <button
+      type="button"
+      className={`px-2.5 py-1 font-secondary text-[10px] tracking-widest uppercase transition-colors ${
+        checked ? "bg-green-950 text-green-400" : "bg-green-1000 text-green-600"
+      }`}
+      onClick={() => onChange(true)}
+    >
+      On
+    </button>
+  </div>
+);
+
+const SETTINGS_ROW =
+  "h-14 w-full flex items-center gap-3 px-5 bg-green-950 rounded-lg";
 
 export const SettingsModal = ({
   open,
@@ -183,18 +221,14 @@ export const SettingsModal = ({
   audioSettings,
   onMusicMutedChange,
   onSfxMutedChange,
+  onMusicVolumeChange,
+  onSfxVolumeChange,
+  showDistributionPercent,
+  onShowDistributionPercentChange,
   username,
   onProfileClick,
 }: SettingsModalProps) => {
   if (!open) return null;
-
-  const isMuted = audioSettings.musicMuted && audioSettings.sfxMuted;
-
-  const toggleMute = () => {
-    const next = !isMuted;
-    onMusicMutedChange(next);
-    onSfxMutedChange(next);
-  };
 
   return (
     <div
@@ -213,15 +247,84 @@ export const SettingsModal = ({
         <span className="font-secondary text-xs tracking-[0.2em] uppercase text-green-400 mb-1">
           Settings
         </span>
+
+        {/* Music row */}
         <Button
           variant="secondary"
           gradient="green"
-          className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
-          onClick={toggleMute}
+          className={SETTINGS_ROW}
+          asChild
         >
-          {isMuted ? <SpeakerMutedIcon size="sm" /> : <SpeakerIcon size="sm" />}
-          {isMuted ? "Volume Off" : "Volume On"}
+          <div>
+            <button
+              type="button"
+              className="shrink-0"
+              onClick={() => onMusicMutedChange(!audioSettings.musicMuted)}
+            >
+              {audioSettings.musicMuted ? (
+                <SpeakerMutedIcon size="sm" />
+              ) : (
+                <SpeakerIcon size="sm" />
+              )}
+            </button>
+            <span className="font-secondary text-sm tracking-widest uppercase w-[60px] shrink-0">
+              Music
+            </span>
+            <VolumeSlider
+              value={audioSettings.musicVolume}
+              onChange={onMusicVolumeChange}
+            />
+          </div>
         </Button>
+
+        {/* Effects row */}
+        <Button
+          variant="secondary"
+          gradient="green"
+          className={SETTINGS_ROW}
+          asChild
+        >
+          <div>
+            <button
+              type="button"
+              className="shrink-0"
+              onClick={() => onSfxMutedChange(!audioSettings.sfxMuted)}
+            >
+              {audioSettings.sfxMuted ? (
+                <SpeakerMutedIcon size="sm" />
+              ) : (
+                <SpeakerIcon size="sm" />
+              )}
+            </button>
+            <span className="font-secondary text-sm tracking-widest uppercase w-[60px] shrink-0">
+              Effects
+            </span>
+            <VolumeSlider
+              value={audioSettings.sfxVolume}
+              onChange={onSfxVolumeChange}
+            />
+          </div>
+        </Button>
+
+        {/* Distribution % toggle */}
+        {onShowDistributionPercentChange != null && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-between px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() =>
+              onShowDistributionPercentChange(!showDistributionPercent)
+            }
+          >
+            Show Distribution %
+            <ToggleSwitch
+              checked={!!showDistributionPercent}
+              onChange={onShowDistributionPercentChange}
+            />
+          </Button>
+        )}
+
+        {/* Profile button */}
         {username && (
           <Button
             variant="secondary"
