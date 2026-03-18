@@ -4,6 +4,7 @@ import { Profile } from "@/components/elements";
 import {
   ArrowLeftIcon,
   ControllerIcon,
+  GearIcon,
   GlitchBombIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
 import { mobilePath } from "@/utils/mobile";
-import { SettingsModal, SoundPopover } from "./sound-modal";
+import { SettingsModal } from "./sound-modal";
 
 export interface AppHeaderProps {
   moonrocks: number;
@@ -95,22 +96,18 @@ export const AppHeader = ({
 
       {/* Right: Sound + Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
-        {/* Desktop: sound popover */}
-        {audioSettings &&
-          onMusicMutedChange &&
-          onSfxMutedChange &&
-          onMusicVolumeChange &&
-          onSfxVolumeChange && (
-            <div className="hidden md:flex">
-              <SoundPopover
-                settings={audioSettings}
-                onMusicMutedChange={onMusicMutedChange}
-                onSfxMutedChange={onSfxMutedChange}
-                onMusicVolumeChange={onMusicVolumeChange}
-                onSfxVolumeChange={onSfxVolumeChange}
-              />
-            </div>
-          )}
+        {/* Desktop: settings button */}
+        {audioSettings && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            wrapperClassName="hidden md:flex"
+            className="h-12 w-12 p-0"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <GearIcon size="sm" />
+          </Button>
+        )}
         {/* Moonrocks display */}
         {!hideBalance && (
           <GradientBorder color="pink">
