@@ -170,15 +170,7 @@ export const GameScene = ({
         <div className="relative">
           <Puller
             onClick={onPull}
-            variant={
-              lives < 2
-                ? "bomb"
-                : lives < 4
-                  ? "multiplier"
-                  : lives < 5
-                    ? "default"
-                    : "point"
-            }
+            variant={lives < 2 ? "bomb" : lives < 4 ? "warning" : "point"}
             size="md"
             sizePx={pullerSizePx}
             orbs={orbs}
