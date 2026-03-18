@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import { HeartIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 
@@ -40,6 +41,10 @@ export interface GameStatsProps {
   maxHealth?: number;
   level: number;
   className?: string;
+  /** Increment to trigger dramatic glitch burst on points counter */
+  pointsBurst?: number;
+  /** Ref attached to the points counter element (fly target) */
+  pointsRef?: RefObject<HTMLDivElement | null>;
 }
 
 export const GameStats = ({
@@ -49,6 +54,8 @@ export const GameStats = ({
   maxHealth = 5,
   level,
   className = "",
+  pointsBurst = 0,
+  pointsRef,
 }: GameStatsProps) => {
   const goalProgress = Math.min(
     milestone > 0 ? (points / milestone) * 100 : 0,
@@ -91,11 +98,12 @@ export const GameStats = ({
       </div>
 
       {/* Center - Points & Level */}
-      <div className="flex flex-col items-center">
+      <div ref={pointsRef} className="flex flex-col items-center">
         <GlitchText
           className="text-green-400 font-rubik text-[clamp(1.5rem,5svh,3rem)]"
           style={{ textShadow: "0 0 20px rgba(74, 222, 128, 0.3)" }}
           text={String(points)}
+          burst={pointsBurst}
         />
         <div className="flex items-center justify-center px-3 py-0.5 rounded-full border border-green-700 -mt-3">
           <GlitchText
