@@ -9,6 +9,7 @@ import {
   GameShop,
   StashModal,
 } from "@/components/containers";
+import type { OrbOutcome } from "@/components/containers/game-scene";
 import {
   BombTracker,
   CashOutChoice,
@@ -130,20 +131,14 @@ export const Game = () => {
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
     null,
   );
-  const [currentOrb, setCurrentOrb] = useState<
-    | {
-        variant:
-          | "point"
-          | "bomb"
-          | "multiplier"
-          | "chip"
-          | "moonrock"
-          | "health";
-        content: string;
-      }
-    | undefined
-  >(undefined);
+  const [currentOrb, setCurrentOrb] = useState<OrbOutcome | undefined>(
+    undefined,
+  );
   const lastPullIdRef = useRef<number | null>(null);
+  const pointsRef = useRef<HTMLDivElement>(null);
+  const [pointsBurst, setPointsBurst] = useState(0);
+  // Hold displayed points at pre-pull value until flying animation arrives
+  const [heldPoints, setHeldPoints] = useState<number | null>(null);
 
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
@@ -347,26 +342,41 @@ export const Game = () => {
 
     // Check if this is a new pull we haven't seen
     if (latestPull.id > lastPullIdRef.current) {
-      // Show the outcome
+      const orb = latestPull.orb;
+      const base = orb.basePoints();
+      const mult = game?.multiplier ?? 1;
+      const multiplied = base !== null ? Math.floor(base * mult) : null;
+      const hasMultEffect =
+        base !== null && multiplied !== null && multiplied !== base && mult > 1;
+
+      // Hold points at current value for point orbs (released when flying anim arrives)
+      if (orb.isPoint() && game) {
+        setHeldPoints(game.points);
+      }
+
       setCurrentOrb({
-        variant: latestPull.orb.outcomeVariant(),
-        content: latestPull.orb.outcome(),
+        variant: orb.outcomeVariant(),
+        content: orb.outcome(),
+        basePoints: base ?? undefined,
+        multipliedPoints: hasMultEffect ? multiplied : undefined,
+        activeMultiplier: hasMultEffect ? mult : undefined,
       });
-      playOrbSound(latestPull.orb);
+      playOrbSound(orb);
       stopPulling();
       setIsPulling(false);
 
-      // Update the last seen pull id
       lastPullIdRef.current = latestPull.id;
 
-      // Clear after animation (2 seconds matches GameScene timing)
+      // Clear after animation — longer if multiplier effect is shown
+      const clearMs = hasMultEffect ? 3200 : 2500;
       const timer = setTimeout(() => {
         setCurrentOrb(undefined);
-      }, 2500);
+        setHeldPoints(null);
+      }, clearMs);
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, playOrbSound, stopPulling]);
+  }, [pulls, playOrbSound, stopPulling, game]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
@@ -377,6 +387,12 @@ export const Game = () => {
       setIsPulling(false);
     }
   }, [pull, game, isPulling]);
+
+  const handlePointsArrive = useCallback(() => {
+    // Release held points → GlitchText burst transition
+    setHeldPoints(null);
+    setPointsBurst((prev) => prev + 1);
+  }, []);
 
   const closeOverlay = useCallback(() => setOverlay("none"), []);
 
@@ -423,6 +439,10 @@ export const Game = () => {
     [],
   );
   const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
+
+  // Displayed points: held at pre-pull value during fly animation, otherwise actual
+  const displayedPoints =
+    heldPoints !== null ? heldPoints : (game?.points ?? 0);
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
@@ -667,10 +687,12 @@ export const Game = () => {
           <div className="flex flex-1 flex-col">
             <div className="flex flex-1 min-h-0 flex-col gap-[clamp(6px,2svh,18px)]">
               <GameStats
-                points={game.points}
+                points={displayedPoints}
                 milestone={game.milestone}
                 health={game.health}
                 level={game.level}
+                pointsBurst={pointsBurst}
+                pointsRef={pointsRef}
               />
               <PLChartTabs
                 data={plData}
@@ -695,6 +717,8 @@ export const Game = () => {
                 pullLoading={isPulling}
                 showPercentages={displaySettings.showDistributionPercent}
                 onPull={handlePull}
+                pointsTargetRef={pointsRef}
+                onPointsArrive={handlePointsArrive}
               />
             </div>
             <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">

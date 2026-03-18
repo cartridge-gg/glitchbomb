@@ -388,6 +388,23 @@ export class Orb {
     }
   }
 
+  public basePoints(): number | null {
+    switch (this.value) {
+      case OrbType.Point5:
+        return 5;
+      case OrbType.Point6:
+        return 6;
+      case OrbType.Point7:
+        return 7;
+      case OrbType.Point8:
+        return 8;
+      case OrbType.Point9:
+        return 9;
+      default:
+        return null;
+    }
+  }
+
   public outcomeVariant():
     | "point"
     | "bomb"

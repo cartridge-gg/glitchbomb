@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { GameScene } from "./game-scene";
+import { GameScene, type OrbOutcome } from "./game-scene";
 
 const meta: Meta<typeof GameScene> = {
   title: "Containers/GameScene",
@@ -53,36 +53,29 @@ const meta: Meta<typeof GameScene> = {
 export default meta;
 type Story = StoryObj<typeof GameScene>;
 
-const orbVariants = [
-  { variant: "point" as const, content: "+50 pts" },
-  { variant: "bomb" as const, content: "-1 HP" },
-  { variant: "multiplier" as const, content: "x3" },
-  { variant: "chip" as const, content: "+25 Chips" },
-  { variant: "moonrock" as const, content: "+50 Moonrocks" },
-  { variant: "health" as const, content: "+1 HP" },
+const orbVariants: OrbOutcome[] = [
+  { variant: "point", content: "+5 pts", basePoints: 5 },
+  { variant: "bomb", content: "-1 HP" },
+  { variant: "multiplier", content: "x3" },
+  { variant: "chip", content: "+25 Chips" },
+  { variant: "moonrock", content: "+50 Moonrocks" },
+  { variant: "health", content: "+1 HP" },
 ];
+
+const multipliedPointOrb: OrbOutcome = {
+  variant: "point",
+  content: "+5 pts",
+  basePoints: 5,
+  multipliedPoints: 7,
+  activeMultiplier: 1.5,
+};
 
 export const Default: Story = {
   render: (args) => {
-    const [orb, setOrb] = useState<
-      | {
-          variant:
-            | "point"
-            | "bomb"
-            | "multiplier"
-            | "chip"
-            | "moonrock"
-            | "health";
-          content: string;
-        }
-      | undefined
-    >(undefined);
+    const [orb, setOrb] = useState<OrbOutcome | undefined>(undefined);
 
     const handlePull = () => {
-      // Clear orb first to reset animation
       setOrb(undefined);
-
-      // Pick a random orb variant after a short delay
       setTimeout(() => {
         const randomOrb =
           orbVariants[Math.floor(Math.random() * orbVariants.length)];
@@ -99,6 +92,35 @@ export const Default: Story = {
     multiplier: 3,
     hasCurse: true,
     curseLabel: "Double Draw",
+    values: {
+      bombs: 20,
+      points: 58,
+      multipliers: 3,
+      special: 23,
+      health: 5,
+    },
+  },
+};
+
+export const MultiplierEffect: Story = {
+  render: (args) => {
+    const [orb, setOrb] = useState<OrbOutcome | undefined>(undefined);
+
+    const handlePull = () => {
+      setOrb(undefined);
+      setTimeout(() => {
+        setOrb(multipliedPointOrb);
+      }, 100);
+    };
+
+    return <GameScene {...args} orb={orb} onPull={handlePull} />;
+  },
+  args: {
+    lives: 5,
+    bombs: 3,
+    orbs: 5,
+    multiplier: 1.5,
+    hasCurse: false,
     values: {
       bombs: 20,
       points: 58,

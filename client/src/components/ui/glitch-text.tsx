@@ -4,6 +4,9 @@ const GLITCH_CHARS = "!@#$%&*<>{}[]=/\\|~^";
 const STEP_MS = 35;
 const GLITCH_STEPS = 6;
 
+const BURST_STEP_MS = 45;
+const BURST_GLITCH_STEPS = 12;
+
 const SCRAMBLE_STEP_MS = 100;
 const SCRAMBLE_GLITCH_STEPS = 8;
 const SCRAMBLE_HOLD_MS = 800;
@@ -14,6 +17,8 @@ interface GlitchTextProps {
   style?: React.CSSProperties;
   /** When true, loops: readable → glitch → readable → glitch */
   scramble?: boolean;
+  /** Increment to trigger a dramatic burst glitch on next text change */
+  burst?: number;
 }
 
 export const GlitchText = ({
@@ -21,10 +26,18 @@ export const GlitchText = ({
   className,
   style,
   scramble,
+  burst = 0,
 }: GlitchTextProps) => {
   const [display, setDisplay] = useState(text);
+  const [isBursting, setIsBursting] = useState(false);
   const prevText = useRef(text);
   const frameRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const burstRef = useRef(burst);
+
+  // Track burst changes
+  useEffect(() => {
+    burstRef.current = burst;
+  }, [burst]);
 
   // Transition animation when text changes
   useEffect(() => {
@@ -35,18 +48,32 @@ export const GlitchText = ({
       clearTimeout(frameRef.current);
     }
 
+    const useBurst = burstRef.current > 0;
+    const steps = useBurst ? BURST_GLITCH_STEPS : GLITCH_STEPS;
+    const stepMs = useBurst ? BURST_STEP_MS : STEP_MS;
+
+    if (useBurst) setIsBursting(true);
+
     let step = 0;
     const maxLen = Math.max(prevText.current.length, text.length);
 
     const tick = () => {
       step++;
-      if (step >= GLITCH_STEPS) {
+      if (step >= steps) {
         setDisplay(text);
         frameRef.current = null;
+        if (useBurst) setIsBursting(false);
         return;
       }
 
-      const resolved = Math.floor((step / GLITCH_STEPS) * text.length);
+      const progress = step / steps;
+      const resolved = useBurst
+        ? // Burst: stay fully corrupted longer, then resolve fast in last 30%
+          progress < 0.7
+          ? 0
+          : Math.floor(((progress - 0.7) / 0.3) * text.length)
+        : Math.floor(progress * text.length);
+
       let result = "";
       for (let i = 0; i < maxLen; i++) {
         if (i < resolved) {
@@ -57,7 +84,7 @@ export const GlitchText = ({
         }
       }
       setDisplay(result);
-      frameRef.current = setTimeout(tick, STEP_MS);
+      frameRef.current = setTimeout(tick, stepMs);
     };
 
     tick();
@@ -122,8 +149,15 @@ export const GlitchText = ({
     };
   }, [scramble, text]);
 
+  const burstStyle: React.CSSProperties = isBursting
+    ? {
+        ...style,
+        textShadow: `${style?.textShadow ? `${style.textShadow}, ` : ""}-3px 0 rgba(255, 0, 50, 0.8), 3px 0 rgba(0, 100, 255, 0.8)`,
+      }
+    : style;
+
   return (
-    <span className={className} style={style}>
+    <span className={className} style={burstStyle}>
       {display}
     </span>
   );
