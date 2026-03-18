@@ -139,6 +139,9 @@ export const Game = () => {
   const [pointsBurst, setPointsBurst] = useState(0);
   // Hold displayed points at pre-pull value until flying animation arrives
   const [heldPoints, setHeldPoints] = useState<number | null>(null);
+  // Capture game state at time of pull initiation (before any state updates)
+  const prePullPointsRef = useRef<number | null>(null);
+  const prePullMultiplierRef = useRef<number>(1);
 
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
@@ -329,6 +332,10 @@ export const Game = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFetchComplete]);
 
+  // Keep a ref to current game for reading inside pull detection without re-triggering
+  const gameRef = useRef(game);
+  gameRef.current = game;
+
   // Detect new pulls and show outcome animation
   useEffect(() => {
     // Don't process until we've initialized the lastPullIdRef
@@ -343,15 +350,17 @@ export const Game = () => {
     // Check if this is a new pull we haven't seen
     if (latestPull.id > lastPullIdRef.current) {
       const orb = latestPull.orb;
+      const currentGame = gameRef.current;
       const base = orb.basePoints();
-      const mult = game?.multiplier ?? 1;
+      // Use snapshotted multiplier (captured at pull time, before state updates)
+      const mult = prePullMultiplierRef.current;
       const multiplied = base !== null ? Math.floor(base * mult) : null;
       const hasMultEffect =
         base !== null && multiplied !== null && multiplied !== base && mult > 1;
 
-      // Hold points at current value for point orbs (released when flying anim arrives)
-      if (orb.isPoint() && game) {
-        setHeldPoints(game.points);
+      // Hold points at pre-pull value for point orbs (released when flying anim arrives)
+      if (orb.isPoint()) {
+        setHeldPoints(prePullPointsRef.current ?? currentGame?.points ?? 0);
       }
 
       setCurrentOrb({
@@ -372,25 +381,31 @@ export const Game = () => {
       const timer = setTimeout(() => {
         setCurrentOrb(undefined);
         setHeldPoints(null);
+        prePullPointsRef.current = null;
       }, clearMs);
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, playOrbSound, stopPulling, game]);
+  }, [pulls, playOrbSound, stopPulling]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
     if (!game || isPulling) return;
+    // Snapshot state before pull for held-display during animation
+    prePullPointsRef.current = game.points;
+    prePullMultiplierRef.current = game.multiplier;
     setIsPulling(true);
     const success = await pull(game.id);
     if (!success) {
       setIsPulling(false);
+      prePullPointsRef.current = null;
     }
   }, [pull, game, isPulling]);
 
   const handlePointsArrive = useCallback(() => {
-    // Release held points → GlitchText burst transition
+    // Release held points → GlitchText burst transition to new value
     setHeldPoints(null);
+    prePullPointsRef.current = null;
     setPointsBurst((prev) => prev + 1);
   }, []);
 
