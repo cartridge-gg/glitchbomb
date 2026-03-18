@@ -5,6 +5,7 @@ import {
   ArrowLeftIcon,
   ChipIcon,
   ControllerIcon,
+  GearIcon,
   MoonrockIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
 import { mobilePath } from "@/utils/mobile";
-import { SettingsModal, SoundPopover } from "./sound-modal";
+import { SettingsModal } from "./sound-modal";
 
 export interface GameHeaderProps {
   moonrocks: number;
@@ -137,23 +138,16 @@ export const GameHeader = ({
 
       {/* Right column - sound button + profile aligned right */}
       <div className="flex justify-end gap-2">
-        {/* Desktop: sound popover + profile */}
-        {audioSettings &&
-          onMusicMutedChange &&
-          onSfxMutedChange &&
-          onMusicVolumeChange &&
-          onSfxVolumeChange && (
-            <div className="hidden md:flex">
-              <SoundPopover
-                settings={audioSettings}
-                onMusicMutedChange={onMusicMutedChange}
-                onSfxMutedChange={onSfxMutedChange}
-                onMusicVolumeChange={onMusicVolumeChange}
-                onSfxVolumeChange={onSfxVolumeChange}
-                buttonClassName="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
-              />
-            </div>
-          )}
+        {/* Desktop: settings + profile */}
+        <Button
+          variant="secondary"
+          gradient="green"
+          wrapperClassName="hidden md:flex"
+          className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <GearIcon size="sm" />
+        </Button>
         <div className="hidden md:flex">
           <GradientBorder color="green">
             <Profile
@@ -188,8 +182,6 @@ export const GameHeader = ({
               onSfxVolumeChange={onSfxVolumeChange}
               showDistributionPercent={showDistributionPercent}
               onShowDistributionPercentChange={onShowDistributionPercentChange}
-              username={username}
-              onProfileClick={onProfileClick}
             />
           )}
       </div>
