@@ -25,6 +25,7 @@ const pullerVariants = cva(
         chip: "",
         moonrock: "",
         rainbow: "",
+        warning: "",
       },
       size: {
         xs: "w-[130px] h-[130px]",
@@ -62,6 +63,9 @@ const VARIANT_COLORS = {
   },
   rainbow: {
     cssVar: "#ffffff",
+  },
+  warning: {
+    cssVar: "var(--orange-100)",
   },
 } as const;
 
