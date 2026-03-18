@@ -57,7 +57,20 @@ function getOrbSoundFile(orb: Orb): string | null {
       return "/assets/sounds/bomb-3.wav";
     }
   }
-  if (orb.isPoint()) return "/assets/sounds/points.wav";
+  if (orb.isPoint()) {
+    switch (orb.value) {
+      case OrbType.PointOrb1:
+        return "/assets/sounds/points-1.wav";
+      case OrbType.Point5:
+        return "/assets/sounds/points-5.wav";
+      case OrbType.Point7:
+        return "/assets/sounds/points-7.wav";
+      case OrbType.Point9:
+        return "/assets/sounds/points-9.wav";
+      default:
+        return "/assets/sounds/points.wav";
+    }
+  }
   if (orb.isHealth()) return "/assets/sounds/health.wav";
   if (orb.isMultiplier()) return "/assets/sounds/multiplier.wav";
   if (orb.isMoonrock() || orb.isChips()) return "/assets/sounds/moonrock.wav";
