@@ -23,6 +23,7 @@ import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
+import { useDisplaySettings } from "@/hooks/use-display-settings";
 import {
   createOfflineGame,
   resetOfflineState,
@@ -58,6 +59,7 @@ export const Home = () => {
     setSfxVolume,
     startMusic,
   } = useAudio();
+  const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -464,6 +466,8 @@ export const Home = () => {
         onSfxMutedChange={setSfxMuted}
         onMusicVolumeChange={setMusicVolume}
         onSfxVolumeChange={setSfxVolume}
+        showDistributionPercent={displaySettings.showDistributionPercent}
+        onShowDistributionPercentChange={setShowDistributionPercent}
       />
 
       <ActivityTickerBanner />
@@ -1331,6 +1335,8 @@ export const Home = () => {
             onSfxMutedChange={setSfxMuted}
             onMusicVolumeChange={setMusicVolume}
             onSfxVolumeChange={setSfxVolume}
+            showDistributionPercent={displaySettings.showDistributionPercent}
+            onShowDistributionPercentChange={setShowDistributionPercent}
           />
 
           {/* Scrollable content */}

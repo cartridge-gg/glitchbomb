@@ -29,6 +29,8 @@ export interface AppHeaderProps {
   onSfxMutedChange?: (muted: boolean) => void;
   onMusicVolumeChange?: (vol: number) => void;
   onSfxVolumeChange?: (vol: number) => void;
+  showDistributionPercent?: boolean;
+  onShowDistributionPercentChange?: (show: boolean) => void;
 }
 
 export const AppHeader = ({
@@ -46,6 +48,8 @@ export const AppHeader = ({
   onSfxMutedChange,
   onMusicVolumeChange,
   onSfxVolumeChange,
+  showDistributionPercent,
+  onShowDistributionPercentChange,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -174,6 +178,8 @@ export const AppHeader = ({
               onSfxMutedChange={onSfxMutedChange}
               onMusicVolumeChange={onMusicVolumeChange}
               onSfxVolumeChange={onSfxVolumeChange}
+              showDistributionPercent={showDistributionPercent}
+              onShowDistributionPercentChange={onShowDistributionPercentChange}
               username={username}
               onProfileClick={onProfileClick}
             />
