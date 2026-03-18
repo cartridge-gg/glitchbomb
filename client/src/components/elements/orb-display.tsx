@@ -101,11 +101,31 @@ const getOrbColor = (orb: Orb) => {
 
 // Get display value for orb (the number shown in the icon)
 const getOrbDisplayValue = (orb: Orb): string => {
-  const name = orb.name();
   if (orb.isMultiplier()) {
-    const match = name.match(/x(\d+)/i);
-    return match ? `X${match[1]}` : "";
+    switch (orb.value) {
+      case OrbType.Multiplier50:
+        return "+0.5x";
+      case OrbType.Multiplier100:
+        return "+1x";
+      case OrbType.Multiplier150:
+        return "+1.5x";
+      default:
+        return "";
+    }
   }
+  if (orb.isHealth()) {
+    switch (orb.value) {
+      case OrbType.Health1:
+        return "1";
+      case OrbType.Health2:
+        return "2";
+      case OrbType.Health3:
+        return "3";
+      default:
+        return "";
+    }
+  }
+  const name = orb.name();
   const match = name.match(/(\d+)/);
   return match ? match[1] : "";
 };
@@ -219,16 +239,7 @@ export const OrbDisplay = ({
           style={{ backgroundColor: color }}
         >
           <span className="font-bold font-secondary text-black">
-            {displayValue.startsWith("X") ? (
-              <>
-                <span className="font-bold opacity-50 font-secondary text-2xs">
-                  X
-                </span>
-                {displayValue.slice(1)}
-              </>
-            ) : (
-              displayValue
-            )}
+            {displayValue}
           </span>
         </div>
       )}
