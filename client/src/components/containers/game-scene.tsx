@@ -385,11 +385,20 @@ export const GameScene = ({
                 className="flex flex-col items-center gap-0"
                 style={{ transform: `scale(${outcomeScale})` }}
               >
-                <Outcome
-                  content={outcomeContent}
-                  variant={orb?.variant ?? "default"}
-                  size="md"
-                />
+                <motion.div
+                  animate={
+                    showMultiplied
+                      ? { scale: [1.2, 1], opacity: [0.7, 1] }
+                      : { scale: 1 }
+                  }
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                  <Outcome
+                    content={outcomeContent}
+                    variant={orb?.variant ?? "default"}
+                    size="md"
+                  />
+                </motion.div>
                 {/* Multiplier badge — appears when multiplied value is shown */}
                 <AnimatePresence>
                   {hasMultiplierEffect && showMultiplied && (
@@ -408,7 +417,7 @@ export const GameScene = ({
                         textShadow: `0 0 12px ${multiplierColor}80`,
                       }}
                     >
-                      {orb!.basePoints} x {orb!.activeMultiplier}x
+                      {orb!.basePoints} &times; {orb!.activeMultiplier}x
                     </motion.div>
                   )}
                 </AnimatePresence>
