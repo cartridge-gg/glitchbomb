@@ -21,7 +21,7 @@ pub impl Milestone of MilestoneTrait {
         // let x: u16 = level.into();
         // x * x / 4
         match level {
-            1 => 10,
+            1 => 0,
             2 => 1,
             3 => 2,
             4 => 4,

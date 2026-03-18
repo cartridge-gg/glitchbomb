@@ -73,11 +73,11 @@ fn test_play_cash_out_mints_moonrocks() {
     game_after.assert_is_over();
     assert(game_after.points == 0, 'Game: points not reset');
 
-    // Reward based on moonrocks=90 (100 initial - 10 level cost), supply=0, target=1B
+    // Reward based on moonrocks=100 (no level 1 cost), supply=0, target=1B
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
-    assert(game_after.moonrocks == 90, 'Game: wrong moonrocks');
+    assert(game_after.moonrocks == 100, 'Game: wrong moonrocks');
 
-    // Reward curve: score=90, supply=0 → base_reward=3, stake=1 → 3 tokens minted
+    // Reward curve: score=100, supply=0 → base_reward=3, stake=1 → 3 tokens minted
     let balance_after = systems.token.balance_of(context.player);
     assert(balance_after >= 1_u16.into(), 'Token: should mint tokens');
 }
@@ -133,10 +133,10 @@ fn test_play_cash_out_reward_scales_with_stake() {
     let game1 = store.game(1);
     let game2 = store.game(2);
 
-    // Reward based on moonrocks=90 for both games (100 - 10 level cost)
+    // Reward based on moonrocks=100 for both games (no level 1 cost)
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
-    assert(game1.moonrocks == 90, 'Stake 1: moonrocks == 90');
-    assert(game2.moonrocks == 90, 'Stake 5: moonrocks == 90');
+    assert(game1.moonrocks == 100, 'Stake 1: moonrocks == 100');
+    assert(game2.moonrocks == 100, 'Stake 5: moonrocks == 100');
 
     // [Assert] Stake multiplier scales token rewards (stake=5 gets 5x stake=1)
     let balance = systems.token.balance_of(context.player);
@@ -164,9 +164,9 @@ fn test_play_cash_out_max_stake() {
     let store = StoreTrait::new(world);
     let game = store.game(1);
 
-    // Reward based on moonrocks=90 (100 - 10 level cost), stake=10
+    // Reward based on moonrocks=100 (no level 1 cost), stake=10
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
-    assert(game.moonrocks == 90, 'Stake 10: moonrocks == 90');
+    assert(game.moonrocks == 100, 'Stake 10: moonrocks == 100');
 
     // Stake=10 should mint more tokens than stake=1
     let balance = systems.token.balance_of(context.player);
@@ -238,8 +238,8 @@ fn test_play_death_cashes_out_moonrocks() {
     assert(game.health == 0, 'Game: health should be 0');
 
     // [Assert] Points were NOT converted to moonrocks on death
-    // Moonrocks = 100 (initial) - 10 (level 1 cost) - 1 (level 2 cost) = 89
-    assert(game.moonrocks == 89, 'Game: moonrocks should be 89');
+    // Moonrocks = 100 (initial) - 0 (level 1 cost) - 1 (level 2 cost) = 99
+    assert(game.moonrocks == 99, 'Game: moonrocks should be 99');
 
     // [Assert] Tokens were minted based on moonrocks only (not points)
     let balance_after = systems.token.balance_of(context.player);

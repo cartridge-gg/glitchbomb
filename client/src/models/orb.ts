@@ -165,11 +165,11 @@ export class Orb {
       case OrbType.Health3:
         return "Triple Health";
       case OrbType.Multiplier50:
-        return "Multiplier x2";
+        return "Multiplier +0.5x";
       case OrbType.Multiplier100:
-        return "Multiplier x3";
+        return "Multiplier +1x";
       case OrbType.Multiplier150:
-        return "Multiplier x4";
+        return "Multiplier +1.5x";
       case OrbType.Point5:
         return "Point 5";
       case OrbType.Point6:

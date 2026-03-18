@@ -22,7 +22,7 @@ export function milestoneValue(level: number): number {
 export function milestoneCost(level: number): number {
   switch (level) {
     case 1:
-      return 10;
+      return 0;
     case 2:
       return 1;
     case 3:
