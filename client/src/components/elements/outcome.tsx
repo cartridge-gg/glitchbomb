@@ -14,6 +14,7 @@ const outcomeVariants = cva("select-none uppercase relative text-center", {
       moonrock: "break-words",
     },
     size: {
+      sm: "text-xl leading-tight tracking-tight",
       md: "text-4xl leading-tight tracking-tighter",
     },
   },
@@ -74,6 +75,7 @@ export const Outcome = ({
   className,
   ...props
 }: OutcomeProps) => {
+  const strokeWidth = size === "sm" ? "6px" : "12px";
   return (
     <motion.div
       className={cn(outcomeVariants({ variant, size, className }), "")}
@@ -90,7 +92,7 @@ export const Outcome = ({
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           WebkitTextFillColor: "transparent",
-          WebkitTextStroke: "12px transparent",
+          WebkitTextStroke: `${strokeWidth} transparent`,
           paintOrder: "stroke fill",
         }}
         aria-hidden="true"

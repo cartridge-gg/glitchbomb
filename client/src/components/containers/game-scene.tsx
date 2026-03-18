@@ -399,7 +399,7 @@ export const GameScene = ({
                     size="md"
                   />
                 </motion.div>
-                {/* Multiplier badge — appears when multiplied value is shown */}
+                {/* Multiplier breakdown — styled like Outcome for visibility */}
                 <AnimatePresence>
                   {hasMultiplierEffect && showMultiplied && (
                     <motion.div
@@ -411,13 +411,13 @@ export const GameScene = ({
                         stiffness: 500,
                         damping: 15,
                       }}
-                      className="mt-1 font-secondary text-xs tracking-wider"
-                      style={{
-                        color: multiplierColor,
-                        textShadow: `0 0 12px ${multiplierColor}80`,
-                      }}
+                      className="mt-1"
                     >
-                      {orb!.basePoints} &times; {orb!.activeMultiplier}x
+                      <Outcome
+                        content={`${orb!.basePoints} × ${orb!.activeMultiplier}x`}
+                        variant="multiplier"
+                        size="sm"
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>
