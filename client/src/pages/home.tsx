@@ -1253,7 +1253,9 @@ export const Home = () => {
               wrapperClassName="flex-1"
               className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
               onClick={
-                showDetails ? () => setShowDetails(false) : handlePractice
+                showDetails
+                  ? () => setShowDetails(false)
+                  : () => requireLogin(handlePractice)
               }
             >
               <GlitchText
