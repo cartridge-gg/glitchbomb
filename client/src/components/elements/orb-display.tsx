@@ -61,22 +61,12 @@ const valuePositionMap = {
   },
 };
 
-const glowSizeMap = {
-  xs: 3,
-  sm: 4,
-  md: 8,
-  lg: 12,
-};
-
 // Get the icon component for an orb type
-const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
-  // PointBomb4 should show a bomb icon
+const getOrbIcon = (orb: Orb) => {
   if (orb.isBomb()) {
-    if (useBombTierIcons) {
-      if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
-      if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
-      if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
-    }
+    if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
+    if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
+    if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
     return BombOrbIcon;
   }
   if (orb.isPoint()) return OrbPointIcon;
@@ -134,10 +124,8 @@ export interface OrbDisplayProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
-  bombTierIcons?: boolean;
   valuePosition?: "bottom" | "top-right";
   showValue?: boolean;
-  glowScale?: number;
   /** When set, the pill shows this count instead of the orb value */
   count?: number;
   /** Hide the center icon (keeps border, background, and tint) */
@@ -149,20 +137,17 @@ export interface OrbDisplayProps
 export const OrbDisplay = ({
   orb,
   size = "md",
-  bombTierIcons = false,
   valuePosition = "bottom",
   showValue = true,
-  glowScale = 1,
   count,
   hideIcon = false,
   iconOverride,
   className,
   ...props
 }: OrbDisplayProps) => {
-  const Icon = iconOverride ?? getOrbIcon(orb, bombTierIcons);
+  const Icon = iconOverride ?? getOrbIcon(orb);
   const color = getOrbColor(orb);
   const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
-  const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (
     <div
@@ -221,7 +206,6 @@ export const OrbDisplay = ({
             )}
             style={{
               color,
-              filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
             }}
           />
         )}

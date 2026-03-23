@@ -151,12 +151,7 @@ export const OrbCategorySummary = forwardRef<
                     />
                   </div>
                 ) : (
-                  <OrbDisplay
-                    orb={config.orb}
-                    size="xs"
-                    showValue={false}
-                    glowScale={0.7}
-                  />
+                  <OrbDisplay orb={config.orb} size="xs" showValue={false} />
                 )}
                 {/* Count pill */}
                 <div

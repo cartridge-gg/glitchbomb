@@ -8,9 +8,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Orb as OrbModel, OrbType } from "@/models";
+import { type Orb as OrbModel, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 import { getOrbColor, getOrbIcon } from "./orb-utils";
+import { setRewardOverlayDismissed } from "./reward-overlay-prefs";
 
 export interface RewardItem {
   variant: "moonrock" | "chip" | "point" | "multiplier";
@@ -38,8 +39,6 @@ export interface RewardOverlayProps {
   reward: RewardItem;
   orbs?: OrbModel[];
 }
-
-const moonrockOrb = new OrbModel(OrbType.Moonrock15);
 
 const PARTICLE_COUNT = 6;
 const PARTICLE_STAGGER_MS = 50;
@@ -84,12 +83,13 @@ export const RewardOverlay = ({
   onTakeAll,
   targetRef,
   orbTargetRef,
-  heading = "YOU RECEIVE",
+  heading = "YOU GET",
   actionLabel = "LET'S GO",
   reward,
   orbs,
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Sort orbs by kind
   const sortedOrbs = useMemo(() => {
@@ -135,6 +135,10 @@ export const RewardOverlay = ({
     if (isExiting) return;
     setIsExiting(true);
     onTakeAll?.();
+
+    if (dontShowAgain) {
+      setRewardOverlayDismissed();
+    }
 
     // Moonrock particles → header
     const orbRect = orbRef.current?.getBoundingClientRect();
@@ -233,7 +237,7 @@ export const RewardOverlay = ({
           transition={{ duration: 0.3 }}
         >
           <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-12">
               {/* Heading */}
               <motion.p
                 className="font-secondary text-sm tracking-[0.3em] text-green-400"
@@ -244,10 +248,9 @@ export const RewardOverlay = ({
                 {heading}
               </motion.p>
 
-              {/* Rewards grid — moonrocks large in center, orbs below */}
+              {/* Rewards — moonrocks then orbs */}
               <motion.div
-                ref={orbRef}
-                className="flex flex-col items-center gap-4"
+                className="flex flex-col items-center gap-12"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
                   scale: isExiting ? 0.5 : 1,
@@ -264,82 +267,130 @@ export const RewardOverlay = ({
                       }
                 }
               >
-                {/* Moonrocks — large, yellow override */}
-                <TapTooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      style={
-                        {
-                          "--orb-moonrock": "var(--yellow-100)",
-                        } as React.CSSProperties
-                      }
-                    >
-                      <OrbDisplay
-                        orb={moonrockOrb}
-                        size="lg"
-                        count={reward.count}
-                        glowScale={1}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
-                    <p
-                      className="font-secondary text-xs font-bold"
-                      style={{ color: "var(--yellow-100)" }}
-                    >
-                      Moonrocks
-                    </p>
-                    <p
-                      className="font-secondary text-xs mt-0.5 opacity-50"
-                      style={{ color: "var(--yellow-100)" }}
-                    >
-                      In-game currency earned by playing. Can be cashed out for
-                      GLITCH tokens.
-                    </p>
-                  </TooltipContent>
-                </TapTooltip>
+                {/* Moonrocks — label + header-button style pill */}
+                <div className="flex flex-col items-center gap-2">
+                  <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
+                    Moon Rocks
+                  </span>
+                  <TapTooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        ref={orbRef}
+                        className="w-[clamp(200px,55vw,240px)] flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-default"
+                      >
+                        <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
+                        <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
+                          {reward.count.toLocaleString()}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                      <p
+                        className="font-secondary text-xs font-bold"
+                        style={{ color: "var(--yellow-100)" }}
+                      >
+                        Moonrocks
+                      </p>
+                      <p
+                        className="font-secondary text-xs mt-0.5 opacity-50"
+                        style={{ color: "var(--yellow-100)" }}
+                      >
+                        In-game currency earned by playing. Can be cashed out
+                        for GLITCH tokens.
+                      </p>
+                    </TooltipContent>
+                  </TapTooltip>
+                </div>
 
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
-                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
-                    {sortedOrbs.map((orb, i) => (
-                      <TapTooltip key={`${orb.value}-${i}`}>
-                        <TooltipTrigger asChild>
-                          <div ref={setOrbElementRef(i)}>
-                            <OrbDisplay
-                              orb={orb}
-                              size="sm"
-                              glowScale={0.5}
-                              count={bombDamage(orb)}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
-                          <p
-                            className="font-secondary text-xs font-bold"
-                            style={{ color: orb.color() }}
-                          >
-                            {orb.name()}
-                          </p>
-                          <p
-                            className="font-secondary text-xs mt-0.5 opacity-50"
-                            style={{ color: orb.color() }}
-                          >
-                            {orb.description()}
-                          </p>
-                        </TooltipContent>
-                      </TapTooltip>
-                    ))}
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
+                      Orbs
+                    </span>
+                    <div className="grid grid-cols-4 gap-3">
+                      {sortedOrbs.map((orb, i) => (
+                        <TapTooltip key={`${orb.value}-${i}`}>
+                          <TooltipTrigger asChild>
+                            <div
+                              ref={setOrbElementRef(i)}
+                              className="cursor-default"
+                            >
+                              <OrbDisplay
+                                orb={orb}
+                                size="sm"
+                                count={bombDamage(orb)}
+                                valuePosition="top-right"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                            <p
+                              className="font-secondary text-xs font-bold"
+                              style={{ color: orb.color() }}
+                            >
+                              {orb.name()}
+                            </p>
+                            <p
+                              className="font-secondary text-xs mt-0.5 opacity-50"
+                              style={{ color: orb.color() }}
+                            >
+                              {orb.description()}
+                            </p>
+                          </TooltipContent>
+                        </TapTooltip>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
 
-              {/* LET'S GO button */}
+              {/* Don't show again + LET'S GO button */}
               <motion.div
+                className="flex flex-col items-center gap-12"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
                 transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
               >
+                <button
+                  type="button"
+                  onClick={() => setDontShowAgain((v) => !v)}
+                  className="flex items-center gap-2.5 cursor-pointer select-none"
+                >
+                  <div
+                    className="w-4 h-4 rounded border flex items-center justify-center transition-all duration-200"
+                    style={{
+                      borderColor: dontShowAgain
+                        ? "rgba(54, 248, 24, 0.6)"
+                        : "rgba(54, 248, 24, 0.24)",
+                      backgroundColor: dontShowAgain
+                        ? "rgba(54, 248, 24, 0.4)"
+                        : "rgba(54, 248, 24, 0.24)",
+                    }}
+                  >
+                    {dontShowAgain && (
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="w-3 h-3 text-green-400"
+                      >
+                        <path
+                          d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  <span
+                    className="font-secondary text-xs tracking-wide"
+                    style={{ color: "rgba(54, 248, 24, 0.48)" }}
+                  >
+                    Do not show this again
+                  </span>
+                </button>
                 <Button
                   variant="secondary"
                   gradient="green"
