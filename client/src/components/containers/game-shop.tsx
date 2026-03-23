@@ -50,16 +50,6 @@ const getOrbTypeName = (orb: Orb): string => {
   return "ORB";
 };
 
-// Get short description for orb type
-const getOrbShortDescription = (orb: Orb): string => {
-  if (orb.isPoint()) return "Gain points";
-  if (orb.isMultiplier()) return "Increase future points";
-  if (orb.isHealth()) return "Gain health";
-  if (orb.isChips()) return "Gain chips";
-  if (orb.isMoonrock()) return "Gain moonrocks";
-  return "";
-};
-
 const getParticleCategory = (orb: Orb) => {
   if (orb.isBomb()) return "bomb";
   if (orb.isPoint()) return "point";
@@ -117,7 +107,7 @@ const ShopItem = ({
           )}
         </div>
         <p className="text-white/60 font-secondary text-xs tracking-wide">
-          {getOrbShortDescription(orb)}
+          {orb.description()}
         </p>
       </div>
 
