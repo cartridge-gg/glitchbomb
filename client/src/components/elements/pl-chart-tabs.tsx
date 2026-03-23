@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { OrbPulled } from "@/models";
 import { milestoneValue } from "@/offline/milestone";
@@ -181,10 +180,7 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
       {entries.map((entry) => {
         if (entry.type === "victory") {
           return (
-            <div
-              key={`victory-${entry.level}`}
-              className="flex items-center"
-            >
+            <div key={`victory-${entry.level}`} className="flex items-center">
               <span className="font-secondary text-xs tracking-widest text-yellow-400">
                 VICTORY
               </span>
