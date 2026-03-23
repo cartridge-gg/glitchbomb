@@ -61,13 +61,6 @@ const valuePositionMap = {
   },
 };
 
-const glowSizeMap = {
-  xs: 3,
-  sm: 4,
-  md: 8,
-  lg: 12,
-};
-
 // Get the icon component for an orb type
 const getOrbIcon = (orb: Orb) => {
   if (orb.isBomb()) {
@@ -133,7 +126,6 @@ export interface OrbDisplayProps
   orb: Orb;
   valuePosition?: "bottom" | "top-right";
   showValue?: boolean;
-  glowScale?: number;
   /** When set, the pill shows this count instead of the orb value */
   count?: number;
   /** Hide the center icon (keeps border, background, and tint) */
@@ -147,7 +139,6 @@ export const OrbDisplay = ({
   size = "md",
   valuePosition = "bottom",
   showValue = true,
-  glowScale = 0.25,
   count,
   hideIcon = false,
   iconOverride,
@@ -157,7 +148,6 @@ export const OrbDisplay = ({
   const Icon = iconOverride ?? getOrbIcon(orb);
   const color = getOrbColor(orb);
   const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
-  const glowSize = glowSizeMap[size ?? "md"] * glowScale;
 
   return (
     <div
@@ -216,7 +206,6 @@ export const OrbDisplay = ({
             )}
             style={{
               color,
-              filter: `drop-shadow(0 0 ${glowSize}px ${color})`,
             }}
           />
         )}

@@ -53,7 +53,6 @@ const OrbStack = ({
         orb={orb}
         size={size}
         showValue={false}
-        glowScale={0.5}
         hideIcon
         className="bg-black"
       />
@@ -63,7 +62,6 @@ const OrbStack = ({
         orb={orb}
         size={size}
         showValue={false}
-        glowScale={0.8}
         className="bg-black"
         iconOverride={iconOverride}
       />
