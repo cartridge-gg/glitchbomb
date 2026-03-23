@@ -1040,7 +1040,7 @@ export const Home = () => {
                 <div key="new-game" className="w-full shrink-0">
                   <ElectricBorder
                     color="#FF0099"
-                    gradient="linear-gradient(0deg, rgba(255, 0, 153, 0.05), rgba(255, 0, 153, 0.05))"
+                    gradient="linear-gradient(0deg, rgba(255, 0, 153, 0.16), rgba(255, 0, 153, 0.16))"
                     borderGradient="linear-gradient(0deg, #FF0099, #FF33AD)"
                     seed={99}
                     cornerRadius={3}
