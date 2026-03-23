@@ -293,12 +293,8 @@ export const Game = () => {
     const reached = game.points >= game.milestone && game.milestone > 0;
     if (reached && !milestoneShownRef.current) {
       milestoneShownRef.current = true;
-      // Delay so the pull animation finishes before the overlay appears
-      const timer = setTimeout(() => {
-        setShowLevelComplete(true);
-        playLevelCompleteSound();
-      }, 800);
-      return () => clearTimeout(timer);
+      setShowLevelComplete(true);
+      playLevelCompleteSound();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.points, game?.milestone]);
