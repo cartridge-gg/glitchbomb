@@ -475,7 +475,7 @@ export const MultiplierMath = {
    */
   getMagnitudeColor(magnitude: 1 | 2 | 3 | 4 | 5): string {
     const colors = {
-      1: "#00FF4D",
+      1: "#4C91FF",
       2: "#FFE100",
       3: "#FF7B00",
       4: "#FFAA56",

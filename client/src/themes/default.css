@@ -49,8 +49,8 @@
     --orange-gradient-100: linear-gradient(0deg, #040603 55%, #141200 68%);
     --red-gradient-100: linear-gradient(0deg, #040603 55%, #141200 68%);
 
-    --multiplier-one-100: linear-gradient(0deg, #33B48B, #00FF4D);
-    --multiplier-one-200: linear-gradient(0deg, #174F1D4D, #55DD634D);
+    --multiplier-one-100: linear-gradient(0deg, #2B5FCC, #4C91FF);
+    --multiplier-one-200: linear-gradient(0deg, #1A3A7A4D, #4C91FF4D);
     --multiplier-two-100: linear-gradient(0deg, #51B433, #FFE100);
     --multiplier-two-200: linear-gradient(0deg, #73AB434D, #CEFE014D);
     --multiplier-three-100: linear-gradient(0deg, #B4B233, #FF7B00);
