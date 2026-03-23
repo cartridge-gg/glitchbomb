@@ -894,7 +894,9 @@ export const Home = () => {
                   variant="secondary"
                   gradient="green"
                   className="h-12 w-12 p-0 disabled:text-white/60"
-                  wrapperClassName={activeGameIndex >= totalSlides - 1 ? "opacity-25" : ""}
+                  wrapperClassName={
+                    activeGameIndex >= totalSlides - 1 ? "opacity-25" : ""
+                  }
                   onClick={handleNext}
                   disabled={activeGameIndex >= totalSlides - 1}
                   aria-label="Next game"
