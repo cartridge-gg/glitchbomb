@@ -269,7 +269,7 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — label + header-button style pill */}
-                <div className="flex flex-col items-center gap-2 w-[clamp(200px,55vw,240px)]">
+                <div className="flex flex-col items-center gap-2">
                   <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
                     Moon Rocks
                   </span>
@@ -277,7 +277,7 @@ export const RewardOverlay = ({
                     <TooltipTrigger asChild>
                       <div
                         ref={orbRef}
-                        className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-default"
+                        className="w-[clamp(200px,55vw,240px)] flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-default"
                       >
                         <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
                         <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
