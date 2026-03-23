@@ -27,10 +27,15 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
+// Shared channel so only one TapTooltip is open at a time
+const tapTooltipChannel = new EventTarget();
+let tapTooltipCounter = 0;
+
 /**
  * TapTooltip — tooltip that also opens on tap for touch devices.
  * On hover-capable devices it behaves like a normal Radix tooltip.
  * On touch devices a tap toggles the tooltip; tapping outside closes it.
+ * Only one TapTooltip can be open at a time.
  */
 const TapTooltip = ({
   children,
@@ -39,6 +44,8 @@ const TapTooltip = ({
   const [open, setOpen] = React.useState(false);
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
   const triggerRef = React.useRef<HTMLDivElement>(null);
+  const idRef = React.useRef(() => ++tapTooltipCounter);
+  const instanceId = React.useMemo(() => idRef.current(), []);
 
   React.useEffect(() => {
     const mq = window.matchMedia("(hover: none)");
@@ -47,6 +54,17 @@ const TapTooltip = ({
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  // Close when another TapTooltip opens
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      if ((e as CustomEvent).detail !== instanceId) {
+        setOpen(false);
+      }
+    };
+    tapTooltipChannel.addEventListener("open", handler);
+    return () => tapTooltipChannel.removeEventListener("open", handler);
+  }, [instanceId]);
 
   React.useEffect(() => {
     if (!isTouchDevice || !open) return;
@@ -65,6 +83,13 @@ const TapTooltip = ({
       clearTimeout(timer);
     };
   }, [isTouchDevice, open]);
+
+  const openTooltip = React.useCallback(() => {
+    tapTooltipChannel.dispatchEvent(
+      new CustomEvent("open", { detail: instanceId }),
+    );
+    setOpen(true);
+  }, [instanceId]);
 
   if (!isTouchDevice) {
     return <Tooltip {...props}>{children}</Tooltip>;
@@ -89,7 +114,11 @@ const TapTooltip = ({
               if (e.pointerType !== "mouse") {
                 e.preventDefault();
                 e.stopPropagation();
-                setOpen((prev) => !prev);
+                if (open) {
+                  setOpen(false);
+                } else {
+                  openTooltip();
+                }
               }
             }}
           >
