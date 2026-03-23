@@ -269,7 +269,7 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — label + header-button style pill */}
-                <div className="flex flex-col items-center gap-2 w-[clamp(160px,50vw,240px)]">
+                <div className="flex flex-col items-center gap-2 w-[clamp(200px,55vw,240px)]">
                   <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
                     Moon Rocks
                   </span>
