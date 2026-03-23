@@ -336,8 +336,9 @@ export const RewardOverlay = ({
                   className="flex items-center gap-2.5 cursor-pointer select-none"
                 >
                   <div
-                    className="w-6 h-6 rounded-lg border-2 border-green-600 flex items-center justify-center"
+                    className="w-6 h-6 rounded-lg border-2 flex items-center justify-center"
                     style={{
+                      borderColor: "rgba(54, 248, 24, 0.24)",
                       backgroundColor: dontShowAgain
                         ? undefined
                         : "rgba(54, 248, 24, 0.24)",
