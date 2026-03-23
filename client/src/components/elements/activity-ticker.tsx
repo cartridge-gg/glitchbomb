@@ -13,38 +13,38 @@ function formatItem(item: ActivityItem): React.ReactNode {
       return (
         <>
           <span
-            className="rounded px-1 py-0.5 text-green-400 font-bold"
+            className="rounded px-2 py-0.5 text-green-400 font-bold font-glitch text-sm"
             style={pillStyle}
           >
             {item.username}
           </span>
-          <span className="text-white/60">started a</span>
+          <span className="text-white font-secondary">started a</span>
           <span
-            className="rounded px-1 py-0.5 text-yellow-400 font-bold"
+            className="rounded px-2 py-0.5 text-yellow-400 font-bold font-glitch text-sm"
             style={pillStyle}
           >
             {item.stake}X
           </span>
-          <span className="text-white/60">game</span>
+          <span className="text-white font-secondary">game</span>
         </>
       );
     case "cash_out":
       return (
         <>
           <span
-            className="rounded px-1 py-0.5 text-green-400 font-bold"
+            className="rounded px-2 py-0.5 text-green-400 font-bold font-glitch text-sm"
             style={pillStyle}
           >
             {item.username}
           </span>
-          <span className="text-white/60">cashed out</span>
+          <span className="text-white font-secondary">cashed out</span>
           <span
-            className="rounded px-1 py-0.5 text-yellow-400 font-bold"
+            className="rounded px-2 py-0.5 text-yellow-400 font-bold font-glitch text-sm"
             style={pillStyle}
           >
             {item.moonrocks}
           </span>
-          <span className="text-white/60">moonrocks</span>
+          <span className="text-white font-secondary">moonrocks</span>
         </>
       );
   }
@@ -108,7 +108,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
   return (
     <div
       className="ticker-container w-full overflow-hidden shrink-0 mb-4 flex items-center select-none touch-pan-x"
-      style={{ backgroundColor: "rgba(4, 6, 3, 0.64)", height: 28 }}
+      style={{ backgroundColor: "rgba(4, 6, 3, 0.64)", height: 36 }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -123,7 +123,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
           oneCopy.map((item, i) => (
             <span
               key={`${copy}-${item.id}-${i}`}
-              className="inline-flex items-center gap-1 font-secondary text-[11px] tracking-wide [&>span]:font-secondary"
+              className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
             >
               <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
               {formatItem(item)}
