@@ -1,16 +1,12 @@
-import { useMemo, useState } from "react";
-import {
-  OrbDisplay,
-  RarityPill,
-  TabBar,
-  type TabBarItem,
-} from "@/components/elements";
+import { useMemo } from "react";
+import { OrbDisplay, RarityPill } from "@/components/elements";
 import {
   TapTooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { OrbType } from "@/models/orb";
@@ -20,41 +16,8 @@ export interface GameStashProps {
   discards?: boolean[];
   pendingOrbs?: Orb[];
   onRemovePending?: (index: number) => void;
+  viewMode?: StashViewMode;
 }
-
-type TabType = "orbs" | "list";
-
-// Grid icon for orbs tab
-const GridIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-    <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
-    <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-    <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
-  </svg>
-);
-
-// List icon for list tab
-const ListIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="5" cy="6" r="2" fill="currentColor" />
-    <rect x="10" y="5" width="11" height="2" rx="1" fill="currentColor" />
-    <circle cx="5" cy="12" r="2" fill="currentColor" />
-    <rect x="10" y="11" width="11" height="2" rx="1" fill="currentColor" />
-    <circle cx="5" cy="18" r="2" fill="currentColor" />
-    <rect x="10" y="17" width="11" height="2" rx="1" fill="currentColor" />
-  </svg>
-);
 
 const bombDamage = (orb: Orb): number | undefined => {
   if (orb.value === OrbType.Bomb1 || orb.value === OrbType.StickyBomb) return 1;
@@ -187,14 +150,9 @@ export const GameStash = ({
   discards,
   pendingOrbs,
   onRemovePending,
+  viewMode = "grid",
 }: GameStashProps) => {
   const hasPending = pendingOrbs && pendingOrbs.length > 0;
-
-  const [activeTab, setActiveTab] = useState<TabType>("orbs");
-  const tabItems: Array<TabBarItem<TabType>> = [
-    { id: "orbs", Icon: GridIcon },
-    { id: "list", Icon: ListIcon },
-  ];
 
   const sorted = useMemo(() => {
     const indices = orbs.map((_, i) => i);
@@ -217,20 +175,12 @@ export const GameStash = ({
   return (
     <div className="flex flex-col gap-[clamp(6px,1.6svh,12px)] w-full max-w-[420px] mx-auto px-5 py-[clamp(8px,2svh,16px)] h-full min-h-0 text-left">
       <div className="flex-1 min-h-0 flex flex-col">
-        {/* Tabs (only when no pending orbs) */}
+        {/* Header (only when no pending orbs) */}
         {!hasPending && (
-          <div className="flex flex-col gap-0">
-            <div className="flex items-center justify-between w-full">
-              <h1 className="text-green-400 font-secondary text-[clamp(1.05rem,3svh,1.25rem)] tracking-wide text-left">
-                {`Your orbs (${orbs.length})`}
-              </h1>
-            </div>
-            <TabBar
-              items={tabItems}
-              active={activeTab}
-              onChange={setActiveTab}
-              className="w-full mt-2 mb-[clamp(8px,2svh,16px)]"
-            />
+          <div className="flex items-center justify-between w-full mb-[clamp(8px,2svh,16px)]">
+            <h1 className="text-green-400 font-secondary text-[clamp(1.05rem,3svh,1.25rem)] tracking-wide text-left">
+              {`Your orbs (${orbs.length})`}
+            </h1>
           </div>
         )}
 
@@ -293,9 +243,7 @@ export const GameStash = ({
           )}
 
           {/* Orbs content */}
-          {hasPending ? (
-            <OrbsTab orbs={sorted.orbs} discards={sorted.discards} />
-          ) : activeTab === "orbs" ? (
+          {hasPending || viewMode === "grid" ? (
             <OrbsTab orbs={sorted.orbs} discards={sorted.discards} />
           ) : (
             <ListTab orbs={sorted.orbs} discards={sorted.discards} />

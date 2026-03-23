@@ -1,4 +1,5 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 import type { Orb } from "@/models";
 import { GameStash } from "./game-stash";
 
@@ -9,6 +10,7 @@ export interface StashModalProps {
   discards?: boolean[];
   pendingOrbs?: Orb[];
   onRemovePending?: (index: number) => void;
+  viewMode?: StashViewMode;
 }
 
 export const StashModal = ({
@@ -18,6 +20,7 @@ export const StashModal = ({
   discards,
   pendingOrbs,
   onRemovePending,
+  viewMode,
 }: StashModalProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
@@ -26,6 +29,7 @@ export const StashModal = ({
         discards={discards}
         pendingOrbs={pendingOrbs}
         onRemovePending={onRemovePending}
+        viewMode={viewMode}
       />
     </DialogContent>
   </Dialog>

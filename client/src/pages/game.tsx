@@ -84,7 +84,8 @@ export const Game = () => {
     stopPulling,
     startMusic,
   } = useAudio();
-  const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
+  const { displaySettings, setShowDistributionPercent, setStashViewMode } =
+    useDisplaySettings();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -785,6 +786,8 @@ export const Game = () => {
         onSfxVolumeChange={setSfxVolume}
         showDistributionPercent={displaySettings.showDistributionPercent}
         onShowDistributionPercentChange={setShowDistributionPercent}
+        stashViewMode={displaySettings.stashViewMode}
+        onStashViewModeChange={setStashViewMode}
         onProfileClick={onProfileClick}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
@@ -795,6 +798,7 @@ export const Game = () => {
         onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
         orbs={game?.bag ?? []}
         discards={game?.discards ?? []}
+        viewMode={displaySettings.stashViewMode}
       />
       <RewardOverlay
         open={showRewardOverlay}

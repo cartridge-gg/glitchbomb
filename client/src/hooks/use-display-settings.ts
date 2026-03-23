@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 
+export type StashViewMode = "grid" | "list";
+
 export interface DisplaySettings {
   showDistributionPercent: boolean;
+  stashViewMode: StashViewMode;
 }
 
 const STORAGE_KEY = "glitchbomb-display";
 
 const DEFAULT_SETTINGS: DisplaySettings = {
   showDistributionPercent: false,
+  stashViewMode: "grid",
 };
 
 function loadSettings(): DisplaySettings {
@@ -41,8 +45,13 @@ export function useDisplaySettings() {
     setSettings((prev) => ({ ...prev, showDistributionPercent: show }));
   }, []);
 
+  const setStashViewMode = useCallback((mode: StashViewMode) => {
+    setSettings((prev) => ({ ...prev, stashViewMode: mode }));
+  }, []);
+
   return {
     displaySettings: settings,
     setShowDistributionPercent,
+    setStashViewMode,
   };
 }
