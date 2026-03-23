@@ -83,7 +83,7 @@ export const RewardOverlay = ({
   onTakeAll,
   targetRef,
   orbTargetRef,
-  heading = "YOU RECEIVE",
+  heading = "YOU GET",
   actionLabel = "LET'S GO",
   reward,
   orbs,
@@ -335,13 +335,23 @@ export const RewardOverlay = ({
                   onClick={() => setDontShowAgain((v) => !v)}
                   className="flex items-center gap-2.5 cursor-pointer select-none"
                 >
-                  <div
-                    className={`w-6 h-6 rounded-lg border-2 transition-colors ${
-                      dontShowAgain
-                        ? "border-green-500 bg-green-900/80"
-                        : "border-white/20 bg-white/5"
-                    }`}
-                  />
+                  <div className="w-6 h-6 rounded-lg border-2 border-green-500 bg-green-900/80 flex items-center justify-center">
+                    {dontShowAgain && (
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="w-4 h-4 text-green-400"
+                      >
+                        <path
+                          d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
                   <span className="font-secondary text-xs tracking-wide text-white/50">
                     Do not show this again
                   </span>
