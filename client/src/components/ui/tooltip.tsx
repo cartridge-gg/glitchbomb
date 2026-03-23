@@ -80,7 +80,7 @@ const TapTooltip = ({
   );
 
   return (
-    <Tooltip {...props} open={open} onOpenChange={setOpen}>
+    <Tooltip {...props} open={open}>
       {trigger && (
         <TooltipTrigger asChild>
           <div
@@ -88,6 +88,7 @@ const TapTooltip = ({
             onPointerDown={(e) => {
               if (e.pointerType !== "mouse") {
                 e.preventDefault();
+                e.stopPropagation();
                 setOpen((prev) => !prev);
               }
             }}
