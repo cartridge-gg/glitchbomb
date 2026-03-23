@@ -20,6 +20,7 @@ export class Game {
   discards: boolean[];
   bag: Orb[];
   shop: Orb[];
+  shopPurchaseCounts: number[];
   pullables: Orb[];
   moonrocks: number;
   stake: number;
@@ -40,6 +41,7 @@ export class Game {
     discards: boolean[],
     bag: Orb[],
     shop: Orb[],
+    shopPurchaseCounts: number[],
     pullables: Orb[],
     moonrocks: number,
     stake: number,
@@ -59,6 +61,7 @@ export class Game {
     this.discards = discards;
     this.bag = bag;
     this.shop = shop;
+    this.shopPurchaseCounts = shopPurchaseCounts;
     this.pullables = pullables;
     this.moonrocks = moonrocks;
     this.stake = stake;
@@ -95,6 +98,7 @@ export class Game {
       shop: Packer.unpack(BigInt(data.shop.value), 5n, 6).map((index) =>
         Orb.from(index),
       ),
+      shopPurchaseCounts: Game.parsePurchaseCounts(BigInt(data.shop.value)),
       moonrocks: Number(data.moonrocks.value),
       stake: Number(data.stake.value),
       created_at: Number(data.created_at.value),
@@ -118,11 +122,26 @@ export class Game {
       props.discards,
       props.bag,
       props.shop,
+      props.shopPurchaseCounts,
       pullables,
       props.moonrocks,
       props.stake,
       props.created_at,
     );
+  }
+
+  // Extract purchase counts from shop u128 (bits 32-91, 20 types × 3 bits each)
+  static parsePurchaseCounts(shopValue: bigint): number[] {
+    const PURCHASE_OFFSET = 32n;
+    const BITS_PER_PURCHASE = 3n;
+    const NUM_ORB_TYPES = 22; // 0-21 (None through StickyBomb)
+    const mask = (1n << BITS_PER_PURCHASE) - 1n; // 0x7
+    const counts: number[] = [];
+    for (let i = 0; i < NUM_ORB_TYPES; i++) {
+      const offset = PURCHASE_OFFSET + BigInt(i) * BITS_PER_PURCHASE;
+      counts.push(Number((shopValue >> offset) & mask));
+    }
+    return counts;
   }
 
   static deduplicate(items: Game[]): Game[] {

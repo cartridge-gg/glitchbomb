@@ -2,7 +2,6 @@ export interface OfflineShopState {
   orbs: number[];
   refreshUsed: boolean;
   burnUsed: boolean;
-  purchaseCounts: number[];
 }
 
 export interface OfflineGame {
@@ -21,6 +20,7 @@ export interface OfflineGame {
   discards: boolean[];
   bag: number[];
   shop: OfflineShopState | null;
+  purchaseCounts: number[];
   moonrocks: number;
   stake: number;
   created_at: number;

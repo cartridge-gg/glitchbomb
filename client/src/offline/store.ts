@@ -356,6 +356,7 @@ function toGameModel(game: OfflineGame): Game {
     discards,
     bag,
     shop,
+    game.purchaseCounts ?? [],
     pullables,
     game.moonrocks,
     game.stake,

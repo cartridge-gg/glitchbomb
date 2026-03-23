@@ -36,6 +36,7 @@ export function createGame(
     discards: [],
     bag: [],
     shop: null,
+    purchaseCounts: new Array(ORB_IDS.StickyBomb + 1).fill(0),
     moonrocks,
     stake,
     created_at: Math.floor(Date.now() / 1000),
@@ -47,12 +48,14 @@ export function cloneGame(game: OfflineGame): OfflineGame {
     ...game,
     discards: game.discards.slice(),
     bag: game.bag.slice(),
+    purchaseCounts: (
+      game.purchaseCounts ?? new Array(ORB_IDS.StickyBomb + 1).fill(0)
+    ).slice(),
     shop: game.shop
       ? {
           orbs: game.shop.orbs.slice(),
           refreshUsed: game.shop.refreshUsed,
           burnUsed: game.shop.burnUsed,
-          purchaseCounts: game.shop.purchaseCounts.slice(),
         }
       : null,
   };
@@ -130,7 +133,6 @@ export function enterShop(
     orbs,
     refreshUsed: false,
     burnUsed: false,
-    purchaseCounts: new Array(ORB_IDS.StickyBomb + 1).fill(0),
   };
   next.chips += next.points;
   next.points = 0;
@@ -154,7 +156,7 @@ export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
     }
     const orbId = shop.orbs[index];
     const baseCost = orbFromId(orbId).cost();
-    const purchaseCount = shop.purchaseCounts[orbId] ?? 0;
+    const purchaseCount = next.purchaseCounts[orbId] ?? 0;
     const multiplier = BASE_MULTIPLIER + purchaseCount * SUPP_MULTIPLIER;
     const cost = Math.floor(
       (baseCost * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER,
@@ -168,7 +170,7 @@ export function buyFromShop(game: OfflineGame, indices: number[]): OfflineGame {
     }
 
     next.chips -= cost;
-    shop.purchaseCounts[orbId] = purchaseCount + 1;
+    next.purchaseCounts[orbId] = purchaseCount + 1;
     next.bag.push(orbId);
     next.discards.push(false);
   });

@@ -19,10 +19,10 @@ pub const SHOP_ACTION_COST: u16 = 4;
 pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
 pub const CURSE_DEMULTIPLIER: u8 = 1; // Bit 1: Multiplier boosts are halved
 // Shop field bit layout (u128):
-// Bits 0-29: 6 orbs * 5 bits = orb types
-// Bit 30: refresh_used flag
-// Bit 31: burn_used flag
-// Bits 32-91: 20 orb types * 3 bits = purchase counts (up to 7 each)
+// Bits 0-29: 6 orbs * 5 bits = orb types (cleared on shop exit)
+// Bit 30: refresh_used flag (cleared on shop exit)
+// Bit 31: burn_used flag (cleared on shop exit)
+// Bits 32-91: 20 orb types * 3 bits = purchase counts (persist across entire game run)
 const ORBS_BITS: u8 = 30;
 const REFRESH_BIT: u8 = 30;
 const BURN_BIT: u8 = 31;
@@ -233,10 +233,13 @@ pub impl GameImpl of GameTrait {
         self.assert_is_completed();
         // [Effect] Reset discards so all orbs are available on entering the shop
         self.discards = 0;
-        // [Effect] Generate and set the shop (orbs in bits 0-29, flags/counts reset)
+        // [Effect] Generate and set the shop (orbs in bits 0-29, preserve purchase counts)
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
-        self.shop = packed_orbs; // Only orbs, flags and counts are 0
+        // Preserve purchase counts from bits 32+ across shop visits
+        let purchase_shift: u128 = TwoPower::pow(PURCHASE_OFFSET).try_into().unwrap();
+        let purchase_counts = (self.shop / purchase_shift) * purchase_shift;
+        self.shop = packed_orbs + purchase_counts;
         // [Effect] Convert points to chips
         self.earn_chips(self.points);
         self.points = 0;
@@ -283,7 +286,9 @@ pub impl GameImpl of GameTrait {
         // [Effect] Exit shop and enter the next stage
         self.level_up();
         self.restore();
-        self.shop = 0;
+        // Clear orbs and flags (bits 0-31) but preserve purchase counts (bits 32+)
+        let purchase_shift: u128 = TwoPower::pow(PURCHASE_OFFSET).try_into().unwrap();
+        self.shop = (self.shop / purchase_shift) * purchase_shift;
         // [Effect] Reset multiplier
         self.multiplier = BASE_MULTIPLIER;
         // [Effect] Apply a level-based curse for the new level
@@ -315,9 +320,11 @@ pub impl GameImpl of GameTrait {
         // [Effect] Generate new shop orbs
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
-        // [Effect] Set new orbs + mark refresh used (bit 30), reset purchase counts
+        // [Effect] Set new orbs + mark refresh used (bit 30), preserve purchase counts
         let refresh_flag: u128 = TwoPower::pow(REFRESH_BIT).try_into().unwrap();
-        self.shop = packed_orbs + refresh_flag;
+        let purchase_shift: u128 = TwoPower::pow(PURCHASE_OFFSET).try_into().unwrap();
+        let purchase_counts = (self.shop / purchase_shift) * purchase_shift;
+        self.shop = packed_orbs + refresh_flag + purchase_counts;
     }
 
     #[inline]
@@ -473,12 +480,16 @@ pub impl GameAssert of AssertTrait {
 
     #[inline]
     fn assert_not_shop(self: @Game) {
-        assert(self.shop == @0, Errors::GAME_IN_SHOP);
+        // Check only orb bits (0-29) — purchase counts in upper bits may persist
+        let orbs_mask: u128 = TwoPower::pow(ORBS_BITS).try_into().unwrap() - 1;
+        assert(*self.shop & orbs_mask == 0, Errors::GAME_IN_SHOP);
     }
 
     #[inline]
     fn assert_in_shop(self: @Game) {
-        assert(self.shop != @0, Errors::GAME_NOT_SHOP);
+        // Check only orb bits (0-29) — purchase counts in upper bits may persist
+        let orbs_mask: u128 = TwoPower::pow(ORBS_BITS).try_into().unwrap() - 1;
+        assert(*self.shop & orbs_mask != 0, Errors::GAME_NOT_SHOP);
     }
 
     #[inline]
@@ -718,7 +729,11 @@ mod tests {
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
         game.exit();
-        assert_eq!(game.shop, 0);
+        // Orb bits (0-29) should be cleared, but purchase counts (32+) persist
+        let orbs_mask: u128 = TwoPower::pow(ORBS_BITS).try_into().unwrap() - 1;
+        assert_eq!(game.shop & orbs_mask, 0);
+        // Purchase counts should be non-zero since we bought an orb
+        assert_eq!(game.shop != 0, true);
     }
 
     #[test]
@@ -803,7 +818,7 @@ mod tests {
     }
 
     #[test]
-    fn test_game_refresh_resets_purchase_counts() {
+    fn test_game_refresh_preserves_purchase_counts() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         game.earn_points(200);
@@ -816,13 +831,17 @@ mod tests {
         game.refresh('NEW_SEED');
         let chips_after_refresh = game.chips;
         assert_eq!(chips_after_refresh, chips_after_first_buy - SHOP_ACTION_COST);
-        // [Info] Buy position 0 again - should be base price (counts reset)
+        // [Info] Buy position 0 - price includes prior purchase counts
         let orbs = GameTrait::get_shop_orbs(game.shop);
         let orb = *orbs.at(0);
         let base = orb.cost();
+        let orb_id: u8 = orb.into();
+        let count = GameTrait::get_purchase_count(game.shop, orb_id);
+        let multiplier = BASE_MULTIPLIER + (count.into() * SUPP_MULTIPLIER);
+        let expected_cost = (base * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
-        assert_eq!(game.chips, chips_after_refresh - base);
+        assert_eq!(game.chips, chips_after_refresh - expected_cost);
     }
 
     #[test]
@@ -840,13 +859,18 @@ mod tests {
         assert_eq!(game.chips, initial_chips - cost1);
         // [Effect] Refresh
         game.refresh('NEW');
-        // [Info] Buy from new shop
+        // [Info] Buy from new shop - price includes prior purchase counts
         let orbs2 = GameTrait::get_shop_orbs(game.shop);
-        let cost2 = (*orbs2.at(0)).cost();
+        let orb2 = *orbs2.at(0);
+        let base2 = orb2.cost();
+        let orb2_id: u8 = orb2.into();
+        let count2 = GameTrait::get_purchase_count(game.shop, orb2_id);
+        let multiplier2 = BASE_MULTIPLIER + (count2.into() * SUPP_MULTIPLIER);
+        let expected_cost2 = (base2 * multiplier2 + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
         let chips_before = game.chips;
         let mut indices: Span<u8> = [0].span();
         game.buy(ref indices);
-        assert_eq!(game.chips, chips_before - cost2);
+        assert_eq!(game.chips, chips_before - expected_cost2);
     }
 
     #[test]
@@ -868,6 +892,29 @@ mod tests {
         // [Check] Flags are reset in new shop
         assert_eq!(GameTrait::is_refresh_used(game.shop), false);
         assert_eq!(GameTrait::is_burn_used(game.shop), false);
+    }
+
+    #[test]
+    fn test_game_purchase_counts_persist_across_shops() {
+        let mut game = GameTrait::new(GAME_ID, STAKE);
+        game.start();
+        game.moonrocks = 500;
+        game.earn_points(200);
+        game.enter(SEED);
+        // [Info] Get orb type at position 0 and buy it
+        let orbs1 = GameTrait::get_shop_orbs(game.shop);
+        let orb1 = *orbs1.at(0);
+        let orb1_id: u8 = orb1.into();
+        let mut indices: Span<u8> = [0].span();
+        game.buy(ref indices);
+        // [Check] Purchase count is 1 for that orb type
+        assert_eq!(GameTrait::get_purchase_count(game.shop, orb1_id), 1);
+        // [Effect] Exit and enter new shop
+        game.exit();
+        game.earn_points(200);
+        game.enter('SHOP2');
+        // [Check] Purchase count persists in new shop
+        assert_eq!(GameTrait::get_purchase_count(game.shop, orb1_id), 1);
     }
 
     #[test]

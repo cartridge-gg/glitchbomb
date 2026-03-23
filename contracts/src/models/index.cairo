@@ -45,7 +45,7 @@ pub struct Game {
     pub chips: u16,
     pub discards: u64, // Bitmap: Each bit represents a pulled orb index (0-49)
     pub bag: felt252, // Packed: Each orb is 5 bits, indicating its variant from the Orb enum.
-    pub shop: u128, // Packed: orbs (30 bits) | refresh_used (1) | burn_used (1) | purchase_counts (60 bits)
+    pub shop: u128, // Packed: orbs (30 bits) | refresh_used (1) | burn_used (1) | purchase_counts (60 bits, persist across shops)
     pub moonrocks: u16,
     pub stake: u8,
     pub created_at: u64,
