@@ -882,7 +882,8 @@ export const Home = () => {
                 <Button
                   variant="secondary"
                   gradient="green"
-                  className="h-12 w-12 p-0"
+                  className="h-12 w-12 p-0 disabled:text-white/60"
+                  wrapperClassName={activeGameIndex <= 0 ? "opacity-25" : ""}
                   onClick={handlePrev}
                   disabled={activeGameIndex <= 0}
                   aria-label="Previous game"
@@ -892,7 +893,8 @@ export const Home = () => {
                 <Button
                   variant="secondary"
                   gradient="green"
-                  className="h-12 w-12 p-0"
+                  className="h-12 w-12 p-0 disabled:text-white/60"
+                  wrapperClassName={activeGameIndex >= totalSlides - 1 ? "opacity-25" : ""}
                   onClick={handleNext}
                   disabled={activeGameIndex >= totalSlides - 1}
                   aria-label="Next game"
@@ -921,7 +923,7 @@ export const Home = () => {
                   <div key={game.id} className="w-full shrink-0">
                     <ElectricBorder
                       color="#36F818"
-                      gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
+                      gradient="linear-gradient(0deg, rgba(54, 248, 24, 0.05), rgba(54, 248, 24, 0.05))"
                       borderGradient="linear-gradient(0deg, #36F818, #81F464)"
                       seed={42 + idx}
                       cornerRadius={3}
@@ -1027,7 +1029,7 @@ export const Home = () => {
                 <div key="new-game" className="w-full shrink-0">
                   <ElectricBorder
                     color="#FF0099"
-                    gradient="linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3))"
+                    gradient="linear-gradient(0deg, rgba(255, 0, 153, 0.05), rgba(255, 0, 153, 0.05))"
                     borderGradient="linear-gradient(0deg, #FF0099, #FF33AD)"
                     seed={99}
                     cornerRadius={3}
