@@ -237,7 +237,7 @@ export const RewardOverlay = ({
           transition={{ duration: 0.3 }}
         >
           <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-10">
               {/* Heading */}
               <motion.p
                 className="font-secondary text-sm tracking-[0.3em] text-green-400"
@@ -248,9 +248,9 @@ export const RewardOverlay = ({
                 {heading}
               </motion.p>
 
-              {/* Rewards grid — moonrocks in center, orbs below */}
+              {/* Rewards — moonrocks then orbs */}
               <motion.div
-                className="flex flex-col items-center gap-4"
+                className="flex flex-col items-center gap-10"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
                   scale: isExiting ? 0.5 : 1,
@@ -268,9 +268,9 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — label + header-button style pill */}
-                <div className="flex flex-col items-center gap-1.5 w-[clamp(140px,40vw,200px)]">
+                <div className="flex flex-col items-center gap-2 w-[clamp(200px,70vw,320px)]">
                   <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
-                    Moonrocks
+                    Moon Rocks
                   </span>
                   <div
                     ref={orbRef}
@@ -285,11 +285,11 @@ export const RewardOverlay = ({
 
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
-                  <div className="flex flex-col items-center gap-1.5 mt-2">
+                  <div className="flex flex-col items-center gap-2">
                     <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
                       Orbs
                     </span>
-                    <div className="grid grid-cols-3 min-[360px]:grid-cols-4 min-[480px]:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       {sortedOrbs.map((orb, i) => (
                         <TapTooltip key={`${orb.value}-${i}`}>
                           <TooltipTrigger asChild>
@@ -325,7 +325,7 @@ export const RewardOverlay = ({
 
               {/* Don't show again + LET'S GO button */}
               <motion.div
-                className="flex flex-col items-center gap-3"
+                className="flex flex-col items-center gap-6"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
                 transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
@@ -336,11 +336,13 @@ export const RewardOverlay = ({
                   className="flex items-center gap-2.5 cursor-pointer select-none"
                 >
                   <div
-                    className="w-6 h-6 rounded-lg border-2 flex items-center justify-center"
+                    className="w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200"
                     style={{
-                      borderColor: "rgba(54, 248, 24, 0.24)",
+                      borderColor: dontShowAgain
+                        ? "rgba(54, 248, 24, 0.6)"
+                        : "rgba(54, 248, 24, 0.24)",
                       backgroundColor: dontShowAgain
-                        ? undefined
+                        ? "rgba(54, 248, 24, 0.4)"
                         : "rgba(54, 248, 24, 0.24)",
                     }}
                   >
@@ -348,7 +350,7 @@ export const RewardOverlay = ({
                       <svg
                         viewBox="0 0 16 16"
                         fill="none"
-                        className="w-4 h-4 text-green-400"
+                        className="w-3.5 h-3.5 text-green-400"
                       >
                         <path
                           d="M3.5 8.5L6.5 11.5L12.5 4.5"
