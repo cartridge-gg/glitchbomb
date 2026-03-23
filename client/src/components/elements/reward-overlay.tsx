@@ -320,17 +320,22 @@ export const RewardOverlay = ({
                 animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
                 transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
               >
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={dontShowAgain}
-                    onChange={(e) => setDontShowAgain(e.target.checked)}
-                    className="w-4 h-4 rounded border border-white/20 bg-white/5 accent-green-400 cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setDontShowAgain((v) => !v)}
+                  className="flex items-center gap-2.5 cursor-pointer select-none"
+                >
+                  <div
+                    className={`w-6 h-6 rounded-lg border-2 transition-colors ${
+                      dontShowAgain
+                        ? "border-green-500 bg-green-900/80"
+                        : "border-white/20 bg-white/5"
+                    }`}
                   />
                   <span className="font-secondary text-xs tracking-wide text-white/50">
                     Do not show this again
                   </span>
-                </label>
+                </button>
                 <Button
                   variant="secondary"
                   gradient="green"
