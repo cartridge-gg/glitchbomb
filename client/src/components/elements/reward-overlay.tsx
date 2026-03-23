@@ -289,7 +289,7 @@ export const RewardOverlay = ({
                     <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
                       Orbs
                     </span>
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-3 min-[360px]:grid-cols-4 min-[480px]:grid-cols-5 gap-2">
                       {sortedOrbs.map((orb, i) => (
                         <TapTooltip key={`${orb.value}-${i}`}>
                           <TooltipTrigger asChild>
