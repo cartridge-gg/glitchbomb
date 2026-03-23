@@ -83,7 +83,8 @@ export const Game = () => {
     stopPulling,
     startMusic,
   } = useAudio();
-  const { displaySettings, setShowDistributionPercent, setStashViewMode } = useDisplaySettings();
+  const { displaySettings, setShowDistributionPercent, setStashViewMode } =
+    useDisplaySettings();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);

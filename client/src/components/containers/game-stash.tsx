@@ -6,10 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { OrbType } from "@/models/orb";
-import type { StashViewMode } from "@/hooks/use-display-settings";
 
 export interface GameStashProps {
   orbs: Orb[];
@@ -144,7 +144,11 @@ const kindOrder = (orb: Orb): number => {
   return 7;
 };
 
-export const GameStash = ({ orbs, discards, viewMode = "grid" }: GameStashProps) => {
+export const GameStash = ({
+  orbs,
+  discards,
+  viewMode = "grid",
+}: GameStashProps) => {
   const sorted = useMemo(() => {
     const indices = orbs.map((_, i) => i);
     indices.sort((a, b) => kindOrder(orbs[a]) - kindOrder(orbs[b]));
