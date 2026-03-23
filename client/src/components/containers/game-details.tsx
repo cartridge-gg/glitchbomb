@@ -3,8 +3,6 @@ import { PayoutChart } from "@/components/elements/payout-chart";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import {
-  breakEvenScore,
-  MAX_SCORE,
   maxPayout,
   STARTERPACK_COUNT,
   tierPrice,
@@ -34,13 +32,6 @@ export const GameDetails = ({
   const valueColor = "#36F818";
   const rowBg = "rgba(54, 248, 24, 0.04)";
 
-  const beScore = breakEvenScore(
-    stake,
-    tokenPrice ?? undefined,
-    supply,
-    target,
-  );
-
   const hasPrice = tokenPrice != null && tokenPrice > 0;
   const maxUsd = hasPrice ? max * tokenPrice : null;
 
@@ -55,25 +46,11 @@ export const GameDetails = ({
       value: `${stake}X`,
       color: "#FF0099",
     },
-    ...(hasPrice
-      ? [
-          {
-            label: "Token Price",
-            value: `1 USD = ${Math.round(1 / tokenPrice).toLocaleString("en-US")} GLITCH`,
-          },
-        ]
-      : []),
-    {
-      label: "Break Even",
-      value: beScore === MAX_SCORE ? "\u2014" : `${beScore} Moonrocks`,
-    },
     { label: "Expires In", value: "24HRS" },
     {
       label: "Maximum Reward",
       value:
-        maxUsd != null
-          ? `${max.toFixed(1)} GLITCH ($${maxUsd.toFixed(2)})`
-          : `${max.toFixed(1)} GLITCH`,
+        maxUsd != null ? `$${maxUsd.toFixed(2)}` : `${max.toFixed(1)} GLITCH`,
       highlight: true,
     },
   ];
