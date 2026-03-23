@@ -8,9 +8,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Orb as OrbModel, OrbType } from "@/models";
+import { type Orb as OrbModel, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 import { getOrbColor, getOrbIcon } from "./orb-utils";
+import { setRewardOverlayDismissed } from "./reward-overlay-prefs";
 
 export interface RewardItem {
   variant: "moonrock" | "chip" | "point" | "multiplier";
@@ -38,8 +39,6 @@ export interface RewardOverlayProps {
   reward: RewardItem;
   orbs?: OrbModel[];
 }
-
-const moonrockOrb = new OrbModel(OrbType.Moonrock15);
 
 const PARTICLE_COUNT = 6;
 const PARTICLE_STAGGER_MS = 50;
@@ -90,6 +89,7 @@ export const RewardOverlay = ({
   orbs,
 }: RewardOverlayProps) => {
   const [isExiting, setIsExiting] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Sort orbs by kind
   const sortedOrbs = useMemo(() => {
@@ -135,6 +135,10 @@ export const RewardOverlay = ({
     if (isExiting) return;
     setIsExiting(true);
     onTakeAll?.();
+
+    if (dontShowAgain) {
+      setRewardOverlayDismissed();
+    }
 
     // Moonrock particles → header
     const orbRect = orbRef.current?.getBoundingClientRect();
@@ -244,9 +248,8 @@ export const RewardOverlay = ({
                 {heading}
               </motion.p>
 
-              {/* Rewards grid — moonrocks large in center, orbs below */}
+              {/* Rewards grid — moonrocks in center, orbs below */}
               <motion.div
-                ref={orbRef}
                 className="flex flex-col items-center gap-4"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
@@ -264,40 +267,16 @@ export const RewardOverlay = ({
                       }
                 }
               >
-                {/* Moonrocks — large, yellow override */}
-                <TapTooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      style={
-                        {
-                          "--orb-moonrock": "var(--yellow-100)",
-                        } as React.CSSProperties
-                      }
-                    >
-                      <OrbDisplay
-                        orb={moonrockOrb}
-                        size="lg"
-                        count={reward.count}
-                        glowScale={1}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
-                    <p
-                      className="font-secondary text-xs font-bold"
-                      style={{ color: "var(--yellow-100)" }}
-                    >
-                      Moonrocks
-                    </p>
-                    <p
-                      className="font-secondary text-xs mt-0.5 opacity-50"
-                      style={{ color: "var(--yellow-100)" }}
-                    >
-                      In-game currency earned by playing. Can be cashed out for
-                      GLITCH tokens.
-                    </p>
-                  </TooltipContent>
-                </TapTooltip>
+                {/* Moonrocks — header-button style pill */}
+                <div
+                  ref={orbRef}
+                  className="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-[#302A10]"
+                >
+                  <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
+                  <span className="font-secondary text-sm tracking-widest text-yellow-400">
+                    {reward.count.toLocaleString()}
+                  </span>
+                </div>
 
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
@@ -334,12 +313,24 @@ export const RewardOverlay = ({
                 )}
               </motion.div>
 
-              {/* LET'S GO button */}
+              {/* Don't show again + LET'S GO button */}
               <motion.div
+                className="flex flex-col items-center gap-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
                 transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
               >
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={dontShowAgain}
+                    onChange={(e) => setDontShowAgain(e.target.checked)}
+                    className="w-4 h-4 rounded border border-white/20 bg-white/5 accent-green-400 cursor-pointer"
+                  />
+                  <span className="font-secondary text-xs tracking-wide text-white/50">
+                    Do not show this again
+                  </span>
+                </label>
                 <Button
                   variant="secondary"
                   gradient="green"

@@ -21,6 +21,7 @@ import {
   type PLDataPoint as PLDataPointComponent,
   RewardOverlay,
 } from "@/components/elements";
+import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
 import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
@@ -259,6 +260,7 @@ export const Game = () => {
       game.pull_count === 0 &&
       !game.over &&
       !isExpired &&
+      !isRewardOverlayDismissed() &&
       rewardShownForGameRef.current !== game.id
     ) {
       rewardShownForGameRef.current = game.id;
