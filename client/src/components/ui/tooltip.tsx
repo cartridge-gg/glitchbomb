@@ -59,7 +59,7 @@ const TapTooltip = ({
       }
     };
     document.addEventListener("pointerdown", handleOutsideTap);
-    const timer = setTimeout(() => setOpen(false), 2000);
+    const timer = setTimeout(() => setOpen(false), 1500);
     return () => {
       document.removeEventListener("pointerdown", handleOutsideTap);
       clearTimeout(timer);
