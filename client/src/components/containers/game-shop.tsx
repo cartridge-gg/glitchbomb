@@ -339,12 +339,42 @@ export const GameShop = ({
     });
   };
 
-  // Combine existing bag with pending purchases for display
-  const displayBag = useMemo(() => {
-    const existingOrbs = bag.filter((orb) => !orb.isNone());
-    const pendingOrbs = basketIndices.map((index) => orbs[index]);
-    return [...existingOrbs, ...pendingOrbs];
-  }, [bag, basketIndices, orbs]);
+  const handleRemovePending = useCallback(
+    (pendingIndex: number) => {
+      const shopIndex = basketIndices[pendingIndex];
+      if (shopIndex === undefined) return;
+      // Remove the last occurrence of this shop index from history
+      const lastHistoryIndex = history.lastIndexOf(shopIndex);
+      if (lastHistoryIndex === -1) return;
+
+      setHistory((prev) => prev.filter((_, i) => i !== lastHistoryIndex));
+      setQuantities((prev) => {
+        const currentQty = prev[shopIndex] || 0;
+        if (currentQty <= 1) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [shopIndex]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [shopIndex]: currentQty - 1 };
+      });
+    },
+    [basketIndices, history],
+  );
+
+  // Existing bag orbs (excluding None)
+  const existingBag = useMemo(() => bag.filter((orb) => !orb.isNone()), [bag]);
+
+  // Pending purchase orbs
+  const pendingOrbs = useMemo(
+    () => basketIndices.map((index) => orbs[index]),
+    [basketIndices, orbs],
+  );
+
+  // Combine existing bag with pending purchases for category summary display
+  const displayBag = useMemo(
+    () => [...existingBag, ...pendingOrbs],
+    [existingBag, pendingOrbs],
+  );
 
   const hasSelections = basketIndices.length > 0;
 
@@ -492,7 +522,9 @@ export const GameShop = ({
       <StashModal
         open={showStash}
         onOpenChange={setShowStash}
-        orbs={displayBag}
+        orbs={existingBag}
+        pendingOrbs={pendingOrbs}
+        onRemovePending={handleRemovePending}
       />
 
       {/* Flying orb particles */}
