@@ -1082,7 +1082,7 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.48)" }}
                             >
                               Moonrocks
                             </p>
@@ -1096,7 +1096,7 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.48)" }}
                             >
                               Expires In
                             </p>
@@ -1110,7 +1110,7 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.48)" }}
                             >
                               Multiplier
                             </p>
@@ -1124,7 +1124,7 @@ export const Home = () => {
                           <div className="flex flex-col gap-1">
                             <p
                               className="font-secondary text-sm leading-none"
-                              style={{ color: "rgba(255, 0, 153, 0.24)" }}
+                              style={{ color: "rgba(255, 0, 153, 0.48)" }}
                             >
                               Max Payout
                             </p>
