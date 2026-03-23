@@ -289,7 +289,7 @@ export const RewardOverlay = ({
                     <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
                       Orbs
                     </span>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-5 gap-2">
                       {sortedOrbs.map((orb, i) => (
                         <TapTooltip key={`${orb.value}-${i}`}>
                           <TooltipTrigger asChild>
@@ -335,7 +335,14 @@ export const RewardOverlay = ({
                   onClick={() => setDontShowAgain((v) => !v)}
                   className="flex items-center gap-2.5 cursor-pointer select-none"
                 >
-                  <div className="w-6 h-6 rounded-lg border-2 border-green-500 bg-green-900/80 flex items-center justify-center">
+                  <div
+                    className="w-6 h-6 rounded-lg border-2 border-green-600 flex items-center justify-center"
+                    style={{
+                      backgroundColor: dontShowAgain
+                        ? undefined
+                        : "rgba(54, 248, 24, 0.24)",
+                    }}
+                  >
                     {dontShowAgain && (
                       <svg
                         viewBox="0 0 16 16"
@@ -352,7 +359,10 @@ export const RewardOverlay = ({
                       </svg>
                     )}
                   </div>
-                  <span className="font-secondary text-xs tracking-wide text-white/50">
+                  <span
+                    className="font-secondary text-xs tracking-wide"
+                    style={{ color: "rgba(54, 248, 24, 0.48)" }}
+                  >
                     Do not show this again
                   </span>
                 </button>
