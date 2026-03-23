@@ -17,7 +17,11 @@ import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { cumulativeRewards, toTokens } from "@/helpers/payout";
+import {
+  cumulativeRewards,
+  maxPayout as maxPayoutRaw,
+  toTokens,
+} from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
@@ -129,6 +133,16 @@ export const Home = () => {
       const glitch = toTokens(
         rewards[Math.min(score, rewards.length) - 1] || 0,
       );
+      if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
+      return `${glitch.toFixed(1)} GLITCH`;
+    },
+    [supply, target, tokenPrice],
+  );
+
+  const formatMaxPayout = useCallback(
+    (stake: number) => {
+      const raw = maxPayoutRaw(stake, supply, target);
+      const glitch = toTokens(raw);
       if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
       return `${glitch.toFixed(1)} GLITCH`;
     },
@@ -958,13 +972,13 @@ export const Home = () => {
                                 className="font-secondary text-sm leading-none"
                                 style={{ color: "rgba(54, 248, 24, 0.24)" }}
                               >
-                                Game ID
+                                Moonrocks
                               </p>
                               <p
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                #{game.id}
+                                {game.moonrocks + game.points || "---"}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -978,9 +992,7 @@ export const Home = () => {
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {isMobile
-                                  ? "---"
-                                  : formatExpiry(game.created_at)}
+                                {formatExpiry(game.created_at)}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -988,13 +1000,15 @@ export const Home = () => {
                                 className="font-secondary text-sm leading-none"
                                 style={{ color: "rgba(54, 248, 24, 0.24)" }}
                               >
-                                Level
+                                Multiplier
                               </p>
                               <p
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                L{game.level}
+                                {game.multiplier
+                                  ? `x${game.multiplier}`
+                                  : "---"}
                               </p>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -1002,18 +1016,13 @@ export const Home = () => {
                                 className="font-secondary text-sm leading-none"
                                 style={{ color: "rgba(54, 248, 24, 0.24)" }}
                               >
-                                {isMobile ? "Score" : "Payout"}
+                                Max Payout
                               </p>
                               <p
                                 className="font-secondary text-sm uppercase leading-none"
                                 style={{ color: "#36F818" }}
                               >
-                                {isMobile
-                                  ? game.moonrocks + game.points
-                                  : formatPayout(
-                                      game.moonrocks + game.points,
-                                      game.stake,
-                                    )}
+                                {isMobile ? "---" : formatMaxPayout(game.stake)}
                               </p>
                             </div>
                           </div>
@@ -1075,7 +1084,7 @@ export const Home = () => {
                               className="font-secondary text-sm leading-none"
                               style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
-                              Game ID
+                              Moonrocks
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
@@ -1103,7 +1112,7 @@ export const Home = () => {
                               className="font-secondary text-sm leading-none"
                               style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
-                              Level
+                              Multiplier
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
@@ -1117,7 +1126,7 @@ export const Home = () => {
                               className="font-secondary text-sm leading-none"
                               style={{ color: "rgba(255, 0, 153, 0.24)" }}
                             >
-                              Payout
+                              Max Payout
                             </p>
                             <p
                               className="font-secondary text-sm uppercase leading-none"
