@@ -4,7 +4,6 @@ import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   TapTooltip,
-  Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,

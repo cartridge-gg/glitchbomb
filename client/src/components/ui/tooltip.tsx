@@ -59,7 +59,11 @@ const TapTooltip = ({
       }
     };
     document.addEventListener("pointerdown", handleOutsideTap);
-    return () => document.removeEventListener("pointerdown", handleOutsideTap);
+    const timer = setTimeout(() => setOpen(false), 2000);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideTap);
+      clearTimeout(timer);
+    };
   }, [isTouchDevice, open]);
 
   if (!isTouchDevice) {
