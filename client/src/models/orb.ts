@@ -214,11 +214,11 @@ export class Orb {
       case OrbType.Health3:
         return "Restore 3 health points.";
       case OrbType.Multiplier50:
-        return "Double your score multiplier.";
+        return "Boost your score multiplier by +0.5x.";
       case OrbType.Multiplier100:
-        return "Triple your score multiplier.";
+        return "Boost your score multiplier by +1x.";
       case OrbType.Multiplier150:
-        return "Quadruple your score multiplier.";
+        return "Boost your score multiplier by +1.5x.";
       case OrbType.Point5:
         return "Earn 5 points.";
       case OrbType.Point6:
