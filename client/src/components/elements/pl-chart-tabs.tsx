@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { OrbPulled } from "@/models";
+import { milestoneValue } from "@/offline/milestone";
 import { type PLDataPoint, PLGraph } from "./pl-graph";
 import { TabBar, type TabBarItem } from "./tab-bar";
 
@@ -120,11 +122,48 @@ const getOrbEffect = (orb: OrbPulled["orb"]): string => {
   return orb.name().toUpperCase();
 };
 
-const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
-  // Sort by id ascending (oldest first, like a chat log)
-  const sortedPulls = [...pulls].sort((a, b) => a.id - b.id);
+type LogEntry =
+  | { type: "pull"; pull: OrbPulled; sortKey: number }
+  | { type: "victory"; level: number; points: number; sortKey: number };
 
-  if (sortedPulls.length === 0) {
+const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
+  const entries = useMemo(() => {
+    if (pulls.length === 0) return [];
+
+    // Sort ascending for boundary detection
+    const chronological = [...pulls].sort((a, b) => a.id - b.id);
+    const result: LogEntry[] = [];
+    let levelCompleted = 0;
+
+    for (let i = 0; i < chronological.length; i++) {
+      const pull = chronological[i];
+
+      // Detect level boundary: drop in potential_moonrocks not caused by curse
+      // Within a level, only curse orbs reduce potential_moonrocks
+      if (i > 0) {
+        const prev = chronological[i - 1];
+        if (
+          pull.potential_moonrocks < prev.potential_moonrocks &&
+          !pull.orb.isCurse()
+        ) {
+          levelCompleted++;
+          result.push({
+            type: "victory",
+            level: levelCompleted,
+            points: milestoneValue(levelCompleted),
+            sortKey: pull.id - 0.5,
+          });
+        }
+      }
+
+      result.push({ type: "pull", pull, sortKey: pull.id });
+    }
+
+    // Sort descending (most recent first)
+    return result.sort((a, b) => b.sortKey - a.sortKey);
+  }, [pulls]);
+
+  if (entries.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <span className="text-green-600 font-secondary text-sm tracking-widest">
@@ -139,7 +178,33 @@ const LogsView = ({ pulls }: { pulls: OrbPulled[] }) => {
       className="flex-1 flex flex-col p-2 overflow-y-auto gap-1"
       style={{ scrollbarWidth: "none" }}
     >
-      {sortedPulls.map((pull) => {
+      {entries.map((entry) => {
+        if (entry.type === "victory") {
+          return (
+            <div
+              key={`victory-${entry.level}`}
+              className="flex items-center"
+            >
+              <span className="font-secondary text-xs tracking-widest text-yellow-400">
+                VICTORY
+              </span>
+              <span className="font-secondary text-xs tracking-widest text-green-700 mx-1">
+                {">"}
+              </span>
+              <span className="font-secondary text-xs tracking-widest text-yellow-400">
+                LEVEL {entry.level} COMPLETED
+              </span>
+              <span className="font-secondary text-xs tracking-widest text-green-700 mx-1">
+                {">"}
+              </span>
+              <span className="font-secondary text-xs tracking-widest text-yellow-400">
+                +{entry.points} POINTS
+              </span>
+            </div>
+          );
+        }
+
+        const { pull } = entry;
         const category = getOrbCategory(pull.orb);
         const effect = getOrbEffect(pull.orb);
         const colorClass = getCategoryColor(pull.orb);
