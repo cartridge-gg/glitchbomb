@@ -629,6 +629,7 @@ export const Game = () => {
           balance={game.chips}
           orbs={game.shop}
           bag={game.pullables}
+          initialPurchaseCounts={game.shopPurchaseCounts}
           onConfirm={handleBuyAndExit}
           isLoading={isExitingShop}
           onBalanceChange={setShopBalanceOverride}

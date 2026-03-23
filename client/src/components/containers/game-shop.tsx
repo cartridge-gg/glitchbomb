@@ -20,6 +20,7 @@ export interface GameShopProps
   balance: number;
   orbs: Orb[];
   bag: Orb[];
+  initialPurchaseCounts?: number[];
   onConfirm: (indices: number[]) => void;
   isLoading?: boolean;
   onBalanceChange?: (balance: number) => void;
@@ -154,6 +155,7 @@ export const GameShop = ({
   balance,
   orbs,
   bag,
+  initialPurchaseCounts = [],
   variant,
   className,
   onConfirm,
@@ -222,9 +224,11 @@ export const GameShop = ({
   // Get the next purchase price for an orb (based on orb TYPE purchase count, not index)
   // Contract formula: cost = ceil(baseCost * (1 + count * 0.2))
   // NOT compounding! Each 20% is added to base, not to previous price
+  // Includes initial purchase counts from prior shop visits
   const getNextPrice = (orb: Orb): number => {
     const orbId = orb.into();
-    const totalQtyForType = getOrbTypeQuantity(orbId);
+    const totalQtyForType =
+      getOrbTypeQuantity(orbId) + (initialPurchaseCounts[orbId] ?? 0);
     const baseCost = orb.cost();
     const multiplier = 1 + totalQtyForType * 0.2;
     return Math.ceil(baseCost * multiplier);
@@ -232,8 +236,10 @@ export const GameShop = ({
 
   // Calculate total spent - need to process purchases in order by orb type
   // Contract formula: cost = ceil(baseCost * (1 + count * 0.2))
+  // Includes initial purchase counts from prior shop visits
   const totalSpent = useMemo(() => {
     // Group purchases by orb type and calculate escalating costs
+    // Start from initial counts (prior shop visits)
     const purchaseCountByType: Record<number, number> = {};
     let total = 0;
 
@@ -241,7 +247,8 @@ export const GameShop = ({
     for (const index of history) {
       const orb = orbs[index];
       const orbId = orb.into();
-      const currentCount = purchaseCountByType[orbId] || 0;
+      const currentCount =
+        (purchaseCountByType[orbId] ?? initialPurchaseCounts[orbId]) || 0;
 
       // Calculate price at this purchase count (linear, not compounding)
       const baseCost = orb.cost();
@@ -254,7 +261,7 @@ export const GameShop = ({
     }
 
     return total;
-  }, [orbs, history]);
+  }, [orbs, history, initialPurchaseCounts]);
 
   const virtualBalance = balance - totalSpent;
   useEffect(() => {
