@@ -82,7 +82,6 @@ const OrbsTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                         <OrbDisplay
                           orb={orb}
                           size="sm"
-                          bombTierIcons
                           valuePosition="top-right"
                           count={bombDamage(orb)}
                         />

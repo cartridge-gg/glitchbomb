@@ -69,14 +69,11 @@ const glowSizeMap = {
 };
 
 // Get the icon component for an orb type
-const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
-  // PointBomb4 should show a bomb icon
+const getOrbIcon = (orb: Orb) => {
   if (orb.isBomb()) {
-    if (useBombTierIcons) {
-      if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
-      if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
-      if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
-    }
+    if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
+    if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
+    if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
     return BombOrbIcon;
   }
   if (orb.isPoint()) return OrbPointIcon;
@@ -134,7 +131,6 @@ export interface OrbDisplayProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof orbDisplayVariants> {
   orb: Orb;
-  bombTierIcons?: boolean;
   valuePosition?: "bottom" | "top-right";
   showValue?: boolean;
   glowScale?: number;
@@ -149,17 +145,16 @@ export interface OrbDisplayProps
 export const OrbDisplay = ({
   orb,
   size = "md",
-  bombTierIcons = false,
   valuePosition = "bottom",
   showValue = true,
-  glowScale = 1,
+  glowScale = 0.25,
   count,
   hideIcon = false,
   iconOverride,
   className,
   ...props
 }: OrbDisplayProps) => {
-  const Icon = iconOverride ?? getOrbIcon(orb, bombTierIcons);
+  const Icon = iconOverride ?? getOrbIcon(orb);
   const color = getOrbColor(orb);
   const displayValue = count != null ? String(count) : getOrbDisplayValue(orb);
   const glowSize = glowSizeMap[size ?? "md"] * glowScale;

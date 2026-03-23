@@ -297,7 +297,6 @@ export const RewardOverlay = ({
                               <OrbDisplay
                                 orb={orb}
                                 size="sm"
-                                glowScale={0.5}
                                 count={bombDamage(orb)}
                                 valuePosition="top-right"
                               />
