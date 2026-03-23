@@ -4,6 +4,7 @@ import { MoonrockIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   TapTooltip,
+  Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
@@ -276,7 +277,7 @@ export const RewardOverlay = ({
                     <TooltipTrigger asChild>
                       <div
                         ref={orbRef}
-                        className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-default"
                       >
                         <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
                         <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
@@ -312,7 +313,10 @@ export const RewardOverlay = ({
                       {sortedOrbs.map((orb, i) => (
                         <TapTooltip key={`${orb.value}-${i}`}>
                           <TooltipTrigger asChild>
-                            <div ref={setOrbElementRef(i)}>
+                            <div
+                              ref={setOrbElementRef(i)}
+                              className="cursor-default"
+                            >
                               <OrbDisplay
                                 orb={orb}
                                 size="sm"
