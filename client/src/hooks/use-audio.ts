@@ -440,6 +440,16 @@ export function useAudio() {
     playSfxLayered(file, settings.sfxVolume, 5);
   }, [settings.sfxMuted, settings.sfxVolume]);
 
+  const playLevelCompleteSound = useCallback(() => {
+    if (settings.sfxMuted) return;
+    playSfx("/assets/sounds/level-completed.wav", settings.sfxVolume);
+  }, [settings.sfxMuted, settings.sfxVolume]);
+
+  const playLevelStartSound = useCallback(() => {
+    if (settings.sfxMuted) return;
+    playSfx("/assets/sounds/level-started.wav", settings.sfxVolume);
+  }, [settings.sfxMuted, settings.sfxVolume]);
+
   const startPulling = useCallback(() => {
     if (settings.sfxMuted) return;
     startPullingLoop(settings.sfxVolume * 0.25);
@@ -473,6 +483,8 @@ export function useAudio() {
     setSfxVolume,
     playOrbSound,
     playRewardSound,
+    playLevelCompleteSound,
+    playLevelStartSound,
     startPulling,
     stopPulling,
     startMusic,

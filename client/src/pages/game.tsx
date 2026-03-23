@@ -80,6 +80,8 @@ export const Game = () => {
     setSfxVolume,
     playOrbSound,
     playRewardSound,
+    playLevelCompleteSound,
+    playLevelStartSound,
     startPulling,
     stopPulling,
     startMusic,
@@ -292,6 +294,7 @@ export const Game = () => {
     if (reached && !milestoneShownRef.current) {
       milestoneShownRef.current = true;
       setShowLevelComplete(true);
+      playLevelCompleteSound();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.points, game?.milestone]);
@@ -302,6 +305,7 @@ export const Game = () => {
     if (prevLevelRef.current !== null && game.level > prevLevelRef.current) {
       milestoneShownRef.current = false;
       setShowLevelEnter(true);
+      playLevelStartSound();
     }
     prevLevelRef.current = game.level;
     // eslint-disable-next-line react-hooks/exhaustive-deps
