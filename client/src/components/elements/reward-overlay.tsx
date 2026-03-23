@@ -272,15 +272,34 @@ export const RewardOverlay = ({
                   <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
                     Moon Rocks
                   </span>
-                  <div
-                    ref={orbRef}
-                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10]"
-                  >
-                    <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
-                    <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
-                      {reward.count.toLocaleString()}
-                    </span>
-                  </div>
+                  <TapTooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        ref={orbRef}
+                        className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10] cursor-pointer"
+                      >
+                        <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
+                        <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
+                          {reward.count.toLocaleString()}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                      <p
+                        className="font-secondary text-xs font-bold"
+                        style={{ color: "var(--yellow-100)" }}
+                      >
+                        Moonrocks
+                      </p>
+                      <p
+                        className="font-secondary text-xs mt-0.5 opacity-50"
+                        style={{ color: "var(--yellow-100)" }}
+                      >
+                        In-game currency earned by playing. Can be cashed out
+                        for GLITCH tokens.
+                      </p>
+                    </TooltipContent>
+                  </TapTooltip>
                 </div>
 
                 {/* Orb grid */}
@@ -336,7 +355,7 @@ export const RewardOverlay = ({
                   className="flex items-center gap-2.5 cursor-pointer select-none"
                 >
                   <div
-                    className="w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200"
+                    className="w-4 h-4 rounded border flex items-center justify-center transition-all duration-200"
                     style={{
                       borderColor: dontShowAgain
                         ? "rgba(54, 248, 24, 0.6)"
@@ -350,7 +369,7 @@ export const RewardOverlay = ({
                       <svg
                         viewBox="0 0 16 16"
                         fill="none"
-                        className="w-3.5 h-3.5 text-green-400"
+                        className="w-3 h-3 text-green-400"
                       >
                         <path
                           d="M3.5 8.5L6.5 11.5L12.5 4.5"
