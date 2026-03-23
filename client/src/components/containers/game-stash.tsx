@@ -18,6 +18,8 @@ import { OrbType } from "@/models/orb";
 export interface GameStashProps {
   orbs: Orb[];
   discards?: boolean[];
+  pendingOrbs?: Orb[];
+  onRemovePending?: (index: number) => void;
 }
 
 type TabType = "orbs" | "list";
@@ -180,7 +182,47 @@ const kindOrder = (orb: Orb): number => {
   return 7;
 };
 
-export const GameStash = ({ orbs, discards }: GameStashProps) => {
+const PurchasingSection = ({
+  orbs,
+  onRemove,
+}: {
+  orbs: Orb[];
+  onRemove?: (index: number) => void;
+}) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <h2 className="text-orange-400 font-secondary text-[clamp(0.85rem,2.4svh,1rem)] tracking-wide">
+        {`Purchasing (${orbs.length})`}
+      </h2>
+      <div className="flex flex-wrap gap-2 pb-2">
+        {orbs.map((orb, i) => (
+          <div key={`pending-${orb.value}-${i}`} className="relative group">
+            <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
+            {onRemove && (
+              <button
+                type="button"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-900/90 border border-red-500/50 flex items-center justify-center hover:bg-red-700 z-10"
+                onClick={() => onRemove(i)}
+              >
+                <span className="text-red-200 text-xs leading-none font-bold">
+                  ×
+                </span>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="w-full h-px bg-green-900/40" />
+    </div>
+  );
+};
+
+export const GameStash = ({
+  orbs,
+  discards,
+  pendingOrbs,
+  onRemovePending,
+}: GameStashProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("orbs");
   const tabItems: Array<TabBarItem<TabType>> = [
     { id: "orbs", Icon: GridIcon },
@@ -220,6 +262,11 @@ export const GameStash = ({ orbs, discards }: GameStashProps) => {
           className="flex-1 min-h-0 overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
+          {/* Purchasing section */}
+          {pendingOrbs && pendingOrbs.length > 0 && (
+            <PurchasingSection orbs={pendingOrbs} onRemove={onRemovePending} />
+          )}
+
           {/* Tab Content */}
           {activeTab === "orbs" ? (
             <OrbsTab orbs={sorted.orbs} discards={sorted.discards} />
