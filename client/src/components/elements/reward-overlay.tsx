@@ -299,6 +299,7 @@ export const RewardOverlay = ({
                                 size="sm"
                                 glowScale={0.5}
                                 count={bombDamage(orb)}
+                                valuePosition="top-right"
                               />
                             </div>
                           </TooltipTrigger>
