@@ -267,48 +267,58 @@ export const RewardOverlay = ({
                       }
                 }
               >
-                {/* Moonrocks — header-button style pill */}
-                <div
-                  ref={orbRef}
-                  className="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-[#302A10]"
-                >
-                  <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
-                  <span className="font-secondary text-sm tracking-widest text-yellow-400">
-                    {reward.count.toLocaleString()}
+                {/* Moonrocks — label + header-button style pill */}
+                <div className="flex flex-col items-center gap-1.5">
+                  <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400/70 uppercase">
+                    Moonrocks
                   </span>
+                  <div
+                    ref={orbRef}
+                    className="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-[#302A10]"
+                  >
+                    <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
+                    <span className="font-secondary text-sm tracking-widest text-yellow-400">
+                      {reward.count.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
-                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-2">
-                    {sortedOrbs.map((orb, i) => (
-                      <TapTooltip key={`${orb.value}-${i}`}>
-                        <TooltipTrigger asChild>
-                          <div ref={setOrbElementRef(i)}>
-                            <OrbDisplay
-                              orb={orb}
-                              size="sm"
-                              glowScale={0.5}
-                              count={bombDamage(orb)}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
-                          <p
-                            className="font-secondary text-xs font-bold"
-                            style={{ color: orb.color() }}
-                          >
-                            {orb.name()}
-                          </p>
-                          <p
-                            className="font-secondary text-xs mt-0.5 opacity-50"
-                            style={{ color: orb.color() }}
-                          >
-                            {orb.description()}
-                          </p>
-                        </TooltipContent>
-                      </TapTooltip>
-                    ))}
+                  <div className="flex flex-col items-center gap-1.5 mt-2">
+                    <span className="font-secondary text-xs tracking-[0.2em] text-green-400/70 uppercase">
+                      Orbs
+                    </span>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                      {sortedOrbs.map((orb, i) => (
+                        <TapTooltip key={`${orb.value}-${i}`}>
+                          <TooltipTrigger asChild>
+                            <div ref={setOrbElementRef(i)}>
+                              <OrbDisplay
+                                orb={orb}
+                                size="sm"
+                                glowScale={0.5}
+                                count={bombDamage(orb)}
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+                            <p
+                              className="font-secondary text-xs font-bold"
+                              style={{ color: orb.color() }}
+                            >
+                              {orb.name()}
+                            </p>
+                            <p
+                              className="font-secondary text-xs mt-0.5 opacity-50"
+                              style={{ color: orb.color() }}
+                            >
+                              {orb.description()}
+                            </p>
+                          </TooltipContent>
+                        </TapTooltip>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
