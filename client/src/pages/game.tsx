@@ -293,8 +293,12 @@ export const Game = () => {
     const reached = game.points >= game.milestone && game.milestone > 0;
     if (reached && !milestoneShownRef.current) {
       milestoneShownRef.current = true;
-      setShowLevelComplete(true);
-      playLevelCompleteSound();
+      // Delay so the pull animation finishes before the overlay appears
+      const timer = setTimeout(() => {
+        setShowLevelComplete(true);
+        playLevelCompleteSound();
+      }, 800);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.points, game?.milestone]);
@@ -377,7 +381,10 @@ export const Game = () => {
         multipliedPoints: hasMultEffect ? multiplied : undefined,
         activeMultiplier: hasMultEffect ? mult : undefined,
       });
-      playOrbSound(orb);
+      // Skip orb sound if this pull triggered milestone (level complete sound plays instead)
+      if (!milestoneShownRef.current) {
+        playOrbSound(orb);
+      }
       stopPulling();
       setIsPulling(false);
 
