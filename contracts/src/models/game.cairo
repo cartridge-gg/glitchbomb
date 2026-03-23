@@ -240,8 +240,12 @@ pub impl GameImpl of GameTrait {
         // [Effect] Convert points to chips
         self.earn_chips(self.points);
         self.points = 0;
-        // [Effect] Spend moonrocks for the next level ante
-        let cost = Milestone::cost(self.level + 1);
+        // [Effect] Spend moonrocks for the next level ante (skip for initial level)
+        let cost = if self.level == DEFAULT_LEVEL {
+            0
+        } else {
+            Milestone::cost(self.level + 1)
+        };
         self.spend_moonrocks(cost);
         cost
     }
@@ -691,8 +695,9 @@ mod tests {
         game.earn_points(100);
         let cost = game.enter(1);
         assert_eq!(game.shop != 0, true);
-        assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL + 1));
-        assert_eq!(game.moonrocks, 100 - cost);
+        // Initial level has no ante
+        assert_eq!(cost, 0);
+        assert_eq!(game.moonrocks, 100);
     }
 
     #[test]

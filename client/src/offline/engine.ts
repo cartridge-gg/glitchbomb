@@ -134,8 +134,8 @@ export function enterShop(
   };
   next.chips += next.points;
   next.points = 0;
-  // Spend moonrocks for the next level ante
-  const cost = milestoneCost(next.level + 1);
+  // Spend moonrocks for the next level ante (skip for initial level)
+  const cost = next.level === DEFAULT_LEVEL ? 0 : milestoneCost(next.level + 1);
   if (next.moonrocks < cost) throw new Error("Game: not enough moonrocks");
   next.moonrocks -= cost;
   return { game: next, shop: next.shop, cost };

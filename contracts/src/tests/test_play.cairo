@@ -238,8 +238,8 @@ fn test_play_death_cashes_out_moonrocks() {
     assert(game.health == 0, 'Game: health should be 0');
 
     // [Assert] Points were NOT converted to moonrocks on death
-    // Moonrocks = 100 (initial) - 0 (level 1 cost) - 1 (level 2 cost) = 99
-    assert(game.moonrocks == 99, 'Game: moonrocks should be 99');
+    // Moonrocks = 100 (initial) - 0 (no ante for initial level) = 100
+    assert(game.moonrocks == 100, 'Game: moonrocks should be 100');
 
     // [Assert] Tokens were minted based on moonrocks only (not points)
     let balance_after = systems.token.balance_of(context.player);
