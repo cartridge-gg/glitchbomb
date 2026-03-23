@@ -6,6 +6,7 @@ import {
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { AudioSettings } from "@/hooks/use-audio";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 
 export interface SoundPopoverProps {
   settings: AudioSettings;
@@ -177,6 +178,8 @@ export interface SettingsModalProps {
   onSfxVolumeChange: (vol: number) => void;
   showDistributionPercent?: boolean;
   onShowDistributionPercentChange?: (show: boolean) => void;
+  stashViewMode?: StashViewMode;
+  onStashViewModeChange?: (mode: StashViewMode) => void;
   username?: string;
   onProfileClick?: () => void;
 }
@@ -225,6 +228,8 @@ export const SettingsModal = ({
   onSfxVolumeChange,
   showDistributionPercent,
   onShowDistributionPercentChange,
+  stashViewMode,
+  onStashViewModeChange,
   username,
   onProfileClick,
 }: SettingsModalProps) => {
@@ -321,6 +326,50 @@ export const SettingsModal = ({
               checked={!!showDistributionPercent}
               onChange={onShowDistributionPercentChange}
             />
+          </Button>
+        )}
+
+        {/* Stash View Mode toggle */}
+        {onStashViewModeChange != null && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-between px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() =>
+              onStashViewModeChange(stashViewMode === "grid" ? "list" : "grid")
+            }
+          >
+            Stash View
+            <div className="flex shrink-0 rounded-md overflow-hidden border border-green-900">
+              <button
+                type="button"
+                className={`px-2.5 py-1 font-secondary text-[10px] tracking-widest uppercase transition-colors ${
+                  stashViewMode === "grid"
+                    ? "bg-green-950 text-green-400"
+                    : "bg-green-1000 text-green-600"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStashViewModeChange("grid");
+                }}
+              >
+                Grid
+              </button>
+              <button
+                type="button"
+                className={`px-2.5 py-1 font-secondary text-[10px] tracking-widest uppercase transition-colors ${
+                  stashViewMode === "list"
+                    ? "bg-green-950 text-green-400"
+                    : "bg-green-1000 text-green-600"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStashViewModeChange("list");
+                }}
+              >
+                List
+              </button>
+            </div>
           </Button>
         )}
 

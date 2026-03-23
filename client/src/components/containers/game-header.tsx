@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 import { mobilePath } from "@/utils/mobile";
 import { SettingsModal } from "./sound-modal";
 
@@ -29,6 +30,8 @@ export interface GameHeaderProps {
   onSfxVolumeChange?: (vol: number) => void;
   showDistributionPercent?: boolean;
   onShowDistributionPercentChange?: (show: boolean) => void;
+  stashViewMode?: StashViewMode;
+  onStashViewModeChange?: (mode: StashViewMode) => void;
   onProfileClick?: () => void;
 }
 
@@ -52,6 +55,8 @@ export const GameHeader = ({
   onSfxVolumeChange,
   showDistributionPercent,
   onShowDistributionPercentChange,
+  stashViewMode,
+  onStashViewModeChange,
   onProfileClick,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
@@ -182,6 +187,8 @@ export const GameHeader = ({
               onSfxVolumeChange={onSfxVolumeChange}
               showDistributionPercent={showDistributionPercent}
               onShowDistributionPercentChange={onShowDistributionPercentChange}
+              stashViewMode={stashViewMode}
+              onStashViewModeChange={onStashViewModeChange}
             />
           )}
       </div>

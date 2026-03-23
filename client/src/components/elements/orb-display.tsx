@@ -125,6 +125,9 @@ const getOrbDisplayValue = (orb: Orb): string => {
         return "";
     }
   }
+  // Per-orb/per-bomb point orbs get an asterisk
+  if (orb.value === OrbType.PointOrb1) return "1*";
+  if (orb.value === OrbType.PointBomb4) return "4*";
   const name = orb.name();
   const match = name.match(/(\d+)/);
   return match ? match[1] : "";
