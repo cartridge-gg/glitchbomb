@@ -237,7 +237,7 @@ export const RewardOverlay = ({
           transition={{ duration: 0.3 }}
         >
           <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col items-center gap-10">
+            <div className="flex flex-col items-center gap-12">
               {/* Heading */}
               <motion.p
                 className="font-secondary text-sm tracking-[0.3em] text-green-400"
@@ -250,7 +250,7 @@ export const RewardOverlay = ({
 
               {/* Rewards — moonrocks then orbs */}
               <motion.div
-                className="flex flex-col items-center gap-10"
+                className="flex flex-col items-center gap-12"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
                   scale: isExiting ? 0.5 : 1,
@@ -268,7 +268,7 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — label + header-button style pill */}
-                <div className="flex flex-col items-center gap-2 w-[clamp(200px,70vw,320px)]">
+                <div className="flex flex-col items-center gap-2 w-[clamp(160px,50vw,240px)]">
                   <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
                     Moon Rocks
                   </span>
@@ -289,7 +289,7 @@ export const RewardOverlay = ({
                     <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
                       Orbs
                     </span>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-3">
                       {sortedOrbs.map((orb, i) => (
                         <TapTooltip key={`${orb.value}-${i}`}>
                           <TooltipTrigger asChild>
@@ -325,7 +325,7 @@ export const RewardOverlay = ({
 
               {/* Don't show again + LET'S GO button */}
               <motion.div
-                className="flex flex-col items-center gap-6"
+                className="flex flex-col items-center gap-12"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: isExiting ? 0 : 1, y: 0 }}
                 transition={isExiting ? { duration: 0.2 } : { delay: 0.7 }}
