@@ -268,16 +268,16 @@ export const RewardOverlay = ({
                 }
               >
                 {/* Moonrocks — label + header-button style pill */}
-                <div className="flex flex-col items-center gap-1.5">
-                  <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400/70 uppercase">
+                <div className="flex flex-col items-center gap-1.5 w-[clamp(140px,40vw,200px)]">
+                  <span className="font-secondary text-xs tracking-[0.2em] text-yellow-400 uppercase">
                     Moonrocks
                   </span>
                   <div
                     ref={orbRef}
-                    className="flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-[#302A10]"
+                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302A10]"
                   >
                     <MoonrockIcon className="w-5 h-5 text-yellow-400 shrink-0" />
-                    <span className="font-secondary text-sm tracking-widest text-yellow-400">
+                    <span className="font-secondary text-[clamp(0.65rem,1.6svh,0.875rem)] tracking-widest text-yellow-400">
                       {reward.count.toLocaleString()}
                     </span>
                   </div>
@@ -286,7 +286,7 @@ export const RewardOverlay = ({
                 {/* Orb grid */}
                 {sortedOrbs.length > 0 && (
                   <div className="flex flex-col items-center gap-1.5 mt-2">
-                    <span className="font-secondary text-xs tracking-[0.2em] text-green-400/70 uppercase">
+                    <span className="font-secondary text-xs tracking-[0.2em] text-green-400 uppercase">
                       Orbs
                     </span>
                     <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
