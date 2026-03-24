@@ -376,6 +376,19 @@ export const GameShop = ({
     [existingBag, pendingOrbs],
   );
 
+  // Sort shop items by rarity (common → rare → cosmic), then by base cost
+  const sortedIndices = useMemo(() => {
+    const rarityOrder = { common: 0, rare: 1, cosmic: 2 } as const;
+    return orbs
+      .map((_, i) => i)
+      .sort((a, b) => {
+        const ra = rarityOrder[orbs[a].rarity()];
+        const rb = rarityOrder[orbs[b].rarity()];
+        if (ra !== rb) return ra - rb;
+        return orbs[a].cost() - orbs[b].cost();
+      });
+  }, [orbs]);
+
   const hasSelections = basketIndices.length > 0;
 
   const handleContinue = () => {
@@ -452,7 +465,8 @@ export const GameShop = ({
 
           {/* Shop items */}
           <div className="flex flex-col gap-1">
-            {orbs.map((orb, index) => {
+            {sortedIndices.map((index) => {
+              const orb = orbs[index];
               const nextPrice = getNextPrice(orb);
               const canAfford = nextPrice <= virtualBalance;
 
