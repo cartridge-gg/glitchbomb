@@ -67,22 +67,12 @@ export const LevelUpOverlay = ({
               transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
             />
 
-            {/* Subtitle */}
-            <motion.p
-              className={`font-secondary text-[clamp(0.7rem,1.6svh,1rem)] tracking-[0.5em] ${cfg.color} opacity-80`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 0.8, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-            >
-              {variant === "complete" ? "COMPLETE" : "ENTERING"}
-            </motion.p>
-
             {/* Level label */}
             <motion.div
               initial={{ scale: 0.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{
-                delay: 0.3,
+                delay: 0.15,
                 type: "spring",
                 stiffness: 200,
                 damping: 15,
@@ -96,6 +86,16 @@ export const LevelUpOverlay = ({
                 text={cfg.label(level)}
               />
             </motion.div>
+
+            {/* Subtitle */}
+            <motion.p
+              className={`font-secondary text-[clamp(0.7rem,1.6svh,1rem)] tracking-[0.5em] ${cfg.color} opacity-80`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 0.8, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
+              {variant === "complete" ? "COMPLETE" : "ENTERING"}
+            </motion.p>
 
             {/* Decorative line */}
             <motion.div
