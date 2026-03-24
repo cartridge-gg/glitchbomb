@@ -635,23 +635,31 @@ export const PLGraph = ({
                 {graphPoints.map((point) => {
                   const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FFFFFF" ? "white" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
-                  return (
+                  const isBomb = point.color === "#FFFFFF";
+                  const circleProps = {
+                    cx: `${point.x}%`,
+                    cy: `${point.y}%`,
+                    r: "6",
+                    fill: point.color,
+                    stroke: "rgba(255,255,255,0.8)",
+                    strokeWidth: "1",
+                    filter: `url(#${filterName})`,
+                    initial: isNew ? { scale: 0, opacity: 0 } : false,
+                    animate: { scale: 1, opacity: 1 },
+                    transition: {
+                      duration: 0.3,
+                      ease: "easeOut",
+                      delay: isNew ? 0.1 : 0,
+                    },
+                  } as const;
+                  return isBomb ? (
+                    <g key={`point-${point.id}`} className="glitch-icon">
+                      <motion.circle {...circleProps} />
+                    </g>
+                  ) : (
                     <motion.circle
                       key={`point-${point.id}`}
-                      cx={`${point.x}%`}
-                      cy={`${point.y}%`}
-                      r="6"
-                      fill={point.color}
-                      stroke="rgba(255,255,255,0.8)"
-                      strokeWidth="1"
-                      filter={`url(#${filterName})`}
-                      initial={isNew ? { scale: 0, opacity: 0 } : false}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeOut",
-                        delay: isNew ? 0.1 : 0,
-                      }}
+                      {...circleProps}
                     />
                   );
                 })}

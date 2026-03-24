@@ -177,7 +177,7 @@ export const GameGraph = ({ pulls, className = "" }: GameGraphProps) => {
           {graphPoints.map((point) => (
             <div
               key={`point-${point.pull.id}`}
-              className="absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2"
+              className={`absolute w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2${point.color === "#FFFFFF" ? " glitch-icon" : ""}`}
               style={{
                 left: `${point.x}%`,
                 top: `${point.y}%`,
