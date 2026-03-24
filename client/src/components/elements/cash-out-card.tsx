@@ -1,13 +1,13 @@
 import { MoonrockIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
-import { CardDivider } from "./card-divider";
 import { InfoCard } from "./info-card";
 
 const rewardValueClass =
-  "font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none";
+  "font-secondary text-[clamp(0.8rem,2.5svh,1.25rem)] leading-none";
 const rewardLabelClass =
   "font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider";
-const rewardIconClass = "w-[clamp(18px,4svh,24px)] h-[clamp(18px,4svh,24px)]";
+const rewardIconClass =
+  "w-[clamp(18px,3.5svh,24px)] h-[clamp(18px,3.5svh,24px)]";
 
 export interface CashOutCardProps {
   moonrocks: number;
@@ -31,7 +31,7 @@ export const CashOutCard = ({
     onClick={onClick}
     disabled={disabled}
     isLoading={isLoading}
-    className="flex-1"
+    className="h-[clamp(120px,22svh,200px)]"
     contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
     labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
     hideInner
@@ -65,56 +65,22 @@ export const CashOutCard = ({
       )}
     </div>
 
-    <div className="flex gap-[clamp(8px,2.2svh,18px)] w-full h-full">
-      {/* You Own Inner Card */}
-      <div
-        className="flex-1 flex flex-col rounded-lg overflow-hidden"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-      >
-        <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-          <span className="text-yellow-400/70 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
-            You Own
-          </span>
-        </div>
-        <CardDivider className="bg-yellow-100" />
-        <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-          <div className="flex items-center justify-center gap-1">
-            <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
-            <GlitchText
-              className={`text-yellow-400 ${rewardValueClass}`}
-              text={String(moonrocks)}
-            />
-          </div>
-          <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
-            Moon Rocks
-          </span>
-        </div>
+    <div
+      className="flex flex-col items-center justify-center gap-[clamp(2px,0.6svh,6px)] rounded-lg py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)] w-full h-full"
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
+    >
+      <div className="flex items-center justify-center gap-[clamp(2px,0.5svh,5px)]">
+        <MoonrockIcon
+          className={`${rewardIconClass} text-yellow-400 shrink-0`}
+        />
+        <GlitchText
+          className={`text-yellow-400 ${rewardValueClass}`}
+          text={String(moonrocks + reward)}
+        />
       </div>
-
-      {/* Reward Inner Card */}
-      <div
-        className="flex-1 flex flex-col rounded-lg overflow-hidden"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-      >
-        <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-          <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
-            Reward
-          </span>
-        </div>
-        <CardDivider className="bg-yellow-100" />
-        <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-          <div className="flex items-center justify-center gap-1">
-            <MoonrockIcon className={`${rewardIconClass} text-yellow-400`} />
-            <GlitchText
-              className={`text-yellow-400 ${rewardValueClass}`}
-              text={`+${reward}`}
-            />
-          </div>
-          <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
-            Moon Rocks
-          </span>
-        </div>
-      </div>
+      <span className={`text-yellow-400/70 ${rewardLabelClass}`}>
+        Moon Rocks
+      </span>
     </div>
   </InfoCard>
 );
