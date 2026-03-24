@@ -301,7 +301,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--black-100);
+  background: var(--green-gradient-100);
   opacity: 1;
   transition: opacity 0.5s ease-out;
 }
