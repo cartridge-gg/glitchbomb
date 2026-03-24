@@ -229,9 +229,11 @@ export function useActivityFeed(chainId: bigint) {
       })
       .catch((err) => console.warn("[useActivityFeed] event sub error:", err));
 
-    // 3. Fetch historical data as fallback
+    // 3. Fetch historical data as fallback (batched to avoid trickle)
     const fetchHistorical = async () => {
       try {
+        const batch: ActivityItem[] = [];
+
         // Fetch recent game NFT balances (game starts)
         const balances = await client.getTokenBalances({
           contract_addresses: [paddedContract],
@@ -245,6 +247,12 @@ export function useActivityFeed(chainId: bigint) {
           },
         });
 
+        // Build lookup promises for all valid balances
+        const balanceEntries: {
+          gameId: number;
+          ownerAddress: string;
+          itemId: string;
+        }[] = [];
         for (const balance of balances.items) {
           const rawBalance = BigInt(balance.balance || "0");
           if (rawBalance === 0n) continue;
@@ -264,22 +272,27 @@ export function useActivityFeed(chainId: bigint) {
 
           const itemId = `start-${gameId}`;
           if (seenRef.current.has(itemId)) continue;
+          balanceEntries.push({ gameId, ownerAddress, itemId });
+        }
 
-          try {
+        // Resolve all lookups in parallel
+        const balanceResults = await Promise.allSettled(
+          balanceEntries.map(async ({ gameId, ownerAddress, itemId }) => {
             const [username, stake] = await Promise.all([
               lookupUsername(ownerAddress),
               lookupStake(client, gameId),
             ]);
-            addItem({
+            return {
               id: itemId,
-              type: "game_started",
+              type: "game_started" as const,
               username,
               stake,
               timestamp: Date.now(),
-            });
-          } catch {
-            // ignore individual lookup failures
-          }
+            };
+          }),
+        );
+        for (const r of balanceResults) {
+          if (r.status === "fulfilled") batch.push(r.value);
         }
 
         // Fetch recent GameOver events (cash outs)
@@ -289,6 +302,12 @@ export function useActivityFeed(chainId: bigint) {
           .build();
 
         const result = await client.getEventMessages(gameOverQuery);
+        const cashOutEntries: {
+          gameId: number;
+          ownerAddress: string;
+          itemId: string;
+          moonrocks: number;
+        }[] = [];
         for (const entity of result.items) {
           const model = entity.models[GAME_OVER_MODEL] as unknown as
             | RawGameOver
@@ -312,18 +331,29 @@ export function useActivityFeed(chainId: bigint) {
           )
             continue;
 
-          try {
+          cashOutEntries.push({ gameId, ownerAddress, itemId, moonrocks });
+        }
+
+        const cashOutResults = await Promise.allSettled(
+          cashOutEntries.map(async ({ ownerAddress, itemId, moonrocks }) => {
             const username = await lookupUsername(ownerAddress);
-            addItem({
+            return {
               id: itemId,
-              type: "cash_out",
+              type: "cash_out" as const,
               username,
               moonrocks,
               timestamp: Date.now(),
-            });
-          } catch {
-            // ignore individual lookup failures
-          }
+            };
+          }),
+        );
+        for (const r of cashOutResults) {
+          if (r.status === "fulfilled") batch.push(r.value);
+        }
+
+        // Single state update with all historical items
+        if (batch.length > 0) {
+          for (const item of batch) seenRef.current.add(item.id);
+          setItems((prev) => [...batch, ...prev].slice(0, MAX_ITEMS));
         }
       } catch (err) {
         console.warn("[useActivityFeed] historical fetch error:", err);
