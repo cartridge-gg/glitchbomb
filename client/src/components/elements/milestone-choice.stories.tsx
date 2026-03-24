@@ -80,18 +80,18 @@ export const CashingOut: Story = {
   },
 };
 
-export const KnownCurse: Story = {
+export const DoubleBombCurse: Story = {
   args: {
     points: 80,
     ante: 6,
-    nextCurseLabel: "Double Draw",
+    nextCurseLabel: "Double Bomb",
   },
 };
 
-export const HighAnte: Story = {
+export const StickyBombCurse: Story = {
   args: {
     points: 120,
     ante: 13,
-    nextCurseLabel: "Double Bomb",
+    nextCurseLabel: "Sticky Bomb",
   },
 };
