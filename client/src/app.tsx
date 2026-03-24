@@ -18,6 +18,7 @@ import {
   getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
+import { AppDataProvider } from "@/contexts/app-data-provider";
 import { LoadingProvider } from "@/contexts/loading-context";
 import Router from "@/routes";
 import { isMobile } from "@/utils/mobile";
@@ -105,9 +106,11 @@ function App() {
       >
         <LoadingProvider>
           <EntitiesProvider>
-            <LoadingScreen />
-            <GameStartedNotifier />
-            <Router />
+            <AppDataProvider>
+              <LoadingScreen />
+              <GameStartedNotifier />
+              <Router />
+            </AppDataProvider>
           </EntitiesProvider>
         </LoadingProvider>
       </StarknetConfig>

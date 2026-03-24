@@ -32,13 +32,11 @@ import { BagIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
+import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { useLoadingSignal } from "@/contexts/use-loading";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
-import { useTokenPrice } from "@/hooks/token-price";
-import { useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { OrbType } from "@/models/orb";
@@ -75,7 +73,7 @@ type OverlayView = "none" | "stash";
 export const Game = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { account, connector } = useAccount();
+  const { connector } = useAccount();
   const { chain } = useNetwork();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { game, config, setGameId } = useEntitiesContext();
@@ -98,19 +96,7 @@ export const Game = () => {
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
-  const glitchAddress = getTokenAddress(chain.id);
-  const { price: tokenPrice } = useTokenPrice(
-    glitchAddress,
-    config?.quote,
-    chain.id.toString(),
-  );
-  const { tokenContracts, isLoading: tokensLoading } = useTokens({
-    accountAddresses: account?.address ? [account.address] : [],
-    contractAddresses: [tokenAddress],
-  });
-
-  // Report page-level loading to the app-wide loading screen
-  useLoadingSignal("tokens", !tokensLoading);
+  const { tokenContracts, tokenPrice } = useAppData();
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
     return tokenContracts.find(
