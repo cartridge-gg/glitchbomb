@@ -553,10 +553,11 @@ export const PLGraph = ({
                   {/* Glitch filter for chart lines — red/blue chromatic split */}
                   <filter
                     id="glitch-line"
-                    x="-10%"
-                    y="-10%"
-                    width="120%"
-                    height="120%"
+                    filterUnits="userSpaceOnUse"
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
                     colorInterpolationFilters="sRGB"
                   >
                     <feOffset in="SourceGraphic" dx="0" dy="0" result="base" />
