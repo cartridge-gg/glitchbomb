@@ -64,6 +64,7 @@ export * from "./refresh";
 export * from "./sparkle";
 export * from "./sparkles";
 export * from "./speaker";
+export * from "./sticky-bomb";
 export * from "./tick";
 export * from "./token";
 export * from "./trash";
