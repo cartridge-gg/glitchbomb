@@ -125,7 +125,9 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
               key={`${copy}-${item.id}-${i}`}
               className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
             >
-              <span className="w-1 h-1 rounded-full shrink-0 bg-white mx-3" />
+              {(copy > 0 || i > 0) && (
+                <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />
+              )}
               {formatItem(item)}
             </span>
           )),
