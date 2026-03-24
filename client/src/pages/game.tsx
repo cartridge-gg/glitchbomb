@@ -4,16 +4,20 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+  ConfirmationDialog,
   GameHeader,
   GameOver,
   GameScene,
   GameShop,
   StashModal,
 } from "@/components/containers";
+import {
+  isCashoutConfirmDismissed,
+  setCashoutConfirmDismissed,
+} from "@/components/containers/confirmation-prefs";
 import type { OrbOutcome } from "@/components/containers/game-scene";
 import {
   BombTracker,
-  CashOutChoice,
   type DistributionKey,
   GameStats,
   LevelUpOverlay,
@@ -65,7 +69,7 @@ const NEXT_LEVEL_CURSES: Record<number, string> = {
   7: "Double Bomb",
 };
 
-type OverlayView = "none" | "stash" | "cashout";
+type OverlayView = "none" | "stash";
 
 export const Game = () => {
   const navigate = useNavigate();
@@ -125,6 +129,7 @@ export const Game = () => {
   }, [game, tokenPrice, supply, target]);
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
+  const [showCashoutConfirm, setShowCashoutConfirm] = useState(false);
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
   const [animateHeaderCount, setAnimateHeaderCount] = useState(false);
   const moonrocksRef = useRef<HTMLDivElement>(null);
@@ -537,8 +542,6 @@ export const Game = () => {
     return currentOrb.content;
   }, [currentOrb, outcomeHasMultEffect, outcomeShowMultiplied]);
 
-  const closeOverlay = useCallback(() => setOverlay("none"), []);
-
   const handleCashOut = useCallback(async () => {
     if (!game) return;
     setIsCashingOut(true);
@@ -576,7 +579,13 @@ export const Game = () => {
   );
 
   const openStash = useCallback(() => setOverlay("stash"), []);
-  const openCashout = useCallback(() => setOverlay("cashout"), []);
+  const openCashout = useCallback(() => {
+    if (isCashoutConfirmDismissed()) {
+      handleCashOut();
+    } else {
+      setShowCashoutConfirm(true);
+    }
+  }, [handleCashOut]);
   const dismissLevelComplete = useCallback(
     () => setShowLevelComplete(false),
     [],
@@ -767,40 +776,13 @@ export const Game = () => {
       );
     }
 
-    // Check if milestone reached or cashout confirmation
+    // Check if milestone reached
     const milestoneReached = game.points >= game.milestone;
-    const showCashoutChoice = overlay === "cashout";
 
     // Main gameplay view - inlined to prevent remount on re-render
     return (
       <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
-        {showCashoutChoice ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
-            <GameStats
-              points={game.points}
-              milestone={game.milestone}
-              health={game.health}
-              level={game.level}
-            />
-            <PLChartTabs
-              data={plData}
-              pulls={pulls}
-              mode="absolute"
-              title="POTENTIAL"
-              goal={chartGoal}
-            />
-            <div className="mt-[clamp(6px,2.2svh,18px)] flex-1 min-h-0 flex items-center justify-center">
-              <CashOutChoice
-                moonrocks={game.moonrocks}
-                points={game.points}
-                cashOutValue={formatCashOutValue}
-                onConfirm={handleCashOut}
-                onCancel={closeOverlay}
-                isConfirming={isCashingOut}
-              />
-            </div>
-          </div>
-        ) : milestoneReached ? (
+        {milestoneReached ? (
           <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
@@ -821,7 +803,7 @@ export const Game = () => {
                 points={game.points}
                 ante={game.level === 1 ? 0 : milestoneCost(game.level + 1)}
                 cashOutValue={formatCashOutValue}
-                onCashOut={handleCashOut}
+                onCashOut={openCashout}
                 onEnterShop={handleEnterShop}
                 isEnteringShop={isEnteringShop}
                 isCashingOut={isCashingOut}
@@ -992,6 +974,19 @@ export const Game = () => {
         orbs={game?.bag ?? []}
         discards={game?.discards ?? []}
         viewMode={displaySettings.stashViewMode}
+      />
+      <ConfirmationDialog
+        open={showCashoutConfirm}
+        onOpenChange={setShowCashoutConfirm}
+        title="YOU STILL HAVE CHIPS"
+        description="Are you sure you want to Continue?"
+        confirmLabel="CONTINUE"
+        onConfirm={() => {
+          setShowCashoutConfirm(false);
+          handleCashOut();
+        }}
+        onDismiss={setCashoutConfirmDismissed}
+        isConfirming={isCashingOut}
       />
       <RewardOverlay
         open={showRewardOverlay}

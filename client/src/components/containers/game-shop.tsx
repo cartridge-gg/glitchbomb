@@ -7,11 +7,16 @@ import {
   OrbDisplay,
   RarityPill,
 } from "@/components/elements";
-import { ChipIcon, WarningIcon } from "@/components/icons";
+import { ChipIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
 import { GradientBorder } from "../ui/gradient-border";
+import { ConfirmationDialog } from "./confirmation-dialog";
+import {
+  isShopExitConfirmDismissed,
+  setShopExitConfirmDismissed,
+} from "./confirmation-prefs";
 import { StashModal } from "./stash-modal";
 
 export interface GameShopProps
@@ -394,6 +399,8 @@ export const GameShop = ({
   const handleContinue = () => {
     if (hasSelections) {
       onConfirm(basketIndices);
+    } else if (isShopExitConfirmDismissed()) {
+      onConfirm([]);
     } else {
       setShowExitConfirmation(true);
     }
@@ -403,52 +410,6 @@ export const GameShop = ({
     setShowExitConfirmation(false);
     onConfirm([]);
   };
-
-  // Show exit confirmation screen
-  if (showExitConfirmation) {
-    return (
-      <div className={gameShopVariants({ variant, className })} {...props}>
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 text-center">
-          <WarningIcon size="xl" className="text-yellow-400" />
-          <div className="flex flex-col gap-3">
-            <h1 className="text-white uppercase text-2xl font-secondary">
-              Leave Shop?
-            </h1>
-            <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide max-w-xs">
-              You haven't selected any orbs. Are you sure you want to leave
-              without buying anything?
-            </p>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex items-stretch gap-3 w-full pt-2">
-          <Button
-            variant="secondary"
-            gradient="green"
-            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest"
-            wrapperClassName="flex-1"
-            onClick={() => setShowExitConfirmation(false)}
-          >
-            ← BACK
-          </Button>
-          <GradientBorder color="orange" className="flex-1">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-bold font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all hover:brightness-125"
-              style={{
-                color: "#F1721C",
-                background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
-              }}
-              onClick={handleConfirmExit}
-            >
-              LEAVE SHOP
-            </button>
-          </GradientBorder>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
@@ -539,6 +500,15 @@ export const GameShop = ({
         orbs={existingBag}
         pendingOrbs={pendingOrbs}
         onRemovePending={handleRemovePending}
+      />
+      <ConfirmationDialog
+        open={showExitConfirmation}
+        onOpenChange={setShowExitConfirmation}
+        title="LEAVE SHOP?"
+        description="You haven't selected any orbs. Are you sure you want to leave without buying anything?"
+        confirmLabel="LEAVE SHOP"
+        onConfirm={handleConfirmExit}
+        onDismiss={setShopExitConfirmDismissed}
       />
 
       {/* Flying orb particles */}
