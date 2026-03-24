@@ -144,10 +144,12 @@ export const Game = () => {
   const pointsRef = useRef<HTMLDivElement>(null);
   const healthRef = useRef<HTMLDivElement>(null);
   const [pointsBurst, setPointsBurst] = useState(0);
-  // Hold displayed points at pre-pull value until flying animation arrives
+  // Hold displayed values at pre-pull value until flying animation arrives
   const [heldPoints, setHeldPoints] = useState<number | null>(null);
+  const [heldHealth, setHeldHealth] = useState<number | null>(null);
   // Capture game state at time of pull initiation (before any state updates)
   const prePullPointsRef = useRef<number | null>(null);
+  const prePullHealthRef = useRef<number | null>(null);
   const prePullMultiplierRef = useRef<number>(1);
 
   // Outcome overlay state (rendered on PL chart)
@@ -264,6 +266,8 @@ export const Game = () => {
       setShowRewardOverlay(false);
       setAnimateHeaderCount(false);
       setRevealedSegments(new Set());
+      setHeldHealth(null);
+      prePullHealthRef.current = null;
     }
   }, [setGameId, searchParams]);
 
@@ -381,9 +385,12 @@ export const Game = () => {
       const hasMultEffect =
         base !== null && multiplied !== null && multiplied !== base && mult > 1;
 
-      // Hold points at pre-pull value for point orbs (released when flying anim arrives)
+      // Hold displayed values at pre-pull value until flying animation arrives
       if (orb.isPoint()) {
         setHeldPoints(prePullPointsRef.current ?? currentGame?.points ?? 0);
+      }
+      if (orb.isHealth() || orb.isBomb()) {
+        setHeldHealth(prePullHealthRef.current ?? currentGame?.health ?? 0);
       }
 
       setCurrentOrb({
@@ -443,8 +450,16 @@ export const Game = () => {
           }
         }
         setCurrentOrb(undefined);
-        setHeldPoints(null);
-        prePullPointsRef.current = null;
+        // Held values are released when the flying particle arrives (handlePointsArrive / health callback).
+        // Only release here as a safety fallback for non-point/non-health orbs.
+        if (!orb.isPoint()) {
+          setHeldPoints(null);
+          prePullPointsRef.current = null;
+        }
+        if (!orb.isHealth() && !orb.isBomb()) {
+          setHeldHealth(null);
+          prePullHealthRef.current = null;
+        }
       }, clearMs);
 
       return () => clearTimeout(timer);
@@ -456,12 +471,14 @@ export const Game = () => {
     if (!game || isPulling) return;
     // Snapshot state before pull for held-display during animation
     prePullPointsRef.current = game.points;
+    prePullHealthRef.current = game.health;
     prePullMultiplierRef.current = game.multiplier;
     setIsPulling(true);
     const success = await pull(game.id);
     if (!success) {
       setIsPulling(false);
       prePullPointsRef.current = null;
+      prePullHealthRef.current = null;
     }
   }, [pull, game, isPulling]);
 
@@ -478,6 +495,9 @@ export const Game = () => {
     const timer = setTimeout(() => {
       if (flyParticle.variant === "point") {
         handlePointsArrive();
+      } else if (flyParticle.variant === "health") {
+        setHeldHealth(null);
+        prePullHealthRef.current = null;
       }
       setFlyParticle(null);
     }, 350);
@@ -563,9 +583,11 @@ export const Game = () => {
   );
   const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
 
-  // Displayed points: held at pre-pull value during fly animation, otherwise actual
+  // Displayed values: held at pre-pull value during fly animation, otherwise actual
   const displayedPoints =
     heldPoints !== null ? heldPoints : (game?.points ?? 0);
+  const displayedHealth =
+    heldHealth !== null ? heldHealth : (game?.health ?? 0);
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
@@ -813,7 +835,7 @@ export const Game = () => {
               <GameStats
                 points={displayedPoints}
                 milestone={game.milestone}
-                health={game.health}
+                health={displayedHealth}
                 level={game.level}
                 pointsBurst={pointsBurst}
                 pointsRef={pointsRef}
