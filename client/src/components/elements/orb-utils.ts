@@ -7,12 +7,14 @@ import {
   CrossIcon,
   HeartIcon,
   SparklesIcon,
+  StickyBombIcon,
 } from "@/components/icons";
 import type { Orb } from "@/models";
 import { OrbType } from "@/models/orb";
 
 /** Get the icon component for an orb type */
 export const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
+  if (orb.value === OrbType.StickyBomb) return StickyBombIcon;
   if (orb.isBomb()) {
     if (useBombTierIcons) {
       if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
