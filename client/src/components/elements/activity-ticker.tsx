@@ -99,10 +99,12 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     track.style.animationDelay = `-${progress * dur}s`;
   }, []);
 
-  if (items.length === 0) return null;
-
-  const minPerCopy = Math.max(1, Math.ceil(8 / items.length));
-  const oneCopy = Array.from({ length: minPerCopy }, () => items).flat();
+  const minPerCopy =
+    items.length > 0 ? Math.max(1, Math.ceil(8 / items.length)) : 0;
+  const oneCopy =
+    items.length > 0
+      ? Array.from({ length: minPerCopy }, () => items).flat()
+      : [];
   const duration = oneCopy.length * 6;
 
   return (
@@ -114,25 +116,27 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      <div
-        ref={trackRef}
-        className="ticker-track inline-flex whitespace-nowrap items-center h-full"
-        style={{ "--ticker-duration": `${duration}s` } as React.CSSProperties}
-      >
-        {[0, 1].map((copy) =>
-          oneCopy.map((item, i) => (
-            <span
-              key={`${copy}-${item.id}-${i}`}
-              className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
-            >
-              {(copy > 0 || i > 0) && (
-                <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />
-              )}
-              {formatItem(item)}
-            </span>
-          )),
-        )}
-      </div>
+      {oneCopy.length > 0 && (
+        <div
+          ref={trackRef}
+          className="ticker-track inline-flex whitespace-nowrap items-center h-full"
+          style={{ "--ticker-duration": `${duration}s` } as React.CSSProperties}
+        >
+          {[0, 1].map((copy) =>
+            oneCopy.map((item, i) => (
+              <span
+                key={`${copy}-${item.id}-${i}`}
+                className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
+              >
+                {(copy > 0 || i > 0) && (
+                  <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />
+                )}
+                {formatItem(item)}
+              </span>
+            )),
+          )}
+        </div>
+      )}
     </div>
   );
 }

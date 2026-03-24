@@ -4,18 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
+import { ActivityTicker } from "@/components/elements/activity-ticker";
 import {
   ArrowRightIcon,
   BombIcon,
   BracketArrowIcon,
   NumsLogoIcon,
 } from "@/components/icons";
-import { ActivityTickerBanner } from "@/components/modules/activity-ticker-banner";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { getTokenAddress } from "@/config";
+import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import {
   cumulativeRewards,
@@ -23,6 +23,7 @@ import {
   toTokens,
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
+import { useActivityFeed } from "@/hooks/activity-feed";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokenPrice } from "@/hooks/token-price";
 import { toDecimal, useTokens } from "@/hooks/tokens";
@@ -45,6 +46,7 @@ export const Home = () => {
   const { starterpacks, config } = useEntitiesContext();
   const { games: onchainGames } = useOwnedGames();
   const offlineState = useOfflineStore();
+  const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
 
   // On mobile, use practice games from localStorage; on desktop, use on-chain games
   const ownedGames = useMemo(() => {
@@ -484,7 +486,7 @@ export const Home = () => {
         onShowDistributionPercentChange={setShowDistributionPercent}
       />
 
-      <ActivityTickerBanner />
+      <ActivityTicker items={activityItems} />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center px-4 pb-0 min-h-0 overflow-hidden">
@@ -1351,6 +1353,8 @@ export const Home = () => {
             showDistributionPercent={displaySettings.showDistributionPercent}
             onShowDistributionPercentChange={setShowDistributionPercent}
           />
+
+          <ActivityTicker items={activityItems} />
 
           {/* Scrollable content */}
           <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
