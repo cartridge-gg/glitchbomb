@@ -658,10 +658,7 @@ export const PLGraph = ({
                       <motion.circle {...circleProps} />
                     </g>
                   ) : (
-                    <motion.circle
-                      key={`point-${point.id}`}
-                      {...circleProps}
-                    />
+                    <motion.circle key={`point-${point.id}`} {...circleProps} />
                   );
                 })}
               </svg>
