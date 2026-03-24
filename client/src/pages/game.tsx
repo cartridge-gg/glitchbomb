@@ -979,8 +979,8 @@ export const Game = () => {
         open={showCashoutConfirm}
         onOpenChange={setShowCashoutConfirm}
         title="YOU STILL HAVE CHIPS"
-        description="Are you sure you want to Continue?"
-        confirmLabel="CONTINUE"
+        description="Are you sure you want to Cash Out?"
+        confirmLabel="CASH OUT"
         onConfirm={() => {
           setShowCashoutConfirm(false);
           handleCashOut();
