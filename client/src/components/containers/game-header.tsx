@@ -189,6 +189,8 @@ export const GameHeader = ({
               onShowDistributionPercentChange={onShowDistributionPercentChange}
               stashViewMode={stashViewMode}
               onStashViewModeChange={onStashViewModeChange}
+              username={username}
+              onProfileClick={onProfileClick}
             />
           )}
       </div>

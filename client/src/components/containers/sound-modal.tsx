@@ -373,11 +373,12 @@ export const SettingsModal = ({
           </Button>
         )}
 
-        {/* Profile button */}
+        {/* Profile button — mobile only (desktop shows profile in header) */}
         {username && (
           <Button
             variant="secondary"
             gradient="green"
+            wrapperClassName="md:hidden"
             className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
             onClick={() => {
               onClose();
