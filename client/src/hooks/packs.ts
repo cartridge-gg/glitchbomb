@@ -38,6 +38,7 @@ export function useOwnedGames() {
   const { address } = useAccount();
   const { chain } = useNetwork();
   const [games, setGames] = useState<Game[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(() => {
     if (!subscriptionRef.current) return;
@@ -50,7 +51,7 @@ export function useOwnedGames() {
     }
   }, []);
 
-  const { tokenBalances: balances } = useTokens({
+  const { tokenBalances: balances, isLoading: tokensLoading } = useTokens({
     accountAddresses: address ? [addAddressPadding(address)] : [],
     contractAddresses: [getCollectionAddress(chain.id)],
     tokenIds: [], // Empty to get all token IDs
@@ -91,16 +92,22 @@ export function useOwnedGames() {
 
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
-    if (!client || !gameIds.length) return;
+    if (!client || !gameIds.length) {
+      setIsFetching(false);
+      return;
+    }
 
     // Cancel existing subscriptions
     subscriptionRef.current = null;
 
     // Fetch initial data
+    setIsFetching(true);
     const query = getOwnedGamesQuery(gameIds).build();
     await client
       .getEntities(query)
       .then((result) => onUpdate({ data: result.items, error: undefined }));
+
+    setIsFetching(false);
 
     // Subscribe to entity and event updates
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
@@ -116,7 +123,10 @@ export function useOwnedGames() {
     };
   }, [refresh, cancelSubscription]);
 
+  const isLoading = tokensLoading || isFetching;
+
   return {
     games,
+    isLoading,
   };
 }

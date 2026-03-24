@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import { ActivityTicker } from "@/components/elements/activity-ticker";
+import { LoadingScreen } from "@/components/elements/loading-screen";
 import {
   ArrowRightIcon,
   BombIcon,
@@ -43,8 +44,8 @@ export const Home = () => {
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { starterpacks, config } = useEntitiesContext();
-  const { games: onchainGames } = useOwnedGames();
+  const { starterpacks, config, status } = useEntitiesContext();
+  const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const offlineState = useOfflineStore();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
 
@@ -104,7 +105,11 @@ export const Home = () => {
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
 
-  const { tokenBalances, tokenContracts } = useTokens({
+  const {
+    tokenBalances,
+    tokenContracts,
+    isLoading: tokensLoading,
+  } = useTokens({
     accountAddresses: account?.address ? [account.address] : [],
     contractAddresses: [tokenAddress],
   });
@@ -466,8 +471,11 @@ export const Home = () => {
     [isLoggedIn, onConnectClick],
   );
 
+  const appLoading = status === "loading" || gamesLoading || tokensLoading;
+
   return (
     <div className="absolute inset-0 flex flex-col">
+      <LoadingScreen isLoading={appLoading} />
       {/* Header */}
       <AppHeader
         moonrocks={displayMoonrocks}

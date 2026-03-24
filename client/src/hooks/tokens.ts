@@ -76,6 +76,7 @@ export function useTokens(
   const { account } = useAccount();
   const { client } = useEntitiesContext();
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const requestRef = useRef<(GetTokenRequest & GetTokenBalanceRequest) | null>(
     null,
   );
@@ -102,6 +103,7 @@ export function useTokens(
 
   const fetchBalances = useCallback(async () => {
     if (!requestRef.current || !client || !account) return;
+    setIsLoading(true);
     const contractAddresses =
       request.contractAddresses?.map((i: string) =>
         addAddressPadding(num.toHex64(i)),
@@ -137,6 +139,7 @@ export function useTokens(
     }
     subscriptionRef.current = subscription;
     setTokenBalances(balances.items);
+    setIsLoading(false);
   }, [
     client,
     account,
@@ -146,11 +149,11 @@ export function useTokens(
   ]);
 
   useEffect(() => {
-    if (
-      (request?.accountAddresses || []).length === 0 ||
-      (contracts || []).length === 0
-    )
+    if ((request?.accountAddresses || []).length === 0) {
+      setIsLoading(false);
       return;
+    }
+    if ((contracts || []).length === 0) return;
     if (!equal(request, requestRef.current)) {
       requestRef.current = request;
       fetchBalances();
@@ -164,6 +167,7 @@ export function useTokens(
   return {
     tokenContracts: contracts,
     tokenBalances,
+    isLoading,
     refetch,
   };
 }
