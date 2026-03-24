@@ -142,6 +142,7 @@ export const Game = () => {
   );
   const lastPullIdRef = useRef<number | null>(null);
   const pointsRef = useRef<HTMLDivElement>(null);
+  const healthRef = useRef<HTMLDivElement>(null);
   const [pointsBurst, setPointsBurst] = useState(0);
   // Hold displayed points at pre-pull value until flying animation arrives
   const [heldPoints, setHeldPoints] = useState<number | null>(null);
@@ -152,7 +153,8 @@ export const Game = () => {
   // Outcome overlay state (rendered on PL chart)
   const [outcomeShowMultiplied, setOutcomeShowMultiplied] = useState(false);
   const [flyParticle, setFlyParticle] = useState<{
-    value: number;
+    label: string;
+    variant: "point" | "health";
     startX: number;
     startY: number;
     endX: number;
@@ -406,15 +408,33 @@ export const Game = () => {
       // Clear after animation — launch flying particle first
       const clearMs = hasMultEffect ? 2500 : 2000;
       const timer = setTimeout(() => {
-        // Launch flying particle for point orbs before clearing overlay
+        const outcomeEl = outcomeRef.current;
+        // Launch flying particle for point orbs → points counter
         if (orb.isPoint()) {
-          const outcomeEl = outcomeRef.current;
           const targetEl = pointsRef.current;
           if (outcomeEl && targetEl) {
             const startRect = outcomeEl.getBoundingClientRect();
             const endRect = targetEl.getBoundingClientRect();
+            const pts = hasMultEffect ? (multiplied ?? 0) : (base ?? 0);
             setFlyParticle({
-              value: hasMultEffect ? (multiplied ?? 0) : (base ?? 0),
+              label: `+${pts}`,
+              variant: "point",
+              startX: startRect.left + startRect.width / 2,
+              startY: startRect.top + startRect.height / 2,
+              endX: endRect.left + endRect.width / 2,
+              endY: endRect.top + endRect.height / 2,
+            });
+          }
+        }
+        // Launch flying particle for health/bomb orbs → health bar
+        if (orb.isHealth() || orb.isBomb()) {
+          const targetEl = healthRef.current;
+          if (outcomeEl && targetEl) {
+            const startRect = outcomeEl.getBoundingClientRect();
+            const endRect = targetEl.getBoundingClientRect();
+            setFlyParticle({
+              label: orb.outcome(),
+              variant: "health",
               startX: startRect.left + startRect.width / 2,
               startY: startRect.top + startRect.height / 2,
               endX: endRect.left + endRect.width / 2,
@@ -452,11 +472,13 @@ export const Game = () => {
     setPointsBurst((prev) => prev + 1);
   }, []);
 
-  // Flying particle → points counter callback
+  // Flying particle → target counter callback
   useEffect(() => {
     if (!flyParticle) return;
     const timer = setTimeout(() => {
-      handlePointsArrive();
+      if (flyParticle.variant === "point") {
+        handlePointsArrive();
+      }
       setFlyParticle(null);
     }, 350);
     return () => clearTimeout(timer);
@@ -795,6 +817,7 @@ export const Game = () => {
                 level={game.level}
                 pointsBurst={pointsBurst}
                 pointsRef={pointsRef}
+                healthRef={healthRef}
               />
               {/* PL Chart with outcome overlay */}
               <div className="relative">
@@ -980,10 +1003,11 @@ export const Game = () => {
         variant="enter"
         onDismiss={dismissLevelEnter}
       />
-      {/* Flying points particle */}
+      {/* Flying particle (points → counter, health/bomb → health bar) */}
       <AnimatePresence>
-        {flyParticle && flyParticle.value > 0 && (
+        {flyParticle && (
           <motion.div
+            key={`fly-${flyParticle.variant}-${flyParticle.startX}`}
             className="fixed z-[60] pointer-events-none"
             style={{ left: 0, top: 0 }}
             initial={{
@@ -1005,15 +1029,21 @@ export const Game = () => {
             }}
           >
             <span
-              className="font-rubik text-2xl font-bold text-green-400"
+              className={`font-rubik text-2xl font-bold ${
+                flyParticle.variant === "health"
+                  ? "text-pink-400"
+                  : "text-green-400"
+              }`}
               style={{
                 textShadow:
-                  "0 0 16px rgba(74, 222, 128, 0.8), 0 0 32px rgba(74, 222, 128, 0.4)",
+                  flyParticle.variant === "health"
+                    ? "0 0 16px rgba(255, 0, 128, 0.8), 0 0 32px rgba(255, 0, 128, 0.4)"
+                    : "0 0 16px rgba(74, 222, 128, 0.8), 0 0 32px rgba(74, 222, 128, 0.4)",
                 transform: "translate(-50%, -50%)",
                 display: "inline-block",
               }}
             >
-              +{flyParticle.value}
+              {flyParticle.label}
             </span>
           </motion.div>
         )}

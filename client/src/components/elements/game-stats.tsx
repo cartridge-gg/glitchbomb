@@ -45,6 +45,8 @@ export interface GameStatsProps {
   pointsBurst?: number;
   /** Ref attached to the points counter element (fly target) */
   pointsRef?: RefObject<HTMLDivElement | null>;
+  /** Ref attached to the health display element (fly target) */
+  healthRef?: RefObject<HTMLDivElement | null>;
 }
 
 export const GameStats = ({
@@ -56,6 +58,7 @@ export const GameStats = ({
   className = "",
   pointsBurst = 0,
   pointsRef,
+  healthRef,
 }: GameStatsProps) => {
   const goalProgress = Math.min(
     milestone > 0 ? (points / milestone) * 100 : 0,
@@ -69,7 +72,7 @@ export const GameStats = ({
       className={`flex items-center gap-[clamp(10px,2.8svh,48px)] ${className}`}
     >
       {/* Left - Health */}
-      <div className="flex-1 flex flex-col gap-1">
+      <div ref={healthRef} className="flex-1 flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-pink-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
             Health
