@@ -1,5 +1,6 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -17,6 +18,7 @@ import {
   GameStats,
   LevelUpOverlay,
   MilestoneChoice,
+  Outcome,
   PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
   RewardOverlay,
@@ -146,6 +148,18 @@ export const Game = () => {
   // Capture game state at time of pull initiation (before any state updates)
   const prePullPointsRef = useRef<number | null>(null);
   const prePullMultiplierRef = useRef<number>(1);
+
+  // Outcome overlay state (rendered on PL chart)
+  const [outcomeShowMultiplied, setOutcomeShowMultiplied] = useState(false);
+  const [flyParticle, setFlyParticle] = useState<{
+    value: number;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  } | null>(null);
+  const outcomeRef = useRef<HTMLDivElement>(null);
+  const [outcomeKey, setOutcomeKey] = useState(0);
 
   // Loading states for actions
   const [isEnteringShop, setIsEnteringShop] = useState(false);
@@ -377,6 +391,9 @@ export const Game = () => {
         multipliedPoints: hasMultEffect ? multiplied : undefined,
         activeMultiplier: hasMultEffect ? mult : undefined,
       });
+      setOutcomeKey((prev) => prev + 1);
+      setFlyParticle(null);
+      setOutcomeShowMultiplied(false);
       // Skip orb sound if this pull triggered milestone (level complete sound plays instead)
       if (!milestoneShownRef.current) {
         playOrbSound(orb);
@@ -386,9 +403,25 @@ export const Game = () => {
 
       lastPullIdRef.current = latestPull.id;
 
-      // Clear after animation — longer if multiplier effect is shown
-      const clearMs = hasMultEffect ? 3200 : 2500;
+      // Clear after animation — launch flying particle first
+      const clearMs = hasMultEffect ? 2500 : 2000;
       const timer = setTimeout(() => {
+        // Launch flying particle for point orbs before clearing overlay
+        if (orb.isPoint()) {
+          const outcomeEl = outcomeRef.current;
+          const targetEl = pointsRef.current;
+          if (outcomeEl && targetEl) {
+            const startRect = outcomeEl.getBoundingClientRect();
+            const endRect = targetEl.getBoundingClientRect();
+            setFlyParticle({
+              value: hasMultEffect ? (multiplied ?? 0) : (base ?? 0),
+              startX: startRect.left + startRect.width / 2,
+              startY: startRect.top + startRect.height / 2,
+              endX: endRect.left + endRect.width / 2,
+              endY: endRect.top + endRect.height / 2,
+            });
+          }
+        }
         setCurrentOrb(undefined);
         setHeldPoints(null);
         prePullPointsRef.current = null;
@@ -418,6 +451,49 @@ export const Game = () => {
     prePullPointsRef.current = null;
     setPointsBurst((prev) => prev + 1);
   }, []);
+
+  // Flying particle → points counter callback
+  useEffect(() => {
+    if (!flyParticle) return;
+    const timer = setTimeout(() => {
+      handlePointsArrive();
+      setFlyParticle(null);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [flyParticle, handlePointsArrive]);
+
+  // Multiplier breakdown timing for outcome overlay on PL chart
+  useEffect(() => {
+    if (!currentOrb) {
+      setOutcomeShowMultiplied(false);
+      return;
+    }
+    const hasMultEffect =
+      currentOrb.variant === "point" &&
+      currentOrb.multipliedPoints !== undefined &&
+      currentOrb.activeMultiplier !== undefined &&
+      currentOrb.activeMultiplier > 1;
+    if (hasMultEffect) {
+      const timer = setTimeout(() => setOutcomeShowMultiplied(true), 600);
+      return () => clearTimeout(timer);
+    }
+    setOutcomeShowMultiplied(false);
+  }, [currentOrb]);
+
+  // Displayed outcome content (updates when multiplier breakdown reveals)
+  const outcomeHasMultEffect =
+    currentOrb?.variant === "point" &&
+    currentOrb?.multipliedPoints !== undefined &&
+    currentOrb?.activeMultiplier !== undefined &&
+    (currentOrb?.activeMultiplier ?? 0) > 1;
+
+  const outcomeContent = useMemo(() => {
+    if (!currentOrb) return "";
+    if (outcomeHasMultEffect && outcomeShowMultiplied) {
+      return `+${currentOrb.multipliedPoints} pts`;
+    }
+    return currentOrb.content;
+  }, [currentOrb, outcomeHasMultEffect, outcomeShowMultiplied]);
 
   const closeOverlay = useCallback(() => setOverlay("none"), []);
 
@@ -720,13 +796,81 @@ export const Game = () => {
                 pointsBurst={pointsBurst}
                 pointsRef={pointsRef}
               />
-              <PLChartTabs
-                data={plData}
-                pulls={pulls}
-                mode="absolute"
-                title="POTENTIAL"
-                goal={chartGoal}
-              />
+              {/* PL Chart with outcome overlay */}
+              <div className="relative">
+                <PLChartTabs
+                  data={plData}
+                  pulls={pulls}
+                  mode="absolute"
+                  title="POTENTIAL"
+                  goal={chartGoal}
+                />
+                {/* Outcome overlay — shown on chart so puller stays clickable */}
+                <AnimatePresence>
+                  {currentOrb && (
+                    <motion.div
+                      key={outcomeKey}
+                      className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 15,
+                          mass: 0.8,
+                        }}
+                      >
+                        <div
+                          ref={outcomeRef}
+                          className="flex flex-col items-center gap-0"
+                        >
+                          <motion.div
+                            animate={
+                              outcomeShowMultiplied
+                                ? { scale: [1.2, 1], opacity: [0.7, 1] }
+                                : { scale: 1 }
+                            }
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                          >
+                            <Outcome
+                              content={outcomeContent}
+                              variant={currentOrb.variant ?? "default"}
+                              size="md"
+                            />
+                          </motion.div>
+                          {/* Multiplier breakdown */}
+                          <AnimatePresence>
+                            {outcomeHasMultEffect && outcomeShowMultiplied && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.3, y: -4 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 500,
+                                  damping: 15,
+                                }}
+                                className="mt-1"
+                              >
+                                <Outcome
+                                  content={`${currentOrb.basePoints} × ${currentOrb.activeMultiplier}x`}
+                                  variant="multiplier"
+                                  size="sm"
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <GameScene
                 className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
                 sceneRef={gameSceneRef}
@@ -743,8 +887,6 @@ export const Game = () => {
                 pullLoading={isPulling}
                 showPercentages={displaySettings.showDistributionPercent}
                 onPull={handlePull}
-                pointsTargetRef={pointsRef}
-                onPointsArrive={handlePointsArrive}
               />
             </div>
             <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
@@ -839,6 +981,44 @@ export const Game = () => {
         variant="enter"
         onDismiss={dismissLevelEnter}
       />
+      {/* Flying points particle */}
+      <AnimatePresence>
+        {flyParticle && flyParticle.value > 0 && (
+          <motion.div
+            className="fixed z-[60] pointer-events-none"
+            style={{ left: 0, top: 0 }}
+            initial={{
+              x: flyParticle.startX,
+              y: flyParticle.startY,
+              scale: 1,
+              opacity: 1,
+            }}
+            animate={{
+              x: flyParticle.endX,
+              y: flyParticle.endY,
+              scale: 0.5,
+              opacity: 0,
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.45,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            <span
+              className="font-rubik text-2xl font-bold text-green-400"
+              style={{
+                textShadow:
+                  "0 0 16px rgba(74, 222, 128, 0.8), 0 0 32px rgba(74, 222, 128, 0.4)",
+                transform: "translate(-50%, -50%)",
+                display: "inline-block",
+              }}
+            >
+              +{flyParticle.value}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
