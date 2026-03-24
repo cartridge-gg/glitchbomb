@@ -39,7 +39,8 @@ export const MilestoneChoice = ({
     "font-secondary text-[clamp(0.8rem,2.5svh,1.25rem)] leading-none";
   const rewardLabelClass =
     "font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider";
-  const rewardIconClass = "w-[clamp(18px,3.5svh,24px)] h-[clamp(18px,3.5svh,24px)]";
+  const rewardIconClass =
+    "w-[clamp(18px,3.5svh,24px)] h-[clamp(18px,3.5svh,24px)]";
 
   return (
     <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full h-full">
@@ -91,7 +92,9 @@ export const MilestoneChoice = ({
             style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
           >
             <div className="flex items-center justify-center gap-[clamp(2px,0.5svh,5px)]">
-              <ChipIcon className={`text-orange-400 ${rewardIconClass} shrink-0`} />
+              <ChipIcon
+                className={`text-orange-400 ${rewardIconClass} shrink-0`}
+              />
               <GlitchText
                 className={`text-orange-400 ${rewardValueClass}`}
                 text={`+${points}`}
