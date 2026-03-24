@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
@@ -103,10 +104,13 @@ export const Game = () => {
     config?.quote,
     chain.id.toString(),
   );
-  const { tokenContracts } = useTokens({
+  const { tokenContracts, isLoading: tokensLoading } = useTokens({
     accountAddresses: account?.address ? [account.address] : [],
     contractAddresses: [tokenAddress],
   });
+
+  // Report page-level loading to the app-wide loading screen
+  useLoadingSignal("tokens", !tokensLoading);
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
     return tokenContracts.find(

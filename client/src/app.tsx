@@ -8,6 +8,7 @@ import {
   voyager,
 } from "@starknet-react/core";
 import { Toaster } from "sonner";
+import { LoadingScreen } from "@/components/elements/loading-screen";
 import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
 import {
   chains,
@@ -17,6 +18,7 @@ import {
   getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
+import { LoadingProvider } from "@/contexts/loading-context";
 import Router from "@/routes";
 import { isMobile } from "@/utils/mobile";
 
@@ -101,10 +103,13 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
-        <EntitiesProvider>
-          <GameStartedNotifier />
-          <Router />
-        </EntitiesProvider>
+        <LoadingProvider>
+          <EntitiesProvider>
+            <LoadingScreen />
+            <GameStartedNotifier />
+            <Router />
+          </EntitiesProvider>
+        </LoadingProvider>
       </StarknetConfig>
       <Toaster
         position="top-left"

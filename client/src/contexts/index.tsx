@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import { NAMESPACE } from "@/constants";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import {
   CONFIG,
   Config,
@@ -234,6 +235,9 @@ function useEntitiesValue(): EntitiesContextType {
       cancelSubscription(gameSubscriptionRef, "game");
     };
   }, [refresh, cancelSubscription]);
+
+  // Report entities loading state to the app-wide loading context
+  useLoadingSignal("entities", status === "success");
 
   return {
     client,

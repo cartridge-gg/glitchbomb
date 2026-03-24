@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { GlitchText } from "@/components/ui/glitch-text";
+import { useLoadingContext } from "@/contexts/use-loading";
 
 const MIN_DISPLAY_MS = 1200;
 
-interface LoadingScreenProps {
-  isLoading: boolean;
-}
-
-export function LoadingScreen({ isLoading }: LoadingScreenProps) {
+export function LoadingScreen() {
+  const { allReady } = useLoadingContext();
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
   const [minElapsed, setMinElapsed] = useState(false);
@@ -18,14 +16,14 @@ export function LoadingScreen({ isLoading }: LoadingScreenProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Start fade-out once data is ready AND minimum time elapsed
+  // Start fade-out once all signals are ready AND minimum time elapsed
   useEffect(() => {
-    if (!isLoading && minElapsed) {
+    if (allReady && minElapsed) {
       setFading(true);
       const timer = setTimeout(() => setVisible(false), 500);
       return () => clearTimeout(timer);
     }
-  }, [isLoading, minElapsed]);
+  }, [allReady, minElapsed]);
 
   if (!visible) return null;
 

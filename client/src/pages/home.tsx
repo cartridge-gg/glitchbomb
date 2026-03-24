@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
 import { LoadingSpinner } from "@/components/elements";
 import { ActivityTicker } from "@/components/elements/activity-ticker";
-import { LoadingScreen } from "@/components/elements/loading-screen";
 import {
   ArrowRightIcon,
   BombIcon,
@@ -18,6 +17,7 @@ import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import {
   cumulativeRewards,
   maxPayout as maxPayoutRaw,
@@ -44,7 +44,7 @@ export const Home = () => {
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
-  const { starterpacks, config, status } = useEntitiesContext();
+  const { starterpacks, config } = useEntitiesContext();
   const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const offlineState = useOfflineStore();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
@@ -471,11 +471,12 @@ export const Home = () => {
     [isLoggedIn, onConnectClick],
   );
 
-  const appLoading = status === "loading" || gamesLoading || tokensLoading;
+  // Report page-level loading to the app-wide loading screen
+  useLoadingSignal("games", !gamesLoading);
+  useLoadingSignal("tokens", !tokensLoading);
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      <LoadingScreen isLoading={appLoading} />
       {/* Header */}
       <AppHeader
         moonrocks={displayMoonrocks}
