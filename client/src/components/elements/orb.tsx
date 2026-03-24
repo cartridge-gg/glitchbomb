@@ -10,6 +10,9 @@ const orbVariants = cva(
       variant: {
         default: "",
         bomb: "",
+        bomb1: "",
+        bomb2: "",
+        bomb3: "",
         point: "",
         multiplier: "",
         chip: "",
@@ -31,17 +34,23 @@ const orbVariants = cva(
 const iconVariants = (variant: string) => {
   switch (variant) {
     case "point":
-      return icons.OrbPointIcon;
+      return icons.SparklesIcon;
     case "bomb":
-      return icons.OrbBombIcon;
+      return icons.BombOrbIcon;
+    case "bomb1":
+      return icons.Bomb1xIcon;
+    case "bomb2":
+      return icons.Bomb2xIcon;
+    case "bomb3":
+      return icons.Bomb3xIcon;
     case "multiplier":
-      return icons.OrbMultiplierIcon;
+      return icons.CrossIcon;
     case "health":
-      return icons.OrbHealthIcon;
+      return icons.HeartIcon;
     case "chip":
-      return icons.OrbChipIcon;
+      return icons.BoltIcon;
     case "moonrock":
-      return icons.OrbMoonrockIcon;
+      return icons.BoltIcon;
     default:
       return icons.OrbIcon;
   }
@@ -53,6 +62,15 @@ const VARIANT_COLORS = {
     cssVar: "#ffffff",
   },
   bomb: {
+    cssVar: "#FFFFFF",
+  },
+  bomb1: {
+    cssVar: "#FFFFFF",
+  },
+  bomb2: {
+    cssVar: "#FFFFFF",
+  },
+  bomb3: {
     cssVar: "#FFFFFF",
   },
   point: {
@@ -140,7 +158,16 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
         }}
       >
         <Icon
-          className={cn("h-full w-full", variant === "bomb" && "glitch-icon")}
+          className={cn(
+            variant === "chip" || variant === "moonrock"
+              ? "h-[35%] w-[35%]"
+              : "h-[60%] w-[60%]",
+            (variant === "bomb" ||
+              variant === "bomb1" ||
+              variant === "bomb2" ||
+              variant === "bomb3") &&
+              "glitch-icon",
+          )}
         />
       </div>
     </motion.div>

@@ -7,6 +7,9 @@ const outcomeVariants = cva("select-none uppercase relative text-center", {
     variant: {
       default: "whitespace-nowrap",
       bomb: "whitespace-nowrap",
+      bomb1: "whitespace-nowrap",
+      bomb2: "whitespace-nowrap",
+      bomb3: "whitespace-nowrap",
       point: "whitespace-nowrap",
       multiplier: "whitespace-nowrap",
       health: "whitespace-nowrap",
@@ -27,6 +30,9 @@ const outcomeVariants = cva("select-none uppercase relative text-center", {
 const textColorVariants = (variant: string) => {
   switch (variant) {
     case "bomb":
+    case "bomb1":
+    case "bomb2":
+    case "bomb3":
       return "text-white/25";
     case "point":
       return "text-green-900";
@@ -46,6 +52,9 @@ const textColorVariants = (variant: string) => {
 const backgroundVariants = (variant: string) => {
   switch (variant) {
     case "bomb":
+    case "bomb1":
+    case "bomb2":
+    case "bomb3":
       return "linear-gradient(0deg, #AAAAAA, #FFFFFF)";
     case "point":
       return "var(--point-gradient-100)";
@@ -80,7 +89,11 @@ export const Outcome = ({
     <motion.div
       className={cn(
         outcomeVariants({ variant, size, className }),
-        variant === "bomb" && "glitch-text",
+        (variant === "bomb" ||
+          variant === "bomb1" ||
+          variant === "bomb2" ||
+          variant === "bomb3") &&
+          "glitch-text",
       )}
       style={{
         boxShadow: "0px 0px 256px 128px #000000DD",

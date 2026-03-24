@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { BagIcon, MoonrockIcon } from "@/components/icons";
+import { BagIcon, BoltIcon } from "@/components/icons";
 import { Orb, OrbType } from "@/models";
 import { OrbDisplay } from "./orb-display";
 
@@ -142,8 +142,8 @@ export const OrbCategorySummary = forwardRef<
                       borderColor: config.color,
                     }}
                   >
-                    <MoonrockIcon
-                      className="w-5 h-5"
+                    <BoltIcon
+                      className="w-3.5 h-3.5"
                       style={{
                         color: config.color,
                         filter: `drop-shadow(0 0 3px ${config.color})`,
