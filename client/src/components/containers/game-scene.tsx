@@ -1,5 +1,4 @@
 import { cva, type VariantProps } from "class-variance-authority";
-
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
   CurseBadge,
@@ -16,7 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MultiplierMath } from "@/helpers/multiplier";
-import { cn } from "@/lib/utils";
 
 export interface OrbOutcome {
   variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
@@ -39,7 +37,6 @@ export interface GameSceneProps
   values: DistributionValues;
   hasCurse?: boolean;
   curseLabel?: string;
-  orb?: OrbOutcome;
   pullLoading?: boolean;
   showPercentages?: boolean;
   onPull: () => void;
@@ -84,7 +81,6 @@ export const GameScene = ({
   values,
   hasCurse = false,
   curseLabel,
-  orb,
   pullLoading = false,
   showPercentages = false,
   variant,
@@ -116,18 +112,7 @@ export const GameScene = ({
     () => MultiplierMath.getMagnitudeColor(multiplierMagnitude),
     [multiplierMagnitude],
   );
-  // Brief dim on distribution when outcome arrives
-  const [dimmed, setDimmed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (orb) {
-      setDimmed(true);
-      const timer = setTimeout(() => setDimmed(false), 1500);
-      return () => clearTimeout(timer);
-    }
-    setDimmed(false);
-  }, [orb]);
 
   return (
     <div
@@ -138,10 +123,7 @@ export const GameScene = ({
       {/* Distribution */}
       <div
         ref={sceneRef}
-        className={cn(
-          "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300",
-          dimmed ? "opacity-10" : "opacity-100",
-        )}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <Distribution
           values={values}

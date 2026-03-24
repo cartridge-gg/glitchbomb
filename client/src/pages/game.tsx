@@ -883,7 +883,6 @@ export const Game = () => {
                 }
                 hasCurse={hasCurse}
                 curseLabel={curseLabel}
-                orb={currentOrb}
                 pullLoading={isPulling}
                 showPercentages={displaySettings.showDistributionPercent}
                 onPull={handlePull}
