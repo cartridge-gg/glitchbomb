@@ -12,7 +12,7 @@ const getOrbColor = (variant: string): string => {
     case "green":
       return "#36F818"; // --green-400
     case "red":
-      return "#FF1E00"; // --red-100
+      return "#FFFFFF"; // white for bombs
     case "blue":
       return "#9747FF"; // --blue-100
     case "yellow":

@@ -29,7 +29,7 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
     case "green":
       return "#36F818"; // --green-400
     case "red":
-      return "#FF1E00"; // --red-100
+      return "#FFFFFF"; // white for bombs
     case "blue":
       return "#9747FF"; // --blue-100
     case "yellow":
@@ -486,7 +486,7 @@ export const PLGraph = ({
                     </feMerge>
                   </filter>
                   <filter
-                    id="glow-red"
+                    id="glow-white"
                     x="-50%"
                     y="-50%"
                     width="200%"
@@ -633,7 +633,7 @@ export const PLGraph = ({
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
-                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FFFFFF" ? "white" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
                   return (
                     <motion.circle

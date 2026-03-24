@@ -12,9 +12,9 @@ export const GameRecap = ({ points, level }: GameRecapProps) => {
         {/* Glow effect */}
         <div
           className="absolute inset-0 rounded-full blur-2xl opacity-50"
-          style={{ backgroundColor: "var(--red-100)" }}
+          style={{ backgroundColor: "#FFFFFF" }}
         />
-        <BombIcon className="w-20 h-20 text-red-400 relative z-10" />
+        <BombIcon className="w-20 h-20 text-white glitch-icon relative z-10" />
       </div>
       <div className="flex flex-col gap-1">
         <h2 className="text-white uppercase text-xl font-glitch">GAME OVER</h2>

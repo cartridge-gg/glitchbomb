@@ -27,7 +27,7 @@ const outcomeVariants = cva("select-none uppercase relative text-center", {
 const textColorVariants = (variant: string) => {
   switch (variant) {
     case "bomb":
-      return "text-red-300";
+      return "text-white/25";
     case "point":
       return "text-green-900";
     case "multiplier":

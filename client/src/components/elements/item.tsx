@@ -45,7 +45,7 @@ const VARIANT_COLORS = {
     cssVar: "#ffffff",
   },
   bomb: {
-    cssVar: "var(--red-100)",
+    cssVar: "#FFFFFF",
   },
   point: {
     cssVar: "var(--green-400)",

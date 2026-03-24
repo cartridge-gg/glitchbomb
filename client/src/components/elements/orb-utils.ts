@@ -32,7 +32,7 @@ export const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
 
 /** Get CSS color for an orb type */
 export const getOrbColor = (orb: Orb) => {
-  if (orb.isBomb()) return "var(--red-100)";
+  if (orb.isBomb()) return "#FFFFFF";
   if (orb.isPoint()) return "var(--green-400)";
   if (orb.isMultiplier()) return "var(--orb-multiplier)";
   if (orb.isHealth()) return "var(--orb-heart)";

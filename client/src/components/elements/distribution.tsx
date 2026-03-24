@@ -29,8 +29,8 @@ interface DistributionProps {
 const SEGMENT_CONFIGS: SegmentConfig[] = [
   {
     key: "bombs",
-    bgColor: "var(--red-300)", // Custom red from preset
-    iconColor: "var(--red-100)", // Custom red from preset
+    bgColor: "rgba(255, 255, 255, 0.16)", // White-700 for bomb segment
+    iconColor: "#FFFFFF", // White for bomb icons
     Icon: BombOrbIcon,
     order: 0,
   },

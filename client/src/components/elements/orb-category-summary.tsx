@@ -36,7 +36,7 @@ const hexToRgba = (color: string, alpha: number) => {
 const categoryConfig: Record<OrbCategory, CategoryConfig> = {
   bomb: {
     orb: new Orb(OrbType.Bomb1),
-    color: "#FF1E00",
+    color: "#FFFFFF",
   },
   point: {
     orb: new Orb(OrbType.Point5),

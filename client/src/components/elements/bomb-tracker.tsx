@@ -24,7 +24,7 @@ const bombTrackerVariants = cva(
   {
     variants: {
       variant: {
-        default: "text-red-400",
+        default: "text-white",
       },
       size: {
         md: "h-10",
@@ -94,7 +94,7 @@ export const BombTracker = ({
         fillRule="evenodd"
         clipRule="evenodd"
         d="M3.42857 0V1.71429H1.71429V3.42857H0V8.57143H1.71429V10.2857H3.42857V12H8.57143V10.2857H10.2857V8.57143H12V3.42857H10.2857V1.71429H8.57143V0H3.42857ZM8.57143 1.71429V3.42857H10.2857V8.57143H8.57143V10.2857H3.42857V8.57143H1.71429V3.42857H3.42857V1.71429H8.57143Z"
-        fill="#FF1E00"
+        fill="#FFFFFF"
         fillOpacity="0.24"
       />
     </svg>
@@ -120,7 +120,10 @@ export const BombTracker = ({
               <EmptySlot className={emptySlotClasses} />
             ) : slot.enabled ? (
               <Icon
-                className={cn("transition-opacity duration-300", slotClasses)}
+                className={cn(
+                  "transition-opacity duration-300 glitch-icon",
+                  slotClasses,
+                )}
               />
             ) : (
               <Icon

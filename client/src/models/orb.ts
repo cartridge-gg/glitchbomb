@@ -344,13 +344,13 @@ export class Orb {
   public color(): string {
     switch (this.value) {
       case OrbType.Bomb1:
-        return "var(--red-100)";
+        return "#FFFFFF";
       case OrbType.Bomb2:
-        return "var(--red-100)";
+        return "#FFFFFF";
       case OrbType.Bomb3:
-        return "var(--red-100)";
+        return "#FFFFFF";
       case OrbType.StickyBomb:
-        return "var(--red-100)";
+        return "#FFFFFF";
       case OrbType.Health1:
         return "var(--orb-heart)";
       case OrbType.Health2:
