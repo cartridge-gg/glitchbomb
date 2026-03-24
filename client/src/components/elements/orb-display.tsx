@@ -79,8 +79,7 @@ const getOrbIcon = (orb: Orb) => {
 
 // Get color for orb type
 const getOrbColor = (orb: Orb) => {
-  // PointBomb4 should be red like a bomb
-  if (orb.isBomb()) return "var(--red-100)";
+  if (orb.isBomb()) return "#FFFFFF";
   if (orb.isPoint()) return "var(--green-400)";
   if (orb.isMultiplier()) return "var(--orb-multiplier)";
   if (orb.isHealth()) return "var(--orb-heart)";
@@ -206,6 +205,7 @@ export const OrbDisplay = ({
               orb.isBomb() || iconOverride
                 ? "w-[60%] h-[60%]"
                 : "w-full h-full",
+              orb.isBomb() && "glitch-icon",
             )}
             style={{
               color,

@@ -29,7 +29,7 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
     case "green":
       return "#36F818"; // --green-400
     case "red":
-      return "#FF1E00"; // --red-100
+      return "#FFFFFF"; // white for bombs
     case "blue":
       return "#9747FF"; // --blue-100
     case "yellow":
@@ -486,7 +486,7 @@ export const PLGraph = ({
                     </feMerge>
                   </filter>
                   <filter
-                    id="glow-red"
+                    id="glow-white"
                     x="-50%"
                     y="-50%"
                     width="200%"
@@ -553,10 +553,11 @@ export const PLGraph = ({
                   {/* Glitch filter for chart lines — red/blue chromatic split */}
                   <filter
                     id="glitch-line"
-                    x="-10%"
-                    y="-10%"
-                    width="120%"
-                    height="120%"
+                    filterUnits="userSpaceOnUse"
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
                     colorInterpolationFilters="sRGB"
                   >
                     <feOffset in="SourceGraphic" dx="0" dy="0" result="base" />
@@ -633,26 +634,31 @@ export const PLGraph = ({
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
-                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FF1E00" ? "red" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FFFFFF" ? "white" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
-                  return (
-                    <motion.circle
-                      key={`point-${point.id}`}
-                      cx={`${point.x}%`}
-                      cy={`${point.y}%`}
-                      r="6"
-                      fill={point.color}
-                      stroke="rgba(255,255,255,0.8)"
-                      strokeWidth="1"
-                      filter={`url(#${filterName})`}
-                      initial={isNew ? { scale: 0, opacity: 0 } : false}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeOut",
-                        delay: isNew ? 0.1 : 0,
-                      }}
-                    />
+                  const isBomb = point.color === "#FFFFFF";
+                  const circleProps = {
+                    cx: `${point.x}%`,
+                    cy: `${point.y}%`,
+                    r: "6",
+                    fill: point.color,
+                    stroke: "rgba(255,255,255,0.8)",
+                    strokeWidth: "1",
+                    filter: `url(#${filterName})`,
+                    initial: isNew ? { scale: 0, opacity: 0 } : false,
+                    animate: { scale: 1, opacity: 1 },
+                    transition: {
+                      duration: 0.3,
+                      ease: "easeOut",
+                      delay: isNew ? 0.1 : 0,
+                    },
+                  } as const;
+                  return isBomb ? (
+                    <g key={`point-${point.id}`} className="glitch-icon">
+                      <motion.circle {...circleProps} />
+                    </g>
+                  ) : (
+                    <motion.circle key={`point-${point.id}`} {...circleProps} />
                   );
                 })}
               </svg>

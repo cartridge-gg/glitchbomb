@@ -53,7 +53,7 @@ const VARIANT_COLORS = {
     cssVar: "#ffffff",
   },
   bomb: {
-    cssVar: "var(--red-100)",
+    cssVar: "#FFFFFF",
   },
   point: {
     cssVar: "var(--green-400)",
@@ -139,7 +139,9 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
           transition: "color 0.5s ease-in-out, filter 0.5s ease-in-out",
         }}
       >
-        <Icon className="h-full w-full" />
+        <Icon
+          className={cn("h-full w-full", variant === "bomb" && "glitch-icon")}
+        />
       </div>
     </motion.div>
   );

@@ -9,7 +9,7 @@ const tagVariants = cva(
     variants: {
       variant: {
         default: "text-white",
-        bomb: "text-red-100",
+        bomb: "text-white",
         point: "text-green-400",
         multiplier: "text-orb-multiplier",
         chip: "text-orb-chips",

@@ -120,7 +120,7 @@ export const MilestoneChoice = ({
             >
               {/* Header */}
               <div className="py-[clamp(1px,0.4svh,3px)] px-[clamp(8px,1.6svh,12px)]">
-                <span className="text-red-400 font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
+                <span className="text-white font-secondary text-[clamp(0.5rem,1.1svh,0.6rem)] tracking-[0.3em] uppercase">
                   Curse
                 </span>
               </div>
@@ -129,13 +129,13 @@ export const MilestoneChoice = ({
               {/* Content */}
               <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(6px,2svh,18px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
                 <div className="flex items-center gap-2">
-                  <GlitchBombIcon className="w-[clamp(16px,3.6svh,22px)] h-[clamp(16px,3.6svh,22px)] text-red-400" />
+                  <GlitchBombIcon className="w-[clamp(16px,3.6svh,22px)] h-[clamp(16px,3.6svh,22px)] text-white glitch-icon" />
                   <GlitchText
-                    className="text-red-400 font-secondary text-[clamp(0.7rem,2.1svh,0.95rem)] text-center leading-tight"
+                    className="text-white font-secondary text-[clamp(0.7rem,2.1svh,0.95rem)] text-center leading-tight"
                     text={curseLabel ?? ""}
                   />
                 </div>
-                <span className="text-red-400/70 font-secondary text-[clamp(0.45rem,1svh,0.6rem)] tracking-[0.3em]">
+                <span className="text-white/70 font-secondary text-[clamp(0.45rem,1svh,0.6rem)] tracking-[0.3em]">
                   Applied next level
                 </span>
               </div>
