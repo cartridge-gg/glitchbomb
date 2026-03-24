@@ -408,11 +408,19 @@ export class Orb {
   public outcomeVariant():
     | "point"
     | "bomb"
+    | "bomb1"
+    | "bomb2"
+    | "bomb3"
     | "multiplier"
     | "chip"
     | "moonrock"
     | "health" {
-    if (this.isBomb()) return "bomb";
+    if (this.isBomb()) {
+      if (this.value === OrbType.Bomb1) return "bomb1";
+      if (this.value === OrbType.Bomb2) return "bomb2";
+      if (this.value === OrbType.Bomb3) return "bomb3";
+      return "bomb";
+    }
     if (this.isHealth()) return "health";
     if (this.isMultiplier()) return "multiplier";
     if (this.isMoonrock()) return "moonrock";

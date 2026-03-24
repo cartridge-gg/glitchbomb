@@ -1,15 +1,14 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
 import {
+  BoltIcon,
   Bomb1xIcon,
   Bomb2xIcon,
   Bomb3xIcon,
   BombOrbIcon,
-  OrbChipIcon,
-  OrbHealthIcon,
-  OrbMoonrockIcon,
-  OrbMultiplierIcon,
-  OrbPointIcon,
+  CrossIcon,
+  HeartIcon,
+  SparklesIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
@@ -69,12 +68,12 @@ const getOrbIcon = (orb: Orb) => {
     if (orb.value === OrbType.Bomb3) return Bomb3xIcon;
     return BombOrbIcon;
   }
-  if (orb.isPoint()) return OrbPointIcon;
-  if (orb.isMultiplier()) return OrbMultiplierIcon;
-  if (orb.isHealth()) return OrbHealthIcon;
-  if (orb.isChips()) return OrbChipIcon;
-  if (orb.isMoonrock()) return OrbMoonrockIcon;
-  return OrbPointIcon;
+  if (orb.isPoint()) return SparklesIcon;
+  if (orb.isMultiplier()) return CrossIcon;
+  if (orb.isHealth()) return HeartIcon;
+  if (orb.isChips()) return BoltIcon;
+  if (orb.isMoonrock()) return BoltIcon;
+  return SparklesIcon;
 };
 
 // Get color for orb type
@@ -202,9 +201,9 @@ export const OrbDisplay = ({
           <Icon
             className={cn(
               "relative z-10",
-              orb.isBomb() || iconOverride
-                ? "w-[60%] h-[60%]"
-                : "w-full h-full",
+              orb.isChips() || orb.isMoonrock()
+                ? "w-[45%] h-[45%]"
+                : "w-[60%] h-[60%]",
               orb.isBomb() && "glitch-icon",
             )}
             style={{

@@ -1,13 +1,12 @@
 import {
+  BoltIcon,
   Bomb1xIcon,
   Bomb2xIcon,
   Bomb3xIcon,
   BombOrbIcon,
-  OrbChipIcon,
-  OrbHealthIcon,
-  OrbMoonrockIcon,
-  OrbMultiplierIcon,
-  OrbPointIcon,
+  CrossIcon,
+  HeartIcon,
+  SparklesIcon,
 } from "@/components/icons";
 import type { Orb } from "@/models";
 import { OrbType } from "@/models/orb";
@@ -22,12 +21,12 @@ export const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
     }
     return BombOrbIcon;
   }
-  if (orb.isPoint()) return OrbPointIcon;
-  if (orb.isMultiplier()) return OrbMultiplierIcon;
-  if (orb.isHealth()) return OrbHealthIcon;
-  if (orb.isChips()) return OrbChipIcon;
-  if (orb.isMoonrock()) return OrbMoonrockIcon;
-  return OrbPointIcon;
+  if (orb.isPoint()) return SparklesIcon;
+  if (orb.isMultiplier()) return CrossIcon;
+  if (orb.isHealth()) return HeartIcon;
+  if (orb.isChips()) return BoltIcon;
+  if (orb.isMoonrock()) return BoltIcon;
+  return SparklesIcon;
 };
 
 /** Get CSS color for an orb type */

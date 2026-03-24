@@ -21,7 +21,16 @@ import { MultiplierMath } from "@/helpers/multiplier";
 import { cn } from "@/lib/utils";
 
 export interface OrbOutcome {
-  variant: "point" | "bomb" | "multiplier" | "chip" | "moonrock" | "health";
+  variant:
+    | "point"
+    | "bomb"
+    | "bomb1"
+    | "bomb2"
+    | "bomb3"
+    | "multiplier"
+    | "chip"
+    | "moonrock"
+    | "health";
   content: string;
   /** Base points before multiplier (e.g. 5 for Point5) */
   basePoints?: number;
