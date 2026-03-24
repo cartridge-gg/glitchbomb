@@ -111,7 +111,7 @@ export const GameStats = ({
         <div className="flex items-center justify-center px-3 py-0.5 rounded-full border border-green-700 -mt-3">
           <GlitchText
             className="font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.75rem)] tracking-wider"
-            text={`Lvl ${level}`}
+            text={`Level ${level}`}
           />
         </div>
       </div>

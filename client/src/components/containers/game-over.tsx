@@ -131,7 +131,7 @@ export const GameOver = ({
                 : "GLITCHED\u00A0OUT"}
           </h1>
           <span className="text-green-600 font-secondary text-sm tracking-widest">
-            Lvl {level}
+            Level {level}
           </span>
         </div>
 
