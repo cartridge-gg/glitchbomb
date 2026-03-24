@@ -46,7 +46,7 @@ const textColorVariants = (variant: string) => {
 const backgroundVariants = (variant: string) => {
   switch (variant) {
     case "bomb":
-      return "var(--hp-gradient-100)";
+      return "linear-gradient(0deg, #AAAAAA, #FFFFFF)";
     case "point":
       return "var(--point-gradient-100)";
     case "multiplier":
@@ -78,7 +78,10 @@ export const Outcome = ({
   const strokeWidth = size === "sm" ? "6px" : "12px";
   return (
     <motion.div
-      className={cn(outcomeVariants({ variant, size, className }), "")}
+      className={cn(
+        outcomeVariants({ variant, size, className }),
+        variant === "bomb" && "glitch-text",
+      )}
       style={{
         boxShadow: "0px 0px 256px 128px #000000DD",
       }}
