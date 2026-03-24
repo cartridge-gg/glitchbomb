@@ -1,5 +1,7 @@
 export * from "./app-header";
 export * from "./cash-out-confirmation";
+export * from "./confirmation-dialog";
+export * from "./confirmation-prefs";
 export * from "./game-details";
 export * from "./game-footer";
 export * from "./game-header";
