@@ -401,6 +401,52 @@ export const PLGraph = ({
           </span>
         </div>
 
+        {/* Extended grid background — outside overflow-hidden so it bleeds past edges */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: "-2rem",
+            bottom: "-2rem",
+            left: "-4rem",
+            right: "-4rem",
+            maskImage:
+              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
+          }}
+        >
+          <svg className="absolute inset-0 w-full h-full">
+            {/* Vertical grid lines */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <line
+                key={`v-${i}`}
+                x1={`${(i + 1) * 7.7}%`}
+                y1="0"
+                x2={`${(i + 1) * 7.7}%`}
+                y2="100%"
+                stroke="rgba(20, 83, 45, 0.4)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+            ))}
+            {/* Horizontal grid lines */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <line
+                key={`h-${i}`}
+                x1="0"
+                y1={`${(i + 1) * 11.1}%`}
+                x2="100%"
+                y2={`${(i + 1) * 11.1}%`}
+                stroke="rgba(20, 83, 45, 0.4)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+            ))}
+          </svg>
+        </div>
+
         {/* Graph area */}
         <div className="absolute left-10 right-0 top-0 bottom-0 overflow-hidden">
           <div
@@ -422,46 +468,6 @@ export const PLGraph = ({
                 willChange: "transform",
               }}
             >
-              {/* Extended grid background with fade */}
-              <div
-                className="absolute -inset-12 pointer-events-none"
-                style={{
-                  maskImage:
-                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-                  WebkitMaskImage:
-                    "radial-gradient(ellipse 100% 120% at 50% 50%, black 30%, transparent 65%)",
-                }}
-              >
-                <svg className="absolute inset-0 w-full h-full">
-                  {/* Vertical grid lines */}
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <line
-                      key={`v-${i}`}
-                      x1={`${(i + 1) * 7.7}%`}
-                      y1="0"
-                      x2={`${(i + 1) * 7.7}%`}
-                      y2="100%"
-                      stroke="rgba(20, 83, 45, 0.4)"
-                      strokeWidth="1"
-                      strokeDasharray="4 4"
-                    />
-                  ))}
-                  {/* Horizontal grid lines */}
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <line
-                      key={`h-${i}`}
-                      x1="0"
-                      y1={`${(i + 1) * 11.1}%`}
-                      x2="100%"
-                      y2={`${(i + 1) * 11.1}%`}
-                      stroke="rgba(20, 83, 45, 0.4)"
-                      strokeWidth="1"
-                      strokeDasharray="4 4"
-                    />
-                  ))}
-                </svg>
-              </div>
-
               {/* Baseline line - dashed white/green */}
               <div
                 className="absolute left-0 right-0 border-t border-dashed border-green-700"
