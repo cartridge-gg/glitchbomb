@@ -15,16 +15,19 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { getTokenAddress } from "@/config";
+import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import {
   cumulativeRewards,
   maxPayout as maxPayoutRaw,
   toTokens,
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
-import { toDecimal } from "@/hooks/tokens";
+import { useActivityFeed } from "@/hooks/activity-feed";
+import { useOwnedGames } from "@/hooks/packs";
+import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import {
@@ -42,13 +45,22 @@ export const Home = () => {
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
-  const {
-    onchainGames,
-    activityItems,
-    tokenBalances,
-    tokenContracts,
-    tokenPrice,
-  } = useAppData();
+  const { tokenContracts, tokenPrice } = useAppData();
+
+  const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
+  const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
+
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+  const { tokenBalances, isLoading: tokensLoading } = useTokens({
+    accountAddresses: account?.address ? [account.address] : [],
+    contractAddresses: [tokenAddress],
+  });
+
+  // Gate the loading screen on all home data being ready
+  const isHomeReady =
+    !gamesLoading && !tokensLoading && tokenContracts.length > 0;
+  useLoadingSignal("home", isHomeReady);
+
   const offlineState = useOfflineStore();
 
   // On mobile, use practice games from localStorage; on desktop, use on-chain games
@@ -104,8 +116,6 @@ export const Home = () => {
     },
     [now],
   );
-
-  const tokenAddress = config?.token || getTokenAddress(chain.id);
 
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
@@ -457,6 +467,8 @@ export const Home = () => {
     },
     [isLoggedIn, onConnectClick],
   );
+
+  if (!isHomeReady) return null;
 
   return (
     <div className="absolute inset-0 flex flex-col">

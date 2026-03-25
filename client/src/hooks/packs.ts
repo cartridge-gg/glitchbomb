@@ -93,12 +93,14 @@ export function useOwnedGames() {
   // Refresh function to fetch and subscribe to data
   const refresh = useCallback(async () => {
     if (!client || !gameIds.length) {
-      setIsFetching(false);
+      // Only mark as done fetching if tokens have also finished loading,
+      // otherwise we're still waiting for gameIds to be derived.
+      if (!tokensLoading) setIsFetching(false);
       return;
     }
 
     // Cancel existing subscriptions
-    subscriptionRef.current = null;
+    cancelSubscription();
 
     // Fetch initial data
     setIsFetching(true);
@@ -113,7 +115,7 @@ export function useOwnedGames() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, gameIds, onUpdate]);
+  }, [client, gameIds, onUpdate, cancelSubscription, tokensLoading]);
 
   useEffect(() => {
     refresh();
