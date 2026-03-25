@@ -18,6 +18,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import {
   cumulativeRewards,
   maxPayout as maxPayoutRaw,
@@ -46,14 +47,18 @@ export const Home = () => {
   const { starterpacks, config } = useEntitiesContext();
   const { tokenContracts, tokenPrice } = useAppData();
 
-  const { games: onchainGames } = useOwnedGames();
+  const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
-  const { tokenBalances } = useTokens({
+  const { tokenBalances, isLoading: tokensLoading } = useTokens({
     accountAddresses: account?.address ? [account.address] : [],
     contractAddresses: [tokenAddress],
   });
+
+  // Report loading to the app-wide loading screen
+  useLoadingSignal("games", !gamesLoading);
+  useLoadingSignal("tokens", !tokensLoading);
 
   const offlineState = useOfflineStore();
 
