@@ -24,8 +24,6 @@ export function toDecimal(
   return Number(rawBalance) / Number(divisor);
 }
 
-const CONTRACT_POLL_INTERVAL = 30_000; // 30 seconds
-
 export function useTokenContracts(
   request: GetTokenRequest & { contractType?: ContractType },
 ) {
@@ -34,7 +32,6 @@ export function useTokenContracts(
   const requestRef = useRef<
     (GetTokenRequest & { contractType?: ContractType }) | null
   >(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchTokens = useCallback(async () => {
     if (!client) return;
@@ -64,15 +61,6 @@ export function useTokenContracts(
       requestRef.current = request;
       refetch();
     }
-
-    // Poll for supply updates
-    intervalRef.current = setInterval(refetch, CONTRACT_POLL_INTERVAL);
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
   }, [request, refetch]);
 
   return {
@@ -111,7 +99,7 @@ export function useTokens(
     };
   }, [cancelSubscription]);
 
-  const { contracts } = useTokenContracts(request);
+  const { contracts, refetch: refetchContracts } = useTokenContracts(request);
 
   const fetchBalances = useCallback(async () => {
     if (!requestRef.current || !client || !account) return;
@@ -173,8 +161,9 @@ export function useTokens(
   }, [contracts, fetchBalances, request]);
 
   const refetch = useCallback(async () => {
+    refetchContracts();
     fetchBalances();
-  }, [fetchBalances]);
+  }, [fetchBalances, refetchContracts]);
 
   return {
     tokenContracts: contracts,

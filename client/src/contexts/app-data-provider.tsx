@@ -1,5 +1,5 @@
 import { useAccount, useNetwork } from "@starknet-react/core";
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useActivityFeed } from "@/hooks/activity-feed";
 import { useOwnedGames } from "@/hooks/packs";
@@ -14,7 +14,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const { account } = useAccount();
   const { chain } = useNetwork();
 
-  const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
+  const {
+    games: onchainGames,
+    isLoading: gamesLoading,
+    refresh: refreshGames,
+  } = useOwnedGames();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -22,17 +26,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     tokenBalances,
     tokenContracts,
     isLoading: tokensLoading,
+    refetch: refetchTokens,
   } = useTokens({
     accountAddresses: account?.address ? [account.address] : [],
     contractAddresses: [tokenAddress],
   });
 
   const glitchAddress = getTokenAddress(chain.id);
-  const { price: tokenPrice } = useTokenPrice(
-    glitchAddress,
-    config?.quote,
-    chain.id.toString(),
-  );
+  const {
+    price: tokenPrice,
+    refetch: refetchPrice,
+  } = useTokenPrice(glitchAddress, config?.quote, chain.id.toString());
+
+  const refresh = useCallback(() => {
+    refreshGames();
+    refetchTokens();
+    refetchPrice();
+  }, [refreshGames, refetchTokens, refetchPrice]);
 
   // Report loading signals to the app-wide loading screen
   useLoadingSignal("games", !gamesLoading);
@@ -48,6 +58,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         tokenContracts,
         tokensLoading,
         tokenPrice,
+        refresh,
       }}
     >
       {children}
