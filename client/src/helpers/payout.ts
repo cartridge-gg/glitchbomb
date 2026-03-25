@@ -85,6 +85,11 @@ export function tierPrice(stake: number): bigint {
   );
 }
 
+/** Full price without the multiplier discount (stake × base_price). */
+export function tierFullPrice(stake: number): bigint {
+  return BigInt(stake) * DEFAULT_ENTRY_PRICE;
+}
+
 /** All tier prices in raw token units (stake 1 through STARTERPACK_COUNT). */
 export const TIER_PRICES: bigint[] = Array.from(
   { length: STARTERPACK_COUNT },
