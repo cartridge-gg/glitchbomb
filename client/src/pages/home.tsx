@@ -9,6 +9,7 @@ import {
   ArrowRightIcon,
   BombIcon,
   BracketArrowIcon,
+  MoonrockIcon,
   NumsLogoIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -1204,7 +1205,7 @@ export const Home = () => {
                         >
                           <button
                             type="button"
-                            className="flex-1 min-w-0 flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:brightness-110"
+                            className="flex-1 min-w-0 flex items-center gap-[4vw] rounded-lg px-4 py-3 transition-colors hover:brightness-110"
                             style={{
                               background: expired
                                 ? "#1A1500"
@@ -1218,15 +1219,17 @@ export const Home = () => {
                               )
                             }
                           >
-                            <BombIcon
-                              size="md"
-                              className="text-white shrink-0"
-                            />
-                            <span className="font-secondary text-sm tracking-widest text-white">
-                              #{game.id}
+                            <span
+                              className="flex items-center gap-1.5"
+                              style={{ color: "#FACC15" }}
+                            >
+                              <MoonrockIcon size="sm" className="shrink-0" />
+                              <span className="font-secondary text-sm tracking-widest">
+                                {game.moonrocks}
+                              </span>
                             </span>
                             <span className="font-secondary text-sm tracking-widest text-white">
-                              L{game.level}
+                              {game.multiplier ? `${game.multiplier}x` : "1x"}
                             </span>
                             <span
                               className="font-secondary text-sm tracking-widest"
@@ -1241,9 +1244,7 @@ export const Home = () => {
                               {expired
                                 ? "EXPIRED"
                                 : cashedOut
-                                  ? isMobile
-                                    ? `${game.moonrocks} PTS`
-                                    : formatPayout(game.moonrocks, game.stake)
+                                  ? formatPayout(game.moonrocks, game.stake)
                                   : "GLITCHED"}
                             </span>
                           </button>
@@ -1252,7 +1253,7 @@ export const Home = () => {
                             gradient={
                               expired ? "yellow" : cashedOut ? "green" : "red"
                             }
-                            className={`shrink-0 h-12 w-12 p-0 ${
+                            className={`shrink-0 h-11 w-14 p-0 ${
                               expired
                                 ? "!bg-[#1A1500] hover:!bg-[#2A2200] !text-yellow-100"
                                 : cashedOut
