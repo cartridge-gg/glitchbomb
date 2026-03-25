@@ -18,7 +18,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { useLoadingSignal } from "@/contexts/use-loading";
+import { useLoadingContext, useLoadingSignal } from "@/contexts/use-loading";
 import {
   cumulativeRewards,
   maxPayout as maxPayoutRaw,
@@ -46,6 +46,7 @@ export const Home = () => {
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
   const { tokenContracts, tokenPrice } = useAppData();
+  const { setReady, removeSignal } = useLoadingContext();
 
   const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
@@ -87,6 +88,11 @@ export const Home = () => {
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  // Clean up the purchase loading signal when navigating away
+  useEffect(() => {
+    return () => removeSignal("purchase");
+  }, [removeSignal]);
 
   useEffect(() => {
     const interval = setInterval(
@@ -426,9 +432,16 @@ export const Home = () => {
     const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
     if (!pack) return;
     purchaseGameIdsRef.current = new Set(ownedGames.map((g) => g.id));
-    (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
-  }, [connector, tierIndex, starterpacks, ownedGames]);
+    (connector as ControllerConnector)?.controller.openStarterPack(pack.id, {
+      onPurchaseComplete: () => {
+        // Fired only when the user completes the purchase — not on cancel.
+        // Show loading screen while the indexer picks up the new game.
+        setReady("purchase", false);
+      },
+    } as Record<string, unknown>);
+  }, [connector, tierIndex, starterpacks, ownedGames, setReady]);
 
+  // Detect new game after purchase and navigate to it
   useEffect(() => {
     if (!purchaseGameIdsRef.current) return;
     const newGame = ownedGames.find(
