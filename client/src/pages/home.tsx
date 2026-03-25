@@ -56,9 +56,9 @@ export const Home = () => {
     contractAddresses: [tokenAddress],
   });
 
-  // Report loading to the app-wide loading screen
-  useLoadingSignal("games", !gamesLoading);
-  useLoadingSignal("tokens", !tokensLoading);
+  // Gate the loading screen on all home data being ready
+  const isHomeReady = !gamesLoading && !tokensLoading && tokenContracts.length > 0;
+  useLoadingSignal("home", isHomeReady);
 
   const offlineState = useOfflineStore();
 
@@ -466,6 +466,8 @@ export const Home = () => {
     },
     [isLoggedIn, onConnectClick],
   );
+
+  if (!isHomeReady) return null;
 
   return (
     <div className="absolute inset-0 flex flex-col">
