@@ -432,9 +432,15 @@ export const Home = () => {
     const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
     if (!pack) return;
     purchaseGameIdsRef.current = new Set(ownedGames.map((g) => g.id));
+    // Show loading screen immediately — it sits behind the controller iframe
+    // (lower z-index) so the user doesn't see it yet. When the controller
+    // closes after purchase, the loading screen is already visible underneath,
+    // covering the gap while the indexer picks up the new game.
+    setReady("purchase", false);
     (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
-  }, [connector, tierIndex, starterpacks, ownedGames]);
+  }, [connector, tierIndex, starterpacks, ownedGames, setReady]);
 
+  // Detect new game after purchase and navigate to it
   useEffect(() => {
     if (!purchaseGameIdsRef.current) return;
     const newGame = ownedGames.find(
@@ -442,9 +448,6 @@ export const Home = () => {
     );
     if (newGame) {
       purchaseGameIdsRef.current = null;
-      // Show the loading screen before closing the controller so the
-      // transition is seamless (no flash of unloaded content).
-      setReady("purchase", false);
       // Close the controller iframe before navigating
       const controllerEl = document.getElementById("controller");
       if (controllerEl) {
@@ -454,7 +457,43 @@ export const Home = () => {
       }
       navigate(mobilePath(`/play?game=${newGame.id}`));
     }
-  }, [ownedGames, navigate, setReady]);
+  }, [ownedGames, navigate]);
+
+  // If the controller closes without a purchase (user cancelled), clear the
+  // loading screen after a grace period for the indexer to catch up.
+  useEffect(() => {
+    if (!purchaseGameIdsRef.current) return;
+
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval>;
+
+    // Wait for the controller to open before watching for it to close
+    const timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
+        const el = document.getElementById("controller");
+        const isVisible =
+          el && el.style.display !== "none" && el.style.opacity !== "0";
+        if (isVisible || cancelled) return;
+
+        // Controller closed — give the indexer time, then clear if no game
+        clearInterval(intervalId);
+        setTimeout(() => {
+          if (cancelled) return;
+          if (purchaseGameIdsRef.current) {
+            // No new game detected — purchase was likely cancelled
+            purchaseGameIdsRef.current = null;
+            removeSignal("purchase");
+          }
+        }, 10_000);
+      }, 500);
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [ownedGames, removeSignal]);
 
   const handlePractice = useCallback(() => {
     if (!isMobile) {
