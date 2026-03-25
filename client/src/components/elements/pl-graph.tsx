@@ -468,7 +468,6 @@ export const PLGraph = ({
                 willChange: "transform",
               }}
             >
-
               {/* Baseline line - dashed white/green */}
               <div
                 className="absolute left-0 right-0 border-t border-dashed border-green-700"
