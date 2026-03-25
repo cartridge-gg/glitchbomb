@@ -11,12 +11,21 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const removeSignal = useCallback((key: string) => {
+    setReadyMap((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }, []);
+
   // Ready when the core "entities" signal exists and every registered signal is true
   const allReady =
     "entities" in readyMap && Object.values(readyMap).every(Boolean);
 
   return (
-    <LoadingContext.Provider value={{ setReady, allReady }}>
+    <LoadingContext.Provider value={{ setReady, removeSignal, allReady }}>
       {children}
     </LoadingContext.Provider>
   );
