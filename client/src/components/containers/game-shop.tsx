@@ -407,7 +407,6 @@ export const GameShop = ({
   };
 
   const handleConfirmExit = () => {
-    setShowExitConfirmation(false);
     onConfirm([]);
   };
 
@@ -509,6 +508,7 @@ export const GameShop = ({
         confirmLabel="LEAVE SHOP"
         onConfirm={handleConfirmExit}
         onDismiss={setShopExitConfirmDismissed}
+        isConfirming={isLoading}
       />
 
       {/* Flying orb particles */}

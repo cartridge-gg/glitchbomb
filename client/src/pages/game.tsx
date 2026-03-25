@@ -302,6 +302,14 @@ export const Game = () => {
     }
   }, [game?.shop]);
 
+  // Close cashout dialog when game ends
+  useEffect(() => {
+    if (game?.over) {
+      setShowCashoutConfirm(false);
+      setIsCashingOut(false);
+    }
+  }, [game?.over]);
+
   // Detect milestone reached — show "Level X Complete" before MilestoneChoice
   useEffect(() => {
     if (!game || game.over) return;
@@ -536,10 +544,12 @@ export const Game = () => {
     if (!game) return;
     setIsCashingOut(true);
     const success = await cashOut(game.id);
-    if (success) {
-      setOverlay("none");
+    if (!success) {
+      // User cancelled or error - reset loading state
+      setShowCashoutConfirm(false);
+      setIsCashingOut(false);
     }
-    setIsCashingOut(false);
+    // On success, keep loading until game.over triggers GameOver render
   }, [cashOut, game]);
 
   const handleEnterShop = useCallback(async () => {
@@ -910,7 +920,6 @@ export const Game = () => {
         description="Are you sure you want to Cash Out?"
         confirmLabel="CASH OUT"
         onConfirm={() => {
-          setShowCashoutConfirm(false);
           handleCashOut();
         }}
         onDismiss={setCashoutConfirmDismissed}
