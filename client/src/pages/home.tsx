@@ -24,8 +24,8 @@ import {
   maxPayout as maxPayoutRaw,
   toTokens,
 } from "@/helpers/payout";
-import { useActivityFeed } from "@/hooks/activity-feed";
 import { useActions } from "@/hooks/actions";
+import { useActivityFeed } from "@/hooks/activity-feed";
 import { useOwnedGames } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
@@ -57,7 +57,8 @@ export const Home = () => {
   });
 
   // Gate the loading screen on all home data being ready
-  const isHomeReady = !gamesLoading && !tokensLoading && tokenContracts.length > 0;
+  const isHomeReady =
+    !gamesLoading && !tokensLoading && tokenContracts.length > 0;
   useLoadingSignal("home", isHomeReady);
 
   const offlineState = useOfflineStore();
