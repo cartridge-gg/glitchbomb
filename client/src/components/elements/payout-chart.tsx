@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  breakEvenScore,
-  cumulativeRewards,
-  MAX_SCORE,
-  toTokens,
-} from "@/helpers/payout";
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { cumulativeRewards, MAX_SCORE, toTokens } from "@/helpers/payout";
 
 export interface PayoutChartProps {
   /** Stake multiplier (1–STARTERPACK_COUNT) */
@@ -58,21 +60,17 @@ export const PayoutChart = ({
 
   // Y-axis always in GLITCH tokens (like Nums shows NUMS)
   const maxVal = toTokens(cumulAt(rewards, MAX_SCORE));
-  const beScore = breakEvenScore(
-    stake,
-    tokenPrice ?? undefined,
-    supply,
-    target,
-  );
-  const beVal = toTokens(cumulAt(rewards, beScore));
-  const showBreakEven = beScore < MAX_SCORE;
+
+  // Hover / touch interaction state
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [hoverScore, setHoverScore] = useState<number | null>(null);
 
   // Chart dimensions
   const chartW = 320;
   const chartH = 220;
   const padL = 36;
   const padR = 14;
-  const padT = showBreakEven ? 24 : 10;
+  const padT = 10;
   const padB = 32;
   const plotW = chartW - padL - padR;
   const plotH = chartH - padT - padB;
@@ -122,43 +120,28 @@ export const PayoutChart = ({
 
   // Y-axis ticks: always show GLITCH token amounts
   const yTicks = useMemo(() => {
-    const ticks: { val: number; label: string; pill?: boolean }[] = [];
+    const ticks: { val: number; label: string }[] = [];
 
     ticks.push({
       val: maxVal,
       label: formatTokens(maxVal),
     });
 
-    if (showBreakEven && Math.abs(beVal - maxVal) / yMax > 0.12) {
-      ticks.push({
-        val: beVal,
-        label: formatTokens(beVal),
-        pill: true,
-      });
-    }
-
     if (ticks.every((t) => t.val / yMax > 0.15)) {
       ticks.push({ val: 0, label: "0" });
     }
 
     return ticks;
-  }, [maxVal, beVal, yMax, showBreakEven]);
+  }, [maxVal, yMax]);
 
-  // X-axis ticks: 0, 100, 200, 300, 400, 500 + break-even
+  // X-axis ticks: 0, 100, 200, 300, 400, 500
   const xTicks = useMemo(() => {
-    const ticks: { score: number; label: string; pill?: boolean }[] = [];
+    const ticks: { score: number; label: string }[] = [];
     for (let s = 0; s <= MAX_SCORE; s += 100) {
       ticks.push({ score: s, label: `${s}` });
     }
-    if (showBreakEven) {
-      // Only add break-even if it doesn't overlap a 100-step tick
-      const overlaps = ticks.some((t) => Math.abs(t.score - beScore) < 40);
-      if (!overlaps) {
-        ticks.push({ score: beScore, label: `${beScore}`, pill: true });
-      }
-    }
     return ticks;
-  }, [beScore, showBreakEven]);
+  }, []);
 
   // Draw animation
   const pathRef = useRef<SVGPathElement>(null);
@@ -181,15 +164,50 @@ export const PayoutChart = ({
 
   const animated = phase === "animate";
 
+  // Pointer → score conversion for interactivity
+  const pointerToScore = useCallback(
+    (e: ReactPointerEvent<SVGSVGElement>) => {
+      const svg = svgRef.current;
+      if (!svg) return null;
+      const rect = svg.getBoundingClientRect();
+      // Map client position into SVG viewBox coordinates
+      const clientX = e.clientX - rect.left;
+      const svgX = (clientX / rect.width) * chartW;
+      // Clamp to plot area and convert to score
+      const clampedX = Math.max(padL, Math.min(svgX, padL + plotW));
+      const s = Math.round(((clampedX - padL) / plotW) * MAX_SCORE);
+      return Math.max(0, Math.min(s, MAX_SCORE));
+    },
+    [chartW, padL, plotW],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: ReactPointerEvent<SVGSVGElement>) => {
+      setHoverScore(pointerToScore(e));
+    },
+    [pointerToScore],
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    setHoverScore(null);
+  }, []);
+
+  // Hover reward value
+  const hoverVal =
+    hoverScore != null ? toTokens(cumulAt(rewards, hoverScore)) : 0;
+
   // Pill dimensions
   const pillH = 14;
   const pillRx = 4;
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${chartW} ${chartH}`}
       className="w-full"
-      style={{ fontFamily: "inherit" }}
+      style={{ fontFamily: "inherit", touchAction: "none" }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
     >
       <defs>
         <filter id="label-shadow">
@@ -269,71 +287,92 @@ export const PayoutChart = ({
         }
       />
 
-      {/* Break-even crosshairs (rendered after curve so they appear on top) */}
-      {showBreakEven && (
-        <>
-          {/* Vertical dashed line: top of chart → intersection */}
-          <line
-            x1={toX(beScore)}
-            y1={padT}
-            x2={toX(beScore)}
-            y2={toY(beVal)}
-            stroke={labelColor}
-            strokeWidth={0.8}
-            strokeDasharray="3 3"
-          />
-
-          {/* Horizontal dashed line: Y-axis → intersection */}
-          <line
-            x1={padL}
-            y1={toY(beVal)}
-            x2={toX(beScore)}
-            y2={toY(beVal)}
-            stroke={labelColor}
-            strokeWidth={0.8}
-            strokeDasharray="3 3"
-          />
-
-          {/* Break-even dot */}
-          <circle
-            cx={toX(beScore)}
-            cy={toY(beVal)}
-            r={3}
-            fill="#FFFFFF"
-            stroke="rgba(0,0,0,0.3)"
-            strokeWidth={0.5}
-            style={{
-              opacity: animated ? 1 : 0,
-              transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-            }}
-          />
-
-          {/* "Break Even" pill at top of vertical line */}
-          <rect
-            x={toX(beScore) - 30}
-            y={padT - pillH - 2}
-            width={60}
-            height={pillH}
-            rx={pillRx}
-            fill={pillBg}
-            stroke={pillBorder}
-            strokeWidth={0.5}
-          />
-          <text
-            x={toX(beScore)}
-            y={padT - pillH / 2 - 2}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill={valueColor}
-            fontSize={7}
-            letterSpacing="0.04em"
-            className="font-secondary"
-            filter="url(#label-shadow)"
-          >
-            BREAK EVEN
-          </text>
-        </>
-      )}
+      {/* Hover crosshairs + reward tooltip */}
+      {hoverScore != null &&
+        (() => {
+          const hx = toX(hoverScore);
+          const hy = toY(hoverVal);
+          const tooltipLabel = `${formatTokens(hoverVal)} GLITCH`;
+          const tooltipW = tooltipLabel.length * 4.2 + 14;
+          // Place tooltip above the dot; if near top, place below
+          const tooltipAbove = hy - 20 >= padT;
+          const tooltipY = tooltipAbove ? hy - 18 : hy + 8;
+          // Clamp horizontally
+          const tooltipX = Math.max(
+            padL,
+            Math.min(hx - tooltipW / 2, padL + plotW - tooltipW),
+          );
+          return (
+            <>
+              {/* Vertical dashed line: dot → X-axis */}
+              <line
+                x1={hx}
+                y1={hy}
+                x2={hx}
+                y2={toY(0)}
+                stroke={labelColor}
+                strokeWidth={0.6}
+                strokeDasharray="2 2"
+              />
+              {/* Horizontal dashed line: Y-axis → dot */}
+              <line
+                x1={padL}
+                y1={hy}
+                x2={hx}
+                y2={hy}
+                stroke={labelColor}
+                strokeWidth={0.6}
+                strokeDasharray="2 2"
+              />
+              {/* Dot on curve */}
+              <circle
+                cx={hx}
+                cy={hy}
+                r={3}
+                fill={lineColor}
+                stroke="rgba(0,0,0,0.3)"
+                strokeWidth={0.5}
+              />
+              {/* Tooltip pill */}
+              <rect
+                x={tooltipX}
+                y={tooltipY}
+                width={tooltipW}
+                height={pillH}
+                rx={pillRx}
+                fill={pillBg}
+                stroke={pillBorder}
+                strokeWidth={0.5}
+              />
+              <text
+                x={tooltipX + tooltipW / 2}
+                y={tooltipY + pillH / 2}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={valueColor}
+                fontSize={7}
+                letterSpacing="0.03em"
+                className="font-secondary"
+                filter="url(#label-shadow)"
+              >
+                {tooltipLabel}
+              </text>
+              {/* Score label on X-axis */}
+              <text
+                x={hx}
+                y={padT + plotH + 14}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={valueColor}
+                fontSize={8}
+                letterSpacing="0.04em"
+                className="font-secondary"
+              >
+                {hoverScore}
+              </text>
+            </>
+          );
+        })()}
 
       {/* Score marker crosshairs (rendered after curve so they appear on top) */}
       {showScore &&
@@ -341,14 +380,9 @@ export const PayoutChart = ({
           const sx = toX(score);
           const sy = toY(scoreVal);
           const dotR = 4;
-          const belowBreakEven = showBreakEven && score < beScore;
-          const markerColor = belowBreakEven ? "#FF6B6B" : scoreColor;
-          const markerPillBg = belowBreakEven
-            ? "rgba(255, 107, 107, 0.18)"
-            : scorePillBg;
-          const markerPillBorder = belowBreakEven
-            ? "rgba(255, 107, 107, 0.45)"
-            : scorePillBorder;
+          const markerColor = scoreColor;
+          const markerPillBg = scorePillBg;
+          const markerPillBorder = scorePillBorder;
           // Place pill above the dot; if near top, place below
           const pillAbove = sy - dotR - pillH - 4 >= padT;
           const pillY = pillAbove ? sy - dotR - pillH - 2 : sy + dotR + 2;
@@ -438,32 +472,17 @@ export const PayoutChart = ({
       {yTicks.map((tick) => {
         const y = toY(tick.val);
         const textX = padL - 4;
-        const labelW = tick.label.length * 4.5;
-        const pillPad = 5;
         return (
           <g key={`y-${tick.val}`}>
-            {tick.pill && (
-              <rect
-                x={textX - labelW - pillPad}
-                y={y - pillH / 2}
-                width={labelW + pillPad * 2}
-                height={pillH}
-                rx={pillRx}
-                fill="#071E03"
-                stroke={pillBorder}
-                strokeWidth={0.5}
-              />
-            )}
             <text
               x={textX}
               y={y}
               textAnchor="end"
               dominantBaseline="central"
-              fill={tick.pill ? valueColor : labelColor}
+              fill={labelColor}
               fontSize={7}
               letterSpacing="0.03em"
               className="font-secondary"
-              filter={tick.pill ? "url(#label-shadow)" : undefined}
             >
               {tick.label}
             </text>
@@ -475,31 +494,17 @@ export const PayoutChart = ({
       {xTicks.map((tick) => {
         const x = toX(tick.score);
         const y = padT + plotH + 14;
-        const textW = tick.label.length * 5 + 8;
         return (
           <g key={`x-${tick.score}`}>
-            {tick.pill && (
-              <rect
-                x={x - textW / 2}
-                y={y - pillH / 2}
-                width={textW}
-                height={pillH}
-                rx={pillRx}
-                fill={pillBg}
-                stroke={pillBorder}
-                strokeWidth={0.5}
-              />
-            )}
             <text
               x={x}
               y={y}
               textAnchor="middle"
               dominantBaseline="central"
-              fill={tick.pill ? valueColor : labelColor}
+              fill={labelColor}
               fontSize={8}
               letterSpacing="0.04em"
               className="font-secondary"
-              filter={tick.pill ? "url(#label-shadow)" : undefined}
             >
               {tick.label}
             </text>
