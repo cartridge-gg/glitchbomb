@@ -29,11 +29,11 @@ import {
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
 import { BagIcon } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useLoadingSignal } from "@/contexts/use-loading";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
@@ -638,77 +638,15 @@ export const Game = () => {
   const hasCurse = hasStickyBomb;
   const curseLabel = hasStickyBomb ? "Sticky Bomb" : undefined;
 
-  // Check if we're still loading (have URL params but no data yet)
-  const isLoading = !game;
   const gameIdParam = searchParams.get("game");
+  const isGameReady = !!game && tokenContracts.length > 0;
+  useLoadingSignal("game", isGameReady);
 
-  // If no URL params at all, show nothing
   if (!gameIdParam) return null;
+  if (!isGameReady) return null;
 
   // Determine which screen to show
   const renderScreen = () => {
-    // Loading state - show optimistic UI
-    if (isLoading) {
-      return (
-        <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
-          <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)]">
-              <GameStats
-                points={INITIAL_GAME_VALUES.points}
-                milestone={INITIAL_GAME_VALUES.milestone}
-                health={INITIAL_GAME_VALUES.health}
-                level={INITIAL_GAME_VALUES.level}
-              />
-              <PLChartTabs
-                data={[]}
-                pulls={[]}
-                mode="absolute"
-                title="POTENTIAL"
-              />
-              <GameScene
-                className="mt-[clamp(6px,1svh,12px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
-                lives={INITIAL_GAME_VALUES.health}
-                bombs={INITIAL_GAME_VALUES.distribution.bombs}
-                orbs={INITIAL_GAME_VALUES.orbsCount}
-                multiplier={INITIAL_GAME_VALUES.multiplier}
-                values={INITIAL_GAME_VALUES.distribution}
-                hasCurse={false}
-                showPercentages={displaySettings.showDistributionPercent}
-                onPull={() => {}} // No-op while loading
-              />
-            </div>
-            <div className="flex items-center justify-center pb-[clamp(4px,1svh,10px)] opacity-50">
-              <BombTracker details={bombDetails} size="lg" />
-            </div>
-            <div className="pt-[clamp(6px,1.1svh,12px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)] opacity-50 pointer-events-none">
-              <Button
-                variant="secondary"
-                gradient="green"
-                className="min-h-[clamp(40px,6svh,56px)] min-w-16"
-                disabled
-              >
-                <BagIcon className="w-6 h-6 text-green-400" />
-              </Button>
-              <GradientBorder color="purple" className="flex-1">
-                <button
-                  type="button"
-                  disabled
-                  className="w-full min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, #4A1A6B 0%, #2D1052 100%)",
-                    color: "#FF80FF",
-                  }}
-                >
-                  LOADING...
-                </button>
-              </GradientBorder>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     // Expired (created_at + 24h has passed without completion)
     const isExpired =
       game.created_at > 0 &&
