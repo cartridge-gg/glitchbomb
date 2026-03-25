@@ -6,30 +6,36 @@ const MIN_DISPLAY_MS = 1200;
 
 export function LoadingScreen() {
   const { allReady } = useLoadingContext();
-  const [visible, setVisible] = useState(true);
-  const [fading, setFading] = useState(false);
-  const [minElapsed, setMinElapsed] = useState(false);
+  const [phase, setPhase] = useState<"visible" | "fading" | "hidden">(
+    "visible",
+  );
 
-  // Ensure minimum display time so it doesn't just flash
+  // Re-show when data starts loading again (e.g. navigating back to home)
   useEffect(() => {
-    const timer = setTimeout(() => setMinElapsed(true), MIN_DISPLAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Start fade-out once all signals are ready AND minimum time elapsed
-  useEffect(() => {
-    if (allReady && minElapsed) {
-      setFading(true);
-      const timer = setTimeout(() => setVisible(false), 500);
-      return () => clearTimeout(timer);
+    if (!allReady && phase === "hidden") {
+      setPhase("visible");
     }
-  }, [allReady, minElapsed]);
+  }, [allReady, phase]);
 
-  if (!visible) return null;
+  // Start fade-out after min display time when ready
+  useEffect(() => {
+    if (!allReady || phase !== "visible") return;
+    const timer = setTimeout(() => setPhase("fading"), MIN_DISPLAY_MS);
+    return () => clearTimeout(timer);
+  }, [allReady, phase]);
+
+  // Hide after fade completes
+  useEffect(() => {
+    if (phase !== "fading") return;
+    const timer = setTimeout(() => setPhase("hidden"), 500);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  if (phase === "hidden") return null;
 
   return (
     <div
-      className={`loading-screen ${fading ? "loading-screen-exit" : ""}`}
+      className={`loading-screen ${phase === "fading" ? "loading-screen-exit" : ""}`}
       aria-label="Loading"
     >
       <div className="loading-screen-scanlines" aria-hidden="true" />
