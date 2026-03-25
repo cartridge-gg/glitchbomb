@@ -128,6 +128,5 @@ export function useOwnedGames() {
   return {
     games,
     isLoading,
-    refresh,
   };
 }

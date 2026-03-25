@@ -48,7 +48,6 @@ export const Home = () => {
     tokenBalances,
     tokenContracts,
     tokenPrice,
-    refresh,
   } = useAppData();
   const offlineState = useOfflineStore();
 
@@ -83,12 +82,6 @@ export const Home = () => {
       60_000,
     );
     return () => clearInterval(interval);
-  }, []);
-
-  // Refetch all data when home page mounts (e.g. navigating back from game)
-  useEffect(() => {
-    refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Start normal background music on homepage (crossfades from game track)

@@ -16,8 +16,6 @@ export interface AppDataContextType {
   tokensLoading: boolean;
   /** Token price in USD (from Ekubo) */
   tokenPrice: number | null;
-  /** Refetch all app data (games, tokens, price) */
-  refresh: () => void;
 }
 
 export const AppDataContext = createContext<AppDataContextType | undefined>(
