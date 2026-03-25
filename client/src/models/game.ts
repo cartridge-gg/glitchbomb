@@ -95,8 +95,8 @@ export class Game {
       bag: Packer.unpack(BigInt(data.bag.value), 5n).map((index) =>
         Orb.from(index),
       ),
-      shop: Packer.unpack(BigInt(data.shop.value), 5n, 6).map((index) =>
-        Orb.from(index),
+      shop: Packer.unpack(BigInt(data.shop.value) & 0x3fffffffn, 5n, 6).map(
+        (index) => Orb.from(index),
       ),
       shopPurchaseCounts: Game.parsePurchaseCounts(BigInt(data.shop.value)),
       moonrocks: Number(data.moonrocks.value),
