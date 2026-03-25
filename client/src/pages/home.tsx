@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { getTokenAddress } from "@/config";
+import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import {
@@ -23,8 +23,10 @@ import {
   maxPayout as maxPayoutRaw,
   toTokens,
 } from "@/helpers/payout";
+import { useActivityFeed } from "@/hooks/activity-feed";
 import { useActions } from "@/hooks/actions";
-import { toDecimal } from "@/hooks/tokens";
+import { useOwnedGames } from "@/hooks/packs";
+import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import {
@@ -42,13 +44,17 @@ export const Home = () => {
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
-  const {
-    onchainGames,
-    activityItems,
-    tokenBalances,
-    tokenContracts,
-    tokenPrice,
-  } = useAppData();
+  const { tokenContracts, tokenPrice } = useAppData();
+
+  const { games: onchainGames } = useOwnedGames();
+  const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
+
+  const tokenAddress = config?.token || getTokenAddress(chain.id);
+  const { tokenBalances } = useTokens({
+    accountAddresses: account?.address ? [account.address] : [],
+    contractAddresses: [tokenAddress],
+  });
+
   const offlineState = useOfflineStore();
 
   // On mobile, use practice games from localStorage; on desktop, use on-chain games
@@ -104,8 +110,6 @@ export const Home = () => {
     },
     [now],
   );
-
-  const tokenAddress = config?.token || getTokenAddress(chain.id);
 
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
