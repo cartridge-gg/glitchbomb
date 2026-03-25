@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { LoadingSpinner } from "@/components/elements/loading-spinner";
 
 export interface ConfirmationDialogProps {
   open: boolean;
@@ -33,7 +34,7 @@ export const ConfirmationDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isConfirming ? () => {} : onOpenChange}>
       <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-6 gap-5">
         <div className="flex flex-col gap-5">
           <h2 className="text-green-400 font-secondary text-lg tracking-wider uppercase pr-6">
@@ -94,7 +95,7 @@ export const ConfirmationDialog = ({
             onClick={handleConfirm}
             disabled={isConfirming}
           >
-            {confirmLabel}
+            {isConfirming ? <LoadingSpinner size="sm" /> : confirmLabel}
           </Button>
         </div>
       </DialogContent>
