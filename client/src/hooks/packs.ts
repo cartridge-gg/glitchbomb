@@ -98,7 +98,7 @@ export function useOwnedGames() {
     }
 
     // Cancel existing subscriptions
-    subscriptionRef.current = null;
+    cancelSubscription();
 
     // Fetch initial data
     setIsFetching(true);
@@ -113,7 +113,7 @@ export function useOwnedGames() {
     client.onEntityUpdated(query.clause, [], onUpdate).then((response) => {
       subscriptionRef.current = response;
     });
-  }, [client, gameIds, onUpdate]);
+  }, [client, gameIds, onUpdate, cancelSubscription]);
 
   useEffect(() => {
     refresh();
