@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
+import { getTokenAddress } from "@/config";
+import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import {
   cumulativeRewards,
@@ -23,10 +24,7 @@ import {
   toTokens,
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
-import { useActivityFeed } from "@/hooks/activity-feed";
-import { useOwnedGames } from "@/hooks/packs";
-import { useTokenPrice } from "@/hooks/token-price";
-import { toDecimal, useTokens } from "@/hooks/tokens";
+import { toDecimal } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import {
@@ -44,9 +42,14 @@ export const Home = () => {
   const { account, connector } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
-  const { games: onchainGames } = useOwnedGames();
+  const {
+    onchainGames,
+    activityItems,
+    tokenBalances,
+    tokenContracts,
+    tokenPrice,
+  } = useAppData();
   const offlineState = useOfflineStore();
-  const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
 
   // On mobile, use practice games from localStorage; on desktop, use on-chain games
   const ownedGames = useMemo(() => {
@@ -104,17 +107,6 @@ export const Home = () => {
 
   const tokenAddress = config?.token || getTokenAddress(chain.id);
 
-  const { tokenBalances, tokenContracts } = useTokens({
-    accountAddresses: account?.address ? [account.address] : [],
-    contractAddresses: [tokenAddress],
-  });
-
-  const glitchAddress = getTokenAddress(chain.id);
-  const { price: tokenPrice } = useTokenPrice(
-    glitchAddress,
-    config?.quote,
-    chain.id.toString(),
-  );
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
     return tokenContracts.find(
