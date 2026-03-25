@@ -87,7 +87,6 @@ export const Home = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
-  const [isPurchasing, setIsPurchasing] = useState(false);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
 
   // Clean up the purchase loading signal when navigating away
@@ -433,59 +432,15 @@ export const Home = () => {
     const pack = starterpacks.find((s) => s.multiplier === tierIndex + 1);
     if (!pack) return;
     purchaseGameIdsRef.current = new Set(ownedGames.map((g) => g.id));
-    setIsPurchasing(true);
-    (connector as ControllerConnector)?.controller.openStarterPack(pack.id);
-  }, [connector, tierIndex, starterpacks, ownedGames]);
-
-  // Watch for the controller iframe to close after the purchase flow starts.
-  // Once the controller disappears we show the loading screen to cover the
-  // gap while the indexer picks up the new game.
-  useEffect(() => {
-    if (!isPurchasing) return;
-
-    let cancelled = false;
-    let controllerWasVisible = false;
-
-    const intervalId = setInterval(() => {
-      if (cancelled) return;
-
-      const el = document.getElementById("controller");
-      const isVisible =
-        el && el.style.display !== "none" && el.style.opacity !== "0";
-
-      if (isVisible) {
-        controllerWasVisible = true;
-        return;
-      }
-
-      // Controller was open and is now closed
-      if (controllerWasVisible) {
-        clearInterval(intervalId);
-
-        if (purchaseGameIdsRef.current) {
-          // Show loading screen while waiting for indexer
-          setReady("purchase", false);
-
-          // If no game detected after a grace period, assume cancelled
-          setTimeout(() => {
-            if (cancelled) return;
-            if (purchaseGameIdsRef.current) {
-              purchaseGameIdsRef.current = null;
-              setIsPurchasing(false);
-              removeSignal("purchase");
-            }
-          }, 15_000);
-        } else {
-          setIsPurchasing(false);
-        }
-      }
-    }, 300);
-
-    return () => {
-      cancelled = true;
-      clearInterval(intervalId);
-    };
-  }, [isPurchasing, setReady, removeSignal]);
+    (connector as ControllerConnector)?.controller.openStarterPack(pack.id, {
+      onPurchaseComplete: () => {
+        // Fired only when the user actually completes the purchase inside the
+        // controller — not on cancel. Show loading screen while the indexer
+        // picks up the new game.
+        setReady("purchase", false);
+      },
+    });
+  }, [connector, tierIndex, starterpacks, ownedGames, setReady]);
 
   // Detect new game after purchase and navigate to it
   useEffect(() => {
@@ -495,7 +450,6 @@ export const Home = () => {
     );
     if (newGame) {
       purchaseGameIdsRef.current = null;
-      setIsPurchasing(false);
       // Close the controller iframe before navigating
       const controllerEl = document.getElementById("controller");
       if (controllerEl) {
