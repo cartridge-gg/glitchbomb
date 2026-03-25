@@ -44,7 +44,6 @@ export const GameDetails = ({
       value: `$${cost.toFixed(2)}`,
       color: "#FF0099",
       fullPrice: hasDiscount ? `$${fullCost.toFixed(2)}` : undefined,
-      discount: hasDiscount ? `${stake}%` : undefined,
     },
     {
       label: "Reward Multiplier",
@@ -126,15 +125,6 @@ export const GameDetails = ({
                     style={{ color: stat.color ?? valueColor }}
                     text={stat.value}
                   />
-                  <span
-                    className="font-secondary text-[10px] px-1.5 py-0.5 rounded"
-                    style={{
-                      color: "#36F818",
-                      backgroundColor: "rgba(54, 248, 24, 0.15)",
-                    }}
-                  >
-                    -{stat.discount}
-                  </span>
                 </span>
               ) : (
                 <GlitchText
