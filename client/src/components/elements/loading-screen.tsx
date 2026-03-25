@@ -10,9 +10,10 @@ export function LoadingScreen() {
     "visible",
   );
 
-  // Re-show when data starts loading again (e.g. navigating back to home)
+  // Re-show when data starts loading again (e.g. navigating back to home,
+  // or purchase completing and transitioning to the game page)
   useEffect(() => {
-    if (!allReady && phase === "hidden") {
+    if (!allReady && (phase === "hidden" || phase === "fading")) {
       setPhase("visible");
     }
   }, [allReady, phase]);
@@ -31,11 +32,13 @@ export function LoadingScreen() {
     return () => clearTimeout(timer);
   }, [phase]);
 
-  if (phase === "hidden") return null;
+  // Show immediately when not ready (bypasses phase state machine for instant
+  // re-show). Also show during visible/fading phases for the fade-out sequence.
+  const isVisible = !allReady || phase !== "hidden";
 
   return (
     <div
-      className={`loading-screen ${phase === "fading" ? "loading-screen-exit" : ""}`}
+      className={`loading-screen ${phase === "fading" && allReady ? "loading-screen-exit" : ""} ${!isVisible ? "loading-screen-hidden" : ""}`}
       aria-label="Loading"
     >
       <div className="loading-screen-scanlines" aria-hidden="true" />

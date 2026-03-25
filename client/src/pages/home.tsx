@@ -18,7 +18,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { DEFAULT_CHAIN_ID, getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { useLoadingSignal } from "@/contexts/use-loading";
+import { useLoadingContext, useLoadingSignal } from "@/contexts/use-loading";
 import {
   cumulativeRewards,
   maxPayout as maxPayoutRaw,
@@ -46,6 +46,7 @@ export const Home = () => {
   const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
   const { tokenContracts, tokenPrice } = useAppData();
+  const { setReady, removeSignal } = useLoadingContext();
 
   const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
@@ -87,6 +88,11 @@ export const Home = () => {
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  // Clean up the purchase loading signal when navigating away
+  useEffect(() => {
+    return () => removeSignal("purchase");
+  }, [removeSignal]);
 
   useEffect(() => {
     const interval = setInterval(
@@ -436,6 +442,9 @@ export const Home = () => {
     );
     if (newGame) {
       purchaseGameIdsRef.current = null;
+      // Show the loading screen before closing the controller so the
+      // transition is seamless (no flash of unloaded content).
+      setReady("purchase", false);
       // Close the controller iframe before navigating
       const controllerEl = document.getElementById("controller");
       if (controllerEl) {
@@ -445,7 +454,7 @@ export const Home = () => {
       }
       navigate(mobilePath(`/play?game=${newGame.id}`));
     }
-  }, [ownedGames, navigate]);
+  }, [ownedGames, navigate, setReady]);
 
   const handlePractice = useCallback(() => {
     if (!isMobile) {

@@ -311,6 +311,10 @@ body {
   pointer-events: none;
 }
 
+.loading-screen-hidden {
+  display: none;
+}
+
 .loading-screen-content {
   display: flex;
   flex-direction: column;
