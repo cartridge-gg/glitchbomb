@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { LoadingSpinner } from "@/components/elements/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { LoadingSpinner } from "@/components/elements/loading-spinner";
 
 export interface ConfirmationDialogProps {
   open: boolean;
