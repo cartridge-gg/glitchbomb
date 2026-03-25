@@ -5,6 +5,7 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import {
   maxPayout,
   STARTERPACK_COUNT,
+  tierFullPrice,
   tierPrice,
   toTokens,
 } from "@/helpers/payout";
@@ -26,7 +27,9 @@ export const GameDetails = ({
 }: GameDetailsProps) => {
   const stake = tierIndex + 1;
   const cost = toTokens(tierPrice(stake));
+  const fullCost = toTokens(tierFullPrice(stake));
   const max = toTokens(maxPayout(stake, supply, target));
+  const hasDiscount = stake >= 2;
 
   const labelColor = "#FFFFFF";
   const valueColor = "#36F818";
@@ -40,6 +43,7 @@ export const GameDetails = ({
       label: "Cost",
       value: `$${cost.toFixed(2)}`,
       color: "#FF0099",
+      fullPrice: hasDiscount ? `$${fullCost.toFixed(2)}` : undefined,
     },
     {
       label: "Reward Multiplier",
@@ -108,11 +112,27 @@ export const GameDetails = ({
               >
                 {stat.label}
               </span>
-              <GlitchText
-                className="font-secondary text-sm"
-                style={{ color: stat.color ?? valueColor }}
-                text={stat.value}
-              />
+              {stat.fullPrice ? (
+                <span className="flex items-center gap-2">
+                  <span
+                    className="font-secondary text-sm line-through opacity-50"
+                    style={{ color: stat.color ?? valueColor }}
+                  >
+                    {stat.fullPrice}
+                  </span>
+                  <GlitchText
+                    className="font-secondary text-sm"
+                    style={{ color: stat.color ?? valueColor }}
+                    text={stat.value}
+                  />
+                </span>
+              ) : (
+                <GlitchText
+                  className="font-secondary text-sm"
+                  style={{ color: stat.color ?? valueColor }}
+                  text={stat.value}
+                />
+              )}
             </div>
           ))}
         </div>
