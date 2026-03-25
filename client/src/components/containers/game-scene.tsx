@@ -194,13 +194,20 @@ export const GameScene = ({
                   side="top"
                   align="center"
                   collisionPadding={16}
-                  className="bg-[#0A0E1A] font-secondary text-[10px] tracking-[0.25em] uppercase border"
-                  style={{
-                    color: multiplierColor,
-                    borderColor: `${multiplierColor}40`,
-                  }}
+                  className="bg-black border border-white/10 px-3 py-2 max-w-[200px]"
                 >
-                  Your current multiplier
+                  <p
+                    className="font-secondary text-xs font-bold"
+                    style={{ color: multiplierColor }}
+                  >
+                    {multiplier}x Multiplier
+                  </p>
+                  <p
+                    className="font-secondary text-xs mt-0.5 opacity-50"
+                    style={{ color: multiplierColor }}
+                  >
+                    All points earned are multiplied by {multiplier}x
+                  </p>
                 </TooltipContent>
               </TapTooltip>
             </TooltipProvider>
