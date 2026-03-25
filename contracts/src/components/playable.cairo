@@ -77,15 +77,12 @@ pub mod PlayableComponent {
                 // [Effect] Start the game immediately (fill bag)
                 let cost = game.start();
 
-                // [Event] Emit PLDataPoint before level cost (initial moonrocks)
+                // [Event] Emit PLDataPoint at baseline (initial moonrocks)
                 store.pl_data_point(0, @game, game.moonrocks, 0);
 
                 // [Effect] Spend moonrocks for entry
                 game.spend_moonrocks(cost);
                 store.set_game(@game);
-
-                // [Event] Emit PLDataPoint after level cost
-                store.pl_data_point(1, @game, game.moonrocks + game.points, 0);
 
                 // [Interaction] Update token metadata
                 collection.update(game_id.into());
@@ -181,7 +178,7 @@ pub mod PlayableComponent {
 
             // Calculate potential moonrocks and PL id base
             let potential_moonrocks = game.moonrocks + game.points;
-            let pl_base_id: u32 = 2 + (game.pull_count.into() - orbs.len()) * 2;
+            let pl_base_id: u32 = 1 + (game.pull_count.into() - orbs.len()) * 2;
 
             // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
             store.orb_pulled(@game, orbs.get(0), 0);
@@ -294,7 +291,7 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Event] Emit PLDataPoint for ante cost
-            let pl_id: u32 = 2 + (game.pull_count.into() * 2) + game.level.into();
+            let pl_id: u32 = 1 + (game.pull_count.into() * 2) + game.level.into();
             let potential = game.moonrocks + game.points;
             store.pl_data_point(pl_id, @game, potential, 0);
 

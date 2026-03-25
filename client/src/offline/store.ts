@@ -127,18 +127,12 @@ export function createOfflineGame(): number {
       potential_moonrocks: game.moonrocks,
       orb: 0,
     };
-    const plAfter: OfflinePLDataPoint = {
-      game_id: id,
-      id: plBaseId + 1,
-      potential_moonrocks: started.moonrocks + started.points,
-      orb: 0,
-    };
 
     return {
       ...prev,
       nextGameId: id + 1,
       games: { ...prev.games, [id]: started },
-      plDataPoints: [...prev.plDataPoints, plStart, plAfter],
+      plDataPoints: [...prev.plDataPoints, plStart],
     };
   });
   return createdId;
