@@ -258,38 +258,6 @@ export const GameOver = ({
               </div>
             </InfoCard>
 
-            {/* Stats rows */}
-            <div className="flex flex-col gap-px bg-black rounded-lg overflow-hidden">
-              {[
-                { label: "Level Reached", value: level },
-                { label: "Orbs Pulled", value: pulls.length },
-                {
-                  label: "Bombs Hit",
-                  value: pulls.filter((p) => p.orb.isBomb()).length,
-                },
-                { label: "Moonrocks Earned", value: moonrocksEarned },
-              ].map((stat, i, arr) => (
-                <div
-                  key={stat.label}
-                  className={`flex justify-between items-center px-4 py-3 ${
-                    i === 0 ? "rounded-t-lg" : ""
-                  } ${i === arr.length - 1 ? "rounded-b-lg" : ""}`}
-                  style={{ backgroundColor: "rgba(54, 248, 24, 0.04)" }}
-                >
-                  <span
-                    className="font-secondary text-sm"
-                    style={{ color: "#FFFFFF" }}
-                  >
-                    {stat.label}
-                  </span>
-                  <GlitchText
-                    className="font-secondary text-sm"
-                    style={{ color: "#36F818" }}
-                    text={String(stat.value)}
-                  />
-                </div>
-              ))}
-            </div>
           </>
         )}
       </div>
