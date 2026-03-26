@@ -117,7 +117,7 @@ export const GameOver = ({
   const titleFont = !cashedOut && !expired ? "font-glitch" : "font-body";
 
   return (
-    <div className="flex flex-col max-w-[420px] w-full mx-auto px-4 min-h-full overflow-x-hidden">
+    <div className="flex flex-col max-w-[420px] w-full mx-auto px-4 min-h-full">
       {/* Content — scrollable, vertically centered when short */}
       <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)] overflow-y-auto">
         <div className="flex flex-col items-center gap-0">
