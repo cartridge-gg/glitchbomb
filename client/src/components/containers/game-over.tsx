@@ -176,6 +176,15 @@ export const GameOver = ({
               />
             )}
 
+            {/* Exchange rate row */}
+            {tokenPrice != null && tokenPrice > 0 && (
+              <div className="flex items-center justify-center py-1">
+                <span className="font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.2em] text-green-600">
+                  1 USD = {Math.floor(1 / tokenPrice).toLocaleString()} GLITCH
+                </span>
+              </div>
+            )}
+
             {/* Earnings card */}
             <InfoCard
               variant={cardVariant}
