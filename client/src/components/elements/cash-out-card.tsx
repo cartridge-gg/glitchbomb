@@ -47,17 +47,17 @@ export const CashOutCard = ({
           style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
         >
           <div
-            className="flex items-center justify-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]"
+            className="flex items-center justify-center px-[clamp(8px,1.5svh,12px)] py-[clamp(3px,0.7svh,6px)]"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
           >
-            <span className="text-yellow-400 font-secondary text-[clamp(0.45rem,0.9svh,0.6rem)] tracking-[0.25em] uppercase">
+            <span className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.25em] uppercase">
               Value
             </span>
           </div>
           <div className="w-px self-stretch bg-yellow-100 opacity-5" />
-          <div className="flex items-center px-[clamp(6px,1.2svh,10px)] py-[clamp(2px,0.5svh,4px)]">
+          <div className="flex items-center px-[clamp(8px,1.5svh,12px)] py-[clamp(3px,0.7svh,6px)]">
             <GlitchText
-              className="text-yellow-400 font-secondary text-[clamp(0.55rem,1.1svh,0.75rem)] leading-none"
+              className="text-yellow-400 font-secondary text-[clamp(0.7rem,1.4svh,0.95rem)] leading-none"
               text={cashOutValue}
             />
           </div>
