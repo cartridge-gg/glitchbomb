@@ -194,7 +194,23 @@ export const PLGraph = ({
     }
 
     // Sort by position (top to bottom)
-    return labels.sort((a, b) => a.position - b.position);
+    labels.sort((a, b) => a.position - b.position);
+
+    // Remove overlapping labels — when two pills are too close, drop one.
+    // ~15% of container height keeps pills from colliding at typical sizes.
+    const MIN_GAP = 15;
+    const deduped: typeof labels = [];
+    for (const label of labels) {
+      if (
+        deduped.length > 0 &&
+        Math.abs(deduped[deduped.length - 1].position - label.position) <
+          MIN_GAP
+      ) {
+        continue; // skip — too close to the previous kept label
+      }
+      deduped.push(label);
+    }
+    return deduped;
   }, [yRange, cumulativeData, baseline, goal]);
 
   // Calculate graph points
