@@ -159,7 +159,9 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
       >
         <Icon
           className={cn(
-            "h-[60%] w-[60%]",
+            variant === "chip" || variant === "moonrock"
+              ? "h-[80%] w-[80%]"
+              : "h-[60%] w-[60%]",
             (variant === "bomb" ||
               variant === "bomb1" ||
               variant === "bomb2" ||

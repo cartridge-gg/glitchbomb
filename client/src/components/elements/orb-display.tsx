@@ -202,7 +202,9 @@ export const OrbDisplay = ({
           <Icon
             className={cn(
               "relative z-10",
-              "w-[60%] h-[60%]",
+              orb.isChips() || orb.isMoonrock()
+                ? "w-[80%] h-[80%]"
+                : "w-[60%] h-[60%]",
               orb.isBomb() && "glitch-icon",
             )}
             style={{
