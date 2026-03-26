@@ -70,12 +70,6 @@ export const GameOver = ({
     return { glitch: tokens, usd: usdVal };
   }, [stake, moonrocksEarned, supply, target, tokenPrice]);
 
-  // Yellow theme for expired, green for cashed out, red for glitched out
-  const titleColor = expired
-    ? "text-yellow-400"
-    : cashedOut
-      ? "text-green-400"
-      : "text-red-100";
   const textColor = expired
     ? "text-yellow-400"
     : cashedOut
