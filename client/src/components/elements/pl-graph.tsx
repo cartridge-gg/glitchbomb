@@ -169,27 +169,28 @@ export const PLGraph = ({
     const dataMin = Math.min(...values);
     const dataMax = Math.max(...values);
 
+    // Use the same padded Y coordinate as graph dots and baseline line
+    // so labels align exactly with their corresponding visual elements.
+    const paddingY = 8;
+    const toPos = (value: number) =>
+      paddingY + ((max - value) / range) * (100 - paddingY * 2);
+
     // Top: goal for the level, or the highest dot value
     const highValue = goal != null ? Math.max(goal, dataMax) : dataMax;
-    const highPosition = ((max - highValue) / range) * 100;
-    labels.push({ value: highValue, position: highPosition });
+    labels.push({ value: highValue, position: toPos(highValue) });
 
     // Bottom: the lowest dot value
     const lowValue = dataMin;
-    const lowPosition = ((max - lowValue) / range) * 100;
 
     // Middle: 100 (baseline) — only shown when lowest < baseline
     if (lowValue < baseline) {
-      const baselinePosition = ((max - baseline) / range) * 100;
-      labels.push({ value: baseline, position: baselinePosition });
-      // Only add low label if it differs from the high label
+      labels.push({ value: baseline, position: toPos(baseline) });
       if (lowValue !== highValue) {
-        labels.push({ value: lowValue, position: lowPosition });
+        labels.push({ value: lowValue, position: toPos(lowValue) });
       }
     } else {
-      // Lowest is at or above baseline — only 2 labels (or 1 if they match)
       if (lowValue !== highValue) {
-        labels.push({ value: lowValue, position: lowPosition });
+        labels.push({ value: lowValue, position: toPos(lowValue) });
       }
     }
 
