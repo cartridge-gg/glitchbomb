@@ -36,11 +36,11 @@ export const MilestoneChoice = ({
   const showCurse = Boolean(curseLabel);
   const showAnte = ante != null && ante > 0;
   const rewardValueClass =
-    "font-secondary text-[clamp(0.8rem,2.5svh,1.25rem)] leading-none";
+    "font-secondary text-[clamp(1rem,3svh,1.5rem)] leading-none";
   const rewardLabelClass =
-    "font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider";
+    "font-secondary text-[clamp(0.6rem,1.4svh,0.85rem)] tracking-wider";
   const rewardIconClass =
-    "w-[clamp(18px,3.5svh,24px)] h-[clamp(18px,3.5svh,24px)]";
+    "w-[clamp(22px,4.5svh,30px)] h-[clamp(22px,4.5svh,30px)]";
 
   return (
     <div className="flex flex-col justify-center gap-[clamp(8px,2.2svh,18px)] w-full h-full">
@@ -65,15 +65,12 @@ export const MilestoneChoice = ({
               className="flex items-center rounded-md overflow-hidden"
               style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
             >
-              <div
-                className="flex items-center justify-center px-[clamp(8px,1.5svh,12px)] py-[clamp(3px,0.7svh,6px)]"
-                style={{ backgroundColor: "rgba(0, 0, 0, 0.15)" }}
-              >
+              <div className="flex items-center justify-center px-[clamp(8px,1.5svh,12px)] py-[clamp(3px,0.7svh,6px)]">
                 <span className="text-orange-400 font-secondary text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.25em] uppercase">
                   Ante
                 </span>
               </div>
-              <div className="w-px self-stretch bg-orange-100 opacity-5" />
+              <div className="w-px self-stretch bg-orange-100 opacity-10" />
               <div className="flex items-center gap-1 px-[clamp(8px,1.5svh,12px)] py-[clamp(3px,0.7svh,6px)]">
                 <MoonrockIcon className="w-[clamp(13px,2.5svh,18px)] h-[clamp(13px,2.5svh,18px)] text-orange-400" />
                 <GlitchText
