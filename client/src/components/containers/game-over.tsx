@@ -125,19 +125,19 @@ export const GameOver = ({
             />
 
             {/* Big centered card with title + moonrocks */}
-            <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-[clamp(8px,2svh,16px)]">
+              <h1
+                className={`${titleColor} ${titleFont} uppercase text-[clamp(1rem,2.8svh,1.5rem)] tracking-[0.3em] leading-tight text-center ${!cashedOut ? "glitch-text" : ""}`}
+              >
+                {cashedOut ? "CASHED OUT" : "GLITCHED\u00A0OUT"}
+              </h1>
+
               <InfoCard
                 variant={cardVariant}
                 className="w-full h-auto"
                 innerClassName="py-[clamp(16px,3svh,28px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2svh,16px)]"
               >
                 <div className="flex flex-col items-center gap-[clamp(8px,2svh,16px)]">
-                  <h1
-                    className={`${titleColor} ${titleFont} uppercase text-[clamp(1rem,2.8svh,1.5rem)] tracking-[0.3em] leading-tight text-center ${!cashedOut ? "glitch-text" : ""}`}
-                  >
-                    {cashedOut ? "CASHED OUT" : "GLITCHED\u00A0OUT"}
-                  </h1>
-
                   <MoonrockLargeIcon className="w-[clamp(56px,10svh,72px)] h-auto" />
 
                   <div className="flex flex-col items-center gap-1">
