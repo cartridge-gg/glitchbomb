@@ -136,6 +136,8 @@ export function enterShop(
   };
   next.chips += next.points;
   next.points = 0;
+  // Reset discards when entering shop (matches onchain contract)
+  next.discards = next.bag.map(() => false);
   // Spend moonrocks for the next level ante
   const cost = milestoneCost(next.level + 1);
   if (next.moonrocks < cost) throw new Error("Game: not enough moonrocks");

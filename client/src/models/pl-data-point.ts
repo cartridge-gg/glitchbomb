@@ -51,9 +51,9 @@ export class PLDataPoint {
       return "pink";
     }
 
-    // Multipliers (7-9) - yellow
+    // Multipliers (7-9) - blue
     if (orbType >= 7 && orbType <= 9) {
-      return "yellow";
+      return "blue";
     }
 
     // Points (10-16) - green

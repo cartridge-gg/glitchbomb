@@ -64,7 +64,7 @@ const INITIAL_GAME_VALUES = {
 
 const NEXT_LEVEL_CURSES: Record<number, string> = {
   4: "Double Bomb",
-  6: "Sticky Bomb",
+  6: "Bomberang",
   7: "Double Bomb",
 };
 
@@ -165,7 +165,7 @@ export const Game = () => {
   const prevLevelRef = useRef<number | null>(null);
   const milestoneShownRef = useRef(false);
 
-  const { dataPoints } = usePLDataPoints({
+  const { dataPoints, isPractice } = usePLDataPoints({
     gameId: game?.id ?? 0,
   });
 
@@ -177,16 +177,39 @@ export const Game = () => {
   const plData: PLDataPointComponent[] = useMemo(() => {
     if (dataPoints.length === 0) return [];
 
-    const sorted = [...dataPoints].sort((a, b) => a.id - b.id);
+    const rawSorted = [...dataPoints].sort((a, b) => a.id - b.id);
+
+    // Fix level marker ordering for onchain data only: the contract's ante
+    // ID formula (1 + pull_count*2 + level) adds a level offset that pushes
+    // markers after the first pulls of the next level. Offline/practice IDs
+    // are sequential and don't need adjustment.
+    let sorted: typeof rawSorted;
+    if (!isPractice) {
+      let levelCount = 0;
+      const withKeys = rawSorted.map((point) => {
+        if (point.orb === 0) {
+          levelCount++;
+          return {
+            point,
+            key: point.id > 0 ? point.id - levelCount - 0.5 : -0.5,
+          };
+        }
+        return { point, key: point.id };
+      });
+      withKeys.sort((a, b) => a.key - b.key);
+      sorted = withKeys.map(({ point }) => point);
+    } else {
+      sorted = rawSorted;
+    }
 
     return sorted.map((point, index) => {
       const orbType = point.orb;
 
-      // Level cost / game start entries (orb=0) → grey
+      // Level cost / game start entries (orb=0) → yellow
       if (orbType === 0) {
         return {
           value: point.potentialMoonrocks,
-          variant: "grey" as const,
+          variant: "yellow" as const,
           id: point.id,
         };
       }
@@ -204,7 +227,7 @@ export const Game = () => {
 
       return { value: point.potentialMoonrocks, variant, id: point.id };
     });
-  }, [dataPoints]);
+  }, [dataPoints, isPractice]);
 
   // Compute goal line for chart: baseMoonrocks + milestone
   // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
@@ -602,7 +625,7 @@ export const Game = () => {
     return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
   const hasCurse = hasStickyBomb;
-  const curseLabel = hasStickyBomb ? "Sticky Bomb" : undefined;
+  const curseLabel = hasStickyBomb ? "Bomberang" : undefined;
 
   const gameIdParam = searchParams.get("game");
   const isGameReady = !!game && tokenContracts.length > 0;
@@ -823,10 +846,10 @@ export const Game = () => {
                   ORBS
                 </button>
               </GradientBorder>
-              <GradientBorder color="yellow" className="flex-1">
+              <GradientBorder color="green" className="flex-1">
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-yellow-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#302A10]"
+                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
                   onClick={openCashout}
                 >
                   CASH OUT

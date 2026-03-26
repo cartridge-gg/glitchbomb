@@ -92,6 +92,6 @@ export const StickyBombCurse: Story = {
   args: {
     points: 120,
     ante: 13,
-    nextCurseLabel: "Sticky Bomb",
+    nextCurseLabel: "Bomberang",
   },
 };

@@ -160,5 +160,6 @@ export function usePLDataPoints({ gameId }: { gameId: number }) {
   return {
     dataPoints: isPractice ? offlinePoints : dataPoints,
     isReady,
+    isPractice,
   };
 }

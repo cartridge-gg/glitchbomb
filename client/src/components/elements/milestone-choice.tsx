@@ -111,13 +111,13 @@ export const MilestoneChoice = ({
               className="flex-1 flex flex-col items-center justify-center gap-[clamp(2px,0.6svh,6px)] rounded-lg py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]"
               style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
             >
-              {curseLabel === "Sticky Bomb" ? (
+              {curseLabel === "Bomberang" ? (
                 <StickyBombIcon className="w-[clamp(24px,5svh,34px)] h-[clamp(24px,5svh,34px)] text-white glitch-icon" />
               ) : (
                 <Bomb2xIcon className="w-[clamp(28px,6svh,40px)] h-[clamp(28px,6svh,40px)] text-white glitch-icon" />
               )}
               <span className="text-white/70 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-wider">
-                {curseLabel === "Sticky Bomb" ? "Sticky Bomb" : "2x Bomb"}
+                {curseLabel === "Bomberang" ? "Bomberang" : "2x Bomb"}
               </span>
             </div>
           )}
