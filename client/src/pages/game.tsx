@@ -739,7 +739,7 @@ export const Game = () => {
               <MilestoneChoice
                 moonrocks={game.moonrocks}
                 points={game.points}
-                ante={game.level === 1 ? 0 : milestoneCost(game.level + 1)}
+                ante={milestoneCost(game.level + 1)}
                 cashOutValue={formatCashOutValue}
                 onCashOut={openCashout}
                 onEnterShop={handleEnterShop}

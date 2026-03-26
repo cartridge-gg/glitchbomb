@@ -73,7 +73,7 @@ fn test_play_cash_out_mints_moonrocks() {
     game_after.assert_is_over();
     assert(game_after.points == 0, 'Game: points not reset');
 
-    // Reward based on moonrocks=100 (no level 1 cost), supply=0, target=1B
+    // Reward based on moonrocks=100 (cashed out before entering shop), supply=0, target=1B
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
     assert(game_after.moonrocks == 100, 'Game: wrong moonrocks');
 
@@ -133,7 +133,7 @@ fn test_play_cash_out_reward_scales_with_stake() {
     let game1 = store.game(1);
     let game2 = store.game(2);
 
-    // Reward based on moonrocks=100 for both games (no level 1 cost)
+    // Reward based on moonrocks=100 for both games (cashed out before entering shop)
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
     assert(game1.moonrocks == 100, 'Stake 1: moonrocks == 100');
     assert(game2.moonrocks == 100, 'Stake 5: moonrocks == 100');
@@ -164,7 +164,7 @@ fn test_play_cash_out_max_stake() {
     let store = StoreTrait::new(world);
     let game = store.game(1);
 
-    // Reward based on moonrocks=100 (no level 1 cost), stake=10
+    // Reward based on moonrocks=100 (cashed out before entering shop), stake=10
     // Moonrocks unchanged (reward goes to Glitch tokens, not moonrocks)
     assert(game.moonrocks == 100, 'Stake 10: moonrocks == 100');
 
@@ -238,8 +238,8 @@ fn test_play_death_cashes_out_moonrocks() {
     assert(game.health == 0, 'Game: health should be 0');
 
     // [Assert] Points were NOT converted to moonrocks on death
-    // Moonrocks = 100 (initial) - 0 (no ante for initial level) = 100
-    assert(game.moonrocks == 100, 'Game: moonrocks should be 100');
+    // Moonrocks = 100 (initial) - 1 (ante for level 2) = 99
+    assert(game.moonrocks == 99, 'Game: moonrocks should be 99');
 
     // [Assert] Tokens were minted based on moonrocks only (not points)
     let balance_after = systems.token.balance_of(context.player);
