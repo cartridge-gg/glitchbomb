@@ -697,6 +697,10 @@ export const Game = () => {
           cashedOut={false}
           expired={true}
           onPlayAgain={() => navigate(mobilePath("/"))}
+          onOpenStash={openStash}
+          health={game.health}
+          points={game.points}
+          milestone={game.milestone}
         />
       );
     }
@@ -716,6 +720,10 @@ export const Game = () => {
           pulls={pulls}
           cashedOut={cashedOut}
           onPlayAgain={() => navigate(mobilePath("/"))}
+          onOpenStash={openStash}
+          health={game.health}
+          points={game.points}
+          milestone={game.milestone}
           stake={game.stake}
           tokenPrice={tokenPrice}
           supply={supply}

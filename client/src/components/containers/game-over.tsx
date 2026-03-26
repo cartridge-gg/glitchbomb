@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
-import { GlitchBombIcon } from "@/components/icons";
-import { Button } from "@/components/ui/button";
+import { BagIcon, GlitchBombIcon, MoonrockLargeIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
-import { Orb, type OrbPulled, OrbType } from "@/models";
+import type { OrbPulled } from "@/models";
 import {
+  GameStats,
   InfoCard,
-  OrbDisplay,
   PayoutChart,
   PLChartTabs,
   type PLDataPoint,
@@ -21,6 +20,11 @@ export interface GameOverProps {
   cashedOut: boolean; // true = voluntarily cashed out, false = died (health = 0)
   expired?: boolean; // true = game expired without being played to completion
   onPlayAgain?: () => void;
+  onOpenStash?: () => void;
+  /** Game stats for header */
+  health: number;
+  points: number;
+  milestone: number;
   /** Payout chart props — when stake is provided, renders the payout chart */
   stake?: number;
   tokenPrice?: number | null;
@@ -30,45 +34,6 @@ export interface GameOverProps {
 
 type Step = "gameover" | "rewards";
 
-const moonrockOrb = new Orb(OrbType.Moonrock15);
-
-/** Two overlapping orbs — back one has no icon, front has the full display */
-const OrbStack = ({
-  orb,
-  size,
-  style,
-  iconOverride,
-}: {
-  orb: Orb;
-  size: "xs" | "sm" | "md" | "lg";
-  style?: React.CSSProperties;
-  iconOverride?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-}) => (
-  <div
-    className="relative pb-3 pr-3"
-    style={{ width: "fit-content", ...style }}
-  >
-    <div className="absolute bottom-0 right-0 opacity-60">
-      <OrbDisplay
-        orb={orb}
-        size={size}
-        showValue={false}
-        hideIcon
-        className="bg-black"
-      />
-    </div>
-    <div className="relative top-1.5 left-1">
-      <OrbDisplay
-        orb={orb}
-        size={size}
-        showValue={false}
-        className="bg-black"
-        iconOverride={iconOverride}
-      />
-    </div>
-  </div>
-);
-
 export const GameOver = ({
   level,
   moonrocksEarned,
@@ -77,15 +42,15 @@ export const GameOver = ({
   cashedOut,
   expired,
   onPlayAgain,
+  onOpenStash,
+  health,
+  points,
+  milestone,
   stake,
   tokenPrice,
   supply,
   target,
 }: GameOverProps) => {
-  const bombsHit = useMemo(
-    () => pulls.filter((p) => p.orb.isBomb()).length,
-    [pulls],
-  );
   const [step, setStep] = useState<Step>("gameover");
 
   // Compute GLITCH tokens earned and USD value for rewards step
@@ -116,75 +81,78 @@ export const GameOver = ({
   // Use glitch font only for "glitched out", regular font for others
   const titleFont = !cashedOut && !expired ? "font-glitch" : "font-body";
 
+  const cardVariant = expired ? "yellow" : cashedOut ? "green" : "red";
+
   return (
-    <div className="flex flex-col max-w-[420px] w-full mx-auto px-4 min-h-full">
-      {/* Content — vertically centered */}
-      <div className="flex flex-1 min-h-0 flex-col justify-center gap-[clamp(6px,2svh,18px)]">
-        <div className="flex flex-col items-center gap-0">
-          <h1
-            className={`${titleColor} ${titleFont} uppercase text-[clamp(1.9rem,5.5svh,2.75rem)] tracking-wider leading-tight text-center ${!cashedOut && !expired ? "glitch-text" : ""}`}
-          >
-            {expired
-              ? "EXPIRED"
-              : cashedOut
-                ? "CASHED OUT"
-                : "GLITCHED\u00A0OUT"}
-          </h1>
-          <span className="text-green-600 font-secondary text-sm tracking-widest">
-            Level {level}
-          </span>
-        </div>
+    <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
+      <div className="flex flex-1 min-h-0 flex-col gap-[clamp(6px,2svh,18px)]">
+        {/* Game Stats header — same as game scene */}
+        <GameStats
+          points={points}
+          milestone={milestone}
+          health={health}
+          level={level}
+        />
 
         {expired ? (
-          <InfoCard
-            variant="yellow"
-            label="Time's Up"
-            className="w-full h-auto"
-            innerClassName="py-[clamp(12px,3svh,24px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
-          >
-            <span
-              className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em] text-center`}
-            >
-              GAME EXPIRED
-            </span>
-          </InfoCard>
-        ) : step === "gameover" ? (
           <>
             <PLChartTabs
               data={plData}
               pulls={pulls}
               mode="absolute"
               title="P/L"
-              tabBarClassName=""
+            />
+            <InfoCard
+              variant="yellow"
+              label="Time's Up"
+              className="w-full h-auto"
+              innerClassName="py-[clamp(12px,3svh,24px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
+            >
+              <span
+                className={`${textColor} font-secondary text-[clamp(1rem,2.6svh,1.5rem)] tracking-[0.2em] text-center`}
+              >
+                GAME EXPIRED
+              </span>
+            </InfoCard>
+          </>
+        ) : step === "gameover" ? (
+          <>
+            {/* Chart */}
+            <PLChartTabs
+              data={plData}
+              pulls={pulls}
+              mode="absolute"
+              title="P/L"
             />
 
-            <InfoCard
-              variant={cashedOut ? "green" : "red"}
-              label={`You Earned${cashedOut ? "!" : ""}`}
-              className="w-full h-auto min-h-[clamp(160px,24svh,210px)]"
-              innerClassName="py-[clamp(8px,1.8svh,14px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2.2svh,20px)]"
-            >
-              <div className="flex flex-col items-center gap-[clamp(4px,1svh,8px)]">
-                <OrbStack
-                  orb={moonrockOrb}
-                  size="lg"
-                  style={
-                    {
-                      "--orb-moonrock": "var(--yellow-100)",
-                    } as React.CSSProperties
-                  }
-                />
-                <div className="flex flex-col items-center gap-1">
-                  <GlitchText
-                    className="text-yellow-400 font-secondary text-[clamp(0.9rem,2.5svh,1.3rem)] tracking-[0.2em]"
-                    text={String(moonrocksEarned)}
-                  />
-                  <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.3em] uppercase opacity-70">
-                    Moonrocks
-                  </span>
+            {/* Big centered card with title + moonrocks */}
+            <div className="flex-1 min-h-0 flex items-center justify-center">
+              <InfoCard
+                variant={cardVariant}
+                className="w-full h-auto"
+                innerClassName="py-[clamp(16px,3svh,28px)] px-[clamp(10px,2svh,16px)] gap-[clamp(8px,2svh,16px)]"
+              >
+                <div className="flex flex-col items-center gap-[clamp(8px,2svh,16px)]">
+                  <h1
+                    className={`${titleColor} ${titleFont} uppercase text-[clamp(1.9rem,5.5svh,2.75rem)] tracking-wider leading-tight text-center ${!cashedOut ? "glitch-text" : ""}`}
+                  >
+                    {cashedOut ? "CASHED OUT" : "GLITCHED\u00A0OUT"}
+                  </h1>
+
+                  <MoonrockLargeIcon className="w-[clamp(56px,10svh,72px)] h-auto" />
+
+                  <div className="flex flex-col items-center gap-1">
+                    <GlitchText
+                      className="text-yellow-400 font-secondary text-[clamp(1.2rem,3.5svh,2rem)] tracking-[0.2em]"
+                      text={String(moonrocksEarned)}
+                    />
+                    <span className="text-yellow-400 font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.3em] uppercase opacity-70">
+                      Moonrocks
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </InfoCard>
+              </InfoCard>
+            </div>
           </>
         ) : (
           <>
@@ -215,7 +183,7 @@ export const GameOver = ({
 
             {/* Earnings card */}
             <InfoCard
-              variant={cashedOut ? "green" : "red"}
+              variant={cardVariant}
               className="w-full h-auto"
               contentClassName="p-[clamp(8px,2svh,12px)] gap-[clamp(8px,2.2svh,18px)]"
               labelClassName="text-[clamp(0.55rem,1.2svh,0.75rem)] tracking-[0.32em]"
@@ -263,15 +231,7 @@ export const GameOver = ({
                   style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
                 >
                   <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-                    <OrbStack
-                      orb={moonrockOrb}
-                      size="md"
-                      style={
-                        {
-                          "--orb-moonrock": "var(--yellow-100)",
-                        } as React.CSSProperties
-                      }
-                    />
+                    <MoonrockLargeIcon className="w-[clamp(40px,7svh,56px)] h-auto" />
                     <GlitchText
                       className="text-yellow-400 font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none"
                       text={String(moonrocksEarned)}
@@ -289,14 +249,7 @@ export const GameOver = ({
                     style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
                   >
                     <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-                      <OrbStack
-                        orb={moonrockOrb}
-                        size="md"
-                        style={
-                          { "--orb-moonrock": "#FF0099" } as React.CSSProperties
-                        }
-                        iconOverride={GlitchBombIcon}
-                      />
+                      <GlitchBombIcon className="w-[clamp(40px,7svh,56px)] h-auto text-[#FF0099]" />
                       <GlitchText
                         className="text-[#FF0099] font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none"
                         text={String(Math.floor(glitch))}
@@ -315,7 +268,10 @@ export const GameOver = ({
               {[
                 { label: "Level Reached", value: level },
                 { label: "Orbs Pulled", value: pulls.length },
-                { label: "Bombs Hit", value: bombsHit },
+                {
+                  label: "Bombs Hit",
+                  value: pulls.filter((p) => p.orb.isBomb()).length,
+                },
                 { label: "Moonrocks Earned", value: moonrocksEarned },
               ].map((stat, i, arr) => (
                 <div
@@ -343,26 +299,50 @@ export const GameOver = ({
         )}
       </div>
 
-      {/* Button — pinned to bottom */}
-      <div className="shrink-0 pb-4">
-        {expired || step === "rewards" ? (
-          <Button
-            variant="default"
-            gradient="green"
-            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.7rem,1.5svh,0.875rem)] tracking-widest"
-            onClick={onPlayAgain}
-          >
-            PLAY AGAIN
-          </Button>
+      {/* Bottom buttons — pinned to bottom */}
+      <div className="shrink-0 pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)]">
+        {expired ? (
+          <GradientBorder color="green" className="w-full">
+            <button
+              type="button"
+              className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+              onClick={onPlayAgain}
+            >
+              PLAY AGAIN
+            </button>
+          </GradientBorder>
+        ) : step === "rewards" ? (
+          <GradientBorder color="green" className="w-full">
+            <button
+              type="button"
+              className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+              onClick={onPlayAgain}
+            >
+              PLAY AGAIN
+            </button>
+          </GradientBorder>
         ) : (
-          <Button
-            variant="default"
-            gradient="green"
-            className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.7rem,1.5svh,0.875rem)] tracking-widest"
-            onClick={() => setStep("rewards")}
-          >
-            CONTINUE
-          </Button>
+          <div className="flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
+            <GradientBorder color="green" className="flex-1">
+              <button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                onClick={onOpenStash}
+              >
+                <BagIcon className="w-5 h-5" />
+                ORBS
+              </button>
+            </GradientBorder>
+            <GradientBorder color="green" className="flex-1">
+              <button
+                type="button"
+                className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                onClick={() => setStep("rewards")}
+              >
+                CONTINUE
+              </button>
+            </GradientBorder>
+          </div>
         )}
       </div>
     </div>

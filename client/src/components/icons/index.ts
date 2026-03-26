@@ -52,6 +52,7 @@ export * from "./heart-outline";
 export * from "./home";
 export * from "./list";
 export * from "./moonrock";
+export * from "./moonrock-large";
 export * from "./nums-logo";
 export * from "./orb";
 export * from "./orb-bomb";
