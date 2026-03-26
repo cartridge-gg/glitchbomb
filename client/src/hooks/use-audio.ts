@@ -433,6 +433,21 @@ export function useAudio() {
     [settings.sfxMuted, settings.sfxVolume],
   );
 
+  const playFatalBombSound = useCallback(
+    (orb: Orb) => {
+      if (settings.sfxMuted) return;
+      const file = getOrbSoundFile(orb);
+      if (!file) return;
+      // Base hit at full volume
+      playSfx(file, settings.sfxVolume);
+      // Descending-pitch reverb layers for dramatic slow-mo explosion feel
+      setTimeout(() => playSfx(file, settings.sfxVolume * 0.7, 0.7), 80);
+      setTimeout(() => playSfx(file, settings.sfxVolume * 0.5, 0.5), 200);
+      setTimeout(() => playSfx(file, settings.sfxVolume * 0.3, 0.35), 400);
+    },
+    [settings.sfxMuted, settings.sfxVolume],
+  );
+
   const playRewardSound = useCallback(() => {
     if (settings.sfxMuted) return;
     const file = "/assets/sounds/moonrock.wav";
@@ -482,6 +497,7 @@ export function useAudio() {
     setMusicVolume,
     setSfxVolume,
     playOrbSound,
+    playFatalBombSound,
     playRewardSound,
     playLevelCompleteSound,
     playLevelStartSound,
