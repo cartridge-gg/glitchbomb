@@ -143,7 +143,7 @@ export const OrbCategorySummary = forwardRef<
                     }}
                   >
                     <BoltIcon
-                      className="w-[11px] h-[11px]"
+                      className="w-[12px] h-[12px]"
                       style={{
                         color: config.color,
                         filter: `drop-shadow(0 0 3px ${config.color})`,
