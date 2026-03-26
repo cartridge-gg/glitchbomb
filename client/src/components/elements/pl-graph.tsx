@@ -199,17 +199,21 @@ export const PLGraph = ({
     // Remove overlapping labels — when two pills are too close, drop one.
     // ~15% of container height keeps pills from colliding at typical sizes.
     const MIN_GAP = 15;
+    // Walk bottom-to-top so we keep the lowest (most informative) label
+    // when two overlap — e.g. keep 98 over 100.
     const deduped: typeof labels = [];
-    for (const label of labels) {
+    for (let i = labels.length - 1; i >= 0; i--) {
+      const label = labels[i];
       if (
         deduped.length > 0 &&
         Math.abs(deduped[deduped.length - 1].position - label.position) <
           MIN_GAP
       ) {
-        continue; // skip — too close to the previous kept label
+        continue;
       }
       deduped.push(label);
     }
+    deduped.reverse();
     return deduped;
   }, [yRange, cumulativeData, baseline, goal]);
 
