@@ -6,7 +6,6 @@ import {
   Multiplier,
   Puller,
 } from "@/components/elements";
-import { StickyBombIcon } from "@/components/icons";
 import {
   TapTooltip,
   Tooltip,
@@ -44,8 +43,6 @@ export interface GameSceneProps
   orbs: number;
   multiplier: number;
   values: DistributionValues;
-  hasCurse?: boolean;
-  curseLabel?: string;
   pullLoading?: boolean;
   showPercentages?: boolean;
   onPull: () => void;
@@ -88,8 +85,6 @@ export const GameScene = ({
   orbs,
   multiplier,
   values,
-  hasCurse = false,
-  curseLabel,
   pullLoading = false,
   showPercentages = false,
   variant,
@@ -154,29 +149,6 @@ export const GameScene = ({
             bombs={bombs}
             isLoading={pullLoading}
           />
-          {hasCurse && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className="absolute z-30"
-                    style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
-                  >
-                    <StickyBombIcon
-                      style={{ width: badgeSizePx, height: badgeSizePx }}
-                      className="text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-[#1A120A] text-orange-100 font-secondary text-[10px] tracking-[0.25em] uppercase border border-orange-500/50"
-                >
-                  {curseLabel ?? "Random Curse"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
           {/* Multiplier Badge - top right of puller */}
           <div
             className="absolute z-30"

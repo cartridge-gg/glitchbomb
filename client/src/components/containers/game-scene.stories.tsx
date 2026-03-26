@@ -31,14 +31,6 @@ const meta: Meta<typeof GameScene> = {
       description:
         "Object with bombs, points, multipliers, chips, and moonrocks values",
     },
-    hasCurse: {
-      control: "boolean",
-      description: "Whether a curse is active",
-    },
-    curseLabel: {
-      control: "text",
-      description: "Tooltip label for the curse badge",
-    },
     orb: {
       control: "object",
       description: "Object with variant and content",
@@ -90,8 +82,6 @@ export const Default: Story = {
     bombs: 3,
     orbs: 5,
     multiplier: 3,
-    hasCurse: true,
-    curseLabel: "Double Draw",
     values: {
       bombs: 20,
       points: 58,
@@ -120,7 +110,6 @@ export const MultiplierEffect: Story = {
     bombs: 3,
     orbs: 5,
     multiplier: 1.5,
-    hasCurse: false,
     values: {
       bombs: 20,
       points: 58,
