@@ -401,7 +401,7 @@ export const PLGraph = ({
           {yAxisLabels.map((group, gi) => (
             <div
               key={`group-${gi}`}
-              className="absolute flex flex-col items-start"
+              className="absolute flex flex-col items-start gap-0.5"
               style={{
                 top: `${group.position}%`,
                 transform:
