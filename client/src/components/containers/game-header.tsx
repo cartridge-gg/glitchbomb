@@ -2,10 +2,10 @@ import { type RefObject, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Profile } from "@/components/elements";
 import {
-  ArrowLeftIcon,
   ChipIcon,
   ControllerIcon,
   GearIcon,
+  GlitchBombIcon,
   MoonrockIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -100,16 +100,15 @@ export const GameHeader = ({
 
   return (
     <div className="grid grid-cols-[1fr_minmax(0,400px)_1fr] items-center gap-[clamp(6px,2svh,16px)] pt-[clamp(8px,2.5svh,16px)] pb-0 px-4">
-      {/* Left column - back button aligned left */}
+      {/* Left column - bomb icon aligned left */}
       <div className="flex justify-start">
-        <Button
-          variant="secondary"
-          gradient="green"
-          className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+        <button
+          type="button"
+          className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] flex items-center justify-center"
           onClick={() => navigate(mobilePath("/"))}
         >
-          <ArrowLeftIcon size="sm" />
-        </Button>
+          <GlitchBombIcon size="lg" className="text-white glitch-icon" />
+        </button>
       </div>
 
       {/* Center column - Moonrocks + Chips (max 420px, shrinks on mobile) */}
