@@ -204,10 +204,9 @@ export const PLGraph = ({
     for (const label of labels) {
       const last = groups[groups.length - 1];
       if (last && label.position - last.position < MIN_GAP) {
-        // Merge into existing group, update group position to midpoint
+        // Merge into group — keep position of the first label so it
+        // stays centered on its line (e.g. 100 on the baseline).
         last.labels.push(label);
-        last.position =
-          last.labels.reduce((s, l) => s + l.position, 0) / last.labels.length;
       } else {
         groups.push({ position: label.position, labels: [label] });
       }
