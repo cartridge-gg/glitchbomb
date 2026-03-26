@@ -169,32 +169,48 @@ export const PLGraph = ({
     const dataMin = Math.min(...values);
     const dataMax = Math.max(...values);
 
+    // Use the same padded Y coordinate as graph dots and baseline line
+    // so labels align exactly with their corresponding visual elements.
+    const paddingY = 8;
+    const toPos = (value: number) =>
+      paddingY + ((max - value) / range) * (100 - paddingY * 2);
+
     // Top: goal for the level, or the highest dot value
     const highValue = goal != null ? Math.max(goal, dataMax) : dataMax;
-    const highPosition = ((max - highValue) / range) * 100;
-    labels.push({ value: highValue, position: highPosition });
+    labels.push({ value: highValue, position: toPos(highValue) });
 
     // Bottom: the lowest dot value
     const lowValue = dataMin;
-    const lowPosition = ((max - lowValue) / range) * 100;
 
     // Middle: 100 (baseline) — only shown when lowest < baseline
     if (lowValue < baseline) {
-      const baselinePosition = ((max - baseline) / range) * 100;
-      labels.push({ value: baseline, position: baselinePosition });
-      // Only add low label if it differs from the high label
+      labels.push({ value: baseline, position: toPos(baseline) });
       if (lowValue !== highValue) {
-        labels.push({ value: lowValue, position: lowPosition });
+        labels.push({ value: lowValue, position: toPos(lowValue) });
       }
     } else {
-      // Lowest is at or above baseline — only 2 labels (or 1 if they match)
       if (lowValue !== highValue) {
-        labels.push({ value: lowValue, position: lowPosition });
+        labels.push({ value: lowValue, position: toPos(lowValue) });
       }
     }
 
-    // Sort by position (top to bottom)
-    return labels.sort((a, b) => a.position - b.position);
+    // Sort by position (top to bottom).
+    // Mark labels that overlap with a prior label so the renderer can
+    // stack them below instead of centering on the same spot.
+    labels.sort((a, b) => a.position - b.position);
+    const MIN_GAP = 12;
+    const result: { value: number; position: number; stackBelow?: boolean }[] =
+      [];
+    for (const label of labels) {
+      const prev = result[result.length - 1];
+      if (prev && label.position - prev.position < MIN_GAP) {
+        // Too close — render this one stacked just below the previous
+        result.push({ ...label, position: prev.position, stackBelow: true });
+      } else {
+        result.push(label);
+      }
+    }
+    return result;
   }, [yRange, cumulativeData, baseline, goal]);
 
   // Calculate graph points
@@ -387,10 +403,11 @@ export const PLGraph = ({
               className="absolute font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
               style={{
                 top: `${label.position}%`,
-                transform:
-                  label.position === 0
+                transform: label.stackBelow
+                  ? "translateY(calc(50% + 2px))"
+                  : label.position <= 5
                     ? "translateY(0)"
-                    : label.position === 100
+                    : label.position >= 95
                       ? "translateY(-100%)"
                       : "translateY(-50%)",
               }}
