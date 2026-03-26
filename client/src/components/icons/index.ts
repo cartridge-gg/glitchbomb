@@ -47,6 +47,7 @@ export * from "./eye";
 export * from "./fire";
 export * from "./gear";
 export * from "./glitch-bomb";
+export * from "./glitch-token-large";
 export * from "./heart";
 export * from "./heart-outline";
 export * from "./home";

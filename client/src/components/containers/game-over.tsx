@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { BagIcon, GlitchBombIcon, MoonrockLargeIcon } from "@/components/icons";
+import {
+  BagIcon,
+  GlitchTokenLargeIcon,
+  MoonrockLargeIcon,
+} from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { cumulativeRewards, toTokens } from "@/helpers/payout";
@@ -253,7 +257,7 @@ export const GameOver = ({
                     style={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
                   >
                     <div className="flex-1 flex flex-col items-center justify-center gap-[clamp(4px,1svh,10px)] py-[clamp(8px,2.2svh,16px)] px-[clamp(8px,2.2svh,14px)]">
-                      <GlitchBombIcon className="w-[clamp(40px,7svh,56px)] h-auto text-[#FF0099]" />
+                      <GlitchTokenLargeIcon className="w-[clamp(40px,7svh,56px)] h-auto" />
                       <GlitchText
                         className="text-[#FF0099] font-secondary text-[clamp(0.9rem,3svh,1.5rem)] leading-none"
                         text={String(Math.floor(glitch))}
@@ -266,7 +270,6 @@ export const GameOver = ({
                 )}
               </div>
             </InfoCard>
-
           </>
         )}
       </div>
