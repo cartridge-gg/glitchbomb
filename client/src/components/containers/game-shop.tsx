@@ -468,7 +468,7 @@ export const GameShop = ({
       <div className="flex items-stretch gap-3 w-full pt-2 shrink-0">
         <Button
           variant="secondary"
-          gradient="green"
+          gradient="orange"
           className="min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest disabled:opacity-30"
           wrapperClassName="flex-1"
           disabled={history.length === 0 || isLoading}
@@ -477,13 +477,13 @@ export const GameShop = ({
           <span className="text-md leading-none translate-y-[1px]">↻</span>
           UNDO
         </Button>
-        <GradientBorder color="orange" className="flex-1">
+        <GradientBorder color="green" className="flex-1">
           <button
             type="button"
             className="flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-bold font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all disabled:pointer-events-none disabled:opacity-50 hover:brightness-125"
             style={{
-              color: "#F1721C",
-              background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
+              color: "#36F818",
+              background: "linear-gradient(180deg, #0D2518 0%, #061208 100%)",
             }}
             onClick={handleContinue}
             disabled={isLoading}

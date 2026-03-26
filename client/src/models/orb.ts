@@ -157,7 +157,7 @@ export class Orb {
       case OrbType.Bomb3:
         return "Triple Bomb";
       case OrbType.StickyBomb:
-        return "Sticky Bomb";
+        return "Bomberang";
       case OrbType.Health1:
         return "Health";
       case OrbType.Health2:

@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
-  CurseBadge,
   Distribution,
   type DistributionValues,
   Multiplier,
   Puller,
 } from "@/components/elements";
+import { StickyBombIcon } from "@/components/icons";
 import {
   TapTooltip,
   Tooltip,
@@ -162,7 +162,10 @@ export const GameScene = ({
                     className="absolute z-30"
                     style={{ top: -badgeOffsetTop, left: -badgeOffsetX }}
                   >
-                    <CurseBadge size={badgeSizePx} />
+                    <StickyBombIcon
+                      style={{ width: badgeSizePx, height: badgeSizePx }}
+                      className="text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]"
+                    />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent

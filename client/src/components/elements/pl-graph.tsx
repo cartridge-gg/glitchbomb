@@ -10,7 +10,7 @@ import {
 
 export interface PLDataPoint {
   value: number; // The P/L value at this point (delta or absolute based on mode)
-  variant: "green" | "red" | "yellow" | "blue" | "grey" | "pink"; // Color of the dot
+  variant: "green" | "red" | "yellow" | "blue" | "pink"; // Color of the dot
   id?: number; // Optional unique ID for animation keys
 }
 
@@ -33,9 +33,7 @@ const getVariantColor = (variant: PLDataPoint["variant"]): string => {
     case "blue":
       return "#9747FF"; // --blue-100
     case "yellow":
-      return "#4C91FF"; // --yellow-100
-    case "grey":
-      return "#AAAAAA";
+      return "#FACC15"; // yellow-400, used for level markers
     case "pink":
       return "#FF0099"; // --orb-heart
     default:
@@ -542,19 +540,6 @@ export const PLGraph = ({
                     </feMerge>
                   </filter>
                   <filter
-                    id="glow-grey"
-                    x="-50%"
-                    y="-50%"
-                    width="200%"
-                    height="200%"
-                  >
-                    <feGaussianBlur stdDeviation="2" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                  <filter
                     id="glow-pink"
                     x="-50%"
                     y="-50%"
@@ -651,7 +636,7 @@ export const PLGraph = ({
 
                 {/* Points as SVG circles */}
                 {graphPoints.map((point) => {
-                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FFFFFF" ? "white" : point.color === "#9747FF" ? "blue" : point.color === "#AAAAAA" ? "grey" : point.color === "#FF0099" ? "pink" : "yellow"}`;
+                  const filterName = `glow-${point.color === "#36F818" ? "green" : point.color === "#FFFFFF" ? "white" : point.color === "#9747FF" ? "blue" : point.color === "#FF0099" ? "pink" : "yellow"}`;
                   const isNew = newPointIds.has(point.id);
                   const isBomb = point.color === "#FFFFFF";
                   const circleProps = {
