@@ -196,25 +196,22 @@ export const PLGraph = ({
     // Sort by position (top to bottom)
     labels.sort((a, b) => a.position - b.position);
 
-    // Remove overlapping labels — when two pills are too close, drop one.
-    // ~15% of container height keeps pills from colliding at typical sizes.
-    const MIN_GAP = 15;
-    // Walk bottom-to-top so we keep the lowest (most informative) label
-    // when two overlap — e.g. keep 98 over 100.
-    const deduped: typeof labels = [];
-    for (let i = labels.length - 1; i >= 0; i--) {
-      const label = labels[i];
-      if (
-        deduped.length > 0 &&
-        Math.abs(deduped[deduped.length - 1].position - label.position) <
-          MIN_GAP
-      ) {
-        continue;
+    // Group labels that are too close into clusters so we can render
+    // them as a single stacked element (no DOM overlap).
+    const MIN_GAP = 12;
+    const groups: { position: number; labels: typeof labels }[] = [];
+    for (const label of labels) {
+      const last = groups[groups.length - 1];
+      if (last && label.position - last.position < MIN_GAP) {
+        // Merge into existing group, update group position to midpoint
+        last.labels.push(label);
+        last.position =
+          last.labels.reduce((s, l) => s + l.position, 0) / last.labels.length;
+      } else {
+        groups.push({ position: label.position, labels: [label] });
       }
-      deduped.push(label);
     }
-    deduped.reverse();
-    return deduped;
+    return groups;
   }, [yRange, cumulativeData, baseline, goal]);
 
   // Calculate graph points
@@ -399,24 +396,31 @@ export const PLGraph = ({
         aria-label={title}
         role="img"
       >
-        {/* Y-axis labels as pills */}
+        {/* Y-axis labels as pills — grouped when close to avoid overlap */}
         <div className="absolute left-0 top-0 bottom-0 z-10">
-          {yAxisLabels.map((label, index) => (
-            <span
-              key={`label-${label.value}-${index}`}
-              className="absolute font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
+          {yAxisLabels.map((group, gi) => (
+            <div
+              key={`group-${gi}`}
+              className="absolute flex flex-col items-start"
               style={{
-                top: `${label.position}%`,
+                top: `${group.position}%`,
                 transform:
-                  label.position === 0
+                  group.position <= 5
                     ? "translateY(0)"
-                    : label.position === 100
+                    : group.position >= 95
                       ? "translateY(-100%)"
                       : "translateY(-50%)",
               }}
             >
-              {label.value}
-            </span>
+              {group.labels.map((label, li) => (
+                <span
+                  key={`label-${label.value}-${li}`}
+                  className="font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
+                >
+                  {label.value}
+                </span>
+              ))}
+            </div>
           ))}
         </div>
         <div className="absolute right-0 top-0 z-10">
