@@ -154,8 +154,13 @@ export const GameOver = ({
             </div>
           </>
         ) : (
-          <>
-            {/* Rewards step: payout chart + stats */}
+          <div className="flex-1 min-h-0 flex flex-col justify-center gap-[clamp(6px,2svh,18px)]">
+            {/* Rewards step header */}
+            <span className="font-secondary text-[clamp(0.6rem,1.3svh,0.8rem)] tracking-[0.3em] uppercase text-green-400">
+              GAME REWARDS
+            </span>
+
+            {/* Payout chart */}
             {stake != null ? (
               <GradientBorder color="green" className="rounded-xl">
                 <div
@@ -178,15 +183,6 @@ export const GameOver = ({
                 mode="absolute"
                 title="P/L"
               />
-            )}
-
-            {/* Exchange rate row */}
-            {tokenPrice != null && tokenPrice > 0 && (
-              <div className="flex items-center justify-center py-1">
-                <span className="font-secondary text-[clamp(0.5rem,1.1svh,0.7rem)] tracking-[0.2em] text-green-600">
-                  1 USD = {Math.floor(1 / tokenPrice).toLocaleString()} GLITCH
-                </span>
-              </div>
             )}
 
             {/* Earnings card */}
@@ -270,7 +266,7 @@ export const GameOver = ({
                 )}
               </div>
             </InfoCard>
-          </>
+          </div>
         )}
       </div>
 
