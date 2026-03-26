@@ -192,7 +192,6 @@ export function exitShop(game: OfflineGame): {
   next.health = MAX_HEALTH;
   next.shop = null;
   next.multiplier = BASE_MULTIPLIER;
-  next.discards = next.bag.map(() => false);
 
   applyLevelCurse(next);
 
