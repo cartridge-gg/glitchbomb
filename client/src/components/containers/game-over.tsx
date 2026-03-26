@@ -6,7 +6,7 @@ import {
 } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
-import { cumulativeRewards, toTokens } from "@/helpers/payout";
+import { tokenPayout, toTokens } from "@/helpers/payout";
 import type { OrbPulled } from "@/models";
 import {
   GameStats,
@@ -61,9 +61,7 @@ export const GameOver = ({
   const { glitch, usd } = useMemo(() => {
     if (stake == null || moonrocksEarned <= 0)
       return { glitch: 0, usd: null as number | null };
-    const rewards = cumulativeRewards(stake, supply, target);
-    const idx = Math.min(moonrocksEarned, rewards.length) - 1;
-    const raw = idx >= 0 ? rewards[idx] : 0;
+    const raw = tokenPayout(moonrocksEarned, stake, supply, target);
     const tokens = toTokens(raw);
     const usdVal =
       tokenPrice != null && tokenPrice > 0 ? tokens * tokenPrice : null;
