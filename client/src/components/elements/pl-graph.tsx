@@ -372,7 +372,7 @@ export const PLGraph = ({
   };
 
   return (
-    <div className={`flex flex-col gap-3 overflow-x-clip ${className}`}>
+    <div className={`flex flex-col gap-3 ${className}`}>
       {/* Graph container */}
       <div
         className="relative w-full h-[clamp(100px,20svh,200px)]"
