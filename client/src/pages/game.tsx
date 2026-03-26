@@ -165,7 +165,7 @@ export const Game = () => {
   const prevLevelRef = useRef<number | null>(null);
   const milestoneShownRef = useRef(false);
 
-  const { dataPoints } = usePLDataPoints({
+  const { dataPoints, isPractice } = usePLDataPoints({
     gameId: game?.id ?? 0,
   });
 
@@ -177,24 +177,30 @@ export const Game = () => {
   const plData: PLDataPointComponent[] = useMemo(() => {
     if (dataPoints.length === 0) return [];
 
-    // Sort by ID, but fix level marker ordering: the contract's ante ID
-    // formula (1 + pull_count*2 + level) adds a level offset that can push
-    // markers after the first pulls of the next level. Adjust by subtracting
-    // the level offset from each marker's effective sort key.
     const rawSorted = [...dataPoints].sort((a, b) => a.id - b.id);
-    let levelCount = 0;
-    const withKeys = rawSorted.map((point) => {
-      if (point.orb === 0) {
-        levelCount++;
-        return {
-          point,
-          key: point.id > 0 ? point.id - levelCount - 0.5 : -0.5,
-        };
-      }
-      return { point, key: point.id };
-    });
-    withKeys.sort((a, b) => a.key - b.key);
-    const sorted = withKeys.map(({ point }) => point);
+
+    // Fix level marker ordering for onchain data only: the contract's ante
+    // ID formula (1 + pull_count*2 + level) adds a level offset that pushes
+    // markers after the first pulls of the next level. Offline/practice IDs
+    // are sequential and don't need adjustment.
+    let sorted: typeof rawSorted;
+    if (!isPractice) {
+      let levelCount = 0;
+      const withKeys = rawSorted.map((point) => {
+        if (point.orb === 0) {
+          levelCount++;
+          return {
+            point,
+            key: point.id > 0 ? point.id - levelCount - 0.5 : -0.5,
+          };
+        }
+        return { point, key: point.id };
+      });
+      withKeys.sort((a, b) => a.key - b.key);
+      sorted = withKeys.map(({ point }) => point);
+    } else {
+      sorted = rawSorted;
+    }
 
     return sorted.map((point, index) => {
       const orbType = point.orb;
@@ -221,7 +227,7 @@ export const Game = () => {
 
       return { value: point.potentialMoonrocks, variant, id: point.id };
     });
-  }, [dataPoints]);
+  }, [dataPoints, isPractice]);
 
   // Compute goal line for chart: baseMoonrocks + milestone
   // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
