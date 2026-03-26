@@ -159,45 +159,45 @@ export const PLGraph = ({
     return { min, max, baselinePos, hasBelowBaseline };
   }, [cumulativeData, baseline, goal]);
 
-  // Calculate Y-axis labels (max 3 labels: top, middle, bottom)
+  // Calculate Y-axis labels: lowest dot, 100 (baseline), goal/highest dot
   const yAxisLabels = useMemo(() => {
-    const { min, max, hasBelowBaseline } = yRange;
-    const labels: { value: number; position: number }[] = [];
+    if (cumulativeData.length === 0) return [];
+
+    const { min, max } = yRange;
     const range = max - min;
+    const labels: { value: number; position: number }[] = [];
 
-    // Always show max at top
-    labels.push({ value: max, position: 0 });
+    const values = cumulativeData.map((d) => d.cumulative);
+    const dataMin = Math.min(...values);
+    const dataMax = Math.max(...values);
 
-    // Add bottom label
-    if (hasBelowBaseline) {
-      labels.push({ value: min, position: 100 });
-    } else {
-      // Show baseline at bottom when no values below baseline
-      labels.push({ value: baseline, position: 100 });
-    }
+    // Top: goal for the level, or the highest dot value
+    const highValue = goal != null ? Math.max(goal, dataMax) : dataMax;
+    const highPosition = ((max - highValue) / range) * 100;
+    labels.push({ value: highValue, position: highPosition });
 
-    // Add one middle label (baseline or midpoint)
-    const baselinePosition = ((max - baseline) / range) * 100;
-    // Only add middle label if there's enough space (between 20% and 80%)
-    if (baselinePosition > 20 && baselinePosition < 80) {
+    // Bottom: the lowest dot value
+    const lowValue = dataMin;
+    const lowPosition = ((max - lowValue) / range) * 100;
+
+    // Middle: 100 (baseline) — only shown when lowest < baseline
+    if (lowValue < baseline) {
+      const baselinePosition = ((max - baseline) / range) * 100;
       labels.push({ value: baseline, position: baselinePosition });
-    } else if (labels.length < 3) {
-      // If baseline is too close to edges, add a midpoint label
-      const midValue = Math.round((max + min) / 2 / 10) * 10;
-      const midPosition = ((max - midValue) / range) * 100;
-      if (
-        midPosition > 20 &&
-        midPosition < 80 &&
-        midValue !== max &&
-        midValue !== min
-      ) {
-        labels.push({ value: midValue, position: midPosition });
+      // Only add low label if it differs from the high label
+      if (lowValue !== highValue) {
+        labels.push({ value: lowValue, position: lowPosition });
+      }
+    } else {
+      // Lowest is at or above baseline — only 2 labels (or 1 if they match)
+      if (lowValue !== highValue) {
+        labels.push({ value: lowValue, position: lowPosition });
       }
     }
 
     // Sort by position (top to bottom)
     return labels.sort((a, b) => a.position - b.position);
-  }, [yRange, baseline]);
+  }, [yRange, cumulativeData, baseline, goal]);
 
   // Calculate graph points
   const graphPoints = useMemo(() => {

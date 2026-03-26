@@ -139,12 +139,7 @@ export const Game = () => {
   const pointsRef = useRef<HTMLDivElement>(null);
   const healthRef = useRef<HTMLDivElement>(null);
   const [pointsBurst, setPointsBurst] = useState(0);
-  // Hold displayed values at pre-pull value until flying animation arrives
-  const [heldPoints, setHeldPoints] = useState<number | null>(null);
-  const [heldHealth, setHeldHealth] = useState<number | null>(null);
   // Capture game state at time of pull initiation (before any state updates)
-  const prePullPointsRef = useRef<number | null>(null);
-  const prePullHealthRef = useRef<number | null>(null);
   const prePullMultiplierRef = useRef<number>(1);
 
   // Outcome overlay state (rendered on PL chart)
@@ -261,8 +256,6 @@ export const Game = () => {
       setShowRewardOverlay(false);
       setAnimateHeaderCount(false);
       setRevealedSegments(new Set());
-      setHeldHealth(null);
-      prePullHealthRef.current = null;
     }
   }, [setGameId, searchParams]);
 
@@ -362,10 +355,6 @@ export const Game = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFetchComplete]);
 
-  // Keep a ref to current game for reading inside pull detection without re-triggering
-  const gameRef = useRef(game);
-  gameRef.current = game;
-
   // Detect new pulls and show outcome animation
   useEffect(() => {
     // Don't process until we've initialized the lastPullIdRef
@@ -380,7 +369,6 @@ export const Game = () => {
     // Check if this is a new pull we haven't seen
     if (latestPull.id > lastPullIdRef.current) {
       const orb = latestPull.orb;
-      const currentGame = gameRef.current;
       const base = orb.basePoints();
       // Use snapshotted multiplier (captured at pull time, before state updates)
       const mult = prePullMultiplierRef.current;
@@ -388,12 +376,9 @@ export const Game = () => {
       const hasMultEffect =
         base !== null && multiplied !== null && multiplied !== base && mult > 1;
 
-      // Hold displayed values at pre-pull value until flying animation arrives
+      // Trigger burst immediately so bars update at pull time
       if (orb.isPoint()) {
-        setHeldPoints(prePullPointsRef.current ?? currentGame?.points ?? 0);
-      }
-      if (orb.isHealth() || orb.isBomb()) {
-        setHeldHealth(prePullHealthRef.current ?? currentGame?.health ?? 0);
+        setPointsBurst((prev) => prev + 1);
       }
 
       setCurrentOrb({
@@ -453,16 +438,6 @@ export const Game = () => {
           }
         }
         setCurrentOrb(undefined);
-        // Held values are released when the flying particle arrives (handlePointsArrive / health callback).
-        // Only release here as a safety fallback for non-point/non-health orbs.
-        if (!orb.isPoint()) {
-          setHeldPoints(null);
-          prePullPointsRef.current = null;
-        }
-        if (!orb.isHealth() && !orb.isBomb()) {
-          setHeldHealth(null);
-          prePullHealthRef.current = null;
-        }
       }, clearMs);
 
       return () => clearTimeout(timer);
@@ -472,40 +447,23 @@ export const Game = () => {
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
     if (!game || isPulling) return;
-    // Snapshot state before pull for held-display during animation
-    prePullPointsRef.current = game.points;
-    prePullHealthRef.current = game.health;
+    // Snapshot multiplier before pull (used for outcome display)
     prePullMultiplierRef.current = game.multiplier;
     setIsPulling(true);
     const success = await pull(game.id);
     if (!success) {
       setIsPulling(false);
-      prePullPointsRef.current = null;
-      prePullHealthRef.current = null;
     }
   }, [pull, game, isPulling]);
 
-  const handlePointsArrive = useCallback(() => {
-    // Release held points → GlitchText burst transition to new value
-    setHeldPoints(null);
-    prePullPointsRef.current = null;
-    setPointsBurst((prev) => prev + 1);
-  }, []);
-
-  // Flying particle → target counter callback
+  // Flying particle → cleanup when it arrives at target
   useEffect(() => {
     if (!flyParticle) return;
     const timer = setTimeout(() => {
-      if (flyParticle.variant === "point") {
-        handlePointsArrive();
-      } else if (flyParticle.variant === "health") {
-        setHeldHealth(null);
-        prePullHealthRef.current = null;
-      }
       setFlyParticle(null);
     }, 350);
     return () => clearTimeout(timer);
-  }, [flyParticle, handlePointsArrive]);
+  }, [flyParticle]);
 
   // Multiplier breakdown timing for outcome overlay on PL chart
   useEffect(() => {
@@ -592,11 +550,9 @@ export const Game = () => {
   );
   const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
 
-  // Displayed values: held at pre-pull value during fly animation, otherwise actual
-  const displayedPoints =
-    heldPoints !== null ? heldPoints : (game?.points ?? 0);
-  const displayedHealth =
-    heldHealth !== null ? heldHealth : (game?.health ?? 0);
+  // Bars always reflect actual game state immediately
+  const displayedPoints = game?.points ?? 0;
+  const displayedHealth = game?.health ?? 0;
 
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
