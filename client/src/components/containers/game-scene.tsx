@@ -8,7 +8,6 @@ import {
 } from "@/components/elements";
 import {
   TapTooltip,
-  Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
