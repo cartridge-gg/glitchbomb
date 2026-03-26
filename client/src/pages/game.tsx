@@ -1,7 +1,14 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useNetwork } from "@starknet-react/core";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ConfirmationDialog,
@@ -84,6 +91,7 @@ export const Game = () => {
     setMusicVolume,
     setSfxVolume,
     playOrbSound,
+    playFatalBombSound,
     playRewardSound,
     playLevelCompleteSound,
     playLevelStartSound,
@@ -164,6 +172,12 @@ export const Game = () => {
   const [showLevelEnter, setShowLevelEnter] = useState(false);
   const prevLevelRef = useRef<number | null>(null);
   const milestoneShownRef = useRef(false);
+
+  // Death sequence state — delays GameOver to show fatal bomb animation
+  const [deathPending, setDeathPending] = useState(false);
+  const [isFatalBomb, setIsFatalBomb] = useState(false);
+  const gameRef = useRef(game);
+  gameRef.current = game;
 
   const { dataPoints, isPractice } = usePLDataPoints({
     gameId: game?.id ?? 0,
@@ -326,14 +340,18 @@ export const Game = () => {
     }
   }, [game?.over]);
 
-  // Detect milestone reached — show "Level X Complete" before MilestoneChoice
+  // Detect milestone reached — delay overlay so the winning pull animation plays first
   useEffect(() => {
     if (!game || game.over) return;
     const reached = game.points >= game.milestone && game.milestone > 0;
     if (reached && !milestoneShownRef.current) {
       milestoneShownRef.current = true;
-      setShowLevelComplete(true);
-      playLevelCompleteSound();
+      // Delay level-complete overlay so the winning orb outcome animation is visible
+      const timer = setTimeout(() => {
+        setShowLevelComplete(true);
+        playLevelCompleteSound();
+      }, 2300);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.points, game?.milestone]);
@@ -379,7 +397,9 @@ export const Game = () => {
   }, [initialFetchComplete]);
 
   // Detect new pulls and show outcome animation
-  useEffect(() => {
+  // useLayoutEffect prevents a single-frame flash of GameOver/MilestoneChoice
+  // before the outcome animation state is set
+  useLayoutEffect(() => {
     // Don't process until we've initialized the lastPullIdRef
     if (lastPullIdRef.current === null) return;
     if (pulls.length === 0) return;
@@ -414,17 +434,44 @@ export const Game = () => {
       setOutcomeKey((prev) => prev + 1);
       setFlyParticle(null);
       setOutcomeShowMultiplied(false);
-      // Skip orb sound if this pull triggered milestone (level complete sound plays instead)
-      if (!milestoneShownRef.current) {
+
+      // Detect fatal bomb (triggers death sequence instead of immediate GameOver)
+      const currentGame = gameRef.current;
+      const isFatal =
+        orb.isBomb() &&
+        currentGame != null &&
+        currentGame.over &&
+        currentGame.health <= 0;
+
+      if (isFatal) {
+        setDeathPending(true);
+        setIsFatalBomb(true);
+        playFatalBombSound(orb);
+      } else {
+        setIsFatalBomb(false);
         playOrbSound(orb);
       }
+
       stopPulling();
       setIsPulling(false);
 
       lastPullIdRef.current = latestPull.id;
 
-      // Clear after animation — launch flying particle first
-      const clearMs = hasMultEffect ? 2500 : 2000;
+      // Extended duration for fatal bomb (dramatic hold), normal for others
+      // Also use longer hold for milestone-reaching pulls so animation is visible
+      const isMilestoneReaching =
+        currentGame != null &&
+        !currentGame.over &&
+        currentGame.points >= currentGame.milestone &&
+        currentGame.milestone > 0;
+      const clearMs = isFatal
+        ? 3000
+        : isMilestoneReaching
+          ? 2500
+          : hasMultEffect
+            ? 2500
+            : 2000;
+
       const timer = setTimeout(() => {
         const outcomeEl = outcomeRef.current;
         // Launch flying particle for point orbs → points counter
@@ -461,15 +508,21 @@ export const Game = () => {
           }
         }
         setCurrentOrb(undefined);
+
+        // Clear death sequence after animation completes
+        if (isFatal) {
+          setDeathPending(false);
+          setIsFatalBomb(false);
+        }
       }, clearMs);
 
       return () => clearTimeout(timer);
     }
-  }, [pulls, playOrbSound, stopPulling]);
+  }, [pulls, playOrbSound, playFatalBombSound, stopPulling]);
 
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
-    if (!game || isPulling) return;
+    if (!game || isPulling || game.over) return;
     // Snapshot multiplier before pull (used for outcome display)
     prePullMultiplierRef.current = game.multiplier;
     setIsPulling(true);
@@ -655,8 +708,8 @@ export const Game = () => {
       );
     }
 
-    // Game over (terminal state) - both view mode and immediate game over
-    if (game.over) {
+    // Game over (terminal state) — delayed during death sequence so bomb animation plays
+    if (game.over && !deathPending) {
       const cashedOut = game.health > 0;
       // When died (health = 0), moonrocks earned on death (from recent PR #148)
       // When cashed out, game.moonrocks has the full score
@@ -699,7 +752,7 @@ export const Game = () => {
     // Main gameplay view - inlined to prevent remount on re-render
     return (
       <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
-        {milestoneReached ? (
+        {milestoneReached && !currentOrb ? (
           <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto overflow-x-hidden pb-[clamp(6px,1.1svh,12px)]">
             <GameStats
               points={game.points}
@@ -761,12 +814,16 @@ export const Game = () => {
                     >
                       <motion.div
                         initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        animate={{
+                          opacity: 1,
+                          scale: isFatalBomb ? 1.4 : 1,
+                          y: 0,
+                        }}
                         transition={{
                           type: "spring",
-                          stiffness: 400,
-                          damping: 15,
-                          mass: 0.8,
+                          stiffness: isFatalBomb ? 180 : 400,
+                          damping: isFatalBomb ? 10 : 15,
+                          mass: isFatalBomb ? 1.5 : 0.8,
                         }}
                       >
                         <div
@@ -863,7 +920,18 @@ export const Game = () => {
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col min-h-0">
+    <motion.div
+      className="absolute inset-0 flex flex-col min-h-0"
+      animate={
+        deathPending
+          ? {
+              x: [0, -10, 10, -8, 8, -5, 5, -2, 2, 0],
+              y: [0, 5, -5, 4, -4, 2, -2, 1, -1, 0],
+            }
+          : undefined
+      }
+      transition={deathPending ? { duration: 0.6, ease: "easeOut" } : undefined}
+    >
       <GameHeader
         moonrocks={game?.moonrocks ?? 100}
         chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
@@ -981,6 +1049,23 @@ export const Game = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      {/* Death sequence — red flash overlay */}
+      <AnimatePresence>
+        {deathPending && (
+          <motion.div
+            key="death-flash"
+            className="fixed inset-0 z-[100] pointer-events-none"
+            initial={{ opacity: 0.7 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2.5, ease: "easeOut" }}
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,50,50,0.8) 0%, rgba(200,0,0,0.6) 40%, rgba(100,0,0,0.2) 100%)",
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
