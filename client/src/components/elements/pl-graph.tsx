@@ -139,11 +139,22 @@ export const PLGraph = ({
       max = Math.ceil(midpoint + minRange / 2);
     }
 
+    // Don't let the range extend below baseline when no data is below it —
+    // otherwise the starting value (e.g. 100) looks visually lower than it is.
+    if (dataMin >= baseline && min < baseline) {
+      const excess = baseline - min;
+      min = baseline;
+      max += excess;
+    }
+
     const hasBelowBaseline = min < baseline;
 
-    // Calculate baseline position as percentage from top
+    // Calculate baseline position as percentage from top.
+    // Must use the same padding as graphPoints (paddingY=8) so the
+    // dashed line aligns with dots at the same value.
     const finalRange = max - min;
-    const baselinePos = ((max - baseline) / finalRange) * 100;
+    const normalizedBaseline = (max - baseline) / finalRange;
+    const baselinePos = 8 + normalizedBaseline * (100 - 8 * 2);
 
     return { min, max, baselinePos, hasBelowBaseline };
   }, [cumulativeData, baseline, goal]);
