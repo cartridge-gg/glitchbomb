@@ -1,13 +1,14 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
 import {
-  BoltIcon,
   Bomb1xIcon,
   Bomb2xIcon,
   Bomb3xIcon,
   BombOrbIcon,
   CrossIcon,
   HeartIcon,
+  OrbChipIcon,
+  OrbMoonrockIcon,
   SparklesIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -71,8 +72,8 @@ const getOrbIcon = (orb: Orb) => {
   if (orb.isPoint()) return SparklesIcon;
   if (orb.isMultiplier()) return CrossIcon;
   if (orb.isHealth()) return HeartIcon;
-  if (orb.isChips()) return BoltIcon;
-  if (orb.isMoonrock()) return BoltIcon;
+  if (orb.isChips()) return OrbChipIcon;
+  if (orb.isMoonrock()) return OrbMoonrockIcon;
   return SparklesIcon;
 };
 
@@ -201,9 +202,7 @@ export const OrbDisplay = ({
           <Icon
             className={cn(
               "relative z-10",
-              orb.isChips() || orb.isMoonrock()
-                ? "w-[45%] h-[45%]"
-                : "w-[60%] h-[60%]",
+              "w-[60%] h-[60%]",
               orb.isBomb() && "glitch-icon",
             )}
             style={{

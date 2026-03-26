@@ -1,11 +1,12 @@
 import {
-  BoltIcon,
   Bomb1xIcon,
   Bomb2xIcon,
   Bomb3xIcon,
   BombOrbIcon,
   CrossIcon,
   HeartIcon,
+  OrbChipIcon,
+  OrbMoonrockIcon,
   SparklesIcon,
   StickyBombIcon,
 } from "@/components/icons";
@@ -26,8 +27,8 @@ export const getOrbIcon = (orb: Orb, useBombTierIcons?: boolean) => {
   if (orb.isPoint()) return SparklesIcon;
   if (orb.isMultiplier()) return CrossIcon;
   if (orb.isHealth()) return HeartIcon;
-  if (orb.isChips()) return BoltIcon;
-  if (orb.isMoonrock()) return BoltIcon;
+  if (orb.isChips()) return OrbChipIcon;
+  if (orb.isMoonrock()) return OrbMoonrockIcon;
   return SparklesIcon;
 };
 
