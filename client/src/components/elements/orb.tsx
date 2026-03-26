@@ -48,9 +48,9 @@ const iconVariants = (variant: string) => {
     case "health":
       return icons.HeartIcon;
     case "chip":
-      return icons.BoltIcon;
+      return icons.OrbChipIcon;
     case "moonrock":
-      return icons.BoltIcon;
+      return icons.OrbMoonrockIcon;
     default:
       return icons.OrbIcon;
   }
@@ -160,7 +160,7 @@ export const Orb = ({ variant, size, className, ...props }: OrbProps) => {
         <Icon
           className={cn(
             variant === "chip" || variant === "moonrock"
-              ? "h-[35%] w-[35%]"
+              ? "h-[80%] w-[80%]"
               : "h-[60%] w-[60%]",
             (variant === "bomb" ||
               variant === "bomb1" ||
