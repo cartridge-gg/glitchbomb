@@ -21,8 +21,8 @@ import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingContext, useLoadingSignal } from "@/contexts/use-loading";
 import {
-  cumulativeRewards,
   maxPayout as maxPayoutRaw,
+  tokenPayout,
   toTokens,
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
@@ -140,10 +140,7 @@ export const Home = () => {
   const formatPayout = useCallback(
     (score: number, stake: number) => {
       if (score <= 0) return "$0.00";
-      const rewards = cumulativeRewards(stake, supply, target);
-      const glitch = toTokens(
-        rewards[Math.min(score, rewards.length) - 1] || 0,
-      );
+      const glitch = toTokens(tokenPayout(score, stake, supply, target));
       if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
       return `${glitch.toFixed(1)} GLITCH`;
     },

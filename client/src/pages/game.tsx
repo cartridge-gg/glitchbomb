@@ -41,7 +41,7 @@ import { getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingSignal } from "@/contexts/use-loading";
-import { cumulativeRewards, toTokens } from "@/helpers/payout";
+import { tokenPayout, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
@@ -118,10 +118,14 @@ export const Game = () => {
 
   const formatCashOutValue = useMemo(() => {
     if (!game || !tokenPrice) return undefined;
-    const score = game.moonrocks + game.points;
+    // Include points only when milestone is reached (matches contract behavior)
+    const milestoneReached =
+      game.points >= game.milestone && game.milestone > 0;
+    const score = milestoneReached
+      ? game.moonrocks + game.points
+      : game.moonrocks;
     if (score <= 0) return undefined;
-    const rewards = cumulativeRewards(game.stake, supply, target);
-    const glitch = toTokens(rewards[Math.min(score, rewards.length) - 1] || 0);
+    const glitch = toTokens(tokenPayout(score, game.stake, supply, target));
     return `$${(glitch * tokenPrice).toFixed(2)}`;
   }, [game, tokenPrice, supply, target]);
 

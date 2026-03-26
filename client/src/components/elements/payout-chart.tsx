@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { cumulativeRewards, MAX_SCORE, toTokens } from "@/helpers/payout";
+import { MAX_SCORE, scoreRewards, toTokens } from "@/helpers/payout";
 
 export interface PayoutChartProps {
   /** Stake multiplier (1–STARTERPACK_COUNT) */
@@ -37,9 +37,6 @@ function cumulAt(arr: number[], score: number): number {
   return arr[Math.min(score, arr.length) - 1];
 }
 
-/** Score sample points for the cumulative curve. */
-const STEP_SCORES = Array.from({ length: 51 }, (_, i) => i * 10); // 0,10,20,...,500
-
 export const PayoutChart = ({
   stake,
   tokenPrice,
@@ -50,11 +47,11 @@ export const PayoutChart = ({
   const hasPrice = tokenPrice != null && tokenPrice > 0;
 
   const rewards = useMemo(
-    () => cumulativeRewards(stake, supply, target),
+    () => scoreRewards(stake, supply, target),
     [stake, supply, target],
   );
   const baseRewardsArr = useMemo(
-    () => (stake > 1 ? cumulativeRewards(1, supply, target) : []),
+    () => (stake > 1 ? scoreRewards(1, supply, target) : []),
     [stake, supply, target],
   );
 
@@ -81,17 +78,24 @@ export const PayoutChart = ({
   const toY = (val: number) =>
     padT + plotH - (Math.sqrt(val) / Math.sqrt(yMax)) * plotH;
 
-  // Build smooth cumulative curve path
+  // Build staircase path from reward array (steps at tier boundaries)
   const buildCurve = useMemo(() => {
-    return (cumulArr: number[]) => {
-      let path = "";
-      for (let i = 0; i < STEP_SCORES.length; i++) {
-        const score = STEP_SCORES[i];
-        const val = toTokens(cumulAt(cumulArr, score));
-        const x = toX(score);
-        const y = toY(val);
-        path += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+    return (rewardArr: number[]) => {
+      const maxScore = rewardArr.length;
+      if (maxScore === 0) return "";
+      let path = `M ${toX(0)} ${toY(0)}`;
+      let prevTokens = 0;
+      for (let s = 1; s <= maxScore; s++) {
+        const tokens = toTokens(rewardArr[s - 1]);
+        if (tokens !== prevTokens) {
+          // Horizontal to this score at previous level, then step up
+          path += ` L ${toX(s)} ${toY(prevTokens)}`;
+          path += ` L ${toX(s)} ${toY(tokens)}`;
+          prevTokens = tokens;
+        }
       }
+      // Final horizontal segment to the end
+      path += ` L ${toX(maxScore)} ${toY(prevTokens)}`;
       return path;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

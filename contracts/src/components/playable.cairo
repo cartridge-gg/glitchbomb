@@ -241,6 +241,11 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired(starknet::get_block_timestamp());
 
+            // [Effect] If level completed (at milestone), convert points to moonrocks
+            if game.is_completed() {
+                game.moonrocks += game.points;
+            }
+
             // [Effect] Use accumulated moonrocks as score (clamped to MAX_SCORE)
             let score: u16 = if game.moonrocks > MAX_SCORE {
                 MAX_SCORE
