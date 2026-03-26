@@ -194,24 +194,23 @@ export const PLGraph = ({
       }
     }
 
-    // Sort by position (top to bottom)
+    // Sort by position (top to bottom).
+    // Mark labels that overlap with a prior label so the renderer can
+    // stack them below instead of centering on the same spot.
     labels.sort((a, b) => a.position - b.position);
-
-    // Group labels that are too close into clusters so we can render
-    // them as a single stacked element (no DOM overlap).
     const MIN_GAP = 12;
-    const groups: { position: number; labels: typeof labels }[] = [];
+    const result: { value: number; position: number; stackBelow?: boolean }[] =
+      [];
     for (const label of labels) {
-      const last = groups[groups.length - 1];
-      if (last && label.position - last.position < MIN_GAP) {
-        // Merge into group — keep position of the first label so it
-        // stays centered on its line (e.g. 100 on the baseline).
-        last.labels.push(label);
+      const prev = result[result.length - 1];
+      if (prev && label.position - prev.position < MIN_GAP) {
+        // Too close — render this one stacked just below the previous
+        result.push({ ...label, position: prev.position, stackBelow: true });
       } else {
-        groups.push({ position: label.position, labels: [label] });
+        result.push(label);
       }
     }
-    return groups;
+    return result;
   }, [yRange, cumulativeData, baseline, goal]);
 
   // Calculate graph points
@@ -396,31 +395,25 @@ export const PLGraph = ({
         aria-label={title}
         role="img"
       >
-        {/* Y-axis labels as pills — grouped when close to avoid overlap */}
+        {/* Y-axis labels as pills */}
         <div className="absolute left-0 top-0 bottom-0 z-10">
-          {yAxisLabels.map((group, gi) => (
-            <div
-              key={`group-${gi}`}
-              className="absolute flex flex-col items-start gap-0.5"
+          {yAxisLabels.map((label, index) => (
+            <span
+              key={`label-${label.value}-${index}`}
+              className="absolute font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
               style={{
-                top: `${group.position}%`,
-                transform:
-                  group.position <= 5
+                top: `${label.position}%`,
+                transform: label.stackBelow
+                  ? "translateY(calc(50% + 2px))"
+                  : label.position <= 5
                     ? "translateY(0)"
-                    : group.position >= 95
+                    : label.position >= 95
                       ? "translateY(-100%)"
                       : "translateY(-50%)",
               }}
             >
-              {group.labels.map((label, li) => (
-                <span
-                  key={`label-${label.value}-${li}`}
-                  className="font-secondary text-green-400 text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-widest leading-none bg-green-950 px-[clamp(6px,1.4svh,12px)] py-[clamp(2px,0.7svh,6px)] rounded-full"
-                >
-                  {label.value}
-                </span>
-              ))}
-            </div>
+              {label.value}
+            </span>
           ))}
         </div>
         <div className="absolute right-0 top-0 z-10">
