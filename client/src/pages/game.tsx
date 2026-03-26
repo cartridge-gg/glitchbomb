@@ -46,7 +46,6 @@ import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
-import { OrbType } from "@/models/orb";
 import { milestoneCost } from "@/offline/milestone";
 import { mobilePath } from "@/utils/mobile";
 
@@ -669,16 +668,10 @@ export const Game = () => {
           },
     [game],
   );
-  const hasStickyBomb = useMemo(
-    () => game?.bag?.some((orb) => orb.value === OrbType.StickyBomb) ?? false,
-    [game?.bag],
-  );
   const nextCurseLabel = useMemo(() => {
     const nextLevel = (game?.level ?? 0) + 1;
     return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
-  const hasCurse = hasStickyBomb;
-  const curseLabel = hasStickyBomb ? "Bomberang" : undefined;
 
   const gameIdParam = searchParams.get("game");
   const isGameReady = !!game && tokenContracts.length > 0;
@@ -882,8 +875,6 @@ export const Game = () => {
                 values={
                   showRewardOverlay ? progressiveDistribution : distribution
                 }
-                hasCurse={hasCurse}
-                curseLabel={curseLabel}
                 pullLoading={isPulling}
                 showPercentages={displaySettings.showDistributionPercent}
                 onPull={handlePull}

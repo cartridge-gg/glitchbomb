@@ -10,6 +10,7 @@ import {
   OrbChipIcon,
   OrbMoonrockIcon,
   SparklesIcon,
+  StickyBombIcon,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
@@ -63,6 +64,7 @@ const valuePositionMap = {
 
 // Get the icon component for an orb type
 const getOrbIcon = (orb: Orb) => {
+  if (orb.value === OrbType.StickyBomb) return StickyBombIcon;
   if (orb.isBomb()) {
     if (orb.value === OrbType.Bomb1) return Bomb1xIcon;
     if (orb.value === OrbType.Bomb2) return Bomb2xIcon;
