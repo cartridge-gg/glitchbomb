@@ -78,8 +78,7 @@ export const GameOver = ({
       ? "text-green-400"
       : "text-red-100";
 
-  // Use glitch font only for "glitched out", regular font for others
-  const titleFont = !cashedOut && !expired ? "font-glitch" : "font-body";
+  const titleFont = "font-secondary";
 
   const cardVariant = expired ? "yellow" : cashedOut ? "green" : "red";
 
@@ -134,7 +133,7 @@ export const GameOver = ({
               >
                 <div className="flex flex-col items-center gap-[clamp(8px,2svh,16px)]">
                   <h1
-                    className={`${titleColor} ${titleFont} uppercase text-[clamp(1.9rem,5.5svh,2.75rem)] tracking-wider leading-tight text-center ${!cashedOut ? "glitch-text" : ""}`}
+                    className={`${titleColor} ${titleFont} uppercase text-[clamp(1rem,2.8svh,1.5rem)] tracking-[0.3em] leading-tight text-center ${!cashedOut ? "glitch-text" : ""}`}
                   >
                     {cashedOut ? "CASHED OUT" : "GLITCHED\u00A0OUT"}
                   </h1>
