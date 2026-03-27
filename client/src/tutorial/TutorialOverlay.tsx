@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTutorial } from "./hooks";
 import { TutorialStep } from "./steps";
 
@@ -10,24 +10,34 @@ interface SpotlightRect {
   height: number;
 }
 
-// Match the codebase color system exactly
 const COLORS = {
   green400: "#36F818",
   green400_48: "rgba(54, 248, 24, 0.48)",
   green400_24: "rgba(54, 248, 24, 0.24)",
-  green400_15: "rgba(54, 248, 24, 0.15)",
   green400_10: "rgba(54, 248, 24, 0.10)",
   cardBg: "#0A1A0A",
-  borderDark: "rgba(29, 58, 41, 0.8)",
-  black100: "#040603",
 };
+
+/** Steps where clicks inside the spotlight must reach the underlying button */
+const INTERACTIVE_STEPS = new Set([
+  TutorialStep.PULL_PROMPT,
+  TutorialStep.BAG_EXPLAIN,
+  TutorialStep.CONTINUE_EXPLAIN,
+  TutorialStep.HOME_WELCOME,
+]);
+
+/** Steps where tapping outside the spotlight does nothing (must use the target) */
+const TARGET_ONLY_STEPS = new Set([
+  TutorialStep.PULL_PROMPT,
+  TutorialStep.BAG_EXPLAIN,
+  TutorialStep.HOME_WELCOME,
+]);
 
 export function TutorialOverlay() {
   const { shouldShowOverlay, currentConfig, state, advance } = useTutorial();
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
     null,
   );
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Find and track the target element
   useEffect(() => {
@@ -69,41 +79,15 @@ export function TutorialOverlay() {
     };
   }, [shouldShowOverlay, currentConfig.target]);
 
-  const handleTap = useCallback(
+  const handleBackdropClick = useCallback(
     (e: React.PointerEvent) => {
-      if (currentConfig.target && spotlightRect) {
-        const { clientX, clientY } = e;
-        const inSpotlight =
-          clientX >= spotlightRect.left &&
-          clientX <= spotlightRect.left + spotlightRect.width &&
-          clientY >= spotlightRect.top &&
-          clientY <= spotlightRect.top + spotlightRect.height;
-
-        if (inSpotlight) {
-          if (
-            state.step === TutorialStep.PULL_PROMPT ||
-            state.step === TutorialStep.BAG_EXPLAIN ||
-            state.step === TutorialStep.CONTINUE_EXPLAIN ||
-            state.step === TutorialStep.HOME_WELCOME
-          ) {
-            return;
-          }
-        }
-      }
-
-      if (
-        state.step === TutorialStep.PULL_PROMPT ||
-        state.step === TutorialStep.BAG_EXPLAIN ||
-        state.step === TutorialStep.HOME_WELCOME
-      ) {
-        return;
-      }
-
+      // For target-only steps, ignore clicks outside the spotlight
+      if (TARGET_ONLY_STEPS.has(state.step)) return;
       e.stopPropagation();
       e.preventDefault();
       advance();
     },
-    [advance, currentConfig.target, spotlightRect, state.step],
+    [advance, state.step],
   );
 
   const tooltipStyle = useCallback((): React.CSSProperties => {
@@ -151,11 +135,71 @@ export function TutorialOverlay() {
     }
   }, [spotlightRect, currentConfig.target, currentConfig.position]);
 
+  const isInteractive = INTERACTIVE_STEPS.has(state.step);
+  const backdropColor = "rgba(0, 0, 0, 0.78)";
+
+  /**
+   * For interactive steps: render 4 dark panels around the spotlight so the
+   * gap lets clicks pass through to the real button underneath.
+   * For tap-anywhere steps: render a single full-screen backdrop.
+   */
   const renderBackdrop = () => {
+    if (spotlightRect && isInteractive) {
+      const { top, left, width, height } = spotlightRect;
+      const bottom = top + height;
+      const right = left + width;
+      const panelStyle = {
+        backgroundColor: backdropColor,
+        position: "fixed" as const,
+        zIndex: 200,
+      };
+      return (
+        <>
+          {/* Top panel */}
+          <div
+            style={{ ...panelStyle, top: 0, left: 0, right: 0, height: top }}
+            onPointerDown={handleBackdropClick}
+          />
+          {/* Bottom panel */}
+          <div
+            style={{ ...panelStyle, top: bottom, left: 0, right: 0, bottom: 0 }}
+            onPointerDown={handleBackdropClick}
+          />
+          {/* Left panel */}
+          <div
+            style={{
+              ...panelStyle,
+              top,
+              left: 0,
+              width: left,
+              height,
+            }}
+            onPointerDown={handleBackdropClick}
+          />
+          {/* Right panel */}
+          <div
+            style={{
+              ...panelStyle,
+              top,
+              left: right,
+              right: 0,
+              height,
+            }}
+            onPointerDown={handleBackdropClick}
+          />
+        </>
+      );
+    }
+
+    // Non-interactive: full-screen backdrop that captures all clicks
     if (spotlightRect) {
       const r = 12;
       return (
-        <svg className="fixed inset-0 w-full h-full z-[200] pointer-events-none">
+        <svg
+          className="fixed inset-0 w-full h-full z-[200]"
+          onPointerDown={handleBackdropClick}
+          style={{ touchAction: "none" }}
+        >
           <defs>
             <mask id="tutorial-mask">
               <rect width="100%" height="100%" fill="white" />
@@ -173,7 +217,7 @@ export function TutorialOverlay() {
           <rect
             width="100%"
             height="100%"
-            fill="rgba(0, 0, 0, 0.78)"
+            fill={backdropColor}
             mask="url(#tutorial-mask)"
           />
         </svg>
@@ -182,8 +226,9 @@ export function TutorialOverlay() {
 
     return (
       <div
-        className="fixed inset-0 z-[200] pointer-events-none"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.78)" }}
+        className="fixed inset-0 z-[200]"
+        style={{ backgroundColor: backdropColor, touchAction: "none" }}
+        onPointerDown={handleBackdropClick}
       />
     );
   };
@@ -256,14 +301,11 @@ export function TutorialOverlay() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[200]"
-          ref={overlayRef}
-          onPointerDown={handleTap}
-          style={{ touchAction: "none" }}
+          className="fixed inset-0 z-[200] pointer-events-none"
         >
           {renderBackdrop()}
           {renderArrow()}
-          {/* Tooltip card — matches InfoCard/ConfirmationDialog styling */}
+          {/* Tooltip card */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -271,7 +313,6 @@ export function TutorialOverlay() {
             className="fixed z-[201] pointer-events-none"
             style={tooltipStyle()}
           >
-            {/* Outer gradient border (matches GradientBorder green) */}
             <div
               className="rounded-2xl p-[1px]"
               style={{
@@ -279,7 +320,6 @@ export function TutorialOverlay() {
                   "linear-gradient(180deg, rgba(54, 248, 24, 0.25) 0%, rgba(54, 248, 24, 0) 100%)",
               }}
             >
-              {/* Inner card */}
               <div
                 className="rounded-2xl px-5 py-4"
                 style={{
@@ -314,7 +354,9 @@ export function TutorialOverlay() {
                     className="font-secondary text-[10px] tracking-[0.25em] uppercase"
                     style={{ color: COLORS.green400_24 }}
                   >
-                    TAP TO CONTINUE
+                    {TARGET_ONLY_STEPS.has(state.step)
+                      ? "TAP THE HIGHLIGHTED AREA"
+                      : "TAP TO CONTINUE"}
                   </span>
                 </div>
               </div>
