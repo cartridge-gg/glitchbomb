@@ -34,7 +34,8 @@ const TARGET_ONLY_STEPS = new Set([
 ]);
 
 export function TutorialOverlay() {
-  const { shouldShowOverlay, currentConfig, state, advance } = useTutorial();
+  const { shouldShowOverlay, currentConfig, state, advance, completeTutorial } =
+    useTutorial();
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
     null,
   );
@@ -329,6 +330,25 @@ export function TutorialOverlay() {
             className="fixed z-[201] pointer-events-none"
             style={tooltipStyle()}
           >
+            {state.step === TutorialStep.HOME_WELCOME && (
+              <div className="flex justify-end mb-2">
+                <button
+                  type="button"
+                  className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto px-3 py-1.5 rounded-full"
+                  style={{
+                    color: COLORS.green400_48,
+                    border: `1px solid ${COLORS.green400_24}`,
+                    backgroundColor: COLORS.cardBg,
+                  }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    completeTutorial();
+                  }}
+                >
+                  SKIP TUTORIAL
+                </button>
+              </div>
+            )}
             <div
               className="rounded-2xl p-[1px]"
               style={{
