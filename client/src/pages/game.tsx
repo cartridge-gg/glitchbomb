@@ -497,13 +497,18 @@ export const Game = () => {
         !currentGame.over &&
         currentGame.points >= currentGame.milestone &&
         currentGame.milestone > 0;
+      // Shorten animation hold during tutorial scripted phase
+      const inTutorialScripted =
+        tutorial.state.active && tutorial.state.step < TutorialStep.FREE_PLAY;
       const clearMs = isFatal
         ? 3000
-        : isMilestoneReaching
-          ? 2500
-          : hasMultEffect
+        : inTutorialScripted
+          ? 1200
+          : isMilestoneReaching
             ? 2500
-            : 2000;
+            : hasMultEffect
+              ? 2500
+              : 2000;
 
       const timer = setTimeout(() => {
         const outcomeEl = outcomeRef.current;
