@@ -384,12 +384,17 @@ export const Game = () => {
   }, [game?.points, game?.milestone]);
 
   // Detect level-up after exiting shop — show "Entering Level X"
+  // Suppress during tutorial scripted phase (tutorial shows its own messages)
   useEffect(() => {
     if (!game) return;
     if (prevLevelRef.current !== null && game.level > prevLevelRef.current) {
       milestoneShownRef.current = false;
-      setShowLevelEnter(true);
-      playLevelStartSound();
+      const inTutorialScripted =
+        tutorial.state.active && tutorial.state.step < TutorialStep.FREE_PLAY;
+      if (!inTutorialScripted) {
+        setShowLevelEnter(true);
+        playLevelStartSound();
+      }
     }
     prevLevelRef.current = game.level;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -646,13 +651,8 @@ export const Game = () => {
   const handleBuyAndExit = useCallback(
     async (indices: number[]) => {
       if (game) {
-        // Tutorial: show price explanation if they bought something, then levels message
         if (tutorial.state.active) {
-          if (indices.length > 0) {
-            tutorial.onOrbBought();
-          } else {
-            tutorial.onShopExited();
-          }
+          tutorial.onShopExited();
         }
         setIsExitingShop(true);
         const success = await buyAndExit(game.id, indices);
@@ -798,7 +798,11 @@ export const Game = () => {
           initialPurchaseCounts={game.shopPurchaseCounts}
           onConfirm={handleBuyAndExit}
           isLoading={isExitingShop}
-          onBalanceChange={setShopBalanceOverride}
+          onBalanceChange={(bal) => {
+            setShopBalanceOverride(bal);
+            // Tutorial: detect first orb added to cart (balance dropped)
+            if (bal < game.chips) tutorial.onOrbBought();
+          }}
         />
       );
     }
