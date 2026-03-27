@@ -91,7 +91,7 @@ export function TutorialOverlay() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [shouldShowOverlay, currentConfig.target]);
+  }, [shouldShowOverlay, currentConfig.target, currentConfig.spotlightShape]);
 
   const handleBackdropClick = useCallback(
     (e: React.PointerEvent) => {

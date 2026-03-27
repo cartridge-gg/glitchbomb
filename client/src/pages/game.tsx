@@ -183,6 +183,8 @@ export const Game = () => {
   const [isFatalBomb, setIsFatalBomb] = useState(false);
   const gameRef = useRef(game);
   gameRef.current = game;
+  const tutorialRef = useRef(tutorial.state);
+  tutorialRef.current = tutorial.state;
 
   const { dataPoints, isPractice } = usePLDataPoints({
     gameId: game?.id ?? 0,
@@ -499,7 +501,7 @@ export const Game = () => {
         currentGame.milestone > 0;
       // Shorten animation hold during tutorial scripted phase
       const inTutorialScripted =
-        tutorial.state.active && tutorial.state.step < TutorialStep.FREE_PLAY;
+        tutorialRef.current.active && tutorialRef.current.step < TutorialStep.FREE_PLAY;
       const clearMs = isFatal
         ? 3000
         : inTutorialScripted
