@@ -76,10 +76,8 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
 
   const advance = useCallback(() => {
     updateState((prev) => {
-      // HOME_WELCOME: dismiss the overlay (player will then click practice)
-      if (prev.step === TutorialStep.HOME_WELCOME) {
-        return { ...prev, step: TutorialStep.GAME_INTRO };
-      }
+      // HOME_WELCOME: advance is a no-op (handled by clicking practice button)
+      if (prev.step === TutorialStep.HOME_WELCOME) return prev;
 
       // HOME_REWARD: completing this marks tutorial as done
       if (prev.step === TutorialStep.HOME_REWARD) {

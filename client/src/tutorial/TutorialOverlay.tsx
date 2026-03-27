@@ -20,6 +20,7 @@ const COLORS = {
 
 /** Steps where clicks inside the spotlight must reach the underlying button */
 const INTERACTIVE_STEPS = new Set([
+  TutorialStep.HOME_WELCOME,
   TutorialStep.PULL_PROMPT,
   TutorialStep.BAG_EXPLAIN,
   TutorialStep.CONTINUE_EXPLAIN,
@@ -27,6 +28,7 @@ const INTERACTIVE_STEPS = new Set([
 
 /** Steps where tapping outside the spotlight does nothing (must use the target) */
 const TARGET_ONLY_STEPS = new Set([
+  TutorialStep.HOME_WELCOME,
   TutorialStep.PULL_PROMPT,
   TutorialStep.BAG_EXPLAIN,
 ]);

@@ -948,31 +948,29 @@ export const Game = () => {
               <BombTracker details={bombDetails} size="lg" />
             </div>
             <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
-              <GradientBorder
-                color="green"
-                className="flex-1"
-                data-tutorial-id="bag-button"
-              >
-                <button
-                  type="button"
-                  data-tutorial-id="bag-button"
-                  className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={openStash}
-                >
-                  <BagIcon className="w-5 h-5" />
-                  ORBS
-                </button>
-              </GradientBorder>
-              <GradientBorder color="green" className="flex-1">
-                <button
-                  type="button"
-                  data-tutorial-id="cash-out-button"
-                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={openCashout}
-                >
-                  CASH OUT
-                </button>
-              </GradientBorder>
+              <div className="flex-1" data-tutorial-id="bag-button">
+                <GradientBorder color="green" className="w-full">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    onClick={openStash}
+                  >
+                    <BagIcon className="w-5 h-5" />
+                    ORBS
+                  </button>
+                </GradientBorder>
+              </div>
+              <div className="flex-1" data-tutorial-id="cash-out-button">
+                <GradientBorder color="green" className="w-full">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    onClick={openCashout}
+                  >
+                    CASH OUT
+                  </button>
+                </GradientBorder>
+              </div>
             </div>
           </div>
         )}

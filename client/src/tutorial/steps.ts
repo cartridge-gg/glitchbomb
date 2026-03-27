@@ -97,6 +97,8 @@ export const STEP_CONFIGS: Record<TutorialStep, TutorialStepConfig> = {
   [TutorialStep.HOME_WELCOME]: {
     title: "Welcome to Glitch Bomb!",
     message: "Since you're new, let's Practice.\nPractice for free anytime!",
+    target: "practice-button",
+    position: "top",
     hasOverlay: true,
     page: "home",
   },
