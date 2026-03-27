@@ -122,8 +122,19 @@ export const AppHeader = ({
               disabled={!canMint}
               aria-label="Mint moonrocks"
             >
-              <svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" clipRule="evenodd" d="M10.0001 2.89834H3.55264V3.50255H2.98684V9.7609H3.55264V10.3991H7.1445V8.05096H4.97502V5.35221H10.0001V13.3334H2.74591V12.9313H1.93917V12.3088H1.37336V11.7142H0.80677V11.1025H0.228716V10.2982H0V2.63306H0.228716V1.82882H0.80677V1.21708H1.37336V0.62249H1.93917V0H10.0001V2.89834Z" fill="#FF0099"/>
+              <svg
+                width="10"
+                height="14"
+                viewBox="0 0 10 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M10.0001 2.89834H3.55264V3.50255H2.98684V9.7609H3.55264V10.3991H7.1445V8.05096H4.97502V5.35221H10.0001V13.3334H2.74591V12.9313H1.93917V12.3088H1.37336V11.7142H0.80677V11.1025H0.228716V10.2982H0V2.63306H0.228716V1.82882H0.80677V1.21708H1.37336V0.62249H1.93917V0H10.0001V2.89834Z"
+                  fill="#FF0099"
+                />
               </svg>
               <GlitchText
                 className="font-secondary text-sm tracking-widest text-[#F09]"
