@@ -82,8 +82,8 @@ export function TutorialOverlay() {
     const handleUpdate = () => findTarget();
     window.addEventListener("resize", handleUpdate);
     window.addEventListener("scroll", handleUpdate, true);
-    const interval = setInterval(findTarget, 200);
-    const timeout = setTimeout(() => clearInterval(interval), 3000);
+    const interval = setInterval(findTarget, 150);
+    const timeout = setTimeout(() => clearInterval(interval), 10000);
 
     return () => {
       window.removeEventListener("resize", handleUpdate);
@@ -168,17 +168,15 @@ export function TutorialOverlay() {
       const cx = left + width / 2;
       const cy = top + height / 2;
       const r = Math.max(width, height) / 2;
-      // Outer rect (CW) then inner circle (CCW) = donut
-      return `path('M 0 0 H ${vw} V ${vh} H 0 Z M ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy} Z')`;
+      return `path(evenodd, 'M 0 0 H ${vw} V ${vh} H 0 Z M ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy} Z')`;
     }
 
     const rx = 12;
-    // Outer rect (CW) then inner rounded rect (CCW approximation)
     const x1 = left;
     const y1 = top;
     const x2 = left + width;
     const y2 = top + height;
-    return `path('M 0 0 H ${vw} V ${vh} H 0 Z M ${x1 + rx} ${y1} H ${x2 - rx} Q ${x2} ${y1} ${x2} ${y1 + rx} V ${y2 - rx} Q ${x2} ${y2} ${x2 - rx} ${y2} H ${x1 + rx} Q ${x1} ${y2} ${x1} ${y2 - rx} V ${y1 + rx} Q ${x1} ${y1} ${x1 + rx} ${y1} Z')`;
+    return `path(evenodd, 'M 0 0 H ${vw} V ${vh} H 0 Z M ${x1 + rx} ${y1} H ${x2 - rx} Q ${x2} ${y1} ${x2} ${y1 + rx} V ${y2 - rx} Q ${x2} ${y2} ${x2 - rx} ${y2} H ${x1 + rx} Q ${x1} ${y2} ${x1} ${y2 - rx} V ${y1 + rx} Q ${x1} ${y1} ${x1 + rx} ${y1} Z')`;
   };
 
   const renderBackdrop = () => {
