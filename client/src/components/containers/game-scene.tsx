@@ -138,8 +138,9 @@ export const GameScene = ({
 
       {/* Puller — always visible so user can spam pulls */}
       <div className="absolute inset-0 flex items-center justify-center z-20">
-        <div className="relative" data-tutorial-id="puller">
+        <div className="relative">
           <Puller
+            data-tutorial-id="puller"
             onClick={onPull}
             variant={lives < 2 ? "bomb" : lives < 4 ? "warning" : "point"}
             size="md"
