@@ -19,9 +19,9 @@ export const useActions = () => {
   const { chain } = useNetwork();
 
   const pull = useCallback(
-    async (gameId: number) => {
+    async (gameId: number, forcedOrbId?: number) => {
       try {
-        if (isPracticeGame(gameId)) return offlinePull(gameId);
+        if (isPracticeGame(gameId)) return offlinePull(gameId, forcedOrbId);
         if (!account?.address) return false;
         const vrfAddress = getVrfAddress(chain.id);
         const gameAddress = getGameAddress(chain.id);

@@ -201,6 +201,7 @@ export function exitShop(game: OfflineGame): {
 export function pullOrbs(
   game: OfflineGame,
   seed: bigint,
+  forcedOrbId?: number,
 ): { game: OfflineGame; orbs: number[]; earnings: number } {
   assertNotOver(game);
   assertNotCompleted(game);
@@ -224,8 +225,25 @@ export function pullOrbs(
   let totalEarnings = 0;
 
   while (pulled.length < drawCount && available.length > 0) {
-    const pickIndex = random.nextInt(available.length);
-    const bagIndex = available.splice(pickIndex, 1)[0] ?? 0;
+    let bagIndex: number;
+
+    if (forcedOrbId !== undefined && pulled.length === 0) {
+      // Tutorial: find the first available orb matching forcedOrbId
+      const forcedIdx = available.findIndex(
+        (idx) => next.bag[idx] === forcedOrbId,
+      );
+      if (forcedIdx >= 0) {
+        bagIndex = available.splice(forcedIdx, 1)[0] ?? 0;
+      } else {
+        // Fallback to random if forced orb not found
+        const pickIndex = random.nextInt(available.length);
+        bagIndex = available.splice(pickIndex, 1)[0] ?? 0;
+      }
+    } else {
+      const pickIndex = random.nextInt(available.length);
+      bagIndex = available.splice(pickIndex, 1)[0] ?? 0;
+    }
+
     const orbId = next.bag[bagIndex] ?? ORB_IDS.None;
 
     if (orbId !== ORB_IDS.StickyBomb) {

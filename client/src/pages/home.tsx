@@ -37,6 +37,7 @@ import {
   selectGame,
   useOfflineStore,
 } from "@/offline/store";
+import { TutorialOverlay, useTutorial } from "@/tutorial";
 import { isMobile, mobilePath } from "@/utils/mobile";
 
 export const Home = () => {
@@ -83,6 +84,7 @@ export const Home = () => {
     startMusic,
   } = useAudio();
   const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
+  const tutorial = useTutorial();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -462,9 +464,13 @@ export const Home = () => {
     if (!isMobile) {
       resetOfflineState();
     }
+    // Start tutorial for first-time players
+    if (!tutorial.state.completed) {
+      tutorial.startTutorial();
+    }
     const gameId = createOfflineGame();
     navigate(mobilePath(`/play?game=${gameId}`));
-  }, [navigate]);
+  }, [navigate, tutorial]);
 
   const isLoggedIn = !!account && !!username;
 
@@ -1281,72 +1287,83 @@ export const Home = () => {
       <div className="shrink-0 pt-4 pb-4 px-4 relative z-[51]">
         <div className="flex gap-3 w-full max-w-[500px] mx-auto">
           {!isMobile && (
+            <div className="flex-1" data-tutorial-id="practice-button">
+              <Button
+                variant="secondary"
+                gradient="green"
+                wrapperClassName="w-full"
+                className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
+                onClick={
+                  showDetails
+                    ? () => setShowDetails(false)
+                    : () => requireLogin(handlePractice)
+                }
+              >
+                <GlitchText
+                  className="font-secondary"
+                  text={showDetails ? "BACK" : "PRACTICE"}
+                />
+              </Button>
+            </div>
+          )}
+          <div
+            className="flex-1"
+            {...(isMobile && isOnNewGameCard
+              ? { "data-tutorial-id": "practice-button" }
+              : {})}
+          >
             <Button
               variant="secondary"
-              gradient="green"
-              wrapperClassName="flex-1"
-              className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
-              onClick={
-                showDetails
-                  ? () => setShowDetails(false)
-                  : () => requireLogin(handlePractice)
+              gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
+              wrapperClassName={`w-full ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
+              className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
+              style={
+                showDetails || isOnNewGameCard
+                  ? { backgroundColor: "#2B052E" }
+                  : undefined
               }
-            >
-              <GlitchText
-                className="font-secondary"
-                text={showDetails ? "BACK" : "PRACTICE"}
-              />
-            </Button>
-          )}
-          <Button
-            variant="secondary"
-            gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
-            wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
-            className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
-            style={
-              showDetails || isOnNewGameCard
-                ? { backgroundColor: "#2B052E" }
-                : undefined
-            }
-            onClick={
-              isMobile
-                ? () =>
-                    requireLogin(() => {
-                      if (isOnNewGameCard) {
-                        handlePractice();
-                      } else if (activeGame) {
-                        handlePlay(activeGame.id);
-                      }
-                    })
-                : showDetails
-                  ? handleBuyGame
-                  : () =>
+              onClick={
+                isMobile
+                  ? () =>
                       requireLogin(() => {
                         if (isOnNewGameCard) {
-                          handleNewGame();
+                          handlePractice();
                         } else if (activeGame) {
                           handlePlay(activeGame.id);
                         }
                       })
-            }
-          >
-            <GlitchText
-              className="font-secondary"
-              text={
-                isMobile
-                  ? isOnNewGameCard
-                    ? "NEW GAME"
-                    : "CONTINUE"
                   : showDetails
-                    ? "PURCHASE"
-                    : isOnNewGameCard
+                    ? handleBuyGame
+                    : () =>
+                        requireLogin(() => {
+                          if (isOnNewGameCard) {
+                            handleNewGame();
+                          } else if (activeGame) {
+                            handlePlay(activeGame.id);
+                          }
+                        })
+              }
+            >
+              <GlitchText
+                className="font-secondary"
+                text={
+                  isMobile
+                    ? isOnNewGameCard
                       ? "NEW GAME"
                       : "CONTINUE"
-              }
-            />
-          </Button>
+                    : showDetails
+                      ? "PURCHASE"
+                      : isOnNewGameCard
+                        ? "NEW GAME"
+                        : "CONTINUE"
+                }
+              />
+            </Button>
+          </div>
         </div>
       </div>
+
+      <TutorialOverlay />
 
       {/* Game Details Overlay */}
       {!isMobile && showDetails && (

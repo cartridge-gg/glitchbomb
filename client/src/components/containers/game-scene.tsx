@@ -140,6 +140,7 @@ export const GameScene = ({
       <div className="absolute inset-0 flex items-center justify-center z-20">
         <div className="relative">
           <Puller
+            data-tutorial-id="puller"
             onClick={onPull}
             variant={lives < 2 ? "bomb" : lives < 4 ? "warning" : "point"}
             size="md"
@@ -151,6 +152,7 @@ export const GameScene = ({
           {/* Multiplier Badge - top right of puller */}
           <div
             className="absolute z-30"
+            data-tutorial-id="multiplier"
             style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
           >
             <TooltipProvider delayDuration={0}>

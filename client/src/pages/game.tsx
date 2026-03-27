@@ -47,6 +47,7 @@ import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
+import { TutorialOverlay, TutorialStep, useTutorial } from "@/tutorial";
 import { mobilePath } from "@/utils/mobile";
 
 // Initial game values for optimistic rendering
@@ -100,6 +101,7 @@ export const Game = () => {
   } = useAudio();
   const { displaySettings, setShowDistributionPercent, setStashViewMode } =
     useDisplaySettings();
+  const tutorial = useTutorial();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -181,6 +183,8 @@ export const Game = () => {
   const [isFatalBomb, setIsFatalBomb] = useState(false);
   const gameRef = useRef(game);
   gameRef.current = game;
+  const tutorialRef = useRef(tutorial.state);
+  tutorialRef.current = tutorial.state;
 
   const { dataPoints, isPractice } = usePLDataPoints({
     gameId: game?.id ?? 0,
@@ -299,8 +303,11 @@ export const Game = () => {
     }
   }, [setGameId, searchParams]);
 
-  // Show reward overlay for fresh games (skip expired ones)
+  // Show reward overlay for fresh games (skip expired ones and tutorial games)
   useEffect(() => {
+    // Skip reward overlay during tutorial — go straight to game
+    if (tutorial.state.active) return;
+
     const isExpired =
       game &&
       game.created_at > 0 &&
@@ -318,7 +325,13 @@ export const Game = () => {
       setShowRewardOverlay(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.id, game?.level, game?.pull_count, game?.over]);
+  }, [
+    game?.id,
+    game?.level,
+    game?.pull_count,
+    game?.over,
+    tutorial.state.active,
+  ]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -343,29 +356,48 @@ export const Game = () => {
     }
   }, [game?.over]);
 
+  // Tutorial: detect game over
+  useEffect(() => {
+    if (!tutorial.state.active) return;
+    if (game?.over) {
+      const won = (game?.health ?? 0) > 0;
+      tutorial.onGameEnd(won);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.over]);
+
   // Detect milestone reached — delay overlay so the winning pull animation plays first
+  // During tutorial scripted phase, suppress the built-in overlay (tutorial has its own)
   useEffect(() => {
     if (!game || game.over) return;
     const reached = game.points >= game.milestone && game.milestone > 0;
     if (reached && !milestoneShownRef.current) {
       milestoneShownRef.current = true;
-      // Delay level-complete overlay so the winning orb outcome animation is visible
-      const timer = setTimeout(() => {
-        setShowLevelComplete(true);
-        playLevelCompleteSound();
-      }, 2300);
-      return () => clearTimeout(timer);
+      const inTutorialScripted =
+        tutorial.state.active && tutorial.state.step < TutorialStep.FREE_PLAY;
+      if (!inTutorialScripted) {
+        const timer = setTimeout(() => {
+          setShowLevelComplete(true);
+          playLevelCompleteSound();
+        }, 2300);
+        return () => clearTimeout(timer);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.points, game?.milestone]);
 
   // Detect level-up after exiting shop — show "Entering Level X"
+  // Suppress during tutorial scripted phase (tutorial shows its own messages)
   useEffect(() => {
     if (!game) return;
     if (prevLevelRef.current !== null && game.level > prevLevelRef.current) {
       milestoneShownRef.current = false;
-      setShowLevelEnter(true);
-      playLevelStartSound();
+      const inTutorialScripted =
+        tutorial.state.active && tutorial.state.step < TutorialStep.FREE_PLAY;
+      if (!inTutorialScripted) {
+        setShowLevelEnter(true);
+        playLevelStartSound();
+      }
     }
     prevLevelRef.current = game.level;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -467,13 +499,19 @@ export const Game = () => {
         !currentGame.over &&
         currentGame.points >= currentGame.milestone &&
         currentGame.milestone > 0;
+      // Shorten animation hold during tutorial scripted phase
+      const inTutorialScripted =
+        tutorialRef.current.active &&
+        tutorialRef.current.step < TutorialStep.FREE_PLAY;
       const clearMs = isFatal
         ? 3000
-        : isMilestoneReaching
-          ? 2500
-          : hasMultEffect
+        : inTutorialScripted
+          ? 1200
+          : isMilestoneReaching
             ? 2500
-            : 2000;
+            : hasMultEffect
+              ? 2500
+              : 2000;
 
       const timer = setTimeout(() => {
         const outcomeEl = outcomeRef.current;
@@ -526,14 +564,29 @@ export const Game = () => {
   // Memoize callbacks to prevent unnecessary re-renders
   const handlePull = useCallback(async () => {
     if (!game || isPulling || game.over) return;
+    // Block pulls when tutorial overlay is showing (except on pull prompt steps)
+    if (tutorial.isPullBlocked) return;
     // Snapshot multiplier before pull (used for outcome display)
     prePullMultiplierRef.current = game.multiplier;
     setIsPulling(true);
-    const success = await pull(game.id);
+    // Get forced orb for tutorial scripted pulls
+    const forcedOrbId = tutorial.getForcedOrbId();
+    tutorial.onPullInitiated();
+    const success = await pull(game.id, forcedOrbId);
     if (!success) {
       setIsPulling(false);
     }
-  }, [pull, game, isPulling]);
+  }, [pull, game, isPulling, tutorial]);
+
+  // Tutorial: advance when pull animation finishes (currentOrb clears)
+  const prevOrbRef = useRef<OrbOutcome | undefined>(undefined);
+  useEffect(() => {
+    if (prevOrbRef.current && !currentOrb) {
+      tutorial.onPullAnimationComplete();
+    }
+    prevOrbRef.current = currentOrb;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentOrb]);
 
   // Flying particle → cleanup when it arrives at target
   useEffect(() => {
@@ -591,31 +644,40 @@ export const Game = () => {
 
   const handleEnterShop = useCallback(async () => {
     if (!game) return;
+    // Tutorial: advance past the continue explanation
+    if (
+      tutorial.state.active &&
+      tutorial.state.step === TutorialStep.CONTINUE_EXPLAIN
+    ) {
+      tutorial.setStep(TutorialStep.ENTER_SHOP_EXPLAIN);
+    }
     setIsEnteringShop(true);
     const success = await enter(game.id);
     if (!success) {
-      // User cancelled or error - reset loading state
       setIsEnteringShop(false);
     }
-    // On success, don't close overlay - wait for shop to load
-  }, [enter, game]);
+  }, [enter, game, tutorial]);
 
   const handleBuyAndExit = useCallback(
     async (indices: number[]) => {
       if (game) {
+        if (tutorial.state.active) {
+          tutorial.onShopExited();
+        }
         setIsExitingShop(true);
         const success = await buyAndExit(game.id, indices);
         if (!success) {
-          // User cancelled or error - reset loading state
           setIsExitingShop(false);
         }
-        // On success, wait for shop to clear via useEffect
       }
     },
-    [buyAndExit, game],
+    [buyAndExit, game, tutorial],
   );
 
-  const openStash = useCallback(() => setOverlay("stash"), []);
+  const openStash = useCallback(() => {
+    setOverlay("stash");
+    tutorial.onBagOpened();
+  }, [tutorial]);
   const openCashout = useCallback(() => {
     if (isCashoutConfirmDismissed()) {
       handleCashOut();
@@ -746,7 +808,11 @@ export const Game = () => {
           initialPurchaseCounts={game.shopPurchaseCounts}
           onConfirm={handleBuyAndExit}
           isLoading={isExitingShop}
-          onBalanceChange={setShopBalanceOverride}
+          onBalanceChange={(bal) => {
+            setShopBalanceOverride(bal);
+            // Tutorial: detect first orb added to cart (balance dropped)
+            if (bal < game.chips) tutorial.onOrbBought();
+          }}
         />
       );
     }
@@ -896,25 +962,29 @@ export const Game = () => {
               <BombTracker details={bombDetails} size="lg" />
             </div>
             <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
-              <GradientBorder color="green" className="flex-1">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={openStash}
-                >
-                  <BagIcon className="w-5 h-5" />
-                  ORBS
-                </button>
-              </GradientBorder>
-              <GradientBorder color="green" className="flex-1">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={openCashout}
-                >
-                  CASH OUT
-                </button>
-              </GradientBorder>
+              <div className="flex-1" data-tutorial-id="bag-button">
+                <GradientBorder color="green" className="w-full">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    onClick={openStash}
+                  >
+                    <BagIcon className="w-5 h-5" />
+                    ORBS
+                  </button>
+                </GradientBorder>
+              </div>
+              <div className="flex-1" data-tutorial-id="cash-out-button">
+                <GradientBorder color="green" className="w-full">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
+                    onClick={openCashout}
+                  >
+                    CASH OUT
+                  </button>
+                </GradientBorder>
+              </div>
             </div>
           </div>
         )}
@@ -958,7 +1028,10 @@ export const Game = () => {
       </div>
       <StashModal
         open={overlay === "stash"}
-        onOpenChange={(open) => setOverlay(open ? "stash" : "none")}
+        onOpenChange={(open) => {
+          setOverlay(open ? "stash" : "none");
+          if (!open) tutorial.onBagClosed();
+        }}
         orbs={game?.bag ?? []}
         discards={game?.discards ?? []}
         viewMode={displaySettings.stashViewMode}
@@ -1069,6 +1142,7 @@ export const Game = () => {
           />
         )}
       </AnimatePresence>
+      <TutorialOverlay />
     </motion.div>
   );
 };
