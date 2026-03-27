@@ -152,6 +152,7 @@ export function TutorialOverlay() {
         backgroundColor: backdropColor,
         position: "fixed" as const,
         zIndex: 200,
+        pointerEvents: "auto" as const,
       };
       return (
         <>
@@ -198,7 +199,7 @@ export function TutorialOverlay() {
         <svg
           className="fixed inset-0 w-full h-full z-[200]"
           onPointerDown={handleBackdropClick}
-          style={{ touchAction: "none" }}
+          style={{ touchAction: "none", pointerEvents: "auto" }}
         >
           <defs>
             <mask id="tutorial-mask">
@@ -227,7 +228,11 @@ export function TutorialOverlay() {
     return (
       <div
         className="fixed inset-0 z-[200]"
-        style={{ backgroundColor: backdropColor, touchAction: "none" }}
+        style={{
+          backgroundColor: backdropColor,
+          touchAction: "none",
+          pointerEvents: "auto",
+        }}
         onPointerDown={handleBackdropClick}
       />
     );
