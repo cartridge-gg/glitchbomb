@@ -330,6 +330,25 @@ export function TutorialOverlay() {
             className="fixed z-[201] pointer-events-none"
             style={tooltipStyle()}
           >
+            {state.step === TutorialStep.HOME_WELCOME && (
+              <div className="flex justify-end mb-2">
+                <button
+                  type="button"
+                  className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto px-3 py-1.5 rounded-full"
+                  style={{
+                    color: COLORS.green400_48,
+                    border: `1px solid ${COLORS.green400_24}`,
+                    backgroundColor: COLORS.cardBg,
+                  }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    completeTutorial();
+                  }}
+                >
+                  SKIP TUTORIAL
+                </button>
+              </div>
+            )}
             <div
               className="rounded-2xl p-[1px]"
               style={{
@@ -364,24 +383,9 @@ export function TutorialOverlay() {
                   </p>
                 )}
                 <div
-                  className="mt-3 pt-2 flex justify-between items-center"
+                  className="mt-3 pt-2 flex justify-end"
                   style={{ borderTop: `1px solid ${COLORS.green400_10}` }}
                 >
-                  {state.step === TutorialStep.HOME_WELCOME ? (
-                    <button
-                      type="button"
-                      className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto"
-                      style={{ color: COLORS.green400_24 }}
-                      onPointerDown={(e) => {
-                        e.stopPropagation();
-                        completeTutorial();
-                      }}
-                    >
-                      SKIP
-                    </button>
-                  ) : (
-                    <span />
-                  )}
                   <span
                     className="font-secondary text-[10px] tracking-[0.25em] uppercase"
                     style={{ color: COLORS.green400_24 }}
