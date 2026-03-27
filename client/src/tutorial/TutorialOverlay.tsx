@@ -346,7 +346,7 @@ export function TutorialOverlay() {
                     completeTutorial();
                   }}
                 >
-                  SKIP TUTORIAL &rsaquo;
+                  SKIP TUTORIAL
                 </button>
               </div>
             )}
