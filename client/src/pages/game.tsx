@@ -47,6 +47,7 @@ import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
+import { createOfflineGame } from "@/offline/store";
 import { TutorialOverlay, TutorialStep, useTutorial } from "@/tutorial";
 import { mobilePath } from "@/utils/mobile";
 
@@ -743,6 +744,15 @@ export const Game = () => {
   const isGameReady = !!game && tokenContracts.length > 0;
   useLoadingSignal("game", isGameReady);
 
+  const handlePlayAgain = useCallback(() => {
+    if (isPractice) {
+      const newGameId = createOfflineGame();
+      navigate(mobilePath(`/play?game=${newGameId}`));
+    } else {
+      navigate(mobilePath("/"));
+    }
+  }, [isPractice, navigate]);
+
   if (!gameIdParam) return null;
   if (!isGameReady) return null;
 
@@ -762,7 +772,7 @@ export const Game = () => {
           pulls={pulls}
           cashedOut={false}
           expired={true}
-          onPlayAgain={() => navigate(mobilePath("/"))}
+          onPlayAgain={handlePlayAgain}
           onOpenStash={openStash}
           health={game.health}
           points={game.points}
@@ -785,7 +795,7 @@ export const Game = () => {
           plData={plData}
           pulls={pulls}
           cashedOut={cashedOut}
-          onPlayAgain={() => navigate(mobilePath("/"))}
+          onPlayAgain={handlePlayAgain}
           onOpenStash={openStash}
           health={game.health}
           points={game.points}
