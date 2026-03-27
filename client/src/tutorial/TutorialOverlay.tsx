@@ -23,14 +23,12 @@ const INTERACTIVE_STEPS = new Set([
   TutorialStep.PULL_PROMPT,
   TutorialStep.BAG_EXPLAIN,
   TutorialStep.CONTINUE_EXPLAIN,
-  TutorialStep.HOME_WELCOME,
 ]);
 
 /** Steps where tapping outside the spotlight does nothing (must use the target) */
 const TARGET_ONLY_STEPS = new Set([
   TutorialStep.PULL_PROMPT,
   TutorialStep.BAG_EXPLAIN,
-  TutorialStep.HOME_WELCOME,
 ]);
 
 export function TutorialOverlay() {
