@@ -331,21 +331,22 @@ export function TutorialOverlay() {
             style={tooltipStyle()}
           >
             {state.step === TutorialStep.HOME_WELCOME && (
-              <div className="flex justify-end mb-2">
+              <div className="flex justify-end mb-3">
                 <button
                   type="button"
-                  className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto px-3 py-1.5 rounded-full"
+                  className="font-secondary text-xs tracking-[0.2em] uppercase pointer-events-auto px-4 py-2 rounded-full active:scale-95 transition-transform"
                   style={{
-                    color: COLORS.green400_48,
-                    border: `1px solid ${COLORS.green400_24}`,
+                    color: COLORS.green400,
+                    border: `1px solid ${COLORS.green400_48}`,
                     backgroundColor: COLORS.cardBg,
+                    boxShadow: `0 0 12px ${COLORS.green400_10}`,
                   }}
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     completeTutorial();
                   }}
                 >
-                  SKIP TUTORIAL
+                  SKIP TUTORIAL &rsaquo;
                 </button>
               </div>
             )}
