@@ -85,6 +85,8 @@ export interface TutorialStepConfig {
   target?: string;
   /** Position of tooltip relative to target */
   position?: "top" | "bottom" | "left" | "right";
+  /** Shape of the spotlight cutout (default: "rect") */
+  spotlightShape?: "rect" | "circle";
   /** If true, show the overlay message */
   hasOverlay: boolean;
   /** Page this step belongs to */
@@ -111,6 +113,7 @@ export const STEP_CONFIGS: Record<TutorialStep, TutorialStepConfig> = {
     title: "Tap here to pull an Orb.",
     target: "puller",
     position: "bottom",
+    spotlightShape: "circle",
     hasOverlay: true,
     page: "game",
   },

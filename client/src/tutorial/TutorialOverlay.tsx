@@ -52,13 +52,27 @@ export function TutorialOverlay() {
       );
       if (el) {
         const rect = el.getBoundingClientRect();
-        const padding = 8;
-        setSpotlightRect({
-          top: rect.top - padding,
-          left: rect.left - padding,
-          width: rect.width + padding * 2,
-          height: rect.height + padding * 2,
-        });
+        const padding = currentConfig.spotlightShape === "circle" ? 16 : 8;
+
+        if (currentConfig.spotlightShape === "circle") {
+          // Make spotlight a square centered on the element (for circular cutout)
+          const size = Math.max(rect.width, rect.height) + padding * 2;
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          setSpotlightRect({
+            top: cy - size / 2,
+            left: cx - size / 2,
+            width: size,
+            height: size,
+          });
+        } else {
+          setSpotlightRect({
+            top: rect.top - padding,
+            left: rect.left - padding,
+            width: rect.width + padding * 2,
+            height: rect.height + padding * 2,
+          });
+        }
       } else {
         setSpotlightRect(null);
       }
@@ -136,65 +150,60 @@ export function TutorialOverlay() {
   }, [spotlightRect, currentConfig.target, currentConfig.position]);
 
   const isInteractive = INTERACTIVE_STEPS.has(state.step);
+  const isCircle = currentConfig.spotlightShape === "circle";
   const backdropColor = "rgba(0, 0, 0, 0.78)";
 
   /**
-   * For interactive steps: render 4 dark panels around the spotlight so the
-   * gap lets clicks pass through to the real button underneath.
-   * For tap-anywhere steps: render a single full-screen backdrop.
+   * Builds an SVG clip-path that covers the full viewport with a hole cut out
+   * for the spotlight area. clip-path affects both rendering AND hit-testing,
+   * so clicks inside the hole pass through to the underlying button.
    */
+  const buildClipPath = () => {
+    if (!spotlightRect) return undefined;
+    const { top, left, width, height } = spotlightRect;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (isCircle) {
+      const cx = left + width / 2;
+      const cy = top + height / 2;
+      const r = Math.max(width, height) / 2;
+      // Outer rect (CW) then inner circle (CCW) = donut
+      return `path('M 0 0 H ${vw} V ${vh} H 0 Z M ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy} Z')`;
+    }
+
+    const rx = 12;
+    // Outer rect (CW) then inner rounded rect (CCW approximation)
+    const x1 = left;
+    const y1 = top;
+    const x2 = left + width;
+    const y2 = top + height;
+    return `path('M 0 0 H ${vw} V ${vh} H 0 Z M ${x1 + rx} ${y1} H ${x2 - rx} Q ${x2} ${y1} ${x2} ${y1 + rx} V ${y2 - rx} Q ${x2} ${y2} ${x2 - rx} ${y2} H ${x1 + rx} Q ${x1} ${y2} ${x1} ${y2 - rx} V ${y1 + rx} Q ${x1} ${y1} ${x1 + rx} ${y1} Z')`;
+  };
+
   const renderBackdrop = () => {
     if (spotlightRect && isInteractive) {
-      const { top, left, width, height } = spotlightRect;
-      const bottom = top + height;
-      const right = left + width;
-      const panelStyle = {
-        backgroundColor: backdropColor,
-        position: "fixed" as const,
-        zIndex: 200,
-        pointerEvents: "auto" as const,
-      };
+      // clip-path creates a visual + pointer-event hole for the spotlight
       return (
-        <>
-          {/* Top panel */}
-          <div
-            style={{ ...panelStyle, top: 0, left: 0, right: 0, height: top }}
-            onPointerDown={handleBackdropClick}
-          />
-          {/* Bottom panel */}
-          <div
-            style={{ ...panelStyle, top: bottom, left: 0, right: 0, bottom: 0 }}
-            onPointerDown={handleBackdropClick}
-          />
-          {/* Left panel */}
-          <div
-            style={{
-              ...panelStyle,
-              top,
-              left: 0,
-              width: left,
-              height,
-            }}
-            onPointerDown={handleBackdropClick}
-          />
-          {/* Right panel */}
-          <div
-            style={{
-              ...panelStyle,
-              top,
-              left: right,
-              right: 0,
-              height,
-            }}
-            onPointerDown={handleBackdropClick}
-          />
-        </>
+        <div
+          className="fixed inset-0 z-[200]"
+          style={{
+            backgroundColor: backdropColor,
+            pointerEvents: "auto",
+            clipPath: buildClipPath(),
+          }}
+          onPointerDown={handleBackdropClick}
+        />
       );
     }
 
-    // Non-interactive: full-screen backdrop that captures all clicks
+    // Non-interactive: full-screen backdrop (visual hole only, clicks captured everywhere)
     if (spotlightRect) {
-      const r = 12;
+      const { top, left, width, height } = spotlightRect;
+      const cx = left + width / 2;
+      const cy = top + height / 2;
+      const r = Math.max(width, height) / 2;
+      const rr = 12;
       return (
         <svg
           className="fixed inset-0 w-full h-full z-[200]"
@@ -204,15 +213,19 @@ export function TutorialOverlay() {
           <defs>
             <mask id="tutorial-mask">
               <rect width="100%" height="100%" fill="white" />
-              <rect
-                x={spotlightRect.left}
-                y={spotlightRect.top}
-                width={spotlightRect.width}
-                height={spotlightRect.height}
-                rx={r}
-                ry={r}
-                fill="black"
-              />
+              {isCircle ? (
+                <circle cx={cx} cy={cy} r={r} fill="black" />
+              ) : (
+                <rect
+                  x={left}
+                  y={top}
+                  width={width}
+                  height={height}
+                  rx={rr}
+                  ry={rr}
+                  fill="black"
+                />
+              )}
             </mask>
           </defs>
           <rect
