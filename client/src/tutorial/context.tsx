@@ -266,10 +266,12 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     (state.step === TutorialStep.BAG_EXPLAIN ||
       state.step === TutorialStep.BAG_VIEW_EXPLAIN);
 
+  // Only allow pulls at specific tutorial steps
   const isPullBlocked =
     state.active &&
-    currentConfig.hasOverlay &&
-    state.step !== TutorialStep.PULL_PROMPT;
+    state.step < TutorialStep.FREE_PLAY &&
+    state.step !== TutorialStep.PULL_PROMPT &&
+    !WAIT_PULL_STEPS.has(state.step);
 
   const value = useMemo<TutorialContextValue>(
     () => ({
