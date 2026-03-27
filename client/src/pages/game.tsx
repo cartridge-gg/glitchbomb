@@ -358,10 +358,11 @@ export const Game = () => {
   useEffect(() => {
     if (!tutorial.state.active) return;
     if (game?.over) {
-      const won = game.health > 0;
+      const won = (game?.health ?? 0) > 0;
       tutorial.onGameEnd(won);
     }
-  }, [game?.over, game?.health, tutorial]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.over]);
 
   // Detect milestone reached — delay overlay so the winning pull animation plays first
   // During tutorial scripted phase, suppress the built-in overlay (tutorial has its own)
@@ -576,7 +577,8 @@ export const Game = () => {
       tutorial.onPullAnimationComplete();
     }
     prevOrbRef.current = currentOrb;
-  }, [currentOrb, tutorial]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentOrb]);
 
   // Flying particle → cleanup when it arrives at target
   useEffect(() => {
