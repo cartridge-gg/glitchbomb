@@ -129,7 +129,7 @@ export const GameHeader = ({
           </div>
         </div>
         {/* Chips (orange) */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" data-tutorial-id="chips-display">
           <div className="w-full flex items-center justify-center gap-2 min-h-[clamp(32px,4.8svh,42px)] min-w-0 px-[clamp(10px,2.5svh,16px)] rounded-full bg-[#302510]">
             <ChipIcon className="w-5 h-5 text-orange-400 shrink-0" />
             <GlitchText

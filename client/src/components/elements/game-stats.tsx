@@ -72,7 +72,11 @@ export const GameStats = ({
       className={`flex items-center gap-[clamp(10px,2.8svh,48px)] ${className}`}
     >
       {/* Left - Health */}
-      <div ref={healthRef} className="flex-1 flex flex-col gap-1">
+      <div
+        ref={healthRef}
+        data-tutorial-id="health-bar"
+        className="flex-1 flex flex-col gap-1"
+      >
         <div className="flex items-center justify-between">
           <span className="text-pink-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
             Health
@@ -101,7 +105,11 @@ export const GameStats = ({
       </div>
 
       {/* Center - Points & Level */}
-      <div ref={pointsRef} className="flex flex-col items-center">
+      <div
+        ref={pointsRef}
+        data-tutorial-id="points-display"
+        className="flex flex-col items-center"
+      >
         <GlitchText
           className="text-green-400 font-glitch text-[clamp(1.5rem,5svh,3rem)]"
           style={{ textShadow: "0 0 20px rgba(74, 222, 128, 0.3)" }}
@@ -117,7 +125,7 @@ export const GameStats = ({
       </div>
 
       {/* Right - Goal */}
-      <div className="flex-1 flex flex-col gap-1">
+      <div data-tutorial-id="goal-bar" className="flex-1 flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-green-400 font-secondary text-[clamp(0.6rem,1.4svh,0.875rem)] tracking-wider">
             Goal

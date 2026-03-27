@@ -45,6 +45,10 @@ export const BombTracker = ({
   className,
   ...props
 }: BombTrackerProps) => {
+  const dataAttrs = { "data-tutorial-id": "bomb-tracker" } as Record<
+    string,
+    string
+  >;
   const minSlots = 8;
   let keyCounter = 0;
   const slotClasses = size === "lg" ? "h-8 w-8" : "h-6 w-6";
@@ -103,6 +107,7 @@ export const BombTracker = ({
   return (
     <div
       className={bombTrackerVariants({ variant, size, className })}
+      {...dataAttrs}
       {...props}
     >
       {slots.map((slot) => {

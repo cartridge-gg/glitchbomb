@@ -2,6 +2,7 @@ import { type CSSProperties, useEffect, useMemo } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Game, Home, Support } from "@/pages";
+import { TutorialProvider } from "@/tutorial";
 
 function RouterView() {
   const { pathname } = useLocation();
@@ -71,7 +72,9 @@ function RouterView() {
 function Router() {
   return (
     <BrowserRouter>
-      <RouterView />
+      <TutorialProvider>
+        <RouterView />
+      </TutorialProvider>
     </BrowserRouter>
   );
 }

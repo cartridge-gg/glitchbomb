@@ -37,6 +37,7 @@ import {
   selectGame,
   useOfflineStore,
 } from "@/offline/store";
+import { TutorialOverlay, useTutorial } from "@/tutorial";
 import { isMobile, mobilePath } from "@/utils/mobile";
 
 export const Home = () => {
@@ -83,6 +84,7 @@ export const Home = () => {
     startMusic,
   } = useAudio();
   const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
+  const tutorial = useTutorial();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -462,9 +464,13 @@ export const Home = () => {
     if (!isMobile) {
       resetOfflineState();
     }
+    // Start tutorial for first-time players
+    if (!tutorial.state.completed) {
+      tutorial.startTutorial();
+    }
     const gameId = createOfflineGame();
     navigate(mobilePath(`/play?game=${gameId}`));
-  }, [navigate]);
+  }, [navigate, tutorial]);
 
   const isLoggedIn = !!account && !!username;
 
@@ -1285,6 +1291,7 @@ export const Home = () => {
               variant="secondary"
               gradient="green"
               wrapperClassName="flex-1"
+              data-tutorial-id="practice-button"
               className="w-full h-12 font-secondary uppercase text-sm tracking-widest"
               onClick={
                 showDetails
@@ -1303,6 +1310,9 @@ export const Home = () => {
             gradient={showDetails || isOnNewGameCard ? "pink" : "green"}
             wrapperClassName={`flex-1 ${showDetails || isOnNewGameCard ? "!bg-[linear-gradient(180deg,#FF009960_0%,#FF009900_100%)]" : "!bg-[linear-gradient(180deg,#35F81860_0%,#36F81800_100%)]"}`}
             className={`w-full h-12 font-secondary uppercase text-sm tracking-widest hover:!brightness-125 ${showDetails || isOnNewGameCard ? "!text-[#FF0099]" : "!bg-green-900"}`}
+            {...(isMobile && isOnNewGameCard
+              ? { "data-tutorial-id": "practice-button" }
+              : {})}
             style={
               showDetails || isOnNewGameCard
                 ? { backgroundColor: "#2B052E" }
@@ -1347,6 +1357,8 @@ export const Home = () => {
           </Button>
         </div>
       </div>
+
+      <TutorialOverlay />
 
       {/* Game Details Overlay */}
       {!isMobile && showDetails && (

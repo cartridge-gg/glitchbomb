@@ -138,12 +138,16 @@ export function createOfflineGame(): number {
   return createdId;
 }
 
-export function pull(gameId: number): boolean {
+export function pull(gameId: number, forcedOrbId?: number): boolean {
   try {
     setState((prev) => {
       const game = ensureGame(prev, gameId);
       const seed = createSeed();
-      const { game: nextGame, orbs, earnings } = pullOrbs(game, seed);
+      const {
+        game: nextGame,
+        orbs,
+        earnings,
+      } = pullOrbs(game, seed, forcedOrbId);
 
       // Compute potential BEFORE applying moonrock earnings (matches contract)
       nextGame.moonrocks = game.moonrocks;
