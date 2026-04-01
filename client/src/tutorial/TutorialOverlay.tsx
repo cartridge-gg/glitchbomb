@@ -12,12 +12,10 @@ interface SpotlightRect {
 
 const COLORS = {
   green400: "#36F818",
-  green400_72: "rgba(54, 248, 24, 0.72)",
-  green400_48: "rgba(54, 248, 24, 0.48)",
-  green400_40: "rgba(54, 248, 24, 0.40)",
-  green400_24: "rgba(54, 248, 24, 0.24)",
+  green400_64: "rgba(54, 248, 24, 0.64)",
+  green400_32: "rgba(54, 248, 24, 0.32)",
   green400_10: "rgba(54, 248, 24, 0.10)",
-  cardBg: "#0D220D",
+  cardBg: "#0A1A0A",
 };
 
 /** Steps where clicks inside the spotlight must reach the underlying button */
@@ -197,7 +195,7 @@ export function TutorialOverlay() {
 
   const isInteractive = INTERACTIVE_STEPS.has(state.step);
   const isCircle = currentConfig.spotlightShape === "circle";
-  const backdropColor = "rgba(0, 0, 0, 0.85)";
+  const backdropColor = "rgba(0, 0, 0, 0.80)";
 
   /**
    * Builds an SVG clip-path that covers the full viewport with a hole cut out
@@ -225,75 +223,19 @@ export function TutorialOverlay() {
     return `path(evenodd, 'M 0 0 H ${vw} V ${vh} H 0 Z M ${x1 + rx} ${y1} H ${x2 - rx} Q ${x2} ${y1} ${x2} ${y1 + rx} V ${y2 - rx} Q ${x2} ${y2} ${x2 - rx} ${y2} H ${x1 + rx} Q ${x1} ${y2} ${x1} ${y2 - rx} V ${y1 + rx} Q ${x1} ${y1} ${x1 + rx} ${y1} Z')`;
   };
 
-  /** Renders a glowing ring around the spotlight cutout */
-  const renderSpotlightGlow = () => {
-    if (!spotlightRect) return null;
-    const { top, left, width, height } = spotlightRect;
-    const cx = left + width / 2;
-    const cy = top + height / 2;
-    const r = Math.max(width, height) / 2;
-    const rr = 12;
-    return (
-      <svg className="fixed inset-0 w-full h-full z-[200] pointer-events-none">
-        <defs>
-          <filter
-            id="spotlight-glow-i"
-            x="-50%"
-            y="-50%"
-            width="200%"
-            height="200%"
-          >
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {isCircle ? (
-          <circle
-            cx={cx}
-            cy={cy}
-            r={r}
-            fill="none"
-            stroke={COLORS.green400_24}
-            strokeWidth="2"
-            filter="url(#spotlight-glow-i)"
-          />
-        ) : (
-          <rect
-            x={left}
-            y={top}
-            width={width}
-            height={height}
-            rx={rr}
-            ry={rr}
-            fill="none"
-            stroke={COLORS.green400_24}
-            strokeWidth="2"
-            filter="url(#spotlight-glow-i)"
-          />
-        )}
-      </svg>
-    );
-  };
-
   const renderBackdrop = () => {
     if (spotlightRect && isInteractive) {
       // clip-path creates a visual + pointer-event hole for the spotlight
       return (
-        <>
-          <div
-            className="fixed inset-0 z-[200]"
-            style={{
-              backgroundColor: backdropColor,
-              pointerEvents: "auto",
-              clipPath: buildClipPath(),
-            }}
-            onPointerDown={handleBackdropClick}
-          />
-          {renderSpotlightGlow()}
-        </>
+        <div
+          className="fixed inset-0 z-[200]"
+          style={{
+            backgroundColor: backdropColor,
+            pointerEvents: "auto",
+            clipPath: buildClipPath(),
+          }}
+          onPointerDown={handleBackdropClick}
+        />
       );
     }
 
@@ -311,19 +253,6 @@ export function TutorialOverlay() {
           style={{ touchAction: "none", pointerEvents: "auto" }}
         >
           <defs>
-            <filter
-              id="spotlight-glow"
-              x="-50%"
-              y="-50%"
-              width="200%"
-              height="200%"
-            >
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
             <mask id="tutorial-mask">
               <rect width="100%" height="100%" fill="white" />
               {isCircle ? (
@@ -347,31 +276,6 @@ export function TutorialOverlay() {
             fill={backdropColor}
             mask="url(#tutorial-mask)"
           />
-          {/* Spotlight glow ring */}
-          {isCircle ? (
-            <circle
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill="none"
-              stroke={COLORS.green400_24}
-              strokeWidth="2"
-              filter="url(#spotlight-glow)"
-            />
-          ) : (
-            <rect
-              x={left}
-              y={top}
-              width={width}
-              height={height}
-              rx={rr}
-              ry={rr}
-              fill="none"
-              stroke={COLORS.green400_24}
-              strokeWidth="2"
-              filter="url(#spotlight-glow)"
-            />
-          )}
         </svg>
       );
     }
@@ -440,7 +344,7 @@ export function TutorialOverlay() {
           <polygon
             points={`0,${arrowSize} ${arrowSize},0 ${arrowSize * 2},${arrowSize}`}
             fill={COLORS.cardBg}
-            stroke={COLORS.green400_48}
+            stroke={COLORS.green400_32}
             strokeWidth="1"
           />
         </svg>
@@ -475,8 +379,8 @@ export function TutorialOverlay() {
                   type="button"
                   className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto px-3 py-1.5 rounded-full"
                   style={{
-                    color: COLORS.green400_72,
-                    border: `1px solid ${COLORS.green400_40}`,
+                    color: COLORS.green400_64,
+                    border: `1px solid ${COLORS.green400_32}`,
                     backgroundColor: COLORS.cardBg,
                   }}
                   onPointerDown={(e) => {
@@ -492,14 +396,14 @@ export function TutorialOverlay() {
               className="rounded-2xl p-[1px]"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(54, 248, 24, 0.48) 0%, rgba(54, 248, 24, 0.06) 100%)",
+                  "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
               }}
             >
               <div
                 className="rounded-2xl"
                 style={{
                   backgroundColor: COLORS.cardBg,
-                  boxShadow: `0 0 60px ${COLORS.green400_24}, 0 0 20px ${COLORS.green400_10}, 0 4px 24px rgba(0, 0, 0, 0.7)`,
+                  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.5)",
                   padding: "clamp(10px, 2svh, 16px) clamp(12px, 2.5svh, 20px)",
                 }}
               >
@@ -508,7 +412,6 @@ export function TutorialOverlay() {
                     className="font-secondary tracking-[0.3em] uppercase"
                     style={{
                       color: COLORS.green400,
-                      textShadow: `0 0 20px ${COLORS.green400_48}, 0 0 40px ${COLORS.green400_10}`,
                       fontSize: "clamp(0.75rem, 1.8svh, 0.875rem)",
                       marginBottom: "clamp(4px, 1svh, 8px)",
                     }}
@@ -520,7 +423,7 @@ export function TutorialOverlay() {
                   <p
                     className="font-secondary tracking-wide leading-relaxed whitespace-pre-line"
                     style={{
-                      color: COLORS.green400_72,
+                      color: COLORS.green400_64,
                       fontSize: "clamp(0.7rem, 1.5svh, 0.8rem)",
                     }}
                   >
@@ -530,7 +433,7 @@ export function TutorialOverlay() {
                 <div
                   className="flex justify-end"
                   style={{
-                    borderTop: `1px solid ${COLORS.green400_24}`,
+                    borderTop: `1px solid ${COLORS.green400_10}`,
                     marginTop: "clamp(6px, 1.5svh, 12px)",
                     paddingTop: "clamp(4px, 1svh, 8px)",
                   }}
@@ -538,7 +441,7 @@ export function TutorialOverlay() {
                   <span
                     className="font-secondary tracking-[0.25em] uppercase"
                     style={{
-                      color: COLORS.green400_40,
+                      color: COLORS.green400_32,
                       fontSize: "clamp(0.55rem, 1.1svh, 0.65rem)",
                     }}
                   >
