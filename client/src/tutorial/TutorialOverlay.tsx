@@ -384,20 +384,28 @@ export function TutorialOverlay() {
           className="fixed inset-0 z-[200] pointer-events-none"
         >
           {renderBackdrop()}
-          {/* Spotlight glow — color sampled from target element */}
+          {/* Spotlight border — gradient fade matching GradientBorder style */}
           {spotlightRect && (
             <div
-              className="fixed z-[200] pointer-events-none"
+              className="fixed z-[200] pointer-events-none p-[1px]"
               style={{
                 top: spotlightRect.top,
                 left: spotlightRect.left,
                 width: spotlightRect.width,
                 height: spotlightRect.height,
                 borderRadius: isCircle ? "50%" : "12px",
-                boxShadow: `0 0 16px 2px ${glowColor}`,
-                opacity: 0.3,
+                background: `linear-gradient(180deg, ${glowColor} 0%, transparent 100%)`,
+                opacity: 0.25,
               }}
-            />
+            >
+              <div
+                className="w-full h-full"
+                style={{
+                  borderRadius: isCircle ? "50%" : "calc(12px - 1px)",
+                  backgroundColor: "transparent",
+                }}
+              />
+            </div>
           )}
           {renderArrow()}
           {/* Tooltip card */}
