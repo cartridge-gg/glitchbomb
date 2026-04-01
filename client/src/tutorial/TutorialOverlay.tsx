@@ -39,6 +39,7 @@ export function TutorialOverlay() {
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
     null,
   );
+  const [glowColor, setGlowColor] = useState<string>(COLORS.green400);
 
   // Find and track the target element
   useEffect(() => {
@@ -47,6 +48,23 @@ export function TutorialOverlay() {
       return;
     }
 
+    const sampleColor = (el: Element): string => {
+      // Walk the element and its children to find the most prominent color
+      const candidates = [el, ...el.querySelectorAll("*")];
+      for (const node of candidates) {
+        const style = getComputedStyle(node);
+        const c = style.color;
+        // Skip near-black / transparent / white — we want accent colors
+        const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (m) {
+          const [r, g, b] = [+m[1], +m[2], +m[3]];
+          const brightness = r * 0.299 + g * 0.587 + b * 0.114;
+          if (brightness > 40 && brightness < 240) return c;
+        }
+      }
+      return COLORS.green400;
+    };
+
     const findTarget = () => {
       const el = document.querySelector(
         `[data-tutorial-id="${currentConfig.target}"]`,
@@ -54,6 +72,8 @@ export function TutorialOverlay() {
       if (el) {
         const rect = el.getBoundingClientRect();
         const padding = currentConfig.spotlightShape === "circle" ? 16 : 8;
+
+        setGlowColor(sampleColor(el));
 
         if (currentConfig.spotlightShape === "circle") {
           // Make spotlight a square centered on the element (for circular cutout)
@@ -364,6 +384,21 @@ export function TutorialOverlay() {
           className="fixed inset-0 z-[200] pointer-events-none"
         >
           {renderBackdrop()}
+          {/* Spotlight glow — color sampled from target element */}
+          {spotlightRect && (
+            <div
+              className="fixed z-[200] pointer-events-none"
+              style={{
+                top: spotlightRect.top,
+                left: spotlightRect.left,
+                width: spotlightRect.width,
+                height: spotlightRect.height,
+                borderRadius: isCircle ? "50%" : "12px",
+                boxShadow: `0 0 16px 2px ${glowColor}`,
+                opacity: 0.3,
+              }}
+            />
+          )}
           {renderArrow()}
           {/* Tooltip card */}
           <motion.div
