@@ -400,16 +400,26 @@ export function TutorialOverlay() {
               }}
             >
               <div
-                className="rounded-2xl"
+                className="relative rounded-2xl overflow-hidden"
                 style={{
                   backgroundColor: COLORS.cardBg,
-                  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.5)",
+                  boxShadow:
+                    "0 0 24px rgba(54, 248, 24, 0.08), 0 4px 24px rgba(0, 0, 0, 0.5)",
                   padding: "clamp(10px, 2svh, 16px) clamp(12px, 2.5svh, 20px)",
                 }}
               >
+                {/* CRT scanlines */}
+                <div
+                  className="absolute inset-0 pointer-events-none rounded-2xl"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px)",
+                    opacity: 0.5,
+                  }}
+                />
                 {currentConfig.title && (
                   <p
-                    className="font-secondary tracking-[0.3em] uppercase"
+                    className="relative font-secondary tracking-[0.3em] uppercase"
                     style={{
                       color: COLORS.green400,
                       fontSize: "clamp(0.75rem, 1.8svh, 0.875rem)",
@@ -421,7 +431,7 @@ export function TutorialOverlay() {
                 )}
                 {currentConfig.message && (
                   <p
-                    className="font-secondary tracking-wide leading-relaxed whitespace-pre-line"
+                    className="relative font-secondary tracking-wide leading-relaxed whitespace-pre-line"
                     style={{
                       color: COLORS.green400_64,
                       fontSize: "clamp(0.7rem, 1.5svh, 0.8rem)",
@@ -431,7 +441,7 @@ export function TutorialOverlay() {
                   </p>
                 )}
                 <div
-                  className="flex justify-end"
+                  className="relative flex justify-end"
                   style={{
                     borderTop: `1px solid ${COLORS.green400_10}`,
                     marginTop: "clamp(6px, 1.5svh, 12px)",
