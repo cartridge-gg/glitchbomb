@@ -353,10 +353,22 @@ body {
 /* Tutorial CRT scanline scroll */
 @keyframes tutorial-scanlines {
   from {
-    background-position: 0 0;
+    transform: translateY(-4px);
   }
   to {
-    background-position: 0 4px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tutorial-crt-flicker {
+  0% {
+    opacity: 0.5;
+  }
+  5% {
+    opacity: 0.45;
+  }
+  10% {
+    opacity: 0.5;
   }
 }
 

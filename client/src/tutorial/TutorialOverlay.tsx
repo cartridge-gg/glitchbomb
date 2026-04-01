@@ -410,8 +410,10 @@ export function TutorialOverlay() {
               >
                 {/* CRT scanlines — animated scroll */}
                 <div
-                  className="absolute inset-0 pointer-events-none rounded-2xl animate-[tutorial-scanlines_4s_linear_infinite]"
+                  className="absolute inset-x-0 pointer-events-none animate-[tutorial-scanlines_0.15s_linear_infinite]"
                   style={{
+                    top: "-4px",
+                    bottom: 0,
                     backgroundImage:
                       "repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px)",
                     backgroundSize: "100% 4px",
