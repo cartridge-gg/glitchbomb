@@ -12,8 +12,8 @@ interface SpotlightRect {
 
 const COLORS = {
   green400: "#36F818",
-  green400_48: "rgba(54, 248, 24, 0.48)",
-  green400_24: "rgba(54, 248, 24, 0.24)",
+  green400_64: "rgba(54, 248, 24, 0.64)",
+  green400_32: "rgba(54, 248, 24, 0.32)",
   green400_10: "rgba(54, 248, 24, 0.10)",
   cardBg: "#0A1A0A",
 };
@@ -195,7 +195,7 @@ export function TutorialOverlay() {
 
   const isInteractive = INTERACTIVE_STEPS.has(state.step);
   const isCircle = currentConfig.spotlightShape === "circle";
-  const backdropColor = "rgba(0, 0, 0, 0.78)";
+  const backdropColor = "rgba(0, 0, 0, 0.80)";
 
   /**
    * Builds an SVG clip-path that covers the full viewport with a hole cut out
@@ -344,7 +344,7 @@ export function TutorialOverlay() {
           <polygon
             points={`0,${arrowSize} ${arrowSize},0 ${arrowSize * 2},${arrowSize}`}
             fill={COLORS.cardBg}
-            stroke={COLORS.green400_24}
+            stroke={COLORS.green400_32}
             strokeWidth="1"
           />
         </svg>
@@ -379,8 +379,8 @@ export function TutorialOverlay() {
                   type="button"
                   className="font-secondary text-[10px] tracking-[0.25em] uppercase pointer-events-auto px-3 py-1.5 rounded-full"
                   style={{
-                    color: COLORS.green400_48,
-                    border: `1px solid ${COLORS.green400_24}`,
+                    color: COLORS.green400_64,
+                    border: `1px solid ${COLORS.green400_32}`,
                     backgroundColor: COLORS.cardBg,
                   }}
                   onPointerDown={(e) => {
@@ -396,23 +396,36 @@ export function TutorialOverlay() {
               className="rounded-2xl p-[1px]"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(54, 248, 24, 0.25) 0%, rgba(54, 248, 24, 0) 100%)",
+                  "linear-gradient(180deg, #35F81840 0%, #36F81800 100%)",
               }}
             >
               <div
-                className="rounded-2xl"
+                className="relative rounded-2xl overflow-hidden"
                 style={{
                   backgroundColor: COLORS.cardBg,
-                  boxShadow: `0 0 40px ${COLORS.green400_10}, 0 4px 24px rgba(0, 0, 0, 0.6)`,
+                  boxShadow:
+                    "0 0 24px rgba(54, 248, 24, 0.08), 0 4px 24px rgba(0, 0, 0, 0.5)",
                   padding: "clamp(10px, 2svh, 16px) clamp(12px, 2.5svh, 20px)",
                 }}
               >
+                {/* CRT scanlines — animated scroll */}
+                <div
+                  className="absolute inset-x-0 pointer-events-none animate-[tutorial-scanlines_0.15s_linear_infinite]"
+                  style={{
+                    top: "-4px",
+                    bottom: 0,
+                    backgroundImage:
+                      "repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px)",
+                    backgroundSize: "100% 4px",
+                    opacity: 0.5,
+                  }}
+                />
                 {currentConfig.title && (
                   <p
-                    className="font-secondary tracking-[0.3em] uppercase"
+                    className="relative font-secondary tracking-[0.3em] uppercase"
                     style={{
                       color: COLORS.green400,
-                      textShadow: `0 0 16px ${COLORS.green400_24}`,
+                      textShadow: `0 0 8px ${COLORS.green400_64}, 0 0 2px ${COLORS.green400}`,
                       fontSize: "clamp(0.75rem, 1.8svh, 0.875rem)",
                       marginBottom: "clamp(4px, 1svh, 8px)",
                     }}
@@ -422,9 +435,10 @@ export function TutorialOverlay() {
                 )}
                 {currentConfig.message && (
                   <p
-                    className="font-secondary tracking-wide leading-relaxed whitespace-pre-line"
+                    className="relative font-secondary tracking-wide leading-relaxed whitespace-pre-line"
                     style={{
-                      color: COLORS.green400_48,
+                      color: COLORS.green400_64,
+                      textShadow: `0 0 6px ${COLORS.green400_32}`,
                       fontSize: "clamp(0.7rem, 1.5svh, 0.8rem)",
                     }}
                   >
@@ -432,7 +446,7 @@ export function TutorialOverlay() {
                   </p>
                 )}
                 <div
-                  className="flex justify-end"
+                  className="relative flex justify-end"
                   style={{
                     borderTop: `1px solid ${COLORS.green400_10}`,
                     marginTop: "clamp(6px, 1.5svh, 12px)",
@@ -442,7 +456,7 @@ export function TutorialOverlay() {
                   <span
                     className="font-secondary tracking-[0.25em] uppercase"
                     style={{
-                      color: COLORS.green400_24,
+                      color: COLORS.green400_32,
                       fontSize: "clamp(0.55rem, 1.1svh, 0.65rem)",
                     }}
                   >

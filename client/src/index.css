@@ -350,6 +350,28 @@ body {
   100% { transform: translateX(-100%); }
 }
 
+/* Tutorial CRT scanline scroll */
+@keyframes tutorial-scanlines {
+  from {
+    transform: translateY(-4px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes tutorial-crt-flicker {
+  0% {
+    opacity: 0.5;
+  }
+  5% {
+    opacity: 0.45;
+  }
+  10% {
+    opacity: 0.5;
+  }
+}
+
 /* Scanline overlay for CRT feel */
 .loading-screen-scanlines {
   position: absolute;
