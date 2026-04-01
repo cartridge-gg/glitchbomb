@@ -136,55 +136,46 @@ export function TutorialOverlay() {
 
   const tooltipStyle = (): React.CSSProperties => {
     const safeInset = 16;
+    const maxW = `min(340px, calc(100vw - ${safeInset * 2}px))`;
 
     if (!spotlightRect || !currentConfig.target) {
       return {
         top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        maxWidth: `min(340px, calc(100vw - ${safeInset * 2}px))`,
+        left: `${safeInset}px`,
+        right: `${safeInset}px`,
+        transform: "translateY(-50%)",
+        maxWidth: maxW,
+        marginInline: "auto",
       };
     }
 
     const margin = 12;
-    const vw = window.innerWidth;
     const vh = window.innerHeight;
-
-    // Clamp horizontal center so tooltip stays within viewport
-    const clampCenter = (centerX: number, maxW: number) => {
-      const effectiveMaxW = Math.min(maxW, vw - safeInset * 2);
-      const halfW = effectiveMaxW / 2;
-      return Math.max(
-        safeInset + halfW,
-        Math.min(centerX, vw - safeInset - halfW),
-      );
-    };
 
     switch (effectivePosition) {
       case "top": {
-        const centerX = spotlightRect.left + spotlightRect.width / 2;
         const bottomVal = vh - spotlightRect.top + margin;
         return {
           bottom: `${Math.min(bottomVal, vh - safeInset)}px`,
-          left: `${clampCenter(centerX, 340)}px`,
-          transform: "translateX(-50%)",
-          maxWidth: `min(340px, calc(100vw - ${safeInset * 2}px))`,
+          left: `${safeInset}px`,
+          right: `${safeInset}px`,
+          maxWidth: maxW,
+          marginInline: "auto",
         };
       }
-      case "bottom": {
-        const centerX = spotlightRect.left + spotlightRect.width / 2;
+      case "bottom":
         return {
           top: `${Math.max(spotlightRect.top + spotlightRect.height + margin, safeInset)}px`,
-          left: `${clampCenter(centerX, 340)}px`,
-          transform: "translateX(-50%)",
-          maxWidth: `min(340px, calc(100vw - ${safeInset * 2}px))`,
+          left: `${safeInset}px`,
+          right: `${safeInset}px`,
+          maxWidth: maxW,
+          marginInline: "auto",
         };
-      }
       case "left": {
         const topVal = spotlightRect.top + spotlightRect.height / 2;
         return {
           top: `${Math.max(safeInset, Math.min(topVal, vh - safeInset))}px`,
-          right: `${vw - spotlightRect.left + margin}px`,
+          right: `${window.innerWidth - spotlightRect.left + margin}px`,
           transform: "translateY(-50%)",
           maxWidth: `min(280px, calc(100vw - ${safeInset * 2}px))`,
         };
