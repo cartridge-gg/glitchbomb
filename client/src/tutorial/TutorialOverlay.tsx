@@ -425,6 +425,7 @@ export function TutorialOverlay() {
                     className="relative font-secondary tracking-[0.3em] uppercase"
                     style={{
                       color: COLORS.green400,
+                      textShadow: `0 0 8px ${COLORS.green400_64}, 0 0 2px ${COLORS.green400}`,
                       fontSize: "clamp(0.75rem, 1.8svh, 0.875rem)",
                       marginBottom: "clamp(4px, 1svh, 8px)",
                     }}
@@ -437,6 +438,7 @@ export function TutorialOverlay() {
                     className="relative font-secondary tracking-wide leading-relaxed whitespace-pre-line"
                     style={{
                       color: COLORS.green400_64,
+                      textShadow: `0 0 6px ${COLORS.green400_32}`,
                       fontSize: "clamp(0.7rem, 1.5svh, 0.8rem)",
                     }}
                   >
