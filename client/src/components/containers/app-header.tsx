@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import type { AudioSettings } from "@/hooks/use-audio";
+import type { StashViewMode } from "@/hooks/use-display-settings";
 import { mobilePath } from "@/utils/mobile";
 import { SettingsModal } from "./sound-modal";
 
@@ -31,6 +32,8 @@ export interface AppHeaderProps {
   onSfxVolumeChange?: (vol: number) => void;
   showDistributionPercent?: boolean;
   onShowDistributionPercentChange?: (show: boolean) => void;
+  stashViewMode?: StashViewMode;
+  onStashViewModeChange?: (mode: StashViewMode) => void;
 }
 
 export const AppHeader = ({
@@ -50,6 +53,8 @@ export const AppHeader = ({
   onSfxVolumeChange,
   showDistributionPercent,
   onShowDistributionPercentChange,
+  stashViewMode,
+  onStashViewModeChange,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -193,6 +198,8 @@ export const AppHeader = ({
               onSfxVolumeChange={onSfxVolumeChange}
               showDistributionPercent={showDistributionPercent}
               onShowDistributionPercentChange={onShowDistributionPercentChange}
+              stashViewMode={stashViewMode}
+              onStashViewModeChange={onStashViewModeChange}
               username={username}
               onProfileClick={onProfileClick}
             />

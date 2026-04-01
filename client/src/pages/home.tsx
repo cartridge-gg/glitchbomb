@@ -83,7 +83,8 @@ export const Home = () => {
     setSfxVolume,
     startMusic,
   } = useAudio();
-  const { displaySettings, setShowDistributionPercent } = useDisplaySettings();
+  const { displaySettings, setShowDistributionPercent, setStashViewMode } =
+    useDisplaySettings();
   const tutorial = useTutorial();
   const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
@@ -505,6 +506,8 @@ export const Home = () => {
         onSfxVolumeChange={setSfxVolume}
         showDistributionPercent={displaySettings.showDistributionPercent}
         onShowDistributionPercentChange={setShowDistributionPercent}
+        stashViewMode={displaySettings.stashViewMode}
+        onStashViewModeChange={setStashViewMode}
       />
 
       <ActivityTicker items={activityItems} />
@@ -1384,6 +1387,8 @@ export const Home = () => {
             onSfxVolumeChange={setSfxVolume}
             showDistributionPercent={displaySettings.showDistributionPercent}
             onShowDistributionPercentChange={setShowDistributionPercent}
+            stashViewMode={displaySettings.stashViewMode}
+            onStashViewModeChange={setStashViewMode}
           />
 
           <ActivityTicker items={activityItems} />
