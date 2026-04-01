@@ -1223,7 +1223,7 @@ export const Home = () => {
                             }
                           >
                             <span
-                              className="flex items-center gap-1.5"
+                              className="flex items-center gap-1.5 w-[72px] shrink-0"
                               style={{ color: "#FACC15" }}
                             >
                               <MoonrockIcon size="sm" className="shrink-0" />
@@ -1231,7 +1231,7 @@ export const Home = () => {
                                 {game.moonrocks}
                               </span>
                             </span>
-                            <span className="font-secondary text-sm tracking-widest text-white">
+                            <span className="font-secondary text-sm tracking-widest text-white w-[32px] shrink-0">
                               {game.multiplier ? `${game.multiplier}x` : "1x"}
                             </span>
                             <span
