@@ -105,50 +105,93 @@ export function TutorialOverlay() {
     [advance, state.step],
   );
 
-  const tooltipStyle = useCallback((): React.CSSProperties => {
+  // Compute effective tooltip position with mobile-aware fallbacks
+  const effectivePosition = (() => {
+    if (!spotlightRect || !currentConfig.target)
+      return currentConfig.position ?? "bottom";
+
+    const pos = currentConfig.position ?? "bottom";
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 12;
+    let p = pos;
+
+    // Fall back left/right to top/bottom on narrow screens
+    if ((p === "left" || p === "right") && vw < 480) {
+      const targetCenterY = spotlightRect.top + spotlightRect.height / 2;
+      p = targetCenterY > vh / 2 ? "top" : "bottom";
+    }
+
+    // Flip if not enough space for tooltip
+    if (p === "bottom") {
+      const spaceBelow =
+        vh - (spotlightRect.top + spotlightRect.height + margin);
+      if (spaceBelow < 100) p = "top";
+    } else if (p === "top") {
+      const spaceAbove = spotlightRect.top - margin;
+      if (spaceAbove < 100) p = "bottom";
+    }
+
+    return p;
+  })();
+
+  const tooltipStyle = (): React.CSSProperties => {
+    const safeInset = 16;
+    const maxW = `min(340px, calc(100vw - ${safeInset * 2}px))`;
+
     if (!spotlightRect || !currentConfig.target) {
       return {
         top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        maxWidth: "min(340px, calc(100vw - 32px))",
+        left: `${safeInset}px`,
+        right: `${safeInset}px`,
+        transform: "translateY(-50%)",
+        maxWidth: maxW,
+        marginInline: "auto",
       };
     }
 
-    const pos = currentConfig.position ?? "bottom";
-    const margin = 16;
+    const margin = 12;
+    const vh = window.innerHeight;
 
-    switch (pos) {
-      case "top":
+    switch (effectivePosition) {
+      case "top": {
+        const bottomVal = vh - spotlightRect.top + margin;
         return {
-          bottom: `${window.innerHeight - spotlightRect.top + margin}px`,
-          left: `${spotlightRect.left + spotlightRect.width / 2}px`,
-          transform: "translateX(-50%)",
-          maxWidth: "min(340px, calc(100vw - 32px))",
+          bottom: `${Math.min(bottomVal, vh - safeInset)}px`,
+          left: `${safeInset}px`,
+          right: `${safeInset}px`,
+          maxWidth: maxW,
+          marginInline: "auto",
         };
+      }
       case "bottom":
         return {
-          top: `${spotlightRect.top + spotlightRect.height + margin}px`,
-          left: `${spotlightRect.left + spotlightRect.width / 2}px`,
-          transform: "translateX(-50%)",
-          maxWidth: "min(340px, calc(100vw - 32px))",
+          top: `${Math.max(spotlightRect.top + spotlightRect.height + margin, safeInset)}px`,
+          left: `${safeInset}px`,
+          right: `${safeInset}px`,
+          maxWidth: maxW,
+          marginInline: "auto",
         };
-      case "left":
+      case "left": {
+        const topVal = spotlightRect.top + spotlightRect.height / 2;
         return {
-          top: `${spotlightRect.top + spotlightRect.height / 2}px`,
+          top: `${Math.max(safeInset, Math.min(topVal, vh - safeInset))}px`,
           right: `${window.innerWidth - spotlightRect.left + margin}px`,
           transform: "translateY(-50%)",
-          maxWidth: "min(280px, calc(100vw - 32px))",
+          maxWidth: `min(280px, calc(100vw - ${safeInset * 2}px))`,
         };
-      case "right":
+      }
+      case "right": {
+        const topVal = spotlightRect.top + spotlightRect.height / 2;
         return {
-          top: `${spotlightRect.top + spotlightRect.height / 2}px`,
+          top: `${Math.max(safeInset, Math.min(topVal, vh - safeInset))}px`,
           left: `${spotlightRect.left + spotlightRect.width + margin}px`,
           transform: "translateY(-50%)",
-          maxWidth: "min(280px, calc(100vw - 32px))",
+          maxWidth: `min(280px, calc(100vw - ${safeInset * 2}px))`,
         };
+      }
     }
-  }, [spotlightRect, currentConfig.target, currentConfig.position]);
+  };
 
   const isInteractive = INTERACTIVE_STEPS.has(state.step);
   const isCircle = currentConfig.spotlightShape === "circle";
@@ -253,7 +296,7 @@ export function TutorialOverlay() {
   const renderArrow = () => {
     if (!spotlightRect || !currentConfig.target) return null;
 
-    const pos = currentConfig.position ?? "bottom";
+    const pos = effectivePosition;
     const arrowSize = 10;
     let arrowStyle: React.CSSProperties = {};
     let rotation = 0;
@@ -357,18 +400,21 @@ export function TutorialOverlay() {
               }}
             >
               <div
-                className="rounded-2xl px-5 py-4"
+                className="rounded-2xl"
                 style={{
                   backgroundColor: COLORS.cardBg,
                   boxShadow: `0 0 40px ${COLORS.green400_10}, 0 4px 24px rgba(0, 0, 0, 0.6)`,
+                  padding: "clamp(10px, 2svh, 16px) clamp(12px, 2.5svh, 20px)",
                 }}
               >
                 {currentConfig.title && (
                   <p
-                    className="font-secondary text-sm tracking-[0.3em] uppercase mb-2"
+                    className="font-secondary tracking-[0.3em] uppercase"
                     style={{
                       color: COLORS.green400,
                       textShadow: `0 0 16px ${COLORS.green400_24}`,
+                      fontSize: "clamp(0.75rem, 1.8svh, 0.875rem)",
+                      marginBottom: "clamp(4px, 1svh, 8px)",
                     }}
                   >
                     {currentConfig.title}
@@ -376,19 +422,29 @@ export function TutorialOverlay() {
                 )}
                 {currentConfig.message && (
                   <p
-                    className="font-secondary text-xs tracking-wide leading-relaxed whitespace-pre-line"
-                    style={{ color: COLORS.green400_48 }}
+                    className="font-secondary tracking-wide leading-relaxed whitespace-pre-line"
+                    style={{
+                      color: COLORS.green400_48,
+                      fontSize: "clamp(0.7rem, 1.5svh, 0.8rem)",
+                    }}
                   >
                     {currentConfig.message}
                   </p>
                 )}
                 <div
-                  className="mt-3 pt-2 flex justify-end"
-                  style={{ borderTop: `1px solid ${COLORS.green400_10}` }}
+                  className="flex justify-end"
+                  style={{
+                    borderTop: `1px solid ${COLORS.green400_10}`,
+                    marginTop: "clamp(6px, 1.5svh, 12px)",
+                    paddingTop: "clamp(4px, 1svh, 8px)",
+                  }}
                 >
                   <span
-                    className="font-secondary text-[10px] tracking-[0.25em] uppercase"
-                    style={{ color: COLORS.green400_24 }}
+                    className="font-secondary tracking-[0.25em] uppercase"
+                    style={{
+                      color: COLORS.green400_24,
+                      fontSize: "clamp(0.55rem, 1.1svh, 0.65rem)",
+                    }}
                   >
                     {TARGET_ONLY_STEPS.has(state.step)
                       ? "TAP THE HIGHLIGHTED AREA"
