@@ -1,5 +1,7 @@
 import { useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import type { ActivityItem } from "@/hooks/activity-feed";
+import { mobilePath } from "@/utils/mobile";
 
 interface ActivityTickerProps {
   items: ActivityItem[];
@@ -52,7 +54,14 @@ function formatItem(item: ActivityItem): React.ReactNode {
 
 export function ActivityTicker({ items }: ActivityTickerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+  const dragRef = useRef({
+    active: false,
+    startX: 0,
+    scrollLeft: 0,
+    dragged: false,
+    target: null as HTMLElement | null,
+  });
+  const navigate = useNavigate();
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     const track = trackRef.current;
@@ -66,19 +75,32 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
       active: true,
       startX: e.clientX,
       scrollLeft: matrix.m41,
+      dragged: false,
+      target: e.target as HTMLElement,
     };
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragRef.current.active || !trackRef.current) return;
     const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 4) dragRef.current.dragged = true;
     trackRef.current.style.transform = `translateX(${dragRef.current.scrollLeft + dx}px)`;
   }, []);
 
   const onPointerUp = useCallback(() => {
+    const { dragged, target } = dragRef.current;
     dragRef.current.active = false;
     const track = trackRef.current;
     if (!track) return;
+
+    // Navigate if it was a tap, not a drag
+    if (!dragged && target) {
+      const item = target.closest<HTMLElement>("[data-game-id]");
+      if (item) {
+        navigate(mobilePath(`/play?game=${item.dataset.gameId}&view=true`));
+      }
+    }
+
     // Calculate current position as a fraction of the animation cycle
     // Animation moves from translateX(0) to translateX(-50%)
     const currentX = Number.parseFloat(
@@ -97,7 +119,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     void track.offsetWidth;
     track.style.animation = "";
     track.style.animationDelay = `-${progress * dur}s`;
-  }, []);
+  }, [navigate]);
 
   const minPerCopy =
     items.length > 0 ? Math.max(1, Math.ceil(8 / items.length)) : 0;
@@ -126,7 +148,8 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
             oneCopy.map((item, i) => (
               <span
                 key={`${copy}-${item.id}-${i}`}
-                className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
+                className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide cursor-pointer transition-opacity hover:opacity-50"
+                data-game-id={item.gameId}
               >
                 {(copy > 0 || i > 0) && (
                   <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />
