@@ -57,11 +57,16 @@ export function useTokenContracts(
 
   useEffect(() => {
     if ((request.contractAddresses || []).length === 0) return;
+    if (!client) {
+      // Reset so the fetch is re-attempted once client is available
+      requestRef.current = null;
+      return;
+    }
     if (!equal(request, requestRef.current)) {
       requestRef.current = request;
       refetch();
     }
-  }, [request, refetch]);
+  }, [client, request, refetch]);
 
   return {
     contracts,

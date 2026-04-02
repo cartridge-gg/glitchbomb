@@ -158,7 +158,7 @@ function useEntitiesValue(): EntitiesContextType {
 
   // Refresh function to fetch and subscribe to data
   const refreshEntities = useCallback(async () => {
-    if (!client || !accountAddress) return;
+    if (!client) return;
 
     // Cancel existing subscriptions
     cancelSubscription(entitiesSubscriptionRef, "entities");
@@ -181,7 +181,7 @@ function useEntitiesValue(): EntitiesContextType {
       .then((response) => {
         entitiesSubscriptionRef.current = response;
       });
-  }, [client, accountAddress, onEntityUpdate, cancelSubscription]);
+  }, [client, onEntityUpdate, cancelSubscription]);
 
   // Refresh function to fetch and subscribe to game data
   const refreshGame = useCallback(async () => {
