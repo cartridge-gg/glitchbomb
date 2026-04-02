@@ -59,6 +59,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     startX: 0,
     scrollLeft: 0,
     dragged: false,
+    target: null as HTMLElement | null,
   });
   const navigate = useNavigate();
 
@@ -75,6 +76,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
       startX: e.clientX,
       scrollLeft: matrix.m41,
       dragged: false,
+      target: e.target as HTMLElement,
     };
   }, []);
 
@@ -86,9 +88,19 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
   }, []);
 
   const onPointerUp = useCallback(() => {
+    const { dragged, target } = dragRef.current;
     dragRef.current.active = false;
     const track = trackRef.current;
     if (!track) return;
+
+    // Navigate if it was a tap, not a drag
+    if (!dragged && target) {
+      const item = target.closest<HTMLElement>("[data-game-id]");
+      if (item) {
+        navigate(mobilePath(`/play?game=${item.dataset.gameId}&view=true`));
+      }
+    }
+
     // Calculate current position as a fraction of the animation cycle
     // Animation moves from translateX(0) to translateX(-50%)
     const currentX = Number.parseFloat(
@@ -107,7 +119,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     void track.offsetWidth;
     track.style.animation = "";
     track.style.animationDelay = `-${progress * dur}s`;
-  }, []);
+  }, [navigate]);
 
   const minPerCopy =
     items.length > 0 ? Math.max(1, Math.ceil(8 / items.length)) : 0;
@@ -137,10 +149,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
               <span
                 key={`${copy}-${item.id}-${i}`}
                 className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide cursor-pointer transition-opacity hover:opacity-50"
-                onClick={() => {
-                  if (dragRef.current.dragged) return;
-                  navigate(mobilePath(`/play?game=${item.gameId}&view=true`));
-                }}
+                data-game-id={item.gameId}
               >
                 {(copy > 0 || i > 0) && (
                   <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />
