@@ -1,5 +1,7 @@
 import { useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import type { ActivityItem } from "@/hooks/activity-feed";
+import { mobilePath } from "@/utils/mobile";
 
 interface ActivityTickerProps {
   items: ActivityItem[];
@@ -52,7 +54,13 @@ function formatItem(item: ActivityItem): React.ReactNode {
 
 export function ActivityTicker({ items }: ActivityTickerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+  const dragRef = useRef({
+    active: false,
+    startX: 0,
+    scrollLeft: 0,
+    dragged: false,
+  });
+  const navigate = useNavigate();
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     const track = trackRef.current;
@@ -66,12 +74,14 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
       active: true,
       startX: e.clientX,
       scrollLeft: matrix.m41,
+      dragged: false,
     };
   }, []);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragRef.current.active || !trackRef.current) return;
     const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 4) dragRef.current.dragged = true;
     trackRef.current.style.transform = `translateX(${dragRef.current.scrollLeft + dx}px)`;
   }, []);
 
@@ -126,7 +136,11 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
             oneCopy.map((item, i) => (
               <span
                 key={`${copy}-${item.id}-${i}`}
-                className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide"
+                className="inline-flex items-center gap-2 font-secondary text-xs tracking-wide cursor-pointer transition-opacity hover:opacity-50"
+                onClick={() => {
+                  if (dragRef.current.dragged) return;
+                  navigate(mobilePath(`/play?game=${item.gameId}&view=true`));
+                }}
               >
                 {(copy > 0 || i > 0) && (
                   <span className="w-1 h-1 rounded-full shrink-0 bg-white ml-3 mr-1" />

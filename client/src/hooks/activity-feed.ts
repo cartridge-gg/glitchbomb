@@ -22,6 +22,7 @@ export interface ActivityItem {
   id: string;
   type: ActivityType;
   username: string;
+  gameId: number;
   stake?: number;
   moonrocks?: number;
   timestamp: number;
@@ -150,6 +151,7 @@ export function useActivityFeed(chainId: bigint) {
           id: itemId,
           type: "game_started",
           username,
+          gameId,
           stake,
           timestamp: Date.now(),
         });
@@ -213,6 +215,7 @@ export function useActivityFeed(chainId: bigint) {
             id: itemId,
             type: "cash_out",
             username,
+            gameId,
             moonrocks,
             timestamp: Date.now(),
           });
@@ -286,6 +289,7 @@ export function useActivityFeed(chainId: bigint) {
               id: itemId,
               type: "game_started" as const,
               username,
+              gameId,
               stake,
               timestamp: Date.now(),
             };
@@ -335,16 +339,19 @@ export function useActivityFeed(chainId: bigint) {
         }
 
         const cashOutResults = await Promise.allSettled(
-          cashOutEntries.map(async ({ ownerAddress, itemId, moonrocks }) => {
-            const username = await lookupUsername(ownerAddress);
-            return {
-              id: itemId,
-              type: "cash_out" as const,
-              username,
-              moonrocks,
-              timestamp: Date.now(),
-            };
-          }),
+          cashOutEntries.map(
+            async ({ gameId, ownerAddress, itemId, moonrocks }) => {
+              const username = await lookupUsername(ownerAddress);
+              return {
+                id: itemId,
+                type: "cash_out" as const,
+                username,
+                gameId,
+                moonrocks,
+                timestamp: Date.now(),
+              };
+            },
+          ),
         );
         for (const r of cashOutResults) {
           if (r.status === "fulfilled") batch.push(r.value);
