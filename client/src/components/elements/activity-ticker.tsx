@@ -97,7 +97,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     if (!dragged && target) {
       const item = target.closest<HTMLElement>("[data-game-id]");
       if (item) {
-        navigate(mobilePath(`/play?game=${item.dataset.gameId}`));
+        navigate(mobilePath(`/play?game=${item.dataset.gameId}&view=true`));
       }
     }
 
