@@ -158,8 +158,9 @@ function playSfx(
 }
 
 function playTapSfx(volume: number) {
-  const rate = 0.95 + Math.random() * 0.1;
-  playSfx("/assets/sounds/click.wav", volume, rate);
+  // Random pitch between 0.9 and 1.1
+  const rate = 0.9 + Math.random() * 0.2;
+  playSfx("/assets/sounds/tap.wav", volume, rate);
 }
 
 let gLastHoveredButton: Element | null = null;
