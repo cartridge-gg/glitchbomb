@@ -438,13 +438,10 @@ export function useAudio() {
       playHoverSfx(settings.sfxVolume * 0.3);
     };
     const onPointerOut = (e: PointerEvent) => {
-      const target = e.target as Element;
-      const button = target.closest(
-        'button, [role="button"], [data-slot="button"]',
-      );
-      if (button === gLastHoveredButton) {
-        gLastHoveredButton = null;
-      }
+      if (!gLastHoveredButton) return;
+      const related = e.relatedTarget as Element | null;
+      if (related && gLastHoveredButton.contains(related)) return;
+      gLastHoveredButton = null;
     };
     document.addEventListener("pointerover", onPointerOver, { passive: true });
     document.addEventListener("pointerout", onPointerOut, { passive: true });
