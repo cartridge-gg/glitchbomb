@@ -163,6 +163,13 @@ function playTapSfx(volume: number) {
   playSfx("/assets/sounds/tap.wav", volume, rate);
 }
 
+let gLastHoveredButton: Element | null = null;
+
+function playHoverSfx(volume: number) {
+  const rate = 0.95 + Math.random() * 0.1;
+  playSfx("/assets/sounds/hover.wav", volume, rate);
+}
+
 // ── Pulling loop state ──
 
 let gPullingSource: AudioBufferSourceNode | null = null;
@@ -415,6 +422,36 @@ export function useAudio() {
     document.addEventListener("pointerdown", onPointerDown, { passive: true });
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [settings.sfxMuted, settings.sfxVolume]);
+
+  // Global hover sound on buttons
+  useEffect(() => {
+    if (settings.sfxMuted) return;
+    const onPointerOver = (e: PointerEvent) => {
+      const target = e.target as Element;
+      const button = target.closest(
+        'button, [role="button"], [data-slot="button"]',
+      );
+      if (!button || button === gLastHoveredButton) return;
+      gLastHoveredButton = button;
+      playHoverSfx(settings.sfxVolume * 0.3);
+    };
+    const onPointerOut = (e: PointerEvent) => {
+      const target = e.target as Element;
+      const button = target.closest(
+        'button, [role="button"], [data-slot="button"]',
+      );
+      if (button === gLastHoveredButton) {
+        gLastHoveredButton = null;
+      }
+    };
+    document.addEventListener("pointerover", onPointerOver, { passive: true });
+    document.addEventListener("pointerout", onPointerOut, { passive: true });
+    return () => {
+      document.removeEventListener("pointerover", onPointerOver);
+      document.removeEventListener("pointerout", onPointerOut);
+      gLastHoveredButton = null;
     };
   }, [settings.sfxMuted, settings.sfxVolume]);
 
