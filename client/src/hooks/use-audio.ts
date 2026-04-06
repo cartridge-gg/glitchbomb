@@ -507,7 +507,12 @@ export function useAudio() {
       }, 2087);
     }
     playSfx("/assets/sounds/level-completed.wav", settings.sfxVolume);
-  }, [settings.sfxMuted, settings.sfxVolume, settings.musicMuted, settings.musicVolume]);
+  }, [
+    settings.sfxMuted,
+    settings.sfxVolume,
+    settings.musicMuted,
+    settings.musicVolume,
+  ]);
 
   const playLevelStartSound = useCallback(() => {
     if (settings.sfxMuted) return;
