@@ -491,8 +491,27 @@ export function useAudio() {
 
   const playLevelCompleteSound = useCallback(() => {
     if (settings.sfxMuted) return;
+
+    const ctx = getAudioCtx();
+
+    // Lower the music volume
+    if (gMusicGain && !settings.musicMuted) {
+      const now = ctx.currentTime;
+      const original = settings.musicVolume;
+
+      gMusicGain.gain.setValueAtTime(gMusicGain.gain.value, now);
+      gMusicGain.gain.linearRampToValueAtTime(original * 0.1, now + 0.2); // quick fade down
+
+      // Restore volume after the SFX
+      setTimeout(() => {
+        const t = ctx.currentTime;
+        gMusicGain?.gain.setValueAtTime(gMusicGain.gain.value, t);
+        gMusicGain?.gain.linearRampToValueAtTime(original, t + 2.087);
+      }, 2087);
+    }
+
     playSfx("/assets/sounds/level-completed.wav", settings.sfxVolume);
-  }, [settings.sfxMuted, settings.sfxVolume]);
+  }, [settings.sfxMuted, settings.sfxVolume, settings.musicMuted, settings.musicVolume]);
 
   const playLevelStartSound = useCallback(() => {
     if (settings.sfxMuted) return;
