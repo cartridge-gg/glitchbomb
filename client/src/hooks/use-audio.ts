@@ -101,6 +101,7 @@ function getPointEchoLayers(orb: Orb): number {
 const FADE_DURATION_S = 0.8;
 const ECHO_OFFSET_MS = 40;
 const ECHO_VOLUME_DECAY = 0.72;
+const HALF_STEP_PLAYBACK_RATE = 2 ** (1 / 12);
 
 // ── Shared Web Audio context ──
 
@@ -228,14 +229,19 @@ function stopPullingLoop() {
   gPullingGain = null;
 }
 
-function playSfxLayered(file: string, baseVolume: number, layers: number) {
-  playSfx(file, baseVolume);
+function playSfxLayered(
+  file: string,
+  baseVolume: number,
+  layers: number,
+  playbackRate?: number,
+) {
+  playSfx(file, baseVolume, playbackRate);
   let vol = baseVolume;
   for (let i = 1; i <= layers; i++) {
     vol *= ECHO_VOLUME_DECAY;
     const delay = i * ECHO_OFFSET_MS;
     const layerVol = vol;
-    setTimeout(() => playSfx(file, layerVol), delay);
+    setTimeout(() => playSfx(file, layerVol, playbackRate), delay);
   }
 }
 
@@ -251,6 +257,13 @@ let gMusicOffset = 0; // offset into the buffer
 
 let gOldSource: AudioBufferSourceNode | null = null;
 let gOldGain: GainNode | null = null;
+let gLastOrbValue: OrbType | null = null;
+let gLastOrbRepeatCount = 0;
+
+function resetOrbRepeatPitch() {
+  gLastOrbValue = null;
+  gLastOrbRepeatCount = 0;
+}
 
 function stopSource(
   source: AudioBufferSourceNode | null,
@@ -457,11 +470,22 @@ export function useAudio() {
       if (settings.sfxMuted) return;
       const file = getOrbSoundFile(orb);
       if (!file) return;
+      const isRepeatedOrb = gLastOrbValue === orb.value;
+      gLastOrbValue = orb.value;
+      gLastOrbRepeatCount = isRepeatedOrb ? gLastOrbRepeatCount + 1 : 1;
+      const playbackRate = orb.isBomb()
+        ? 1
+        : HALF_STEP_PLAYBACK_RATE ** (gLastOrbRepeatCount - 1);
 
       if (orb.isPoint()) {
-        playSfxLayered(file, settings.sfxVolume, getPointEchoLayers(orb));
+        playSfxLayered(
+          file,
+          settings.sfxVolume,
+          getPointEchoLayers(orb),
+          playbackRate,
+        );
       } else {
-        playSfx(file, settings.sfxVolume);
+        playSfx(file, settings.sfxVolume, playbackRate);
       }
     },
     [settings.sfxMuted, settings.sfxVolume],
@@ -491,6 +515,7 @@ export function useAudio() {
 
   const playLevelCompleteSound = useCallback(() => {
     if (settings.sfxMuted) return;
+    resetOrbRepeatPitch();
     const ctx = getAudioCtx();
     const musicGain = gMusicGain;
     // Lower the music volume
@@ -516,6 +541,7 @@ export function useAudio() {
 
   const playLevelStartSound = useCallback(() => {
     if (settings.sfxMuted) return;
+    resetOrbRepeatPitch();
     playSfx("/assets/sounds/level-started.wav", settings.sfxVolume);
   }, [settings.sfxMuted, settings.sfxVolume]);
 
@@ -526,6 +552,10 @@ export function useAudio() {
 
   const stopPulling = useCallback(() => {
     stopPullingLoop();
+  }, []);
+
+  const resetOrbPitchProgression = useCallback(() => {
+    resetOrbRepeatPitch();
   }, []);
 
   const setMusicMuted = useCallback((muted: boolean) => {
@@ -557,6 +587,7 @@ export function useAudio() {
     playLevelStartSound,
     startPulling,
     stopPulling,
+    resetOrbPitchProgression,
     startMusic,
     stopMusic,
     isMusicPlaying,
