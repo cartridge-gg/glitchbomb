@@ -98,6 +98,7 @@ export const Game = () => {
     playLevelStartSound,
     startPulling,
     stopPulling,
+    resetOrbPitchProgression,
     startMusic,
   } = useAudio();
   const { displaySettings, setShowDistributionPercent, setStashViewMode } =
@@ -287,6 +288,7 @@ export const Game = () => {
     const gameId = searchParams.get("game");
     if (gameId) {
       setGameId(Number(gameId));
+      resetOrbPitchProgression();
       // Reset all local state when game changes
       lastPullIdRef.current = null;
       prevLevelRef.current = null;
@@ -302,7 +304,7 @@ export const Game = () => {
       setAnimateHeaderCount(false);
       setRevealedSegments(new Set());
     }
-  }, [setGameId, searchParams]);
+  }, [resetOrbPitchProgression, setGameId, searchParams]);
 
   // Show reward overlay for fresh games (skip expired ones and tutorial games)
   useEffect(() => {
