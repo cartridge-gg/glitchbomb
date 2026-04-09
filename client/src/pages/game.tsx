@@ -44,6 +44,7 @@ import { useLoadingSignal } from "@/contexts/use-loading";
 import { tokenPayout, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
+import { useControllerUsername } from "@/hooks/use-controller-username";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
@@ -104,6 +105,7 @@ export const Game = () => {
   const { displaySettings, setShowDistributionPercent, setStashViewMode } =
     useDisplaySettings();
   const tutorial = useTutorial();
+  const { username } = useControllerUsername();
 
   // Payout chart data
   const tokenAddress = config?.token || getTokenAddress(chain.id);
@@ -143,7 +145,6 @@ export const Game = () => {
     new Set(),
   );
   const rewardShownForGameRef = useRef<number | null>(null);
-  const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
     null,
   );
@@ -262,14 +263,6 @@ export const Game = () => {
     const lastValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
     return lastValue - game.points + game.milestone;
   }, [game, plData]);
-
-  // Fetch username from controller
-  useEffect(() => {
-    if (!connector) return;
-    (connector as never as ControllerConnector).controller
-      .username()
-      ?.then((name) => setUsername(name));
-  }, [connector]);
 
   const onProfileClick = useCallback(() => {
     const controller = (connector as never as ControllerConnector)?.controller;

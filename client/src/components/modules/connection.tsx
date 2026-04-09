@@ -1,13 +1,14 @@
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { Connect, Profile } from "@/components/elements";
+import { useControllerUsername } from "@/hooks/use-controller-username";
 import { isMobile } from "@/utils/mobile";
 
 export const Connection = () => {
   const { account, connector } = useAccount();
-  const [username, setUsername] = useState<string>();
   const { connectAsync, connectors } = useConnect();
+  const { username } = useControllerUsername();
 
   const onProfileClick = useCallback(async () => {
     const controller = (connector as never as ControllerConnector)?.controller;
@@ -21,15 +22,6 @@ export const Connection = () => {
   const onConnectClick = useCallback(async () => {
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
-
-  useEffect(() => {
-    if (!connector) return;
-    (connector as never as ControllerConnector).controller
-      .username()
-      ?.then((username) => {
-        setUsername(username);
-      });
-  }, [connector]);
 
   return account && username ? (
     <Profile username={`${username}`} onClick={onProfileClick} />

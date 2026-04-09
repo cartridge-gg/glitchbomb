@@ -27,6 +27,7 @@ import {
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
 import { useActivityFeed } from "@/hooks/activity-feed";
+import { useControllerUsername } from "@/hooks/use-controller-username";
 import { useOwnedGames } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
@@ -86,7 +87,7 @@ export const Home = () => {
   const { displaySettings, setShowDistributionPercent, setStashViewMode } =
     useDisplaySettings();
   const tutorial = useTutorial();
-  const [username, setUsername] = useState<string>();
+  const { username } = useControllerUsername();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
@@ -183,13 +184,6 @@ export const Home = () => {
   const onConnectClick = useCallback(async () => {
     await connectAsync({ connector: connectors[0] });
   }, [connectAsync, connectors]);
-
-  useEffect(() => {
-    if (!connector) return;
-    (connector as never as ControllerConnector).controller
-      .username()
-      ?.then((name) => setUsername(name));
-  }, [connector]);
 
   // Build game list from owned games
   const gameList = useMemo(() => {
