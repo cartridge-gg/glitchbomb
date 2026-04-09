@@ -1,4 +1,5 @@
-import { useNetwork } from "@starknet-react/core";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { useAccount, useNetwork } from "@starknet-react/core";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   useCallback,
@@ -43,7 +44,6 @@ import { useLoadingSignal } from "@/contexts/use-loading";
 import { tokenPayout, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
-import { useControllerAuth } from "@/hooks/use-controller-auth";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
@@ -81,8 +81,8 @@ type OverlayView = "none" | "stash";
 export const Game = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { connector } = useAccount();
   const { chain } = useNetwork();
-  const { username, handleLogout, handleOpenProfile } = useControllerAuth();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { game, config, setGameId } = useEntitiesContext();
   const {
@@ -143,6 +143,7 @@ export const Game = () => {
     new Set(),
   );
   const rewardShownForGameRef = useRef<number | null>(null);
+  const [username, setUsername] = useState<string>();
   const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
     null,
   );
@@ -261,6 +262,23 @@ export const Game = () => {
     const lastValue = plData.length > 0 ? plData[plData.length - 1].value : 0;
     return lastValue - game.points + game.milestone;
   }, [game, plData]);
+
+  // Fetch username from controller
+  useEffect(() => {
+    if (!connector) return;
+    (connector as never as ControllerConnector).controller
+      .username()
+      ?.then((name) => setUsername(name));
+  }, [connector]);
+
+  const onProfileClick = useCallback(() => {
+    const controller = (connector as never as ControllerConnector)?.controller;
+    if (isMobile) {
+      controller?.openSettings();
+    } else {
+      controller?.openProfile("inventory");
+    }
+  }, [connector]);
 
   // Start glitched music on mount (crossfades from home track)
   useEffect(() => {
@@ -1018,8 +1036,7 @@ export const Game = () => {
         onShowDistributionPercentChange={setShowDistributionPercent}
         stashViewMode={displaySettings.stashViewMode}
         onStashViewModeChange={setStashViewMode}
-        onProfileClick={handleOpenProfile}
-        onLogOut={handleLogout}
+        onProfileClick={onProfileClick}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}

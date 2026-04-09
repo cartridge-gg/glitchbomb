@@ -1,4 +1,5 @@
-import { useAccount, useNetwork } from "@starknet-react/core";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
@@ -26,7 +27,6 @@ import {
 } from "@/helpers/payout";
 import { useActions } from "@/hooks/actions";
 import { useActivityFeed } from "@/hooks/activity-feed";
-import { useControllerAuth } from "@/hooks/use-controller-auth";
 import { useOwnedGames } from "@/hooks/packs";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
@@ -45,16 +45,10 @@ export const Home = () => {
   const { mint } = useActions();
   const { chain } = useNetwork();
   const { account, connector } = useAccount();
+  const { connectAsync, connectors } = useConnect();
   const { starterpacks, config } = useEntitiesContext();
   const { tokenContracts, tokenPrice } = useAppData();
   const { setReady, removeSignal } = useLoadingContext();
-  const {
-    username,
-    isLoggedIn,
-    handleConnect,
-    handleLogout,
-    handleOpenProfile,
-  } = useControllerAuth();
 
   const { games: onchainGames, isLoading: gamesLoading } = useOwnedGames();
   const activityItems = useActivityFeed(BigInt(DEFAULT_CHAIN_ID));
@@ -92,6 +86,7 @@ export const Home = () => {
   const { displaySettings, setShowDistributionPercent, setStashViewMode } =
     useDisplaySettings();
   const tutorial = useTutorial();
+  const [username, setUsername] = useState<string>();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
@@ -175,6 +170,26 @@ export const Home = () => {
   }, [tokenContract, tokenBalances, tokenAddress]);
 
   const displayMoonrocks = balance;
+
+  const onProfileClick = useCallback(() => {
+    const controller = (connector as never as ControllerConnector)?.controller;
+    if (isMobile) {
+      controller?.openSettings();
+    } else {
+      controller?.openProfile("inventory");
+    }
+  }, [connector]);
+
+  const onConnectClick = useCallback(async () => {
+    await connectAsync({ connector: connectors[0] });
+  }, [connectAsync, connectors]);
+
+  useEffect(() => {
+    if (!connector) return;
+    (connector as never as ControllerConnector).controller
+      .username()
+      ?.then((name) => setUsername(name));
+  }, [connector]);
 
   // Build game list from owned games
   const gameList = useMemo(() => {
@@ -461,15 +476,17 @@ export const Home = () => {
     navigate(mobilePath(`/play?game=${gameId}`));
   }, [navigate, tutorial]);
 
+  const isLoggedIn = !!account && !!username;
+
   const requireLogin = useCallback(
     (action: () => void) => {
       if (!isLoggedIn) {
-        handleConnect();
+        onConnectClick();
         return;
       }
       action();
     },
-    [handleConnect, isLoggedIn],
+    [isLoggedIn, onConnectClick],
   );
 
   if (!isHomeReady) return null;
@@ -483,9 +500,8 @@ export const Home = () => {
         username={username}
         showBack={false}
         onMint={isMobile ? undefined : () => mint(tokenAddress)}
-        onProfileClick={handleOpenProfile}
-        onConnect={isLoggedIn ? undefined : handleConnect}
-        onLogOut={isLoggedIn ? handleLogout : undefined}
+        onProfileClick={onProfileClick}
+        onConnect={isLoggedIn ? undefined : onConnectClick}
         audioSettings={audioSettings}
         onMusicMutedChange={setMusicMuted}
         onSfxMutedChange={setSfxMuted}
@@ -1365,9 +1381,8 @@ export const Home = () => {
             showBack
             onBack={() => setShowDetails(false)}
             onMint={() => mint(tokenAddress)}
-            onProfileClick={handleOpenProfile}
-            onConnect={isLoggedIn ? undefined : handleConnect}
-            onLogOut={isLoggedIn ? handleLogout : undefined}
+            onProfileClick={onProfileClick}
+            onConnect={isLoggedIn ? undefined : onConnectClick}
             audioSettings={audioSettings}
             onMusicMutedChange={setMusicMuted}
             onSfxMutedChange={setSfxMuted}

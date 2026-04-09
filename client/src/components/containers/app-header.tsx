@@ -34,7 +34,6 @@ export interface AppHeaderProps {
   onShowDistributionPercentChange?: (show: boolean) => void;
   stashViewMode?: StashViewMode;
   onStashViewModeChange?: (mode: StashViewMode) => void;
-  onLogOut?: () => void;
 }
 
 export const AppHeader = ({
@@ -56,7 +55,6 @@ export const AppHeader = ({
   onShowDistributionPercentChange,
   stashViewMode,
   onStashViewModeChange,
-  onLogOut,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -204,7 +202,6 @@ export const AppHeader = ({
               onStashViewModeChange={onStashViewModeChange}
               username={username}
               onProfileClick={onProfileClick}
-              onLogOut={onLogOut}
             />
           )}
       </div>
