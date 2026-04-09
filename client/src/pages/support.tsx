@@ -11,7 +11,7 @@ export function Support() {
         backPath={mobilePath("/")}
       />
 
-      <div className="flex-1 overflow-y-auto px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-green-700 [&_*]:font-secondary">
+      <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-green-700 [&_*]:font-secondary">
         {/* How to Play */}
         <h2 className="text-lg tracking-widest text-green-400 uppercase mt-6 mb-3">
           How to Play
@@ -68,7 +68,7 @@ export function Support() {
           Privacy Policy
         </h2>
         <a
-          href="https://cartridge.gg/privacy"
+          href="https://cartridge.gg/legal/privacy-policy"
           target="_blank"
           rel="noopener noreferrer"
           className="block text-green-300 hover:text-green-200 underline underline-offset-2"
@@ -84,7 +84,7 @@ export function Support() {
           By playing GlitchBomb you agree to the Cartridge terms of service.
         </p>
         <a
-          href="https://cartridge.gg/terms"
+          href="https://cartridge.gg/legal/terms-of-service"
           target="_blank"
           rel="noopener noreferrer"
           className="block mt-2 text-green-300 hover:text-green-200 underline underline-offset-2"
