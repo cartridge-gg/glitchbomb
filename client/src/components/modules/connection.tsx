@@ -1,39 +1,13 @@
-import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount, useConnect } from "@starknet-react/core";
-import { useCallback, useEffect, useState } from "react";
 import { Connect, Profile } from "@/components/elements";
-import { isMobile } from "@/utils/mobile";
+import { useControllerAuth } from "@/hooks/use-controller-auth";
 
 export const Connection = () => {
-  const { account, connector } = useAccount();
-  const [username, setUsername] = useState<string>();
-  const { connectAsync, connectors } = useConnect();
+  const { username, isLoggedIn, handleConnect, handleOpenProfile } =
+    useControllerAuth();
 
-  const onProfileClick = useCallback(async () => {
-    const controller = (connector as never as ControllerConnector)?.controller;
-    if (isMobile) {
-      controller?.openSettings();
-    } else {
-      controller?.openProfile("inventory");
-    }
-  }, [connector]);
-
-  const onConnectClick = useCallback(async () => {
-    await connectAsync({ connector: connectors[0] });
-  }, [connectAsync, connectors]);
-
-  useEffect(() => {
-    if (!connector) return;
-    (connector as never as ControllerConnector).controller
-      .username()
-      ?.then((username) => {
-        setUsername(username);
-      });
-  }, [connector]);
-
-  return account && username ? (
-    <Profile username={`${username}`} onClick={onProfileClick} />
+  return isLoggedIn && username ? (
+    <Profile username={username} onClick={handleOpenProfile} />
   ) : (
-    <Connect highlight onClick={onConnectClick} />
+    <Connect highlight onClick={handleConnect} />
   );
 };

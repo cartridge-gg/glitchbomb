@@ -1,5 +1,6 @@
 import * as Popover from "@radix-ui/react-popover";
 import {
+  BracketArrowIcon,
   ControllerIcon,
   SpeakerIcon,
   SpeakerMutedIcon,
@@ -182,6 +183,7 @@ export interface SettingsModalProps {
   onStashViewModeChange?: (mode: StashViewMode) => void;
   username?: string;
   onProfileClick?: () => void;
+  onLogOut?: () => void;
 }
 
 const ToggleSwitch = ({
@@ -232,6 +234,7 @@ export const SettingsModal = ({
   onStashViewModeChange,
   username,
   onProfileClick,
+  onLogOut,
 }: SettingsModalProps) => {
   if (!open) return null;
 
@@ -373,21 +376,36 @@ export const SettingsModal = ({
           </Button>
         )}
 
-        {/* Profile button — mobile only (desktop shows profile in header) */}
+        {/* Account actions */}
         {username && (
-          <Button
-            variant="secondary"
-            gradient="green"
-            wrapperClassName="md:hidden"
-            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
-            onClick={() => {
-              onClose();
-              onProfileClick?.();
-            }}
-          >
-            <ControllerIcon size="sm" />
-            {username}
-          </Button>
+          <>
+            <Button
+              variant="secondary"
+              gradient="green"
+              className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+              onClick={() => {
+                onClose();
+                onProfileClick?.();
+              }}
+            >
+              <ControllerIcon size="sm" />
+              {username}
+            </Button>
+            {onLogOut && (
+              <Button
+                variant="secondary"
+                gradient="green"
+                className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+                onClick={() => {
+                  onClose();
+                  onLogOut();
+                }}
+              >
+                <BracketArrowIcon size="sm" />
+                Log Out
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>
