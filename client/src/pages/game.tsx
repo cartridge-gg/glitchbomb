@@ -271,9 +271,7 @@ export const Game = () => {
   }, [connector]);
 
   const onProfileClick = useCallback(() => {
-    (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
-    );
+    (connector as never as ControllerConnector)?.controller.openSettings();
   }, [connector]);
 
   // Start glitched music on mount (crossfades from home track)

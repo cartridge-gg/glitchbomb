@@ -9,9 +9,7 @@ export const Connection = () => {
   const { connectAsync, connectors } = useConnect();
 
   const onProfileClick = useCallback(async () => {
-    (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
-    );
+    (connector as never as ControllerConnector)?.controller.openSettings();
   }, [connector]);
 
   const onConnectClick = useCallback(async () => {

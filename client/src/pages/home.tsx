@@ -172,9 +172,7 @@ export const Home = () => {
   const displayMoonrocks = balance;
 
   const onProfileClick = useCallback(() => {
-    (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
-    );
+    (connector as never as ControllerConnector)?.controller.openSettings();
   }, [connector]);
 
   const onConnectClick = useCallback(async () => {
