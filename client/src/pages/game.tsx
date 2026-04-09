@@ -49,7 +49,7 @@ import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
 import { createOfflineGame } from "@/offline/store";
 import { TutorialOverlay, TutorialStep, useTutorial } from "@/tutorial";
-import { mobilePath } from "@/utils/mobile";
+import { isMobile, mobilePath } from "@/utils/mobile";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -272,9 +272,12 @@ export const Game = () => {
   }, [connector]);
 
   const onProfileClick = useCallback(() => {
-    (connector as never as ControllerConnector)?.controller.openProfile(
-      "inventory",
-    );
+    const controller = (connector as never as ControllerConnector)?.controller;
+    if (isMobile) {
+      controller?.openSettings();
+    } else {
+      controller?.openProfile("inventory");
+    }
   }, [connector]);
 
   // Start glitched music on mount (crossfades from home track)
