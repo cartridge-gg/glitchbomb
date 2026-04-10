@@ -531,7 +531,12 @@ export function useAudio() {
         musicGain.gain.linearRampToValueAtTime(original, t + 2.087);
       }, 2087);
     }
-    playSfx("/assets/sounds/level-completed.wav", settings.sfxVolume);
+    // Play level complete sound at the highest volume between music and sfx
+    const levelCompleteVolume =
+      settings.musicVolume > settings.sfxVolume
+        ? settings.musicVolume
+        : settings.sfxVolume;
+    playSfx("/assets/sounds/level-completed.wav", levelCompleteVolume);
   }, [
     settings.sfxMuted,
     settings.sfxVolume,
