@@ -47,10 +47,7 @@ export function useControllerUsername() {
     };
 
     window.addEventListener("focus", handleRefresh);
-    window.addEventListener(
-      AUTH_CHANGED_EVENT,
-      handleRefresh as EventListener,
-    );
+    window.addEventListener(AUTH_CHANGED_EVENT, handleRefresh as EventListener);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
