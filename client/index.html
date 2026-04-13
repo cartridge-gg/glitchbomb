@@ -19,14 +19,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Unregister any existing service workers from the old PWA setup
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          for (var r of registrations) r.unregister();
-        });
-      }
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
