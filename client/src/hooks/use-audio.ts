@@ -65,6 +65,8 @@ function getOrbSoundFile(orb: Orb): string | null {
         return "/assets/sounds/points-5.wav";
       case OrbType.Point7:
         return "/assets/sounds/points-7.wav";
+      case OrbType.Point8:
+        return "/assets/sounds/points-8.wav";
       case OrbType.Point9:
         return "/assets/sounds/points-9.wav";
       default:
