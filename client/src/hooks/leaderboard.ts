@@ -1,9 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/api/keys";
 import {
   LeaderboardScore,
   type LeaderboardScoreRow,
 } from "@/api/torii/leaderboard-score";
-import { useQuery } from "@tanstack/react-query";
 
 export type LeaderboardScoreRowData = LeaderboardScoreRow;
 

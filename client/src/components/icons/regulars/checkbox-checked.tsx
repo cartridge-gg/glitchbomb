@@ -1,5 +1,5 @@
 import { forwardRef, memo } from "react";
-import { iconVariants, type IconProps } from "..";
+import { type IconProps, iconVariants } from "..";
 
 export const CheckboxCheckedIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(

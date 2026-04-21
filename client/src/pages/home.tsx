@@ -3,7 +3,6 @@ import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
-import { LeaderboardScene } from "@/components/scenes";
 import { LoadingSpinner } from "@/components/elements";
 import { ActivityTicker } from "@/components/elements/activity-ticker";
 import {
@@ -14,6 +13,7 @@ import {
   MoonrockIcon,
   NumsLogoIcon,
 } from "@/components/icons";
+import { LeaderboardScene } from "@/components/scenes";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";

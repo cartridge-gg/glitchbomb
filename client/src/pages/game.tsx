@@ -18,7 +18,6 @@ import {
   GameShop,
   StashModal,
 } from "@/components/containers";
-import { LeaderboardScene } from "@/components/scenes";
 import {
   isCashoutConfirmDismissed,
   setCashoutConfirmDismissed,
@@ -37,6 +36,7 @@ import {
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
 import { BagIcon } from "@/components/icons";
+import { LeaderboardScene } from "@/components/scenes";
 import { GradientBorder } from "@/components/ui/gradient-border";
 import { getTokenAddress } from "@/config";
 import { useAppData } from "@/contexts/use-app-data";

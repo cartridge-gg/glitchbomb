@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ControllerConnector from "@cartridge/connector/controller";
 import type { ControllerOptions, SessionPolicies } from "@cartridge/controller";
 import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
@@ -8,6 +7,7 @@ import {
   StarknetConfig,
   voyager,
 } from "@starknet-react/core";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/elements/loading-screen";
 import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
