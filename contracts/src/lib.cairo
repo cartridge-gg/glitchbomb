@@ -2,6 +2,25 @@ pub mod constants;
 pub mod store;
 
 pub mod elements {
+    pub mod achievements {
+        pub mod brinker;
+        pub mod composer;
+        pub mod conqueror;
+        pub mod index;
+        pub mod interface;
+        pub mod loyalty;
+        pub mod moonrock;
+        pub mod multiplier;
+        pub mod scorer;
+        pub mod sequencer;
+        pub mod shopper;
+    }
+    pub mod curses {
+        pub mod demultiplier;
+        pub mod double_draw;
+        pub mod index;
+        pub mod interface;
+    }
     pub mod effects {
         pub mod boost;
         pub mod chips;
@@ -14,17 +33,41 @@ pub mod elements {
         pub mod lose;
         pub mod moonrock;
     }
-    pub mod curses {
-        pub mod demultiplier;
-        pub mod double_draw;
-        pub mod index;
-        pub mod interface;
-    }
     pub mod powers {
         pub mod burn;
         pub mod index;
         pub mod interface;
         pub mod reroll;
+    }
+    pub mod quests {
+        pub mod bag;
+        pub mod bomb;
+        pub mod health;
+        pub mod index;
+        pub mod interface;
+        pub mod level;
+        pub mod moonrock;
+        pub mod multiplier;
+        pub mod orb;
+        pub mod points;
+        pub mod session;
+        pub mod shop;
+    }
+    pub mod tasks {
+        pub mod bag;
+        pub mod brinker;
+        pub mod composer;
+        pub mod conqueror;
+        pub mod index;
+        pub mod interface;
+        pub mod level;
+        pub mod loyalty;
+        pub mod moonrock;
+        pub mod multiplier;
+        pub mod puller;
+        pub mod scorer;
+        pub mod sequencer;
+        pub mod shopper;
     }
 }
 
@@ -32,14 +75,20 @@ pub mod models {
     pub mod config;
     pub mod game;
     pub mod index;
-    pub mod starterpack;
+    pub mod position;
+    pub mod vault;
 }
 
 pub mod events {
+    pub mod claimed;
     pub mod index;
+    pub mod purchased;
+    pub mod started;
+    pub mod vault;
 }
 
 pub mod types {
+    pub mod counters;
     pub mod curse;
     pub mod effect;
     pub mod image;
@@ -69,18 +118,22 @@ pub mod interfaces {
 
 pub mod components {
     pub mod playable;
-    pub mod starterpack;
+    pub mod purchase;
+    pub mod rewardable;
 }
 
 pub mod systems {
     pub mod collection;
+    pub mod faucet;
+    pub mod governor;
     pub mod play;
     pub mod setup;
+    pub mod token;
+    pub mod treasury;
+    pub mod vault;
 }
 
 pub mod mocks {
-    pub mod registry;
-    pub mod token;
     pub mod vrf;
 }
 

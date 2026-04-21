@@ -18,6 +18,7 @@ import {
   GameShop,
   StashModal,
 } from "@/components/containers";
+import { LeaderboardScene } from "@/components/scenes";
 import {
   isCashoutConfirmDismissed,
   setCashoutConfirmDismissed,
@@ -136,6 +137,7 @@ export const Game = () => {
   }, [game, tokenPrice, supply, target]);
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showCashoutConfirm, setShowCashoutConfirm] = useState(false);
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
   const [animateHeaderCount, setAnimateHeaderCount] = useState(false);
@@ -1030,6 +1032,7 @@ export const Game = () => {
         stashViewMode={displaySettings.stashViewMode}
         onStashViewModeChange={setStashViewMode}
         onProfileClick={onProfileClick}
+        onLeaderboard={() => setShowLeaderboard(!showLeaderboard)}
       />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {renderScreen()}
@@ -1056,6 +1059,17 @@ export const Game = () => {
         onDismiss={setCashoutConfirmDismissed}
         isConfirming={isCashingOut}
       />
+      {showLeaderboard && (
+        <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
+            <LeaderboardScene
+              rows={[]}
+              onClose={() => setShowLeaderboard(false)}
+              className="h-full"
+            />
+          </div>
+        </div>
+      )}
       <RewardOverlay
         open={showRewardOverlay}
         onDismiss={() => {

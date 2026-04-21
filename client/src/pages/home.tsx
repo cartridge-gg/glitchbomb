@@ -3,12 +3,14 @@ import { useAccount, useConnect, useNetwork } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppHeader, GameDetails } from "@/components/containers";
+import { LeaderboardScene } from "@/components/scenes";
 import { LoadingSpinner } from "@/components/elements";
 import { ActivityTicker } from "@/components/elements/activity-ticker";
 import {
   ArrowRightIcon,
   BombIcon,
-  BracketArrowIcon,
+  BracketArrowLeftIcon,
+  BracketArrowRightIcon,
   MoonrockIcon,
   NumsLogoIcon,
 } from "@/components/icons";
@@ -90,6 +92,7 @@ export const Home = () => {
   const { username } = useControllerUsername();
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
@@ -505,6 +508,7 @@ export const Home = () => {
         onShowDistributionPercentChange={setShowDistributionPercent}
         stashViewMode={displaySettings.stashViewMode}
         onStashViewModeChange={setStashViewMode}
+        onLeaderboard={() => setShowLeaderboard(!showLeaderboard)}
       />
 
       <ActivityTicker items={activityItems} />
@@ -925,7 +929,7 @@ export const Home = () => {
                   disabled={activeGameIndex <= 0}
                   aria-label="Previous game"
                 >
-                  <BracketArrowIcon size="xs" direction="left" />
+                  <BracketArrowLeftIcon size="xs" />
                 </Button>
                 <Button
                   variant="secondary"
@@ -938,7 +942,7 @@ export const Home = () => {
                   disabled={activeGameIndex >= totalSlides - 1}
                   aria-label="Next game"
                 >
-                  <BracketArrowIcon size="xs" direction="right" />
+                  <BracketArrowRightIcon size="xs" />
                 </Button>
               </div>
             </div>
@@ -1363,6 +1367,18 @@ export const Home = () => {
         </div>
       </div>
 
+      {showLeaderboard && (
+        <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
+            <LeaderboardScene
+              rows={[]}
+              onClose={() => setShowLeaderboard(false)}
+              className="h-full"
+            />
+          </div>
+        </div>
+      )}
+
       <TutorialOverlay />
 
       {/* Game Details Overlay */}
@@ -1386,6 +1402,7 @@ export const Home = () => {
             onShowDistributionPercentChange={setShowDistributionPercent}
             stashViewMode={displaySettings.stashViewMode}
             onStashViewModeChange={setStashViewMode}
+            onLeaderboard={() => setShowLeaderboard(!showLeaderboard)}
           />
 
           <ActivityTicker items={activityItems} />

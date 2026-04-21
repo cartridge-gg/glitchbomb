@@ -2,10 +2,19 @@
 version = 1
 
 [[package]]
+name = "achievement"
+version = "0.0.0"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
+dependencies = [
+ "dojo",
+ "graffiti",
+]
+
+[[package]]
 name = "alexandria_bytes"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:c09087b8b6d2f49ea1719cc780fa2901852879258ac2a55190187ed5b9e8488e"
+checksum = "sha256:1ebc31b29ba196bd6ec70cfa487561f39a1ff9043f97319f302b2083e132284e"
 dependencies = [
  "alexandria_data_structures",
  "alexandria_math",
@@ -13,15 +22,15 @@ dependencies = [
 
 [[package]]
 name = "alexandria_data_structures"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:74cf0a36da91032e1ca5a65a0ce1349b1fcd8623a78f9afa3498fa58858491e1"
+checksum = "sha256:7af20f90c16e71aa2d4b176d37b792eccf798e09b8c3ef370a68766f2db4824f"
 
 [[package]]
 name = "alexandria_encoding"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:1de969247c55dbb2c2d2cc98e09a12f5c52be12814b9c11899059b16c7edf647"
+checksum = "sha256:6effe1616f1b697d8f03979c936c948e76d20c2869aceecf980eab65a640117b"
 dependencies = [
  "alexandria_bytes",
  "alexandria_data_structures",
@@ -31,15 +40,15 @@ dependencies = [
 
 [[package]]
 name = "alexandria_math"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:b17fd1964c054d8e8a3fde2ee7dfecd5f318767f0bced764a6fa887271432f76"
+checksum = "sha256:2f634a878ad20377041649f0c63ffff8d7f01fe578e3666371dfb15d243b6822"
 
 [[package]]
 name = "alexandria_numeric"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:02b70ff561c48a97925cb07d183a9aeb53906fed443d6a38341f9bc4062b5768"
+checksum = "sha256:4208af0eeabc7eabdc53c440a58fdaf2ce8ff08de4a38f5368a0c992fdad30e4"
 dependencies = [
  "alexandria_math",
  "alexandria_searching",
@@ -47,17 +56,27 @@ dependencies = [
 
 [[package]]
 name = "alexandria_searching"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:70ef2765fa52a109467747601ab6be055295bc05de8ba105bc105437d8e551cd"
+checksum = "sha256:05f3f305b142a0160e5686c364d947ee60ff685ad15985dbdba8cf5ca7f308cd"
 dependencies = [
  "alexandria_data_structures",
 ]
 
 [[package]]
+name = "bundle"
+version = "0.0.0"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
+dependencies = [
+ "dojo",
+ "graffiti",
+ "openzeppelin",
+]
+
+[[package]]
 name = "collection"
 version = "0.0.0"
-source = "git+https://github.com/cartridge-gg/arcade?rev=1ca0d78#1ca0d78da1edbe6d348401d46171502145b4af80"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
 dependencies = [
  "graffiti",
  "openzeppelin",
@@ -96,14 +115,18 @@ source = "git+https://github.com/EkuboProtocol/starknet-contracts?rev=cf2e95f#cf
 name = "glitchbomb"
 version = "0.0.0"
 dependencies = [
+ "achievement",
  "alexandria_encoding",
+ "bundle",
  "collection",
  "dojo",
  "dojo_cairo_macros",
  "dojo_cairo_test",
  "ekubo",
  "graffiti",
+ "leaderboard",
  "openzeppelin",
+ "quest",
  "starterpack",
 ]
 
@@ -113,9 +136,18 @@ version = "0.1.0"
 source = "git+https://github.com/bal7hazar/graffiti.git?rev=e8b0854#e8b0854798ebbcebde504ea299ed556900564ff2"
 
 [[package]]
+name = "leaderboard"
+version = "0.0.0"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
+dependencies = [
+ "dojo",
+ "graffiti",
+]
+
+[[package]]
 name = "models"
 version = "0.0.0"
-source = "git+https://github.com/cartridge-gg/arcade?rev=1ca0d78#1ca0d78da1edbe6d348401d46171502145b4af80"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
 dependencies = [
  "dojo",
  "registry",
@@ -123,14 +155,15 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:5e4fdecc957cfca7854d95912dc72d9f725517c063b116512900900add29fd77"
+checksum = "sha256:ded6f53e0b50a3583f72c556d9ca508e627d175c6f01a2f5124f2e9a052ac985"
 dependencies = [
  "openzeppelin_access",
  "openzeppelin_account",
  "openzeppelin_finance",
  "openzeppelin_governance",
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
  "openzeppelin_merkle_tree",
  "openzeppelin_presets",
@@ -142,67 +175,80 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin_access"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:511681dd26d814ee2bc996d44ff8cb4aaa5ae9d14272130def7eb901cf004850"
+checksum = "sha256:2c7fab22d2601fca4f456c81272637f2563a423652d1671383bbe3d007803977"
 dependencies = [
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
 ]
 
 [[package]]
 name = "openzeppelin_account"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:fb3381c50d68b028d3801feb43df378e2bd62137b6884844f8f60aefe796188b"
+checksum = "sha256:b46f41be21fff6692d32949664d2f0dd1919c741346a676d6e0f1fe2ea576999"
 dependencies = [
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
  "openzeppelin_utils",
 ]
 
 [[package]]
 name = "openzeppelin_finance"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:e9456ef69502a87c4c99bf50145351b50950f8b11244847d92935c466c4ba787"
+checksum = "sha256:f77f4f5262666d8033f16b3a7df839ed2abb699a09ad33099c7bb6bf2807fec1"
 dependencies = [
  "openzeppelin_access",
+ "openzeppelin_interfaces",
  "openzeppelin_token",
 ]
 
 [[package]]
 name = "openzeppelin_governance"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:056e6d6f3d48193b53f06283884f8a9675f986fc85425f6a40e8c1aeb3b3ecfa"
+checksum = "sha256:b76c87f72b1481a62e3c6904a9a3da5cfc4de8b5a86a4742de30f1e2984c7e2b"
 dependencies = [
  "openzeppelin_access",
- "openzeppelin_account",
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
  "openzeppelin_token",
  "openzeppelin_utils",
 ]
 
 [[package]]
-name = "openzeppelin_introspection"
-version = "2.0.0"
+name = "openzeppelin_interfaces"
+version = "2.1.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:87773ed6cd2318f169283ecbbb161890d1996260a80302d81ec45b70ee5e54c1"
+checksum = "sha256:f69fdb36eb894a0e0732385e723c5ff56d8cb4c1d49b29446c77eefac00b02a5"
+
+[[package]]
+name = "openzeppelin_introspection"
+version = "3.0.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:ee491981a69736cde220f8b7dd290b6d8620c85ee6b83c81f665f5bef78b62b1"
+dependencies = [
+ "openzeppelin_interfaces",
+]
 
 [[package]]
 name = "openzeppelin_merkle_tree"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:47f80c9ce59557774243214f8e75c5e866f30f3d8daa755855f6ffd01c89ca89"
+checksum = "sha256:3417680a1f672bd6cfb54962481f6b96d72f6510be2658d17c8356709b5c950a"
 
 [[package]]
 name = "openzeppelin_presets"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:36c761ee923f1dc0887c0eab8c224b49ac242dbfe9163fbb0b08562042ab3d98"
+checksum = "sha256:1facc433476df1c36ecb33e3a10b6a5fb219c670c437b43696788843fbc0bc25"
 dependencies = [
  "openzeppelin_access",
  "openzeppelin_account",
  "openzeppelin_finance",
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
  "openzeppelin_token",
  "openzeppelin_upgrades",
@@ -211,38 +257,53 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin_security"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:902932ec296c2f400e0ac7c579edeaafd6067b6ce6d9854c1191de28e396ffe3"
+checksum = "sha256:470f2debae50e03f1435874bc697a0825c257edcad4d1a0cc134e40360e6aba8"
+dependencies = [
+ "openzeppelin_interfaces",
+]
 
 [[package]]
 name = "openzeppelin_token"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:6fe61f63b5a6706018265fb7373b6e5bd3ff829bdc760b2b90296b1e708d180c"
+checksum = "sha256:5ce19d297251d9f11acc38a3e3e2faeb2e73b003c8de2f02c7c5d06d9161a5fc"
 dependencies = [
  "openzeppelin_access",
- "openzeppelin_account",
+ "openzeppelin_interfaces",
  "openzeppelin_introspection",
  "openzeppelin_utils",
 ]
 
 [[package]]
 name = "openzeppelin_upgrades"
-version = "2.0.0"
+version = "3.0.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:560d57a9c3f3ec5a476e82fec8963c93c8df63a4ff9ff134f64ab8383bde3c61"
+checksum = "sha256:1b148d5da1ae90a056b455e8865260423c5491a82777377abfdc68fd8e7d0675"
 
 [[package]]
 name = "openzeppelin_utils"
-version = "2.0.0"
+version = "2.1.0"
 source = "registry+https://scarbs.xyz/"
-checksum = "sha256:bf799c794139837f397975ffdf6a7ed5032d198bbf70e87a8f44f144a9dfc505"
+checksum = "sha256:4d5504fef1c5a6d9fee6a3ae392004a4a24b4b3ccb790c5e5217da96beb73e08"
+dependencies = [
+ "openzeppelin_interfaces",
+]
+
+[[package]]
+name = "quest"
+version = "0.0.0"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
+dependencies = [
+ "dojo",
+ "graffiti",
+]
 
 [[package]]
 name = "registry"
 version = "0.0.0"
-source = "git+https://github.com/cartridge-gg/arcade?rev=1ca0d78#1ca0d78da1edbe6d348401d46171502145b4af80"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
 dependencies = [
  "collection",
  "dojo",
@@ -252,7 +313,7 @@ dependencies = [
 [[package]]
 name = "starterpack"
 version = "0.0.0"
-source = "git+https://github.com/cartridge-gg/arcade?rev=1ca0d78#1ca0d78da1edbe6d348401d46171502145b4af80"
+source = "git+https://github.com/cartridge-gg/arcade?rev=fc2e81c#fc2e81c8d4cee706bb26cb2396d941fd0657c277"
 dependencies = [
  "dojo",
  "graffiti",

@@ -3,6 +3,7 @@ import {
   ControllerIcon,
   SpeakerIcon,
   SpeakerMutedIcon,
+  TrophyIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { AudioSettings } from "@/hooks/use-audio";
@@ -182,6 +183,7 @@ export interface SettingsModalProps {
   onStashViewModeChange?: (mode: StashViewMode) => void;
   username?: string;
   onProfileClick?: () => void;
+  onLeaderboard?: () => void;
 }
 
 const ToggleSwitch = ({
@@ -232,6 +234,7 @@ export const SettingsModal = ({
   onStashViewModeChange,
   username,
   onProfileClick,
+  onLeaderboard,
 }: SettingsModalProps) => {
   if (!open) return null;
 
@@ -373,7 +376,21 @@ export const SettingsModal = ({
           </Button>
         )}
 
-        {/* Profile button — mobile only (desktop shows profile in header) */}
+        {onLeaderboard && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() => {
+              onClose();
+              onLeaderboard();
+            }}
+          >
+            <TrophyIcon variant="solid" size="md" />
+            Leaderboard
+          </Button>
+        )}
+
         {username && (
           <Button
             variant="secondary"

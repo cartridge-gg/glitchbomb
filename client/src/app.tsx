@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ControllerConnector from "@cartridge/connector/controller";
 import type { ControllerOptions, SessionPolicies } from "@cartridge/controller";
 import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
@@ -89,31 +90,35 @@ const options: ControllerOptions = {
   ...(isMobile ? {} : { policies: buildPolicies() }),
   preset: isMobile ? "glitch-bomb-mobile" : "glitch-bomb",
   // namespace: "GLITCHBOMB",
-  slot: "gb-bal",
+  slot: "glitchbomb",
 };
 
 const connectors = [new ControllerConnector(options) as never as Connector];
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <>
-      <StarknetConfig
-        autoConnect
-        chains={[chains[DEFAULT_CHAIN_ID]]}
-        connectors={connectors}
-        explorer={voyager}
-        provider={provider}
-      >
-        <LoadingProvider>
-          <EntitiesProvider>
-            <AppDataProvider>
-              <LoadingScreen />
-              <GameStartedNotifier />
-              <Router />
-            </AppDataProvider>
-          </EntitiesProvider>
-        </LoadingProvider>
-      </StarknetConfig>
+      <QueryClientProvider client={queryClient}>
+        <StarknetConfig
+          autoConnect
+          chains={[chains[DEFAULT_CHAIN_ID]]}
+          connectors={connectors}
+          explorer={voyager}
+          provider={provider}
+        >
+          <LoadingProvider>
+            <EntitiesProvider>
+              <AppDataProvider>
+                <LoadingScreen />
+                <GameStartedNotifier />
+                <Router />
+              </AppDataProvider>
+            </EntitiesProvider>
+          </LoadingProvider>
+        </StarknetConfig>
+      </QueryClientProvider>
       <Toaster
         position="top-left"
         duration={3000}

@@ -6,6 +6,7 @@ import {
   ControllerIcon,
   GearIcon,
   GlitchBombIcon,
+  TrophyIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
@@ -34,6 +35,7 @@ export interface AppHeaderProps {
   onShowDistributionPercentChange?: (show: boolean) => void;
   stashViewMode?: StashViewMode;
   onStashViewModeChange?: (mode: StashViewMode) => void;
+  onLeaderboard?: () => void;
 }
 
 export const AppHeader = ({
@@ -55,6 +57,7 @@ export const AppHeader = ({
   onShowDistributionPercentChange,
   stashViewMode,
   onStashViewModeChange,
+  onLeaderboard,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -105,6 +108,17 @@ export const AppHeader = ({
 
       {/* Right: Sound + Moonrocks + Profile */}
       <div className="flex gap-2 shrink-0">
+        {/* Leaderboard button */}
+        {onLeaderboard && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-12 w-12 p-0"
+            onClick={onLeaderboard}
+          >
+            <TrophyIcon variant="solid" size="md" />
+          </Button>
+        )}
         {/* Desktop: settings button */}
         {audioSettings && (
           <Button

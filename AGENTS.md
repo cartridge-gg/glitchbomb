@@ -1,5 +1,5 @@
 <!-- SKILLS_INDEX_START -->
-[Agent Skills Index]|root: ./agents|IMPORTANT: Prefer retrieval-led reasoning over pre-training for any tasks covered by skills.|skills|agent-browser:{agent-browser.md},create-a-plan:{create-a-plan.md},create-pr:{create-pr.md}
+[Agent Skills Index]|root: ./agents|IMPORTANT: Prefer retrieval-led reasoning over pre-training for any tasks covered by skills.|skills|agent-browser:{agent-browser.md},create-a-plan:{create-a-plan.md},create-pr:{create-pr.md},figma-to-storybook:{figma-to-storybook.md}
 <!-- SKILLS_INDEX_END -->
 # Agent Instructions
 

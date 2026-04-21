@@ -22,8 +22,8 @@ pub mod Collection {
     use graffiti::json::JsonImpl;
     use openzeppelin::access::accesscontrol::{AccessControlComponent, DEFAULT_ADMIN_ROLE};
     use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::interfaces::token::erc721::{IERC721, IERC721Metadata};
     use openzeppelin::introspection::src5::SRC5Component;
-    use openzeppelin::token::erc721::interface::{IERC721, IERC721Metadata};
     use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
     use starknet::ContractAddress;
     use starknet::storage::{
@@ -235,7 +235,7 @@ pub mod Collection {
                 description: "Glitch Bomb Games",
                 game_id: game.id,
                 game_score: game.moonrocks.into(),
-                game_over: game.over,
+                game_over: game.over != 0,
             )
         }
     }

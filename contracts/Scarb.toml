@@ -7,13 +7,48 @@ edition = "2024_07"
 [scripts]
 
 [[target.starknet-contract]]
+allowed-libfuncs-list.name = "experimental"
 sierra = true
 casm = true
-build-external-contracts = ["dojo::world::world_contract::world"]
+build-external-contracts = [
+  "dojo::world::world_contract::world",
+  "openzeppelin::presets::account::AccountUpgradeable",
+  "achievement::models::index::m_AchievementDefinition",
+  "achievement::models::index::m_AchievementCompletion",
+  "achievement::models::index::m_AchievementAdvancement",
+  "achievement::models::index::m_AchievementAssociation",
+  "achievement::events::index::e_TrophyCreation",
+  "achievement::events::index::e_TrophyProgression",
+  "achievement::events::index::e_AchievementCompleted",
+  "achievement::events::index::e_AchievementClaimed",
+  "quest::models::index::m_QuestDefinition",
+  "quest::models::index::m_QuestCompletion",
+  "quest::models::index::m_QuestAdvancement",
+  "quest::models::index::m_QuestAssociation",
+  "quest::models::index::m_QuestCondition",
+  "quest::events::index::e_QuestCreation",
+  "quest::events::index::e_QuestProgression",
+  "quest::events::index::e_QuestUnlocked",
+  "quest::events::index::e_QuestCompleted",
+  "quest::events::index::e_QuestClaimed",
+  "leaderboard::events::index::e_LeaderboardScore",
+  "bundle::models::index::m_Bundle",
+  "bundle::models::index::m_BundleIssuance",
+  "bundle::models::index::m_BundleReferral",
+  "bundle::models::index::m_BundleGroup",
+  "bundle::models::index::m_BundleVoucher",
+  "bundle::events::index::e_BundleRegistered",
+  "bundle::events::index::e_BundleUpdated",
+  "bundle::events::index::e_BundleIssued",
+]
 
 [dependencies]
+achievement.workspace = true
 collection.workspace = true
+quest.workspace = true
+bundle.workspace = true
 starterpack.workspace = true
+leaderboard.workspace = true
 graffiti.workspace = true
 ekubo.workspace = true
 openzeppelin.workspace = true

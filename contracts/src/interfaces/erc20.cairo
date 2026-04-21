@@ -22,3 +22,16 @@ pub trait IERC20<T> {
     fn burn(ref self: T, amount: u256);
     fn total_supply(self: @T) -> u256;
 }
+
+#[starknet::interface]
+pub trait IERC20Metadata<T> {
+    /// Returns the name of the token.
+    fn name(self: @T) -> felt252;
+
+    /// Returns the symbol of the token.
+    fn symbol(self: @T) -> felt252;
+
+    /// Returns the number of decimals used to get its user representation.
+    fn decimals(self: @T) -> u8;
+}
+

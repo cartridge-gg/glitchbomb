@@ -7,6 +7,7 @@ import {
   GearIcon,
   GlitchBombIcon,
   MoonrockIcon,
+  TrophyIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { GlitchText } from "@/components/ui/glitch-text";
@@ -33,6 +34,7 @@ export interface GameHeaderProps {
   stashViewMode?: StashViewMode;
   onStashViewModeChange?: (mode: StashViewMode) => void;
   onProfileClick?: () => void;
+  onLeaderboard?: () => void;
 }
 
 const COUNT_UP_DURATION_MS = 600;
@@ -58,6 +60,7 @@ export const GameHeader = ({
   stashViewMode,
   onStashViewModeChange,
   onProfileClick,
+  onLeaderboard,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
   const [displayCount, setDisplayCount] = useState<number | null>(null);
@@ -143,6 +146,16 @@ export const GameHeader = ({
       {/* Right column - sound button + profile aligned right */}
       <div className="flex justify-end gap-2">
         {/* Desktop: settings + profile */}
+        {onLeaderboard && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-[clamp(36px,6svh,48px)] w-[clamp(36px,6svh,48px)] p-0"
+            onClick={onLeaderboard}
+          >
+            <TrophyIcon variant="solid" size="md" />
+          </Button>
+        )}
         <Button
           variant="secondary"
           gradient="green"
@@ -190,6 +203,7 @@ export const GameHeader = ({
               onStashViewModeChange={onStashViewModeChange}
               username={username}
               onProfileClick={onProfileClick}
+              onLeaderboard={onLeaderboard}
             />
           )}
       </div>

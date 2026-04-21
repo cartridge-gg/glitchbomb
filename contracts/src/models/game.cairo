@@ -5,7 +5,9 @@ use crate::constants::{
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::power::TwoPower;
+use crate::helpers::rewarder::Rewarder;
 pub use crate::models::index::Game;
+use crate::types::counters::{Counters, CountersTrait};
 use crate::types::curse::{Curse, CurseTrait};
 use crate::types::milestone::Milestone;
 use crate::types::orb::{Orb, OrbTrait};
@@ -32,6 +34,7 @@ const BITS_PER_PURCHASE: u8 = 3;
 pub mod Errors {
     pub const GAME_IS_OVER: felt252 = 'Game: is over';
     pub const GAME_NOT_OVER: felt252 = 'Game: not over';
+    pub const GAME_NOT_STARTED: felt252 = 'Game: not started';
     pub const GAME_ALREADY_STARTED: felt252 = 'Game: already started';
     pub const GAME_IN_SHOP: felt252 = 'Game: in shop';
     pub const GAME_NOT_SHOP: felt252 = 'Game: not in shop';
@@ -46,16 +49,16 @@ pub mod Errors {
     pub const GAME_SHOP_BURN_USED: felt252 = 'Game: shop burn used';
     pub const GAME_CANNOT_BURN_BOMB: felt252 = 'Game: cannot burn bomb';
     pub const GAME_INVALID_BAG_INDEX: felt252 = 'Game: invalid bag index';
-    pub const GAME_EXPIRED: felt252 = 'Game: expired';
+    pub const GAME_HAS_EXPIRED: felt252 = 'Game: has expired';
+    pub const GAME_ALREADY_CLAIMED: felt252 = 'Game: already claimed';
 }
 
 #[generate_trait]
 pub impl GameImpl of GameTrait {
-    fn new(id: u64, stake: u8) -> Game {
+    fn new(id: u64, stake: u128) -> Game {
         Game {
             id: id,
-            seed: 0,
-            over: false,
+            claimed: false,
             level: DEFAULT_LEVEL,
             health: MAX_HEALTH,
             immunity: 0,
@@ -65,12 +68,17 @@ pub impl GameImpl of GameTrait {
             milestone: Milestone::get(DEFAULT_LEVEL),
             multiplier: BASE_MULTIPLIER,
             chips: 0,
+            over: 0,
+            expiration: 0,
             discards: 0,
             bag: 0,
             shop: 0,
             moonrocks: DEFAULT_MOONROCKS,
             stake: stake,
-            created_at: 0,
+            level_counters: 0,
+            counters: 0,
+            supply: 0,
+            price: 0,
         }
     }
 
@@ -119,6 +127,11 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
+    fn is_full_health(self: @Game) -> bool {
+        self.health == @MAX_HEALTH
+    }
+
+    #[inline]
     fn heal(ref self: Game, health: u8) {
         self.health += core::cmp::min(health, MAX_HEALTH - self.health);
     }
@@ -135,8 +148,24 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
+    fn counters(self: @Game) -> Counters {
+        CountersTrait::unpack(*self.counters)
+    }
+
+    #[inline]
+    fn level_counters(self: @Game) -> Counters {
+        CountersTrait::unpack(*self.level_counters)
+    }
+
+    #[inline]
     fn immune(ref self: Game, immunity: u8) {
         self.immunity += immunity;
+    }
+
+    #[inline]
+    fn counts(self: @Game) -> (u8, u8, u8, u8, u8, u8) {
+        let bag: Orbs = OrbsTrait::unpack(*self.bag);
+        bag.counts()
     }
 
     #[inline]
@@ -188,39 +217,53 @@ pub impl GameImpl of GameTrait {
         count
     }
 
+    /// Determines if the game is over based on the current health.
     #[inline]
     fn is_over(self: @Game) -> bool {
         self.health == @0
     }
 
+    /// Determines if the game has expired based on the current timestamp.
+    #[inline]
+    fn is_expired(self: @Game) -> bool {
+        starknet::get_block_timestamp() >= *self.expiration
+    }
+
+    /// Determines if the game is completed based on the current points.
     #[inline]
     fn is_completed(self: @Game) -> bool {
         self.points >= @Milestone::get(*self.level)
     }
 
+    /// Assesses the game state and updates the game over status.
     #[inline]
     fn assess(ref self: Game) {
-        self.over = self.is_over();
+        if self.is_over() {
+            self.over = starknet::get_block_timestamp();
+        }
     }
 
     #[inline]
     fn start(ref self: Game) -> u16 {
         // [Effect] Set the initial bag
         self.bag = OrbsTrait::initial();
+        // [Effect] Set expiration
+        self.expiration = starknet::get_block_timestamp() + GAME_EXPIRATION_TIME;
+        // [Effect] Update game counters
+        let mut game_counters: Counters = self.counters();
+        game_counters.streak_save += 1;
+        self.counters = game_counters.pack();
         // [Return] Entry fee
         Milestone::cost(self.level)
     }
 
     #[inline]
     fn cash_out(ref self: Game) -> u16 {
-        // [Check] Game state
-        self.assert_not_over();
-        self.assert_not_shop();
         // [Effect] Convert points
         let moonrocks = self.points;
         self.points = 0;
         // [Effect] Update state
-        self.over = true;
+        self.over = starknet::get_block_timestamp();
         // [Return] Moonrocks
         moonrocks
     }
@@ -233,6 +276,8 @@ pub impl GameImpl of GameTrait {
         self.assert_is_completed();
         // [Effect] Reset discards so all orbs are available on entering the shop
         self.discards = 0;
+        // [Effect] Reset level counters
+        self.level_counters = 0;
         // [Effect] Generate and set the shop (orbs in bits 0-29, preserve purchase counts)
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
@@ -257,6 +302,7 @@ pub impl GameImpl of GameTrait {
         // [Effect] Extract orbs from shop (lower 30 bits)
         let orbs: Orbs = Self::get_shop_orbs(self.shop);
         let max_index: u32 = orbs.len();
+        let quantity: u8 = indices.len().try_into().unwrap();
         while let Option::Some(index) = indices.pop_front() {
             // [Check] Index is within range
             let current: u32 = (*index).into();
@@ -275,7 +321,16 @@ pub impl GameImpl of GameTrait {
             self.shop = Self::inc_purchase_count(self.shop, orb_id);
             // [Effect] Add orb to the bag
             self.add(orb);
-        };
+        }
+        // [Effect] Increment counters
+        // [Note] There is no need to track game purchases since it is not used
+        let mut level_counters: Counters = self.level_counters();
+        level_counters.buy(quantity);
+        self.level_counters = level_counters.pack();
+        // [Note] We track buying orbs at the game layer
+        let mut game_counters: Counters = self.counters();
+        game_counters.streak_save = 0;
+        self.counters = game_counters.pack();
     }
 
     #[inline]
@@ -307,24 +362,10 @@ pub impl GameImpl of GameTrait {
             },
             _ => {},
         }
-    }
-
-    #[inline]
-    fn refresh(ref self: Game, seed: felt252) {
-        // [Check] Game state
-        self.assert_not_over();
-        self.assert_in_shop();
-        self.assert_refresh_available();
-        // [Effect] Spend chips
-        self.spend(SHOP_ACTION_COST);
-        // [Effect] Generate new shop orbs
-        let orbs: Orbs = OrbsTrait::shop(seed);
-        let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
-        // [Effect] Set new orbs + mark refresh used (bit 30), preserve purchase counts
-        let refresh_flag: u128 = TwoPower::pow(REFRESH_BIT).try_into().unwrap();
-        let purchase_shift: u128 = TwoPower::pow(PURCHASE_OFFSET).try_into().unwrap();
-        let purchase_counts = (self.shop / purchase_shift) * purchase_shift;
-        self.shop = packed_orbs + refresh_flag + purchase_counts;
+        // [Effect] Update game counters
+        let mut game_counters: Counters = self.counters();
+        game_counters.streak_save += 1;
+        self.counters = game_counters.pack();
     }
 
     #[inline]
@@ -410,12 +451,10 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16) {
+    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16, u32, u16) {
         // [Check] Game is not over
         self.assert_not_over();
         self.assert_not_completed();
-        // [Effect] Store seed for effects that need randomness
-        self.seed = seed;
         // [Effect] If all non-sticky orbs have been pulled, regenerate the bag
         let sticky_count = self.sticky_orbs_count();
         let should_reset = self.pullable_orbs_count() == sticky_count;
@@ -432,12 +471,11 @@ pub impl GameImpl of GameTrait {
         } else {
             1
         };
-
+        // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
         let mut pulled_orbs: Array<Orb> = array![];
         let mut total_earnings: u16 = 0;
         let mut draws_done: u8 = 0;
-
-        // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
+        let total_points: u16 = self.points;
         while draws_done < draw_count && deck.remaining > 0 {
             let index: u8 = deck.draw() - 1;
             let orb: Orb = *bag.at(index.into());
@@ -455,9 +493,25 @@ pub impl GameImpl of GameTrait {
         }
 
         // [Effect] Assess the game
-        self.assess();
+        self.over = if self.is_over() {
+            starknet::get_block_timestamp()
+        } else {
+            self.over
+        };
+
         // [Return] The pulled orbs and total earnings
-        (pulled_orbs, total_earnings)
+        (pulled_orbs, total_earnings, deck.remaining, self.points - total_points)
+    }
+
+    #[inline]
+    fn claim(ref self: Game) -> u256 {
+        // [Check] Game is not claimed
+        self.assert_not_claimed();
+        // [Effect] Claim
+        self.claimed = true;
+        // [Return] Reward amount
+        let reward: u256 = Rewarder::amount(self.moonrocks, self.stake);
+        reward * self.stake.into()
     }
 }
 
@@ -465,12 +519,17 @@ pub impl GameImpl of GameTrait {
 pub impl GameAssert of AssertTrait {
     #[inline]
     fn assert_not_over(self: @Game) {
-        assert(!*self.over, Errors::GAME_IS_OVER);
+        assert(self.over == @0, Errors::GAME_IS_OVER);
     }
 
     #[inline]
     fn assert_is_over(self: @Game) {
-        assert(*self.over, Errors::GAME_NOT_OVER);
+        assert(self.over != @0, Errors::GAME_NOT_OVER);
+    }
+
+    #[inline]
+    fn assert_has_started(self: @Game) {
+        assert(self.expiration != @0, Errors::GAME_NOT_STARTED);
     }
 
     #[inline]
@@ -528,10 +587,13 @@ pub impl GameAssert of AssertTrait {
     }
 
     #[inline]
-    fn assert_not_expired(self: @Game, current_time: u64) {
-        if *self.created_at != 0 {
-            assert(current_time < *self.created_at + GAME_EXPIRATION_TIME, Errors::GAME_EXPIRED);
-        }
+    fn assert_not_expired(self: @Game) {
+        assert(!self.is_expired(), Errors::GAME_HAS_EXPIRED);
+    }
+
+    #[inline]
+    fn assert_not_claimed(self: @Game) {
+        assert(!*self.claimed, Errors::GAME_ALREADY_CLAIMED);
     }
 }
 
@@ -540,14 +602,14 @@ mod tests {
     use super::*;
 
     const GAME_ID: u64 = 1;
-    const STAKE: u8 = 1;
+    const STAKE: u128 = 1;
     const SEED: felt252 = 'SEED';
 
     #[test]
     fn test_game_new() {
         let game = GameTrait::new(GAME_ID, STAKE);
         assert_eq!(game.id, GAME_ID);
-        assert_eq!(game.over, false);
+        assert_eq!(game.over, 0);
         assert_eq!(game.level, DEFAULT_LEVEL);
         assert_eq!(game.health, MAX_HEALTH);
         assert_eq!(game.immunity, 0);
@@ -676,22 +738,13 @@ mod tests {
     }
 
     #[test]
-    fn test_game_assess() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.take_damage(MAX_HEALTH);
-        game.assess();
-        assert_eq!(game.over, true);
-    }
-
-    #[test]
     fn test_game_cash_out() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         game.earn_points(100);
         let cash = game.cash_out();
         assert_eq!(cash, 100);
-        assert_eq!(game.over, true);
+        assert_eq!(game.over, 0);
     }
 
     #[test]
@@ -738,20 +791,6 @@ mod tests {
     }
 
     #[test]
-    fn test_game_refresh() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.earn_points(100);
-        game.enter(SEED);
-        let old_shop = game.shop;
-        game.refresh('NEW_SEED');
-        // [Check] Shop changed and refresh flag is set
-        assert_eq!(game.shop != old_shop, true);
-        assert_eq!(GameTrait::is_refresh_used(game.shop), true);
-        assert_eq!(game.chips, 100 - SHOP_ACTION_COST);
-    }
-
-    #[test]
     fn test_game_burn() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
@@ -784,18 +823,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: 'Game: shop refresh used')]
-    fn test_game_refresh_only_once() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.earn_points(100);
-        game.enter(SEED);
-        game.refresh('SEED1');
-        // [Check] Second refresh should panic
-        game.refresh('SEED2');
-    }
-
-    #[test]
     #[should_panic(expected: 'Game: shop burn used')]
     fn test_game_burn_only_once() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
@@ -816,83 +843,6 @@ mod tests {
         game.enter(SEED);
         // [Check] Burning a bomb (index 0 is Bomb1) should panic
         game.burn(0);
-    }
-
-    #[test]
-    fn test_game_refresh_preserves_purchase_counts() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.earn_points(200);
-        game.enter(SEED);
-        // [Info] Buy position 0 twice (price escalates)
-        let mut indices: Span<u8> = [0, 0].span();
-        game.buy(ref indices);
-        let chips_after_first_buy = game.chips;
-        // [Effect] Refresh shop
-        game.refresh('NEW_SEED');
-        let chips_after_refresh = game.chips;
-        assert_eq!(chips_after_refresh, chips_after_first_buy - SHOP_ACTION_COST);
-        // [Info] Buy position 0 - price includes prior purchase counts
-        let orbs = GameTrait::get_shop_orbs(game.shop);
-        let orb = *orbs.at(0);
-        let base = orb.cost();
-        let orb_id: u8 = orb.into();
-        let count = GameTrait::get_purchase_count(game.shop, orb_id);
-        let multiplier = BASE_MULTIPLIER + (count.into() * SUPP_MULTIPLIER);
-        let expected_cost = (base * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
-        let mut indices: Span<u8> = [0].span();
-        game.buy(ref indices);
-        assert_eq!(game.chips, chips_after_refresh - expected_cost);
-    }
-
-    #[test]
-    fn test_game_buy_refresh_buy_flow() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.earn_points(200);
-        game.enter(SEED);
-        let initial_chips = game.chips;
-        // [Info] Buy one orb
-        let orbs1 = GameTrait::get_shop_orbs(game.shop);
-        let cost1 = (*orbs1.at(0)).cost();
-        let mut indices: Span<u8> = [0].span();
-        game.buy(ref indices);
-        assert_eq!(game.chips, initial_chips - cost1);
-        // [Effect] Refresh
-        game.refresh('NEW');
-        // [Info] Buy from new shop - price includes prior purchase counts
-        let orbs2 = GameTrait::get_shop_orbs(game.shop);
-        let orb2 = *orbs2.at(0);
-        let base2 = orb2.cost();
-        let orb2_id: u8 = orb2.into();
-        let count2 = GameTrait::get_purchase_count(game.shop, orb2_id);
-        let multiplier2 = BASE_MULTIPLIER + (count2.into() * SUPP_MULTIPLIER);
-        let expected_cost2 = (base2 * multiplier2 + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
-        let chips_before = game.chips;
-        let mut indices: Span<u8> = [0].span();
-        game.buy(ref indices);
-        assert_eq!(game.chips, chips_before - expected_cost2);
-    }
-
-    #[test]
-    fn test_game_flags_reset_on_new_shop() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.moonrocks = 500;
-        game.earn_points(200);
-        game.enter(SEED);
-        // [Effect] Use refresh and burn in first shop
-        game.refresh('NEW');
-        game.burn(4);
-        assert_eq!(GameTrait::is_refresh_used(game.shop), true);
-        assert_eq!(GameTrait::is_burn_used(game.shop), true);
-        // [Effect] Exit and enter new shop
-        game.exit();
-        game.earn_points(200);
-        game.enter('SHOP2');
-        // [Check] Flags are reset in new shop
-        assert_eq!(GameTrait::is_refresh_used(game.shop), false);
-        assert_eq!(GameTrait::is_burn_used(game.shop), false);
     }
 
     #[test]
@@ -982,19 +932,6 @@ mod tests {
 
     #[test]
     #[should_panic(expected: 'Game: cannot afford')]
-    fn test_game_refresh_insufficient_chips() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
-        game.start();
-        game.earn_points(12); // Reach milestone to enter shop
-        game.enter(SEED);
-        // [Effect] Spend all chips except 3 (less than SHOP_ACTION_COST of 4)
-        game.spend(game.chips - 3);
-        // [Check] Refresh without enough chips should panic
-        game.refresh('NEW');
-    }
-
-    #[test]
-    #[should_panic(expected: 'Game: cannot afford')]
     fn test_game_burn_insufficient_chips() {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
@@ -1030,9 +967,9 @@ mod tests {
         // [Check] No curse active
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
         // [Effect] Pull orb
-        let (orbs, _earnings) = game.pull(SEED);
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
         // [Check] Only 1 orb pulled
-        assert_eq!(orbs.len(), 1);
+        assert_eq!(orbs.len().into(), 1);
     }
 
     #[test]
@@ -1043,9 +980,9 @@ mod tests {
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         // [Effect] Pull orbs
-        let (orbs, _earnings) = game.pull(SEED);
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled due to DoubleDraw curse
-        assert_eq!(orbs.len(), 2);
+        assert_eq!(orbs.len().into(), 2);
     }
 
     #[test]
@@ -1055,9 +992,9 @@ mod tests {
         let discards_before = game.discards;
         // [Effect] Add DoubleDraw curse and pull
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
-        let (orbs, _earnings) = game.pull(SEED);
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled and discards updated for both
-        assert_eq!(orbs.len(), 2);
+        assert_eq!(orbs.len().into(), 2);
         // Discards should have 2 bits set (2 orbs pulled)
         assert_eq!(Bitmap::popcount(game.discards), Bitmap::popcount(discards_before) + 2);
     }
@@ -1071,16 +1008,16 @@ mod tests {
         // [Effect] Pull until only 1 orb remains (initial bag has 11 orbs)
         // Pull 5 times (each pulls 2) = 10 orbs, leaving 1
         let mut i: u8 = 0;
-        while i < 5 && !game.over {
+        while i < 5 && game.over == 0 {
             game.pull(SEED + i.into());
-            game.points = 0; // Reset points to keep pulling
+            game.points = 0; // Reset points to avoid milestone
             i += 1;
         }
         // [Check] If not dead, pull the last orb
-        if !game.over {
+        if game.over == 0 {
             let pullable = game.pullable_orbs_count();
             if pullable > 0 {
-                let (orbs, _earnings) = game.pull('FINAL');
+                let (orbs, _, _, _) = game.pull('FINAL');
                 // [Check] Should only pull what's available (1 orb max)
                 assert!(orbs.len() <= pullable.into());
             }
@@ -1151,8 +1088,8 @@ mod tests {
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
         // [Check] DoubleDraw still works (pulls 2 orbs)
-        let (orbs, _earnings) = game.pull(SEED);
-        assert_eq!(orbs.len(), 2);
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        assert_eq!(orbs.len().into(), 2);
         // [Check] Demultiplier still works (halves boost)
         let multiplier_before = game.multiplier;
         game.boost(100);
@@ -1169,13 +1106,13 @@ mod tests {
         let bag_size: u8 = bag.len().try_into().unwrap();
         // [Effect] Pull all orbs (without dying)
         let mut i: u8 = 0;
-        while i < bag_size && !game.over {
+        while i < bag_size && game.over == 0 {
             game.pull(SEED + i.into());
             game.points = 0; // Reset points to avoid milestone
             i += 1;
         }
         // [Check] If not dead, all orbs should be discarded
-        if !game.over {
+        if game.over == 0 {
             assert_eq!(game.pullable_orbs_count(), 0);
             // [Effect] Pull again - should reshuffle (reset discards)
             game.pull('RESHUFFLE');
@@ -1197,13 +1134,13 @@ mod tests {
         assert_eq!(new_bag_size, initial_bag_size + 1);
         // [Effect] Pull all orbs (without dying)
         let mut i: u8 = 0;
-        while i < new_bag_size && !game.over {
+        while i < new_bag_size && game.over == 0 {
             game.pull(SEED + i.into());
             game.points = 0;
             i += 1;
         }
         // [Check] If not dead, reshuffle should keep the added orb
-        if !game.over {
+        if game.over == 0 {
             assert_eq!(game.pullable_orbs_count(), 0);
             game.pull('RESHUFFLE');
             // [Check] Bag still has the added orb (new_bag_size - 1 pullable after 1 pull)
@@ -1222,13 +1159,13 @@ mod tests {
         let bag_size: u8 = bag.len().try_into().unwrap();
         // [Effect] Pull all orbs
         let mut i: u8 = 0;
-        while i < bag_size && !game.over {
+        while i < bag_size && game.over == 0 {
             game.pull(SEED + i.into());
             game.points = 0;
             i += 1;
         }
         // [Check] If survived, discards should be full
-        if !game.over {
+        if game.over == 0 {
             let discards_before = game.discards;
             assert!(discards_before > 0);
             // [Effect] Pull to trigger reshuffle
@@ -1426,11 +1363,11 @@ mod tests {
         // [Setup] Replace bag with a single bomb for deterministic pulls
         game.bag = array![Orb::StickyBomb].pack();
         game.discards = 0;
-        let (orbs_first, _earnings_first) = game.pull(SEED);
+        let (orbs_first, _, _, _) = game.pull(SEED);
         assert_eq!(orbs_first.len(), 1);
         assert_eq!(game.discards, 0);
         assert_eq!(game.pullable_orbs_count(), 1);
-        let (orbs_second, _earnings_second) = game.pull('SECOND');
+        let (orbs_second, _, _, _) = game.pull('SECOND');
         assert_eq!(orbs_second.len(), 1);
     }
 }

@@ -2,33 +2,30 @@
 pub mod PlayableComponent {
     // Imports
 
-    use core::num::traits::Zero;
+    use achievement::component::Component as AchievementComponent;
+    use achievement::component::Component::InternalImpl as AchievementInternalImpl;
     use dojo::world::{WorldStorage, WorldStorageTrait};
-    use ekubo::components::clear::IClearDispatcherTrait;
-    use ekubo::interfaces::erc20::IERC20Dispatcher as EkuboIERC20Dispatcher;
-    use ekubo::interfaces::router::{IRouterDispatcherTrait, RouteNode, TokenAmount};
-    use ekubo::types::i129::i129;
-    use ekubo::types::keys::PoolKey;
+    use leaderboard::components::rankable::RankableComponent;
+    use leaderboard::components::rankable::RankableComponent::InternalImpl as RankableInternalImpl;
+    use openzeppelin::interfaces::token::erc721::{IERC721Dispatcher, IERC721DispatcherTrait};
+    use quest::component::Component as QuestableComponent;
+    use quest::component::Component::InternalImpl as QuestableInternalImpl;
     use starknet::ContractAddress;
-    use crate::constants::MAX_SCORE;
-    use crate::helpers::random::RandomTrait;
-    use crate::helpers::rewarder::RewarderImpl;
-    use crate::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use crate::models::config::{ConfigAssert, ConfigTrait};
-    use crate::models::game::{BASE_MULTIPLIER, GameAssert, GameTrait, SUPP_MULTIPLIER};
-    use crate::models::starterpack::StarterpackAssert;
-    use crate::store::StoreTrait;
-    use crate::systems::collection::{
-        ICollectionDispatcher, ICollectionDispatcherTrait, NAME as COLLECTION,
-    };
-    use crate::types::orb::OrbTrait;
-    use crate::types::orbs::OrbsTrait;
+    use crate::constants;
+    use crate::elements::achievements::index::{ACHIEVEMENT_COUNT, AchievementType, IAchievement};
+    use crate::elements::quests::index::{IQuest, QUEST_COUNT, QuestProps, QuestType};
+    use crate::elements::tasks::index::{Task, TaskTrait};
+    use crate::helpers::random::RandomImpl;
+    use crate::helpers::rewarder::Rewarder;
+    use crate::models::config::ConfigTrait;
+    use crate::models::game::{AssertTrait, BASE_MULTIPLIER, GameAssert, GameTrait};
+    use crate::store::{StoreImpl, StoreTrait};
+    use crate::systems::collection::NAME as COLLECTION;
+    use crate::systems::token::{ITokenDispatcher, ITokenDispatcherTrait, NAME as TOKEN};
 
-    // Ekubo pool parameters (hardcoded for sepolia)
-    const POOL_FEE: u128 = 170141183460469235273462165868118016; // 0.05%
-    const POOL_TICK_SPACING: u128 = 354892;
-    const MIN_SQRT_RATIO: u256 = 18446748437148339061;
-    const MAX_SQRT_RATIO: u256 = 6277100250585753475930931601400621808602321654880405518632;
+    // Constants
+
+    const LEADERBOARD_ID: felt252 = 1;
 
     // Storage
 
@@ -42,139 +39,109 @@ pub mod PlayableComponent {
     pub enum Event {}
 
     #[generate_trait]
-    pub impl StarterpackImpl<
-        TContractState, +HasComponent<TContractState>,
-    > of IStarterpackImplementation<TContractState> {
-        fn on_issue(
+    pub impl InternalImpl<
+        TContractState,
+        +HasComponent<TContractState>,
+        +Drop<TContractState>,
+        impl Achievement: AchievementComponent::HasComponent<TContractState>,
+        impl AchievementImpl: AchievementComponent::AchievementTrait<TContractState>,
+        impl Quest: QuestableComponent::HasComponent<TContractState>,
+        impl QuestImpl: QuestableComponent::QuestTrait<TContractState>,
+        impl Rankable: RankableComponent::HasComponent<TContractState>,
+    > of InternalTrait<TContractState> {
+        /// Initializes the components.
+        fn initialize(ref self: ComponentState<TContractState>, mut world: WorldStorage) {
+            // [Event] Initialize all Achievements
+            let mut achievement_id: u8 = ACHIEVEMENT_COUNT;
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            while achievement_id > 0 {
+                let achievement_type: AchievementType = achievement_id.into();
+                let props = achievement_type.props();
+                achievement
+                    .create(
+                        world,
+                        id: props.id,
+                        start: 0,
+                        end: 0,
+                        tasks: props.tasks,
+                        metadata: props.metadata,
+                        to_store: true,
+                    );
+                achievement_id -= 1;
+            }
+            // [Event] Initialize all Quests
+            let mut quest_id: u8 = QUEST_COUNT;
+            let mut quest = get_dep_component_mut!(ref self, Quest);
+            let registry = starknet::get_contract_address();
+            while quest_id > 0 {
+                let quest_type: QuestType = quest_id.into();
+                let props: QuestProps = quest_type.props(registry);
+                quest
+                    .create(
+                        world: world,
+                        id: props.id,
+                        start: props.start,
+                        end: props.end,
+                        duration: props.duration,
+                        interval: props.interval,
+                        tasks: props.tasks.span(),
+                        conditions: props.conditions.span(),
+                        metadata: props.metadata,
+                        to_store: true,
+                    );
+                quest_id -= 1;
+            };
+        }
+
+        /// Create a new game. It ensures the game is valid and not already created.
+        fn create(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            recipient: ContractAddress,
-            starterpack_id: u32,
-            mut quantity: u32,
+            player: ContractAddress,
+            game_id: u64,
+            multiplier: u128,
+            supply: u256,
+            price: u256,
         ) {
             // [Setup] Store
-            let store = StoreTrait::new(world);
+            let mut store = StoreImpl::new(world);
 
-            // [Check] Caller is allowed
-            let config = store.config();
-            let caller = starknet::get_caller_address();
-            config.assert_is_registry(caller);
+            // [Effect] Create game with starterpack stake
+            let mut game = GameTrait::new(id: game_id, stake: multiplier);
 
-            // [Check] Starterpack exists
-            let starterpack = store.starterpack(starterpack_id);
-            starterpack.assert_does_exist();
+            // [Effect] Start the game immediately (fill bag)
+            let cost = game.start();
 
-            // [Interaction] Mint games
-            let collection = self.collection(world);
-            while quantity > 0 {
-                // [Interaction] Mint a game
-                let game_id = collection.mint(recipient, true);
+            // [Event] Emit PLDataPoint at baseline (initial moonrocks)
+            store.pl_data_point(0, @game, game.moonrocks, 0);
 
-                // [Effect] Create game with starterpack stake
-                let mut game = GameTrait::new(id: game_id, stake: starterpack.multiplier);
-                game.created_at = starknet::get_block_timestamp();
+            // [Effect] Spend moonrocks for entry
+            game.spend_moonrocks(cost);
+            store.set_game(@game);
 
-                // [Effect] Start the game immediately (fill bag)
-                let cost = game.start();
-
-                // [Event] Emit PLDataPoint at baseline (initial moonrocks)
-                store.pl_data_point(0, @game, game.moonrocks, 0);
-
-                // [Effect] Spend moonrocks for entry
-                game.spend_moonrocks(cost);
-                store.set_game(@game);
-
-                // [Interaction] Update token metadata
-                collection.update(game_id.into());
-
-                // [Event] Emit GameStarted
-                store.game_started(@game);
-
-                quantity -= 1;
-            }
-
-            // [Interaction] Buy-and-burn via Ekubo (skip when ekubo is not configured)
-            let config = store.config();
-            if config.ekubo.is_non_zero() {
-                let this = starknet::get_contract_address();
-                let quote = IERC20Dispatcher { contract_address: config.quote };
-                let game_token = config.token();
-                let amount = quote.balance_of(this);
-
-                // Transfer USDC to ekubo router
-                let router = store.ekubo_router();
-                let clearer = store.ekubo_clearer();
-                quote.transfer(router.contract_address, amount);
-
-                // Construct pool key (token0 must be the smaller address)
-                let (token0, token1, is_token1) = if config.quote < game_token.contract_address {
-                    (config.quote, game_token.contract_address, false)
-                } else {
-                    (game_token.contract_address, config.quote, true)
-                };
-                let pool_key = PoolKey {
-                    token0,
-                    token1,
-                    fee: POOL_FEE,
-                    tick_spacing: POOL_TICK_SPACING,
-                    extension: 0x73ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971
-                        .try_into()
-                        .unwrap(),
-                };
-
-                // sqrt_ratio_limit: selling token0 -> price drops -> MIN; selling token1 -> rises
-                // -> MAX
-                let sqrt_ratio_limit = if is_token1 {
-                    MAX_SQRT_RATIO
-                } else {
-                    MIN_SQRT_RATIO
-                };
-                let node = RouteNode { pool_key, sqrt_ratio_limit, skip_ahead: 0 };
-                let token_amount = TokenAmount {
-                    token: config.quote,
-                    amount: i129 {
-                        mag: amount.try_into().expect('Amount exceeds u128'), sign: false,
-                    },
-                };
-
-                // Swap USDC for game token
-                router.swap(node, token_amount);
-
-                // Clear tokens from router to this contract
-                clearer
-                    .clear_minimum(
-                        EkuboIERC20Dispatcher { contract_address: game_token.contract_address }, 0,
-                    );
-                clearer.clear(EkuboIERC20Dispatcher { contract_address: config.quote });
-
-                // Burn all game tokens acquired
-                let acquired = game_token.balance_of(this);
-                game_token.burn(acquired);
-            }
+            // [Effect] Achievements
+            // - Hacker
+            // - Hardwired
+            // - Jailbroken
+            // - SysAdmin
+            // - Root Access
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            achievement.progress(world, player.into(), Task::Loyalty.identifier(), 1, true);
         }
-    }
 
-    #[generate_trait]
-    pub impl InternalImpl<
-        TContractState, +HasComponent<TContractState>, +Drop<TContractState>,
-    > of InternalTrait<TContractState> {
         fn pull(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-            game.assert_not_expired(starknet::get_block_timestamp());
+            game.assert_not_expired();
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
-            let config = store.config();
-            let mut rng = RandomTrait::new_vrf(config.vrf());
-            let (orbs, earnings) = game.pull(rng.next_seed());
+            let mut rng = RandomImpl::new_vrf(store.vrf_disp());
+            let (orbs, earnings, remaining, earned_points) = game.pull(rng.next_seed());
 
             // Calculate potential moonrocks and PL id base
             let potential_moonrocks = game.moonrocks + game.points;
@@ -194,105 +161,185 @@ pub mod PlayableComponent {
             }
 
             // [Effect] Update game earnings if exists
-            if earnings > 0 {
-                game.earn_moonrocks(earnings);
+            game.earn_moonrocks(earnings);
+            store.set_game(@game);
+
+            // [Effect] Progressions
+            // - [A] What Now?
+            // - [A] Surge
+            // - [A] Overload
+            // - [A] Sky High
+            // - [A] To The Moon
+            // - [Q] Climber 3
+            // - [Q] Climber 4
+            // - [Q] Climber 5
+            // - [Q] Harver 5
+            // - [Q] Harver 40
+            // - [Q] Harver 80
+            // - [A] Harvest
+            // - [A] Jackpot
+            // - [A] Armageddon 3
+            // - [A] Armageddon 4
+            let player = self.owner(world, game_id);
+            let mut quest = get_dep_component_mut!(ref self, Quest);
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let game_counters = game.counters();
+            let level_counters = game.level_counters();
+            if remaining == 0 {
+                achievement.progress(world, player.into(), Task::WhatNow.identifier(), 1, true);
+            }
+            if earned_points >= 70 {
+                achievement.progress(world, player.into(), Task::Surge.identifier(), 1, true);
+            }
+            if earned_points >= 100 {
+                achievement.progress(world, player.into(), Task::Overload.identifier(), 1, true);
+            }
+            if game.multiplier >= 3 * BASE_MULTIPLIER {
+                quest.progress(world, player.into(), Task::Climber3.identifier(), 1, true);
+            }
+            if game.multiplier >= 4 * BASE_MULTIPLIER {
+                quest.progress(world, player.into(), Task::Climber4.identifier(), 1, true);
+            }
+            if game.multiplier >= 5 * BASE_MULTIPLIER {
+                quest.progress(world, player.into(), Task::Climber5.identifier(), 1, true);
+            }
+            if game.multiplier >= 7 * BASE_MULTIPLIER {
+                achievement.progress(world, player.into(), Task::SkyHigh.identifier(), 1, true);
+            }
+            if game.multiplier >= 10 * BASE_MULTIPLIER {
+                achievement.progress(world, player.into(), Task::ToTheMoon.identifier(), 1, true);
+            }
+            if level_counters.moonrock_amount >= 5 {
+                achievement.progress(world, player.into(), Task::Harvest5.identifier(), 1, true);
+            }
+            if level_counters.moonrock_amount >= 40 {
+                achievement.progress(world, player.into(), Task::Harvest40.identifier(), 1, true);
+            }
+            if level_counters.moonrock_amount >= 80 {
+                achievement.progress(world, player.into(), Task::Harvest80.identifier(), 1, true);
+            }
+            if level_counters.moonrock_amount >= 200 {
+                achievement.progress(world, player.into(), Task::Harvest.identifier(), 1, true);
+            }
+            if level_counters.moonrock_amount >= 500 {
+                achievement.progress(world, player.into(), Task::Jackpot.identifier(), 1, true);
+            }
+            if game_counters.bomb3_count == 3 {
+                achievement.progress(world, player.into(), Task::Armageddon3.identifier(), 1, true);
+            }
+            if game_counters.bomb3_count == 4 {
+                achievement.progress(world, player.into(), Task::Armageddon4.identifier(), 1, true);
+            }
+            if level_counters.health_amount >= 12 {
+                achievement.progress(world, player.into(), Task::Immortal.identifier(), 1, true);
+            }
+            if game_counters.streak_multipliers == 5 {
+                achievement
+                    .progress(world, player.into(), Task::FullyTorqued.identifier(), 1, true);
+            }
+            if game_counters.streak_bombs == 3 {
+                quest.progress(world, player.into(), Task::BombStreak3.identifier(), 1, true);
+            }
+            if game_counters.streak_bombs == 4 {
+                achievement.progress(world, player.into(), Task::BombStreak4.identifier(), 1, true);
+            }
+            if game_counters.streak_bombs == 5 {
+                achievement.progress(world, player.into(), Task::BombStreak5.identifier(), 1, true);
             }
 
-            // [Event] Emit GameOver if dead and cash out moonrocks
-            if game.over {
-                store.game_over(@game, 0);
-
-                // [Effect] Compute reward from existing moonrocks (no points conversion)
-                let score: u16 = if game.moonrocks > MAX_SCORE {
-                    MAX_SCORE
-                } else {
-                    game.moonrocks
-                };
-                let config = store.config();
-                let token = config.token();
-                let supply = token.total_supply();
-                let target = config.target_supply;
-                let reward: u64 = RewarderImpl::amount(score, supply, target);
-                let reward: u64 = reward * game.stake.into();
-
-                store.set_game(@game);
-
-                if reward > 0 {
-                    let caller = starknet::get_caller_address();
-                    token.mint(caller, reward.into());
-                }
+            // [Check] Skip if the game is not over
+            if game.over == 0 {
                 return;
             }
-
-            store.set_game(@game);
+            // [Effect] Finish the game
+            self.finish(world, game_id);
         }
 
         fn cash_out(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            let caller = starknet::get_caller_address();
-            collection.assert_is_owner(caller, game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-            game.assert_not_expired(starknet::get_block_timestamp());
+            game.assert_not_expired();
 
             // [Effect] If level completed (at milestone), convert points to moonrocks
             if game.is_completed() {
                 game.moonrocks += game.points;
             }
 
-            // [Effect] Use accumulated moonrocks as score (clamped to MAX_SCORE)
-            let score: u16 = if game.moonrocks > MAX_SCORE {
-                MAX_SCORE
-            } else {
-                game.moonrocks
-            };
-
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();
             store.set_game(@game);
 
-            // [Event] Emit GameOver (cash out)
-            store.game_over(@game, 1);
-
-            // [Effect] Compute reward via curve, multiplied by stake
-            let config = store.config();
-            let token = config.token();
-            let supply = token.total_supply();
-            let target = config.target_supply;
-            let reward: u64 = RewarderImpl::amount(score, supply, target);
-            let reward: u64 = reward * game.stake.into();
-
-            if reward == 0 {
-                return;
+            // [Effect] Progressions
+            // - [Q] Cash Out 125
+            // - [Q] Cash Out 135
+            // - [Q] Cash Out 150
+            // - [Q] Cash Out 160
+            // - [Q] Cash Out 180
+            // - [A] Cash Out 200
+            // - [A] Cash Out 300
+            // - [A] Cash Out 400
+            // - [A] Cash Out 500
+            // - [A] Cash Out 600
+            // - [A] Cash Out 700
+            let mut quest = get_dep_component_mut!(ref self, Quest);
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let player = self.owner(world, game_id);
+            if game.moonrocks >= 125 {
+                quest.progress(world, player.into(), Task::CashOut125.identifier(), 1, true);
+            }
+            if game.moonrocks >= 135 {
+                quest.progress(world, player.into(), Task::CashOut135.identifier(), 1, true);
+            }
+            if game.moonrocks >= 150 {
+                quest.progress(world, player.into(), Task::CashOut150.identifier(), 1, true);
+            }
+            if game.moonrocks >= 160 {
+                quest.progress(world, player.into(), Task::CashOut160.identifier(), 1, true);
+            }
+            if game.moonrocks >= 180 {
+                quest.progress(world, player.into(), Task::CashOut180.identifier(), 1, true);
+            }
+            if game.moonrocks >= 200 {
+                achievement.progress(world, player.into(), Task::CashOut200.identifier(), 1, true);
+            }
+            if game.moonrocks >= 300 {
+                achievement.progress(world, player.into(), Task::CashOut300.identifier(), 1, true);
+            }
+            if game.moonrocks >= 400 {
+                achievement.progress(world, player.into(), Task::CashOut400.identifier(), 1, true);
+            }
+            if game.moonrocks >= 500 {
+                achievement.progress(world, player.into(), Task::CashOut500.identifier(), 1, true);
+            }
+            if game.moonrocks >= 600 {
+                achievement.progress(world, player.into(), Task::CashOut600.identifier(), 1, true);
+            }
+            if game.moonrocks >= 700 {
+                achievement.progress(world, player.into(), Task::CashOut700.identifier(), 1, true);
             }
 
-            // [Interaction] Mint Glitch tokens to caller
-            token.mint(caller, reward.into());
+            // [Effect] Finish the game
+            self.finish(world, game_id);
         }
 
         fn enter(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-            game.assert_not_expired(starknet::get_block_timestamp());
+            game.assert_not_expired();
 
             // [Effect] Enter shop
-            let config = store.config();
-            let mut rng = RandomTrait::new_vrf(config.vrf());
-            let _cost = game.enter(rng.next_seed());
+            let mut rng = RandomImpl::new_vrf(store.vrf_disp());
+            game.enter(rng.next_seed());
             store.set_game(@game);
 
             // [Event] Emit PLDataPoint for ante cost
@@ -300,8 +347,32 @@ pub mod PlayableComponent {
             let potential = game.moonrocks + game.points;
             store.pl_data_point(pl_id, @game, potential, 0);
 
-            // [Event] Emit ShopEntered
-            store.shop_entered(@game);
+            // [Effect] Progressions
+            // - [A] Linear
+            // - [A] Exponential
+            // - [A] Metagamer
+            // - [A] Medic
+            // - [A] Diamond Hands
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let player = self.owner(world, game_id);
+            let game_counters = game.counters();
+            let (_bombs, points, specials, multipliers, healths, total) = game.counts();
+            if 100 * points / total >= 80 {
+                achievement.progress(world, player.into(), Task::Linear.identifier(), 1, true);
+            }
+            if 100 * multipliers / total >= 50 {
+                achievement.progress(world, player.into(), Task::Exponential.identifier(), 1, true);
+            }
+            if 100 * specials / total >= 40 {
+                achievement.progress(world, player.into(), Task::Metagamer.identifier(), 1, true);
+            }
+            if 100 * healths / total >= 25 {
+                achievement.progress(world, player.into(), Task::Medic.identifier(), 1, true);
+            }
+            if game_counters.streak_save == 3 {
+                achievement
+                    .progress(world, player.into(), Task::DiamondHands.identifier(), 1, true);
+            }
         }
 
         fn buy(
@@ -313,81 +384,71 @@ pub mod PlayableComponent {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-            game.assert_not_expired(starknet::get_block_timestamp());
+            game.assert_not_expired();
 
-            // [Info] Get shop orbs for event emission
-            let orbs = GameTrait::get_shop_orbs(game.shop);
-
-            // [Effect] Buy each item and emit event
-            while let Option::Some(index) = indices.pop_front() {
-                let orb = *orbs.at((*index).into());
-                let orb_id: u8 = orb.into();
-                let purchase_count = GameTrait::get_purchase_count(game.shop, orb_id);
-                let multiplier = BASE_MULTIPLIER + (purchase_count.into() * SUPP_MULTIPLIER);
-                let cost = (orb.cost() * multiplier + BASE_MULTIPLIER - 1) / BASE_MULTIPLIER;
-
-                // [Effect] Buy single orb
-                let mut single: Span<u8> = [*index].span();
-                game.buy(ref single);
-
-                // [Event] Emit OrbPurchased
-                store.orb_purchased(@game, orb_id, cost);
-            }
-
+            // [Effect] Buy orbs
+            game.buy(ref indices);
             store.set_game(@game);
+
+            // [Effect] Progressions
+            // - [Q] BulkOrder
+            // - [A] Shopaholic
+            // - [A] Sold Out
+            let mut quest = get_dep_component_mut!(ref self, Quest);
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let player = self.owner(world, game_id);
+            let level_counters = game.level_counters();
+            if level_counters.buy_count >= 6 {
+                quest.progress(world, player.into(), Task::Shopper6.identifier(), 1, true);
+            }
+            if level_counters.buy_count >= 10 {
+                achievement.progress(world, player.into(), Task::Shopper10.identifier(), 1, true);
+            }
+            if level_counters.buy_count >= 15 {
+                achievement.progress(world, player.into(), Task::Shopper15.identifier(), 1, true);
+            }
         }
 
         fn exit(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-            game.assert_not_expired(starknet::get_block_timestamp());
+            game.assert_not_expired();
+
+            // [Effect] Progressions
+            // - [A] Victory
+            // - [A] Elite
+            // - [A] Royalty
+            // - [A] Flawless
+            // - [A] Never Surrender
+            // - [A] What Bombs
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let player = self.owner(world, game_id);
+            if game.level == 7 {
+                achievement.progress(world, player.into(), Task::Conqueror.identifier(), 1, true);
+            }
+            if game.level == 7 && game.is_full_health() {
+                achievement.progress(world, player.into(), Task::Flawless.identifier(), 1, true);
+            }
+            if game.level == 7 && game.health == 1 {
+                achievement
+                    .progress(world, player.into(), Task::NeverSurrender.identifier(), 1, true);
+            }
+            if game.level == 7 && game.pulled_bombs_count() == 0 {
+                achievement.progress(world, player.into(), Task::WhatBombs.identifier(), 1, true);
+            }
 
             // [Effect] Exit shop (applies level-based curse)
             game.exit();
             store.set_game(@game);
-
-            // [Event] Emit ShopExited
-            store.shop_exited(@game, 0);
-        }
-
-        fn refresh(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
-            // [Check] Feature disabled
-            assert(false, 'Refresh is disabled');
-
-            // [Setup] Store
-            let store = StoreTrait::new(world);
-
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
-            let mut game = store.game(game_id);
-            game.assert_not_over();
-
-            // [Effect] Refresh shop (costs 4 chips, can only do once)
-            let config = store.config();
-            let mut rng = RandomTrait::new_vrf(config.vrf());
-            game.refresh(rng.next_seed());
-            store.set_game(@game);
-
-            // [Event] Emit ShopRefreshed
-            store.shop_refreshed(@game);
         }
 
         fn burn(
@@ -402,25 +463,67 @@ pub mod PlayableComponent {
             // [Setup] Store
             let store = StoreTrait::new(world);
 
-            // [Check] Token ownership
-            let collection = self.collection(world);
-            collection.assert_is_owner(starknet::get_caller_address(), game_id.into());
-
-            // [Check] Game is not over
+            // [Check] Game state
             let mut game = store.game(game_id);
+            game.assert_has_started();
             game.assert_not_over();
-
-            // [Info] Get orb being burned for event
-            let bag = OrbsTrait::unpack(game.bag);
-            let orb = *bag.at(bag_index.into());
-            let orb_id: u8 = orb.into();
+            game.assert_not_expired();
 
             // [Effect] Burn orb from bag (costs 4 chips, can only do once)
             game.burn(bag_index);
             store.set_game(@game);
+        }
 
-            // [Event] Emit OrbBurned
-            store.orb_burned(@game, orb_id, bag_index);
+        fn finish(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
+            // [Setup] Store
+            let mut store = StoreImpl::new(world);
+
+            // [Check] Game state
+            let mut game = store.game(game_id);
+            game.assert_is_over();
+            game.assert_not_expired();
+
+            // [Effect] Claim game
+            let reward: u128 = game.claim().try_into().expect('Game: reward conversion failed');
+            let base_reward: u128 = reward / constants::TEN_POW_18;
+            store.set_game(@game);
+
+            // [Effect] Update average score
+            let mut config = store.config();
+            let weight: u16 = (game.stake / constants::MULTIPLIER_PRECISION).try_into().unwrap();
+            config.push(game.moonrocks.into(), weight, constants::EMA_MIN_SCORE.into());
+            store.set_config(@config);
+
+            // [Effect] Update leaderboard score
+            let player = self.owner(world, game_id);
+            let time = starknet::get_block_timestamp();
+            let mut rankable = get_dep_component_mut!(ref self, Rankable);
+            rankable
+                .submit(
+                    world: world,
+                    leaderboard_id: LEADERBOARD_ID,
+                    game_id: game.id,
+                    player_id: player.into(),
+                    score: game.level.into(),
+                    time: time,
+                    to_store: false,
+                );
+
+            // [Effect] Achievements
+            // - Bottomless
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let game_counters = game.counters();
+            if game_counters.pull_count >= 80 {
+                achievement.progress(world, player.into(), Task::Bottomless.identifier(), 1, true);
+            }
+
+            // [Interaction] Pay user reward
+            let (token_address, _) = world.dns(@TOKEN()).expect('Token not found!');
+            let token = ITokenDispatcher { contract_address: token_address };
+            token.reward(player, reward.into());
+
+            // [Event] Emit claimed event
+            store.claimed(player.into(), game_id, base_reward);
         }
     }
 
@@ -428,11 +531,12 @@ pub mod PlayableComponent {
     pub impl PrivateImpl<
         TContractState, +HasComponent<TContractState>,
     > of PrivateTrait<TContractState> {
-        fn collection(
-            ref self: ComponentState<TContractState>, world: WorldStorage,
-        ) -> ICollectionDispatcher {
+        fn owner(
+            self: @ComponentState<TContractState>, world: WorldStorage, game_id: u64,
+        ) -> ContractAddress {
             let (collection_address, _) = world.dns(@COLLECTION()).expect('Collection not found!');
-            ICollectionDispatcher { contract_address: collection_address }
+            let collection = IERC721Dispatcher { contract_address: collection_address };
+            collection.owner_of(game_id.into())
         }
     }
 }
