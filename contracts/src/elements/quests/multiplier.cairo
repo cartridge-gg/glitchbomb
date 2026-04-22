@@ -1,6 +1,6 @@
 use quest::types::task::{Task as QuestTask, TaskTrait as QuestTaskTrait};
 use starknet::ContractAddress;
-use crate::elements::tasks::multiplier::{Climber3, Climber4, Climber5};
+use crate::elements::tasks::multiplier::{Climber3, Climber4};
 use super::index::{
     INTERVAL_EASY_ONE, INTERVAL_MEDIUM_ONE, ONE_DAY, QuestMetadataTrait, QuestProps, QuestTrait,
 };
@@ -52,36 +52,7 @@ pub impl Quadruple of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 5 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl FifthGear of QuestTrait {
-    fn identifier() -> felt252 {
-        'FIFTH_GEAR'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Fifth Gear",
-            description: "Redlining and loving it.",
-            icon: "fa-gauge",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Climber5::identifier(), 1, Climber5::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 11 * ONE_DAY,
+            start: 6 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_MEDIUM_ONE,

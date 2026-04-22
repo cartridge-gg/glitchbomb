@@ -42,6 +42,7 @@ pub mod elements {
     pub mod quests {
         pub mod bag;
         pub mod bomb;
+        pub mod finisher;
         pub mod health;
         pub mod index;
         pub mod interface;
@@ -117,6 +118,7 @@ pub mod interfaces {
 }
 
 pub mod components {
+    pub mod initializable;
     pub mod playable;
     pub mod purchase;
     pub mod rewardable;

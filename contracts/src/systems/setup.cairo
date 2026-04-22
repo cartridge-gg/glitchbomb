@@ -19,19 +19,27 @@ pub trait ISetup<T> {
     fn set_pool_sqrt(ref self: T, pool_sqrt: u256);
     fn set_base_price(ref self: T, base_price: u256);
     fn set_average_score(ref self: T, average_score: u32, average_weigth: u16);
+    fn create_achievements(ref self: T);
+    fn create_quests(ref self: T);
+    fn create_bundles(ref self: T, entry_price: u128, bundle_allower: ContractAddress);
 }
 
 const ADMIN_ROLE: felt252 = selector!("ADMIN_ROLE");
 
 #[dojo::contract]
 pub mod Setup {
+    use achievement::component::Component as AchievementComponent;
+    use achievement::component::Component::AchievementTrait;
     use bundle::component::Component as BundleComponent;
     use bundle::component::Component::{BundleQuote, BundleTrait};
     use bundle::interface::IBundle;
     use dojo::world::WorldStorageTrait;
     use openzeppelin::access::accesscontrol::{AccessControlComponent, DEFAULT_ADMIN_ROLE};
     use openzeppelin::introspection::src5::SRC5Component;
+    use quest::component::Component as QuestComponent;
+    use quest::component::Component::QuestTrait;
     use starknet::ContractAddress;
+    use crate::components::initializable::InitializableComponent;
     use crate::components::purchase::PurchaseComponent;
     use crate::constants::{NAMESPACE, WORLD_RESOURCE};
     use crate::mocks::vrf::NAME as VRF;
@@ -44,6 +52,12 @@ pub mod Setup {
 
     // Components
 
+    component!(path: AchievementComponent, storage: achievement, event: AchievementEvent);
+    impl AchievementInternalImpl = AchievementComponent::InternalImpl<ContractState>;
+    component!(path: QuestComponent, storage: quest, event: QuestEvent);
+    impl QuestInternalImpl = QuestComponent::InternalImpl<ContractState>;
+    component!(path: InitializableComponent, storage: initializable, event: InitializableEvent);
+    impl InitializableInternalImpl = InitializableComponent::InternalImpl<ContractState>;
     component!(path: BundleComponent, storage: bundle, event: BundleEvent);
     impl BundleInternalImpl = BundleComponent::InternalImpl<ContractState>;
     impl BundleFeeImpl of BundleComponent::BundleFeeTrait<ContractState> {}
@@ -61,6 +75,12 @@ pub mod Setup {
     #[storage]
     struct Storage {
         #[substorage(v0)]
+        achievement: AchievementComponent::Storage,
+        #[substorage(v0)]
+        quest: QuestComponent::Storage,
+        #[substorage(v0)]
+        initializable: InitializableComponent::Storage,
+        #[substorage(v0)]
         bundle: BundleComponent::Storage,
         #[substorage(v0)]
         purchase: PurchaseComponent::Storage,
@@ -76,6 +96,12 @@ pub mod Setup {
     #[derive(Drop, starknet::Event)]
     enum Event {
         #[flat]
+        AchievementEvent: AchievementComponent::Event,
+        #[flat]
+        QuestEvent: QuestComponent::Event,
+        #[flat]
+        InitializableEvent: InitializableComponent::Event,
+        #[flat]
         BundleEvent: BundleComponent::Event,
         #[flat]
         PurchaseEvent: PurchaseComponent::Event,
@@ -83,6 +109,40 @@ pub mod Setup {
         AccessControlEvent: AccessControlComponent::Event,
         #[flat]
         SRC5Event: SRC5Component::Event,
+    }
+
+    impl AchievementImpl of AchievementTrait<ContractState> {
+        fn on_completion(
+            ref self: AchievementComponent::ComponentState<ContractState>,
+            player_id: felt252,
+            achievement_id: felt252,
+        ) {}
+        fn on_claim(
+            ref self: AchievementComponent::ComponentState<ContractState>,
+            player_id: felt252,
+            achievement_id: felt252,
+        ) {}
+    }
+
+    impl QuestImpl of QuestTrait<ContractState> {
+        fn on_quest_unlock(
+            ref self: QuestComponent::ComponentState<ContractState>,
+            player_id: felt252,
+            quest_id: felt252,
+            interval_id: u64,
+        ) {}
+        fn on_quest_complete(
+            ref self: QuestComponent::ComponentState<ContractState>,
+            player_id: felt252,
+            quest_id: felt252,
+            interval_id: u64,
+        ) {}
+        fn on_quest_claim(
+            ref self: QuestComponent::ComponentState<ContractState>,
+            player_id: felt252,
+            quest_id: felt252,
+            interval_id: u64,
+        ) {}
     }
 
     impl BundleImpl of BundleTrait<ContractState> {
@@ -165,9 +225,6 @@ pub mod Setup {
             base_price: entry_price.into(),
         );
         store.set_config(@config);
-
-        // [Effect] Initialize starterpack
-        self.purchase.initialize(world, entry_price.into(), bundle_allower);
 
         // [Effect] Initialize rights
         self.accesscontrol.initializer();
@@ -373,6 +430,32 @@ pub mod Setup {
             config.average_score = average_score;
             config.average_weigth = average_weigth;
             store.set_config(@config);
+        }
+
+        fn create_achievements(ref self: ContractState) {
+            // [Check] Caller is allowed
+            self.accesscontrol.assert_only_role(ADMIN_ROLE);
+            // [Effect] Create all achievements
+            let world = self.world(@NAMESPACE());
+            self.initializable.create_achievements(world);
+        }
+
+        fn create_quests(ref self: ContractState) {
+            // [Check] Caller is allowed
+            self.accesscontrol.assert_only_role(ADMIN_ROLE);
+            // [Effect] Create all quests
+            let world = self.world(@NAMESPACE());
+            self.initializable.create_quests(world);
+        }
+
+        fn create_bundles(
+            ref self: ContractState, entry_price: u128, bundle_allower: ContractAddress,
+        ) {
+            // [Check] Caller is allowed
+            self.accesscontrol.assert_only_role(ADMIN_ROLE);
+            // [Effect] Initialize starterpacks
+            let world = self.world(@NAMESPACE());
+            self.purchase.initialize(world, entry_price.into(), bundle_allower);
         }
     }
 }

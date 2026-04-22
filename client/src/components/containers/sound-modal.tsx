@@ -184,6 +184,9 @@ export interface SettingsModalProps {
   username?: string;
   onProfileClick?: () => void;
   onLeaderboard?: () => void;
+  onQuests?: () => void;
+  onAchievements?: () => void;
+  onReferrals?: () => void;
 }
 
 const ToggleSwitch = ({
@@ -235,6 +238,9 @@ export const SettingsModal = ({
   username,
   onProfileClick,
   onLeaderboard,
+  onQuests,
+  onAchievements,
+  onReferrals,
 }: SettingsModalProps) => {
   if (!open) return null;
 
@@ -388,6 +394,51 @@ export const SettingsModal = ({
           >
             <TrophyIcon variant="solid" size="md" />
             Leaderboard
+          </Button>
+        )}
+
+        {onQuests && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() => {
+              onClose();
+              onQuests();
+            }}
+          >
+            <TrophyIcon variant="solid" size="md" />
+            Quests
+          </Button>
+        )}
+
+        {onAchievements && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() => {
+              onClose();
+              onAchievements();
+            }}
+          >
+            <TrophyIcon variant="solid" size="md" />
+            Achievements
+          </Button>
+        )}
+
+        {onReferrals && (
+          <Button
+            variant="secondary"
+            gradient="green"
+            className="h-14 w-full justify-start gap-3 px-5 font-secondary text-sm tracking-widest uppercase"
+            onClick={() => {
+              onClose();
+              onReferrals();
+            }}
+          >
+            <TrophyIcon variant="solid" size="md" />
+            Referrals
           </Button>
         )}
 

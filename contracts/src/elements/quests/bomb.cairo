@@ -1,11 +1,9 @@
 use quest::types::task::{Task as QuestTask, TaskTrait as QuestTaskTrait};
 use starknet::ContractAddress;
-use crate::elements::tasks::sequencer::{
-    Armageddon3, BombStreak3, BombStreak4, GameBombs10, GameBombs15,
-};
+use crate::elements::tasks::sequencer::{Armageddon3, BombStreak3, GameBombs15};
 use super::index::{
-    INTERVAL_EASY_TWO, INTERVAL_HARD, INTERVAL_MEDIUM_ONE, INTERVAL_MEDIUM_TWO, ONE_DAY,
-    QuestMetadataTrait, QuestProps, QuestTrait,
+    INTERVAL_EASY_ONE, INTERVAL_HARD, INTERVAL_MEDIUM_TWO, ONE_DAY, QuestMetadataTrait, QuestProps,
+    QuestTrait,
 };
 
 pub impl TripleThreat of QuestTrait {
@@ -26,10 +24,10 @@ pub impl TripleThreat of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 8 * ONE_DAY,
+            start: 6 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
-            interval: INTERVAL_EASY_TWO,
+            interval: INTERVAL_EASY_ONE,
             tasks: tasks,
             conditions: array![],
             metadata: metadata,
@@ -56,64 +54,6 @@ pub impl ChainReaction of QuestTrait {
         QuestProps {
             id: Self::identifier(),
             start: 2 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Minesweeper of QuestTrait {
-    fn identifier() -> felt252 {
-        'MINESWEEPER'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Minesweeper",
-            description: "Clear the board, flag nothing.",
-            icon: "fa-chess-board",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(GameBombs10::identifier(), 1, GameBombs10::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 16 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Jammed of QuestTrait {
-    fn identifier() -> felt252 {
-        'JAMMED'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Jammed",
-            description: "Four in a row and no way out.",
-            icon: "fa-lock",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(BombStreak4::identifier(), 1, BombStreak4::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 15 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_MEDIUM_TWO,

@@ -19,8 +19,10 @@ import {
   getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
+import { AchievementsProvider } from "@/contexts/achievements-provider";
 import { AppDataProvider } from "@/contexts/app-data-provider";
 import { LoadingProvider } from "@/contexts/loading-context";
+import { QuestsProvider } from "@/contexts/quests-provider";
 import Router from "@/routes";
 import { isMobile } from "@/utils/mobile";
 
@@ -111,9 +113,13 @@ function App() {
           <LoadingProvider>
             <EntitiesProvider>
               <AppDataProvider>
-                <LoadingScreen />
-                <GameStartedNotifier />
-                <Router />
+                <QuestsProvider>
+                  <AchievementsProvider>
+                    <LoadingScreen />
+                    <GameStartedNotifier />
+                    <Router />
+                  </AchievementsProvider>
+                </QuestsProvider>
               </AppDataProvider>
             </EntitiesProvider>
           </LoadingProvider>

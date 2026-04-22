@@ -13,7 +13,12 @@ import {
   MoonrockIcon,
   NumsLogoIcon,
 } from "@/components/icons";
-import { LeaderboardScene } from "@/components/scenes";
+import {
+  AchievementScene,
+  LeaderboardScene,
+  QuestScene,
+  ReferralScene,
+} from "@/components/scenes";
 import { Button } from "@/components/ui/button";
 import { ElectricBorder } from "@/components/ui/electric-border";
 import { GlitchText } from "@/components/ui/glitch-text";
@@ -27,9 +32,13 @@ import {
   tokenPayout,
   toTokens,
 } from "@/helpers/payout";
+import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
 import { useActivityFeed } from "@/hooks/activity-feed";
+import { useLeaderboard } from "@/hooks/leaderboard";
 import { useOwnedGames } from "@/hooks/packs";
+import { formatTimeLeft, useQuestScene } from "@/hooks/quests";
+import { useReferral } from "@/hooks/referral";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useControllerUsername } from "@/hooks/use-controller-username";
@@ -93,6 +102,75 @@ export const Home = () => {
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showQuests, setShowQuests] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [showReferrals, setShowReferrals] = useState(false);
+  const { data: leaderboardRows, refetch: refetchLeaderboard } = useLeaderboard(
+    { enabled: showLeaderboard },
+  );
+  const { quests: questRows, expiration: questExpiration } = useQuestScene();
+  const { achievements: achievementRows } = useAchievementScene();
+  const { data: referralRows } = useReferral();
+
+  useEffect(() => {
+    if (showLeaderboard) refetchLeaderboard();
+  }, [showLeaderboard, refetchLeaderboard]);
+
+  const leaderboardData = useMemo(
+    () =>
+      (leaderboardRows ?? []).map((row, index) => ({
+        rank: index + 1,
+        username: row.username || row.player.slice(0, 8),
+        score: row.games_played,
+        reward: row.total_reward,
+      })),
+    [leaderboardRows],
+  );
+
+  const referralPayments = useMemo(
+    () =>
+      (referralRows ?? []).map((row) => {
+        const executedAt = row.executed_at
+          ? new Date(row.executed_at).getTime() / 1000
+          : 0;
+        const deltaSec = Math.max(
+          0,
+          Math.floor(Date.now() / 1000 - executedAt),
+        );
+        const timeAgo =
+          deltaSec < 60
+            ? `${deltaSec}s`
+            : deltaSec < 3600
+              ? `${Math.floor(deltaSec / 60)}m`
+              : deltaSec < 86400
+                ? `${Math.floor(deltaSec / 3600)}h`
+                : `${Math.floor(deltaSec / 86400)}d`;
+        return {
+          amount: row.amount.toFixed(4),
+          token: "USDC",
+          from: row.username || row.recipient.slice(0, 8),
+          timeAgo,
+        };
+      }),
+    [referralRows],
+  );
+
+  const referralTotals = useMemo(() => {
+    const rows = referralRows ?? [];
+    const playersSet = new Set(rows.map((r) => r.recipient));
+    const totalEarned = rows.reduce((acc, r) => acc + r.amount, 0);
+    return {
+      players: String(playersSet.size),
+      games: String(rows.length),
+      totalEarned: `$${totalEarned.toFixed(2)}`,
+    };
+  }, [referralRows]);
+
+  const handleCopyReferral = useCallback(() => {
+    if (!account?.address) return;
+    const link = `${window.location.origin}/?ref=${account.address}`;
+    navigator.clipboard?.writeText(link).catch(() => undefined);
+  }, [account?.address]);
   const [tierIndex, setTierIndex] = useState(0);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
@@ -509,6 +587,9 @@ export const Home = () => {
         stashViewMode={displaySettings.stashViewMode}
         onStashViewModeChange={setStashViewMode}
         onLeaderboard={() => setShowLeaderboard(!showLeaderboard)}
+        onQuests={() => setShowQuests(!showQuests)}
+        onAchievements={() => setShowAchievements(!showAchievements)}
+        onReferrals={() => setShowReferrals(!showReferrals)}
       />
 
       <ActivityTicker items={activityItems} />
@@ -1371,8 +1452,49 @@ export const Home = () => {
         <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
           <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
             <LeaderboardScene
-              rows={[]}
+              rows={leaderboardData}
               onClose={() => setShowLeaderboard(false)}
+              className="h-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {showQuests && (
+        <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
+            <QuestScene
+              quests={questRows}
+              timeLeft={formatTimeLeft(questExpiration)}
+              onClose={() => setShowQuests(false)}
+              className="h-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {showAchievements && (
+        <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
+            <AchievementScene
+              achievements={achievementRows}
+              onClose={() => setShowAchievements(false)}
+              className="h-full"
+            />
+          </div>
+        </div>
+      )}
+
+      {showReferrals && (
+        <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
+          <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1">
+            <ReferralScene
+              players={referralTotals.players}
+              games={referralTotals.games}
+              totalEarned={referralTotals.totalEarned}
+              payments={referralPayments}
+              onCopy={handleCopyReferral}
+              onClose={() => setShowReferrals(false)}
               className="h-full"
             />
           </div>
@@ -1403,6 +1525,9 @@ export const Home = () => {
             stashViewMode={displaySettings.stashViewMode}
             onStashViewModeChange={setStashViewMode}
             onLeaderboard={() => setShowLeaderboard(!showLeaderboard)}
+            onQuests={() => setShowQuests(!showQuests)}
+            onAchievements={() => setShowAchievements(!showAchievements)}
+            onReferrals={() => setShowReferrals(!showReferrals)}
           />
 
           <ActivityTicker items={activityItems} />

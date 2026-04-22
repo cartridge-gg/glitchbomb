@@ -88,7 +88,7 @@ pub impl Armageddon of AchievementTrait {
     fn props() -> AchievementProps {
         let metadata = MetadataTrait::new(
             title: 'Armageddon',
-            description: "End times, four rounds at a time.",
+            description: "End times, six rounds at a time.",
             icon: 'fa-bomb',
             points: 70,
             hidden: false,
@@ -98,7 +98,7 @@ pub impl Armageddon of AchievementTrait {
             data: "",
         );
         AchievementProps {
-            id: Self::identifier(), tasks: Task::Armageddon4.tasks(1), metadata: metadata,
+            id: Self::identifier(), tasks: Task::Armageddon6.tasks(1), metadata: metadata,
         }
     }
 }

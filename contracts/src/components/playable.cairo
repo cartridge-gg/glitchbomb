@@ -12,8 +12,7 @@ pub mod PlayableComponent {
     use quest::component::Component::InternalImpl as QuestableInternalImpl;
     use starknet::ContractAddress;
     use crate::constants;
-    use crate::elements::achievements::index::{ACHIEVEMENT_COUNT, AchievementType, IAchievement};
-    use crate::elements::quests::index::{IQuest, QUEST_COUNT, QuestProps, QuestType};
+
     use crate::elements::tasks::index::{Task, TaskTrait};
     use crate::helpers::random::RandomImpl;
     use crate::helpers::rewarder::Rewarder;
@@ -49,50 +48,6 @@ pub mod PlayableComponent {
         impl QuestImpl: QuestableComponent::QuestTrait<TContractState>,
         impl Rankable: RankableComponent::HasComponent<TContractState>,
     > of InternalTrait<TContractState> {
-        /// Initializes the components.
-        fn initialize(ref self: ComponentState<TContractState>, mut world: WorldStorage) {
-            // [Event] Initialize all Achievements
-            let mut achievement_id: u8 = ACHIEVEMENT_COUNT;
-            let mut achievement = get_dep_component_mut!(ref self, Achievement);
-            while achievement_id > 0 {
-                let achievement_type: AchievementType = achievement_id.into();
-                let props = achievement_type.props();
-                achievement
-                    .create(
-                        world,
-                        id: props.id,
-                        start: 0,
-                        end: 0,
-                        tasks: props.tasks,
-                        metadata: props.metadata,
-                        to_store: true,
-                    );
-                achievement_id -= 1;
-            }
-            // [Event] Initialize all Quests
-            let mut quest_id: u8 = QUEST_COUNT;
-            let mut quest = get_dep_component_mut!(ref self, Quest);
-            let registry = starknet::get_contract_address();
-            while quest_id > 0 {
-                let quest_type: QuestType = quest_id.into();
-                let props: QuestProps = quest_type.props(registry);
-                quest
-                    .create(
-                        world: world,
-                        id: props.id,
-                        start: props.start,
-                        end: props.end,
-                        duration: props.duration,
-                        interval: props.interval,
-                        tasks: props.tasks.span(),
-                        conditions: props.conditions.span(),
-                        metadata: props.metadata,
-                        to_store: true,
-                    );
-                quest_id -= 1;
-            };
-        }
-
         /// Create a new game. It ensures the game is valid and not already created.
         fn create(
             ref self: ComponentState<TContractState>,
@@ -119,14 +74,13 @@ pub mod PlayableComponent {
             game.spend_moonrocks(cost);
             store.set_game(@game);
 
-            // [Effect] Achievements
-            // - Hacker
-            // - Hardwired
-            // - Jailbroken
-            // - SysAdmin
-            // - Root Access
+            // [Effect] Progressions
+            // Achievements (Loyalty): Hacker, Hardwired, Jailbroken, SysAdmin, RootAccess
+            // Quests (Loyalty): WarmingUp (x3), Regular (x8), Workaholic (x5)
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let mut quest = get_dep_component_mut!(ref self, Quest);
             achievement.progress(world, player.into(), Task::Loyalty.identifier(), 1, true);
+            quest.progress(world, player.into(), Task::Loyalty.identifier(), 1, true);
         }
 
         fn pull(ref self: ComponentState<TContractState>, world: WorldStorage, game_id: u64) {
@@ -165,28 +119,38 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Effect] Progressions
-            // - [A] What Now?
-            // - [A] Surge
-            // - [A] Overload
-            // - [A] Sky High
-            // - [A] To The Moon
-            // - [Q] Climber 3
-            // - [Q] Climber 4
-            // - [Q] Climber 5
-            // - [Q] Harver 5
-            // - [Q] Harver 40
-            // - [Q] Harver 80
-            // - [A] Harvest
-            // - [A] Jackpot
-            // - [A] Armageddon 3
-            // - [A] Armageddon 4
+            // Achievements:
+            //   WhatNow, Surge, Overload, SkyHigh, ToTheMoon, Harvest, Jackpot,
+            //   Armageddon (x6), Immortal, FullyTorqued, Cursed (streak 4),
+            //   WraithForm (streak 5), Defused, Flatline
+            // Quests:
+            //   TripleTake (Climber3), Quadruple (Climber4),
+            //   GoldRush (Harvest80), SharpShot (Surge20),
+            //   HighScorer (LevelScorer45),
+            //   DeepDive/Marathon/Ironlung (Bottomless15/25/40),
+            //   TripleThreat (Armageddon3), Minefield (GameBombs15),
+            //   FieldMedic (Immortal5), ChainReaction (BombStreak3)
             let player = self.owner(world, game_id);
             let mut quest = get_dep_component_mut!(ref self, Quest);
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
             let game_counters = game.counters();
             let level_counters = game.level_counters();
+
+            // -- Bag state --
             if remaining == 0 {
                 achievement.progress(world, player.into(), Task::WhatNow.identifier(), 1, true);
+            }
+            if game.pullable_bombs_count() == 0 {
+                achievement.progress(world, player.into(), Task::Defused.identifier(), 1, true);
+            }
+            if game.pullable_points_count() == 0 {
+                achievement.progress(world, player.into(), Task::Flatline.identifier(), 1, true);
+            }
+
+            // -- Single-pull points (Surge20 → SharpShot quest, Surge/Overload → achievements)
+            // --
+            if earned_points >= 20 {
+                quest.progress(world, player.into(), Task::Surge20.identifier(), 1, true);
             }
             if earned_points >= 70 {
                 achievement.progress(world, player.into(), Task::Surge.identifier(), 1, true);
@@ -194,14 +158,14 @@ pub mod PlayableComponent {
             if earned_points >= 100 {
                 achievement.progress(world, player.into(), Task::Overload.identifier(), 1, true);
             }
+
+            // -- Multiplier (Climber3/4 → TripleTake/Quadruple quests, SkyHigh/ToTheMoon →
+            // achievements) --
             if game.multiplier >= 3 * BASE_MULTIPLIER {
                 quest.progress(world, player.into(), Task::Climber3.identifier(), 1, true);
             }
             if game.multiplier >= 4 * BASE_MULTIPLIER {
                 quest.progress(world, player.into(), Task::Climber4.identifier(), 1, true);
-            }
-            if game.multiplier >= 5 * BASE_MULTIPLIER {
-                quest.progress(world, player.into(), Task::Climber5.identifier(), 1, true);
             }
             if game.multiplier >= 7 * BASE_MULTIPLIER {
                 achievement.progress(world, player.into(), Task::SkyHigh.identifier(), 1, true);
@@ -209,34 +173,60 @@ pub mod PlayableComponent {
             if game.multiplier >= 10 * BASE_MULTIPLIER {
                 achievement.progress(world, player.into(), Task::ToTheMoon.identifier(), 1, true);
             }
-            if level_counters.moonrock_amount >= 5 {
-                achievement.progress(world, player.into(), Task::Harvest5.identifier(), 1, true);
-            }
-            if level_counters.moonrock_amount >= 40 {
-                achievement.progress(world, player.into(), Task::Harvest40.identifier(), 1, true);
-            }
+
+            // -- Moonrocks per level (GoldRush quest, Harvest/Jackpot achievements) --
             if level_counters.moonrock_amount >= 80 {
-                achievement.progress(world, player.into(), Task::Harvest80.identifier(), 1, true);
+                quest.progress(world, player.into(), Task::Harvest80.identifier(), 1, true);
             }
             if level_counters.moonrock_amount >= 200 {
                 achievement.progress(world, player.into(), Task::Harvest.identifier(), 1, true);
             }
-            if level_counters.moonrock_amount >= 500 {
+            if level_counters.moonrock_amount >= 320 {
                 achievement.progress(world, player.into(), Task::Jackpot.identifier(), 1, true);
             }
-            if game_counters.bomb3_count == 3 {
-                achievement.progress(world, player.into(), Task::Armageddon3.identifier(), 1, true);
+
+            // -- Level points (HighScorer quest) --
+            if level_counters.point_amount >= 45 {
+                quest.progress(world, player.into(), Task::LevelScorer45.identifier(), 1, true);
             }
-            if game_counters.bomb3_count == 4 {
-                achievement.progress(world, player.into(), Task::Armageddon4.identifier(), 1, true);
+
+            // -- Pull count (DeepDive/Marathon/Ironlung quests) --
+            if game_counters.pull_count >= 15 {
+                quest.progress(world, player.into(), Task::Bottomless15.identifier(), 1, true);
+            }
+            if game_counters.pull_count >= 25 {
+                quest.progress(world, player.into(), Task::Bottomless25.identifier(), 1, true);
+            }
+            if game_counters.pull_count >= 40 {
+                quest.progress(world, player.into(), Task::Bottomless40.identifier(), 1, true);
+            }
+
+            // -- Bombs (TripleThreat/Minefield quests, Armageddon6 achievement) --
+            if game_counters.bomb3_count >= 3 {
+                quest.progress(world, player.into(), Task::Armageddon3.identifier(), 1, true);
+            }
+            if game_counters.bomb3_count == 6 {
+                achievement.progress(world, player.into(), Task::Armageddon6.identifier(), 1, true);
+            }
+            if game_counters.bomb_count >= 15 {
+                quest.progress(world, player.into(), Task::GameBombs15.identifier(), 1, true);
+            }
+
+            // -- Health (Immortal5 → FieldMedic quest, Immortal → achievement) --
+            if level_counters.health_amount >= 5 {
+                quest.progress(world, player.into(), Task::Immortal5.identifier(), 1, true);
             }
             if level_counters.health_amount >= 12 {
                 achievement.progress(world, player.into(), Task::Immortal.identifier(), 1, true);
             }
+
+            // -- Streak multipliers --
             if game_counters.streak_multipliers == 5 {
                 achievement
                     .progress(world, player.into(), Task::FullyTorqued.identifier(), 1, true);
             }
+
+            // -- Streak bombs (ChainReaction → quest, Cursed/WraithForm → achievements) --
             if game_counters.streak_bombs == 3 {
                 quest.progress(world, player.into(), Task::BombStreak3.identifier(), 1, true);
             }
@@ -275,52 +265,43 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Effect] Progressions
-            // - [Q] Cash Out 125
-            // - [Q] Cash Out 135
-            // - [Q] Cash Out 150
-            // - [Q] Cash Out 160
-            // - [Q] Cash Out 180
-            // - [A] Cash Out 200
-            // - [A] Cash Out 300
-            // - [A] Cash Out 400
-            // - [A] Cash Out 500
-            // - [A] Cash Out 600
-            // - [A] Cash Out 700
+            // Quests: QuickExit (125), Bankroll (150), GoldenParachute (180),
+            //         HairTrigger (Survivor1)
+            // Achievements: InOrbit/Lunatic (Lunarian), Moonshot, LunarEclipse,
+            //               Supernova, InfiniteGlitch
             let mut quest = get_dep_component_mut!(ref self, Quest);
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
             let player = self.owner(world, game_id);
             if game.moonrocks >= 125 {
                 quest.progress(world, player.into(), Task::CashOut125.identifier(), 1, true);
             }
-            if game.moonrocks >= 135 {
-                quest.progress(world, player.into(), Task::CashOut135.identifier(), 1, true);
-            }
             if game.moonrocks >= 150 {
                 quest.progress(world, player.into(), Task::CashOut150.identifier(), 1, true);
-            }
-            if game.moonrocks >= 160 {
-                quest.progress(world, player.into(), Task::CashOut160.identifier(), 1, true);
             }
             if game.moonrocks >= 180 {
                 quest.progress(world, player.into(), Task::CashOut180.identifier(), 1, true);
             }
             if game.moonrocks >= 200 {
-                achievement.progress(world, player.into(), Task::CashOut200.identifier(), 1, true);
+                achievement.progress(world, player.into(), Task::Lunarian.identifier(), 1, true);
             }
             if game.moonrocks >= 300 {
-                achievement.progress(world, player.into(), Task::CashOut300.identifier(), 1, true);
-            }
-            if game.moonrocks >= 400 {
-                achievement.progress(world, player.into(), Task::CashOut400.identifier(), 1, true);
+                achievement.progress(world, player.into(), Task::Moonshot.identifier(), 1, true);
             }
             if game.moonrocks >= 500 {
-                achievement.progress(world, player.into(), Task::CashOut500.identifier(), 1, true);
+                achievement
+                    .progress(world, player.into(), Task::LunarEclipse.identifier(), 1, true);
             }
             if game.moonrocks >= 600 {
-                achievement.progress(world, player.into(), Task::CashOut600.identifier(), 1, true);
+                achievement.progress(world, player.into(), Task::Supernova.identifier(), 1, true);
             }
             if game.moonrocks >= 700 {
-                achievement.progress(world, player.into(), Task::CashOut700.identifier(), 1, true);
+                achievement
+                    .progress(world, player.into(), Task::InfiniteGlitch.identifier(), 1, true);
+            }
+
+            // [Q] HairTrigger (Survivor1) — cash out at 1 health
+            if game.health == 1 {
+                quest.progress(world, player.into(), Task::Survivor1.identifier(), 1, true);
             }
 
             // [Effect] Finish the game
@@ -338,6 +319,10 @@ pub mod PlayableComponent {
             game.assert_not_expired();
 
             // [Effect] Enter shop
+            // [Note] game.enter() no longer resets level_counters so that the
+            // end-of-level progressions below can read bomb_count (WhatBombs)
+            // and moonrock/health amounts. The reset is performed manually
+            // after the checks.
             let mut rng = RandomImpl::new_vrf(store.vrf_disp());
             game.enter(rng.next_seed());
             store.set_game(@game);
@@ -347,32 +332,49 @@ pub mod PlayableComponent {
             let potential = game.moonrocks + game.points;
             store.pl_data_point(pl_id, @game, potential, 0);
 
-            // [Effect] Progressions
-            // - [A] Linear
-            // - [A] Exponential
-            // - [A] Metagamer
-            // - [A] Medic
-            // - [A] Diamond Hands
+            // [Effect] Progressions (end-of-level — before level_counters reset)
+            // Achievements: Victory/Elite/Royalty (Conqueror), Flawless,
+            //               NeverSurrender, WhatBombs, DiamondHands
+            // Quests: Untouched (LevelFlawless), Cliffhanger (LevelCritical),
+            //         Speedrunner (QuickFinish4)
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let mut quest = get_dep_component_mut!(ref self, Quest);
             let player = self.owner(world, game_id);
             let game_counters = game.counters();
-            let (_bombs, points, specials, multipliers, healths, total) = game.counts();
-            if 100 * points / total >= 80 {
-                achievement.progress(world, player.into(), Task::Linear.identifier(), 1, true);
+            let level_counters = game.level_counters();
+            if game.level == 7 {
+                achievement.progress(world, player.into(), Task::Conqueror.identifier(), 1, true);
             }
-            if 100 * multipliers / total >= 50 {
-                achievement.progress(world, player.into(), Task::Exponential.identifier(), 1, true);
+            if game.level == 7 && game.is_full_health() {
+                achievement.progress(world, player.into(), Task::Flawless.identifier(), 1, true);
             }
-            if 100 * specials / total >= 40 {
-                achievement.progress(world, player.into(), Task::Metagamer.identifier(), 1, true);
+            if game.level == 7 && game.health == 1 {
+                achievement
+                    .progress(world, player.into(), Task::NeverSurrender.identifier(), 1, true);
             }
-            if 100 * healths / total >= 25 {
-                achievement.progress(world, player.into(), Task::Medic.identifier(), 1, true);
+            if game.level == 7 && level_counters.bomb_count == 0 {
+                achievement.progress(world, player.into(), Task::WhatBombs.identifier(), 1, true);
             }
             if game_counters.streak_save == 3 {
                 achievement
                     .progress(world, player.into(), Task::DiamondHands.identifier(), 1, true);
             }
+            // -- Quest: Untouched — beat any level at full health
+            if game.is_full_health() {
+                quest.progress(world, player.into(), Task::LevelFlawless.identifier(), 1, true);
+            }
+            // -- Quest: Cliffhanger — beat any level with 1 health
+            if game.health == 1 {
+                quest.progress(world, player.into(), Task::LevelCritical.identifier(), 1, true);
+            }
+            // -- Quest: Speedrunner — beat level in ≤4 pulls
+            if level_counters.pull_count <= 4 {
+                quest.progress(world, player.into(), Task::QuickFinish4.identifier(), 1, true);
+            }
+
+            // [Effect] Reset level counters after end-of-level progressions.
+            game.level_counters = 0;
+            store.set_game(@game);
         }
 
         fn buy(
@@ -395,16 +397,10 @@ pub mod PlayableComponent {
             store.set_game(@game);
 
             // [Effect] Progressions
-            // - [Q] BulkOrder
-            // - [A] Shopaholic
-            // - [A] Sold Out
-            let mut quest = get_dep_component_mut!(ref self, Quest);
+            // Achievements: Shopaholic (Shopper10), SoldOut (Shopper15)
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
             let player = self.owner(world, game_id);
             let level_counters = game.level_counters();
-            if level_counters.buy_count >= 6 {
-                quest.progress(world, player.into(), Task::Shopper6.identifier(), 1, true);
-            }
             if level_counters.buy_count >= 10 {
                 achievement.progress(world, player.into(), Task::Shopper10.identifier(), 1, true);
             }
@@ -423,32 +419,35 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired();
 
-            // [Effect] Progressions
-            // - [A] Victory
-            // - [A] Elite
-            // - [A] Royalty
-            // - [A] Flawless
-            // - [A] Never Surrender
-            // - [A] What Bombs
-            let mut achievement = get_dep_component_mut!(ref self, Achievement);
-            let player = self.owner(world, game_id);
-            if game.level == 7 {
-                achievement.progress(world, player.into(), Task::Conqueror.identifier(), 1, true);
-            }
-            if game.level == 7 && game.is_full_health() {
-                achievement.progress(world, player.into(), Task::Flawless.identifier(), 1, true);
-            }
-            if game.level == 7 && game.health == 1 {
-                achievement
-                    .progress(world, player.into(), Task::NeverSurrender.identifier(), 1, true);
-            }
-            if game.level == 7 && game.pulled_bombs_count() == 0 {
-                achievement.progress(world, player.into(), Task::WhatBombs.identifier(), 1, true);
-            }
-
-            // [Effect] Exit shop (applies level-based curse)
+            // [Effect] Exit shop (applies level-based curse and advances to next level)
             game.exit();
             store.set_game(@game);
+
+            // [Effect] Progressions (start-of-next-level — after level_up + curses)
+            // Achievements (bag composition): Linear, Exponential, Metagamer, Medic
+            // Quests: TierClimber (LevelReacher4), Summit (LevelReacher6)
+            let mut achievement = get_dep_component_mut!(ref self, Achievement);
+            let mut quest = get_dep_component_mut!(ref self, Quest);
+            let player = self.owner(world, game_id);
+            let (_bombs, points, specials, multipliers, healths, total) = game.counts();
+            if 100 * points / total >= 80 {
+                achievement.progress(world, player.into(), Task::Linear.identifier(), 1, true);
+            }
+            if 100 * multipliers / total >= 50 {
+                achievement.progress(world, player.into(), Task::Exponential.identifier(), 1, true);
+            }
+            if 100 * specials / total >= 40 {
+                achievement.progress(world, player.into(), Task::Metagamer.identifier(), 1, true);
+            }
+            if 100 * healths / total >= 25 {
+                achievement.progress(world, player.into(), Task::Medic.identifier(), 1, true);
+            }
+            if game.level >= 4 {
+                quest.progress(world, player.into(), Task::LevelReacher4.identifier(), 1, true);
+            }
+            if game.level >= 6 {
+                quest.progress(world, player.into(), Task::LevelReacher6.identifier(), 1, true);
+            }
         }
 
         fn burn(

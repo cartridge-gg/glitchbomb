@@ -1,15 +1,12 @@
 use quest::types::task::{Task as QuestTask, TaskTrait as QuestTaskTrait};
 use starknet::ContractAddress;
-use crate::elements::tasks::moonrock::{
-    CashOut125, CashOut135, CashOut150, CashOut160, CashOut180, Harvest40, Harvest5, Harvest80,
-    Survivor1, Survivor2,
-};
+use crate::elements::tasks::moonrock::{CashOut125, CashOut150, CashOut180, Harvest80, Survivor1};
 use super::index::{
-    INTERVAL_EASY_TWO, INTERVAL_HARD, INTERVAL_MEDIUM_ONE, INTERVAL_MEDIUM_TWO, ONE_DAY,
-    QuestMetadataTrait, QuestProps, QuestTrait,
+    INTERVAL_EASY_ONE, INTERVAL_HARD, INTERVAL_MEDIUM_TWO, ONE_DAY, QuestMetadataTrait, QuestProps,
+    QuestTrait,
 };
 
-// --- Easy Two ---
+// --- Easy One ---
 
 pub impl QuickExit of QuestTrait {
     fn identifier() -> felt252 {
@@ -29,128 +26,10 @@ pub impl QuickExit of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 4 * ONE_DAY,
+            start: 3 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
-            interval: INTERVAL_EASY_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Prospector of QuestTrait {
-    fn identifier() -> felt252 {
-        'PROSPECTOR'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Prospector",
-            description: "There's gold in those orbs.",
-            icon: "fa-person-digging",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Harvest5::identifier(), 1, Harvest5::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 9 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_EASY_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-// --- Medium One ---
-
-pub impl Bankroll of QuestTrait {
-    fn identifier() -> felt252 {
-        'BANKROLL'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Bankroll",
-            description: "A hundred and fifty reasons to go home.",
-            icon: "fa-sack-dollar",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(CashOut150::identifier(), 1, CashOut150::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 4 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl CashGrab of QuestTrait {
-    fn identifier() -> felt252 {
-        'CASH_GRAB'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Cash Grab",
-            description: "Grab what you can before it vanishes.",
-            icon: "fa-hand-holding-dollar",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(CashOut160::identifier(), 1, CashOut160::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 9 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Moonwalker of QuestTrait {
-    fn identifier() -> felt252 {
-        'MOONWALKER'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Moonwalker",
-            description: "One small pull, a handful of rocks.",
-            icon: "fa-user-astronaut",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Harvest40::identifier(), 1, Harvest40::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 15 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
+            interval: INTERVAL_EASY_ONE,
             tasks: tasks,
             conditions: array![],
             metadata: metadata,
@@ -178,65 +57,36 @@ pub impl HairTrigger of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
+            start: 4 * ONE_DAY,
+            end: 0,
+            duration: ONE_DAY,
+            interval: INTERVAL_MEDIUM_TWO,
+            tasks: tasks,
+            conditions: array![],
+            metadata: metadata,
+        }
+    }
+}
+
+pub impl Bankroll of QuestTrait {
+    fn identifier() -> felt252 {
+        'BANKROLL'
+    }
+
+    fn props(registry: ContractAddress) -> QuestProps {
+        let metadata = QuestMetadataTrait::new(
+            name: "Bankroll",
+            description: "A hundred and fifty reasons to go home.",
+            icon: "fa-sack-dollar",
+            registry: registry,
+            rewards: [].span(),
+        );
+        let tasks: Array<QuestTask> = array![
+            QuestTaskTrait::new(CashOut150::identifier(), 1, CashOut150::description(0)),
+        ];
+        QuestProps {
+            id: Self::identifier(),
             start: 5 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl AnteUp of QuestTrait {
-    fn identifier() -> felt252 {
-        'ANTE_UP'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Ante Up",
-            description: "Put the chips on the table and walk.",
-            icon: "fa-dollar-sign",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(CashOut135::identifier(), 1, CashOut135::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 8 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl SafetyNet of QuestTrait {
-    fn identifier() -> felt252 {
-        'SAFETY_NET'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Safety Net",
-            description: "Two hearts left, no more risk.",
-            icon: "fa-life-ring",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Survivor2::identifier(), 1, Survivor2::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 14 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_MEDIUM_TWO,

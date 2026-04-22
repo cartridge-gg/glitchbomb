@@ -1,9 +1,7 @@
 use quest::types::task::{Task as QuestTask, TaskTrait as QuestTaskTrait};
 use starknet::ContractAddress;
 use crate::elements::tasks::conqueror::{LevelCritical, LevelFlawless};
-use crate::elements::tasks::level::{
-    LevelReacher2, LevelReacher3, LevelReacher4, LevelReacher5, LevelReacher6,
-};
+use crate::elements::tasks::level::{LevelReacher4, LevelReacher6};
 use super::index::{
     INTERVAL_EASY_TWO, INTERVAL_HARD, INTERVAL_MEDIUM_ONE, INTERVAL_MEDIUM_TWO, ONE_DAY,
     QuestMetadataTrait, QuestProps, QuestTrait,
@@ -30,7 +28,7 @@ pub impl Untouched of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 7 * ONE_DAY,
+            start: 5 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_EASY_TWO,
@@ -41,28 +39,28 @@ pub impl Untouched of QuestTrait {
     }
 }
 
-pub impl FirstSteps of QuestTrait {
+pub impl TierClimber of QuestTrait {
     fn identifier() -> felt252 {
-        'FIRST_STEPS'
+        'TIER_CLIMBER'
     }
 
     fn props(registry: ContractAddress) -> QuestProps {
         let metadata = QuestMetadataTrait::new(
-            name: "First Steps",
-            description: "One small climb for a player.",
-            icon: "fa-shoe-prints",
+            name: "Tier Climber",
+            description: "Four rungs up the ladder.",
+            icon: "fa-signal",
             registry: registry,
             rewards: [].span(),
         );
         let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(LevelReacher2::identifier(), 1, LevelReacher2::description(0)),
+            QuestTaskTrait::new(LevelReacher4::identifier(), 1, LevelReacher4::description(0)),
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 10 * ONE_DAY,
+            start: 5 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
-            interval: INTERVAL_EASY_TWO,
+            interval: INTERVAL_MEDIUM_ONE,
             tasks: tasks,
             conditions: array![],
             metadata: metadata,
@@ -92,93 +90,6 @@ pub impl Cliffhanger of QuestTrait {
         QuestProps {
             id: Self::identifier(),
             start: 6 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Staircase of QuestTrait {
-    fn identifier() -> felt252 {
-        'STAIRCASE'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Staircase",
-            description: "Three floors up, no elevator.",
-            icon: "fa-stairs",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(LevelReacher3::identifier(), 1, LevelReacher3::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 10 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl TierClimber of QuestTrait {
-    fn identifier() -> felt252 {
-        'TIER_CLIMBER'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Tier Climber",
-            description: "Four rungs up the ladder.",
-            icon: "fa-signal",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(LevelReacher4::identifier(), 1, LevelReacher4::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 6 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl FifthFloor of QuestTrait {
-    fn identifier() -> felt252 {
-        'FIFTH_FLOOR'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Fifth Floor",
-            description: "The view is better up here.",
-            icon: "fa-building",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(LevelReacher5::identifier(), 1, LevelReacher5::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 9 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_MEDIUM_TWO,

@@ -36,6 +36,9 @@ export interface AppHeaderProps {
   stashViewMode?: StashViewMode;
   onStashViewModeChange?: (mode: StashViewMode) => void;
   onLeaderboard?: () => void;
+  onQuests?: () => void;
+  onAchievements?: () => void;
+  onReferrals?: () => void;
 }
 
 export const AppHeader = ({
@@ -58,6 +61,9 @@ export const AppHeader = ({
   stashViewMode,
   onStashViewModeChange,
   onLeaderboard,
+  onQuests,
+  onAchievements,
+  onReferrals,
 }: AppHeaderProps) => {
   const navigate = useNavigate();
   const canMint = Boolean(onMint);
@@ -216,6 +222,10 @@ export const AppHeader = ({
               onStashViewModeChange={onStashViewModeChange}
               username={username}
               onProfileClick={onProfileClick}
+              onLeaderboard={onLeaderboard}
+              onQuests={onQuests}
+              onAchievements={onAchievements}
+              onReferrals={onReferrals}
             />
           )}
       </div>

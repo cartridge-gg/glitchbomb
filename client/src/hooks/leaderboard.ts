@@ -7,17 +7,12 @@ import {
 
 export type LeaderboardScoreRowData = LeaderboardScoreRow;
 
-export const useLeaderboard = (): {
-  data: LeaderboardScoreRowData[] | undefined;
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
-} => {
+export const useLeaderboard = (options?: { enabled?: boolean }) => {
   const query = useQuery<LeaderboardScoreRowData[]>({
     queryKey: queryKeys.leaderboardScore(),
     queryFn: LeaderboardScore.fetch,
-    enabled: false,
-    staleTime: 0,
+    enabled: options?.enabled ?? true,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });

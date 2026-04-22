@@ -217,6 +217,38 @@ pub impl GameImpl of GameTrait {
         count
     }
 
+    #[inline]
+    fn pullable_bombs_count(self: @Game) -> u8 {
+        let bag: Orbs = OrbsTrait::unpack(*self.bag);
+        let bag_len: u8 = bag.len().try_into().unwrap();
+        let mut discards: u64 = *self.discards;
+        let mut count: u8 = 0;
+        let mut index: u8 = 0;
+        while index < bag_len {
+            let not_discarded: u8 = 1 - (discards % 2).try_into().unwrap();
+            count += bag.at(index.into()).one_if_bomb() * not_discarded;
+            index += 1;
+            discards /= 2;
+        }
+        count
+    }
+
+    #[inline]
+    fn pullable_points_count(self: @Game) -> u8 {
+        let bag: Orbs = OrbsTrait::unpack(*self.bag);
+        let bag_len: u8 = bag.len().try_into().unwrap();
+        let mut discards: u64 = *self.discards;
+        let mut count: u8 = 0;
+        let mut index: u8 = 0;
+        while index < bag_len {
+            let not_discarded: u8 = 1 - (discards % 2).try_into().unwrap();
+            count += bag.at(index.into()).one_if_point() * not_discarded;
+            index += 1;
+            discards /= 2;
+        }
+        count
+    }
+
     /// Determines if the game is over based on the current health.
     #[inline]
     fn is_over(self: @Game) -> bool {
@@ -276,8 +308,9 @@ pub impl GameImpl of GameTrait {
         self.assert_is_completed();
         // [Effect] Reset discards so all orbs are available on entering the shop
         self.discards = 0;
-        // [Effect] Reset level counters
-        self.level_counters = 0;
+        // [Note] level_counters are intentionally NOT reset here — the caller
+        // (playable::enter) reads them for end-of-level achievement progressions
+        // (WhatBombs uses bomb_count) and must reset them after the checks.
         // [Effect] Generate and set the shop (orbs in bits 0-29, preserve purchase counts)
         let orbs: Orbs = OrbsTrait::shop(seed);
         let packed_orbs: u128 = orbs.pack().try_into().expect('Shop: packing failed');
@@ -727,6 +760,64 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         assert_eq!(game.pulled_bombs_count(), 0);
+    }
+
+    #[test]
+    fn test_game_pullable_bombs_count() {
+        let mut game = GameTrait::new(GAME_ID, STAKE);
+        game.start();
+        // Initial bag contains 2 x Bomb1, 1 x Bomb2, 1 x Bomb3 = 4 bombs.
+        assert_eq!(game.pullable_bombs_count(), 4);
+        // Adding a non-bomb orb must not change the count.
+        game.add(Orb::Point5);
+        assert_eq!(game.pullable_bombs_count(), 4);
+        // Adding a bomb orb increments the count.
+        game.add(Orb::Bomb1);
+        assert_eq!(game.pullable_bombs_count(), 5);
+        // StickyBomb also counts as a bomb via `one_if_bomb`.
+        game.add(Orb::StickyBomb);
+        assert_eq!(game.pullable_bombs_count(), 6);
+    }
+
+    #[test]
+    fn test_game_pullable_bombs_count_excludes_discarded() {
+        let mut game = GameTrait::new(GAME_ID, STAKE);
+        game.start();
+        let initial = game.pullable_bombs_count();
+        // Pull the first orb and verify the pullable count either stays equal
+        // (non-bomb pulled) or decreases by exactly 1 (bomb pulled).
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let pulled = *orbs.at(0);
+        let expected = initial - pulled.one_if_bomb();
+        assert_eq!(game.pullable_bombs_count(), expected);
+    }
+
+    #[test]
+    fn test_game_pullable_points_count() {
+        let mut game = GameTrait::new(GAME_ID, STAKE);
+        game.start();
+        // Initial bag contains 3 x Point5, 1 x PointOrb1, 1 x PointBomb4 = 5 points.
+        assert_eq!(game.pullable_points_count(), 5);
+        // Adding a non-point orb must not change the count.
+        game.add(Orb::Bomb1);
+        assert_eq!(game.pullable_points_count(), 5);
+        // Adding a point orb increments the count.
+        game.add(Orb::Point7);
+        assert_eq!(game.pullable_points_count(), 6);
+        // PointBomb4 also counts as a point orb via `one_if_point`.
+        game.add(Orb::PointBomb4);
+        assert_eq!(game.pullable_points_count(), 7);
+    }
+
+    #[test]
+    fn test_game_pullable_points_count_excludes_discarded() {
+        let mut game = GameTrait::new(GAME_ID, STAKE);
+        game.start();
+        let initial = game.pullable_points_count();
+        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let pulled = *orbs.at(0);
+        let expected = initial - pulled.one_if_point();
+        assert_eq!(game.pullable_points_count(), expected);
     }
 
     #[test]

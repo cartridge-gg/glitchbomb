@@ -35,6 +35,9 @@ export interface GameHeaderProps {
   onStashViewModeChange?: (mode: StashViewMode) => void;
   onProfileClick?: () => void;
   onLeaderboard?: () => void;
+  onQuests?: () => void;
+  onAchievements?: () => void;
+  onReferrals?: () => void;
 }
 
 const COUNT_UP_DURATION_MS = 600;
@@ -61,6 +64,9 @@ export const GameHeader = ({
   onStashViewModeChange,
   onProfileClick,
   onLeaderboard,
+  onQuests,
+  onAchievements,
+  onReferrals,
 }: GameHeaderProps) => {
   const navigate = useNavigate();
   const [displayCount, setDisplayCount] = useState<number | null>(null);
@@ -204,6 +210,9 @@ export const GameHeader = ({
               username={username}
               onProfileClick={onProfileClick}
               onLeaderboard={onLeaderboard}
+              onQuests={onQuests}
+              onAchievements={onAchievements}
+              onReferrals={onReferrals}
             />
           )}
       </div>

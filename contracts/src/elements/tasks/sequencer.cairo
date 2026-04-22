@@ -10,13 +10,13 @@ pub impl Armageddon3 of TaskTrait {
     }
 }
 
-pub impl Armageddon4 of TaskTrait {
+pub impl Armageddon6 of TaskTrait {
     fn identifier() -> felt252 {
-        'ARMAGEDDON_4'
+        'ARMAGEDDON_6'
     }
 
     fn description(count: u32) -> ByteArray {
-        "Pull 4 Triple Bombs in a single game"
+        "Pull 6 Triple Bombs in a single game"
     }
 }
 

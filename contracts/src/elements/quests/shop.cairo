@@ -1,9 +1,9 @@
 use quest::types::task::{Task as QuestTask, TaskTrait as QuestTaskTrait};
 use starknet::ContractAddress;
-use crate::elements::tasks::shopper::{ShopRich80, Shopper6, Spender};
+use crate::elements::tasks::shopper::{ShopRich80, Spender};
 use super::index::{
-    INTERVAL_EASY_TWO, INTERVAL_HARD, INTERVAL_MEDIUM_ONE, INTERVAL_MEDIUM_TWO, ONE_DAY,
-    QuestMetadataTrait, QuestProps, QuestTrait,
+    INTERVAL_EASY_TWO, INTERVAL_HARD, INTERVAL_MEDIUM_TWO, ONE_DAY, QuestMetadataTrait, QuestProps,
+    QuestTrait,
 };
 
 pub impl SmallSpender of QuestTrait {
@@ -25,7 +25,7 @@ pub impl SmallSpender of QuestTrait {
         ];
         QuestProps {
             id: Self::identifier(),
-            start: 2 * ONE_DAY,
+            start: ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_EASY_TWO,
@@ -56,65 +56,6 @@ pub impl BigSpender of QuestTrait {
         QuestProps {
             id: Self::identifier(),
             start: 3 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_ONE,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl Frugal of QuestTrait {
-    fn identifier() -> felt252 {
-        'FRUGAL'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let total: u32 = 150;
-        let metadata = QuestMetadataTrait::new(
-            name: "Frugal",
-            description: "Every bit accounted for.",
-            icon: "fa-scale-balanced",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Spender::identifier(), total.into(), Spender::description(total)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 10 * ONE_DAY,
-            end: 0,
-            duration: ONE_DAY,
-            interval: INTERVAL_MEDIUM_TWO,
-            tasks: tasks,
-            conditions: array![],
-            metadata: metadata,
-        }
-    }
-}
-
-pub impl BulkOrder of QuestTrait {
-    fn identifier() -> felt252 {
-        'BULK_ORDER'
-    }
-
-    fn props(registry: ContractAddress) -> QuestProps {
-        let metadata = QuestMetadataTrait::new(
-            name: "Bulk Order",
-            description: "Six orbs, no receipt needed.",
-            icon: "fa-cart-plus",
-            registry: registry,
-            rewards: [].span(),
-        );
-        let tasks: Array<QuestTask> = array![
-            QuestTaskTrait::new(Shopper6::identifier(), 1, Shopper6::description(0)),
-        ];
-        QuestProps {
-            id: Self::identifier(),
-            start: 17 * ONE_DAY,
             end: 0,
             duration: ONE_DAY,
             interval: INTERVAL_MEDIUM_TWO,

@@ -40,6 +40,7 @@ pub mod Play {
     use starknet::ContractAddress;
     use crate::components::playable::PlayableComponent;
     use crate::constants::{MULTIPLIER_PRECISION, NAMESPACE};
+    use crate::elements::quests::finisher::{DailyFinisherFive, DailyFinisherThree};
     use crate::elements::quests::index::{IQuest, QuestType};
     use crate::systems::collection::{
         ICollectionDispatcher, ICollectionDispatcherTrait, NAME as COLLECTION,
@@ -108,7 +109,6 @@ pub mod Play {
     fn dojo_init(ref self: ContractState) {
         // [Effect] Initialize components
         let world = self.world(@NAMESPACE());
-        self.playable.initialize(world);
         self.accesscontrol.initializer();
         // [Effect] Setup rights
         let treasury_address = world.dns_address(@TREASURY()).expect('Treasury not found!');
@@ -144,7 +144,35 @@ pub mod Play {
             player_id: felt252,
             quest_id: felt252,
             interval_id: u64,
-        ) {}
+        ) {
+            let mut contract_state = self.get_contract_mut();
+            let world = contract_state.world(@NAMESPACE());
+            let quest: QuestType = quest_id.into();
+
+            // [Effect] Progress the daily finisher meta-quests only when a
+            // *regular* daily quest completes (avoid self/cross-incrementation
+            // between the two finishers).
+            let is_finisher = match quest {
+                QuestType::DailyFinisherThree => true,
+                QuestType::DailyFinisherFive => true,
+                _ => false,
+            };
+            if !is_finisher {
+                contract_state
+                    .quest
+                    .progress(world, player_id, DailyFinisherThree::identifier(), 1, true);
+                contract_state
+                    .quest
+                    .progress(world, player_id, DailyFinisherFive::identifier(), 1, true);
+            }
+
+            // [Effect] Autoclaim quest if reward is enabled (triggers
+            // on_quest_claim → free game mint).
+            if !quest.reward() {
+                return;
+            }
+            contract_state.quest.claim(world, player_id, quest_id, interval_id);
+        }
         fn on_quest_claim(
             ref self: QuestComponent::ComponentState<ContractState>,
             player_id: felt252,

@@ -53,31 +53,6 @@ pub impl SoldOut of AchievementTrait {
     }
 }
 
-pub impl Specialist of AchievementTrait {
-    #[inline]
-    fn identifier() -> felt252 {
-        'SPECIALIST'
-    }
-
-    #[inline]
-    fn props() -> AchievementProps {
-        let metadata = MetadataTrait::new(
-            title: 'Specialist',
-            description: "One trick. Mastered ten times over.",
-            icon: 'fa-layer-group',
-            points: 30,
-            hidden: false,
-            index: 2,
-            group: 'Shopper',
-            rewards: [].span(),
-            data: "",
-        );
-        AchievementProps {
-            id: Self::identifier(), tasks: Task::Specialist.tasks(1), metadata: metadata,
-        }
-    }
-}
-
 pub impl DiamondHands of AchievementTrait {
     #[inline]
     fn identifier() -> felt252 {
@@ -92,7 +67,7 @@ pub impl DiamondHands of AchievementTrait {
             icon: 'fa-gem',
             points: 30,
             hidden: false,
-            index: 3,
+            index: 2,
             group: 'Shopper',
             rewards: [].span(),
             data: "",
