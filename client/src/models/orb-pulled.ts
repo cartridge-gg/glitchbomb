@@ -1,7 +1,7 @@
 import type { RawOrbPulled } from "@/models";
 import { Orb } from "./orb";
 
-export const ORB_PULLED = "OrbPulled";
+const MODEL_NAME = "OrbPulled";
 
 export class OrbPulled {
   game_id: number;
@@ -22,7 +22,7 @@ export class OrbPulled {
   }
 
   static getModelName(): string {
-    return ORB_PULLED;
+    return MODEL_NAME;
   }
 
   static from(data: RawOrbPulled): OrbPulled {

@@ -52,7 +52,7 @@ export const ReferralScene = ({
   return (
     <div className={referralSceneVariants({ variant, className })} {...props}>
       {onClose ? (
-        <Close size="md" className="absolute top-3 right-3" onClick={onClose} />
+        <Close size="md" className="absolute top-4 right-4" onClick={onClose} />
       ) : null}
 
       <h2 className="pr-12 text-2xl/8 uppercase tracking-tight text-green-100 md:text-[2.5rem]">

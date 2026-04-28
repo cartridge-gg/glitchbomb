@@ -1,12 +1,11 @@
 import {
   type PointerEvent as ReactPointerEvent,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { MAX_SCORE, scoreRewards, toTokens } from "@/helpers/payout";
+import { MAX_SCORE, maxPayout, scoreRewards, toTokens } from "@/helpers/payout";
 
 export interface PayoutChartProps {
   /** Stake multiplier (1–STARTERPACK_COUNT) */
@@ -17,25 +16,52 @@ export interface PayoutChartProps {
   supply?: bigint;
   /** Target token supply from config (raw units). */
   target?: bigint;
-  /** Player's final score (moonrocks earned). When provided, renders a "YOU" marker on the curve. */
+  /** Player's final score. When provided, renders a "YOU" marker on the curve. */
   score?: number;
 }
 
-/** Format a token value for axis labels. */
+/** Compact token formatter for labels (e.g., "128", "1.2k"). */
 function formatTokens(v: number): string {
   if (v === 0) return "0";
+  if (v >= 10000) return `${Math.round(v / 1000)}k`;
   if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+  if (v >= 10) return Math.round(v).toString();
   if (v >= 1) return v.toFixed(1);
   if (v >= 0.01) return v.toFixed(2);
-  if (v >= 0.001) return v.toFixed(3);
-  return v.toFixed(4);
+  return v.toFixed(3);
 }
 
-/** Helper to look up cumulative reward at a score from precomputed array. */
+/** Look up cumulative reward at a given score from a precomputed array. */
 function cumulAt(arr: number[], score: number): number {
   if (score <= 0 || arr.length === 0) return 0;
   return arr[Math.min(score, arr.length) - 1];
 }
+
+const X_TICK_VALUES = [100, 200, 300, 400, 500] as const;
+
+const CHART_W = 404;
+const CHART_H = 204;
+const PAD_L = 20;
+const PAD_R = 20;
+// PAD_T aligns the curve endpoint with the flag's vertical center.
+const PAD_T = 12;
+// PAD_B prevents the curve's stroke from being clipped at the X-axis edge.
+const PAD_B = 8;
+const PLOT_W = CHART_W - PAD_L - PAD_R;
+const PLOT_H = CHART_H - PAD_T - PAD_B;
+
+const FLAG_W = 103.74;
+const FLAG_BODY_W = 93;
+const FLAG_TIP_W = FLAG_W - FLAG_BODY_W;
+const FLAG_H = 24;
+const FLAG_RIGHT = CHART_W - PAD_R;
+
+const LINE_COLOR = "#36F818";
+const BASE_LINE_COLOR = "rgba(54, 248, 24, 0.20)";
+const FLAG_FILL = "#36F818";
+const FLAG_TEXT_COLOR = "#040603";
+const TOOLTIP_DASH = "rgba(255, 255, 255, 0.35)";
+const TOOLTIP_PILL_BORDER = "rgba(255, 255, 255, 0.35)";
 
 export const PayoutChart = ({
   stake,
@@ -44,8 +70,6 @@ export const PayoutChart = ({
   target = 0n,
   score,
 }: PayoutChartProps) => {
-  const hasPrice = tokenPrice != null && tokenPrice > 0;
-
   const rewards = useMemo(
     () => scoreRewards(stake, supply, target),
     [stake, supply, target],
@@ -55,50 +79,47 @@ export const PayoutChart = ({
     [stake, supply, target],
   );
 
-  // Y-axis always in GLITCH tokens (like Nums shows NUMS)
-  const maxVal = toTokens(cumulAt(rewards, MAX_SCORE));
+  const maxTokens = useMemo(
+    () => toTokens(maxPayout(stake, supply, target)),
+    [stake, supply, target],
+  );
+  const maxUsd =
+    tokenPrice != null && tokenPrice > 0 && maxTokens > 0
+      ? maxTokens * tokenPrice
+      : null;
+  const maxUsdLabel = maxUsd != null ? `$${maxUsd.toFixed(2)}` : null;
+  const flagLabel = `${formatTokens(maxTokens)} GLITCH`;
 
-  // Hover / touch interaction state
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverScore, setHoverScore] = useState<number | null>(null);
+  const isHovering = hoverScore != null;
 
-  // Chart dimensions
-  const chartW = 320;
-  const chartH = 220;
-  const padL = 36;
-  const padR = 14;
-  const padT = 10;
-  const padB = 32;
-  const plotW = chartW - padL - padR;
-  const plotH = chartH - padT - padB;
-
-  const yMax = maxVal * 1.15 || 1;
-  const toX = (score: number) => padL + (score / MAX_SCORE) * plotW;
-  // sqrt scale so the lower values aren't crushed into a flat line
+  // sqrt scale on Y so low values aren't crushed into a flat line.
+  const yMax = maxTokens || 1;
+  const toX = (s: number) => PAD_L + (s / MAX_SCORE) * PLOT_W;
   const toY = (val: number) =>
-    padT + plotH - (Math.sqrt(val) / Math.sqrt(yMax)) * plotH;
+    PAD_T + PLOT_H - (Math.sqrt(val) / Math.sqrt(yMax)) * PLOT_H;
 
-  // Build staircase path from reward array (steps at tier boundaries)
   const buildCurve = useMemo(() => {
+    const curveToX = (s: number) => PAD_L + (s / MAX_SCORE) * PLOT_W;
+    const curveToY = (val: number) =>
+      PAD_T + PLOT_H - (Math.sqrt(val) / Math.sqrt(yMax)) * PLOT_H;
     return (rewardArr: number[]) => {
       const maxScore = rewardArr.length;
       if (maxScore === 0) return "";
-      let path = `M ${toX(0)} ${toY(0)}`;
+      let path = `M ${curveToX(0)} ${curveToY(0)}`;
       let prevTokens = 0;
       for (let s = 1; s <= maxScore; s++) {
         const tokens = toTokens(rewardArr[s - 1]);
         if (tokens !== prevTokens) {
-          // Horizontal to this score at previous level, then step up
-          path += ` L ${toX(s)} ${toY(prevTokens)}`;
-          path += ` L ${toX(s)} ${toY(tokens)}`;
+          path += ` L ${curveToX(s)} ${curveToY(prevTokens)}`;
+          path += ` L ${curveToX(s)} ${curveToY(tokens)}`;
           prevTokens = tokens;
         }
       }
-      // Final horizontal segment to the end
-      path += ` L ${toX(maxScore)} ${toY(prevTokens)}`;
+      path += ` L ${curveToX(maxScore)} ${curveToY(prevTokens)}`;
       return path;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yMax]);
 
   const curvePath = useMemo(() => buildCurve(rewards), [buildCurve, rewards]);
@@ -108,82 +129,19 @@ export const PayoutChart = ({
     [showBaseCurve, buildCurve, baseRewardsArr],
   );
 
-  // Score marker position
   const showScore = score != null;
   const scoreVal = showScore ? toTokens(cumulAt(rewards, score)) : 0;
 
-  const lineColor = "#36F818";
-  const labelColor = "rgba(54, 248, 24, 0.40)";
-  const valueColor = "#36F818";
-  const gridColor = "rgba(54, 248, 24, 0.06)";
-  const pillBg = "rgba(54, 248, 24, 0.12)";
-  const pillBorder = "rgba(54, 248, 24, 0.25)";
-  const scoreColor = "#FFFFFF";
-  const scorePillBg = "rgba(255, 255, 255, 0.15)";
-  const scorePillBorder = "rgba(255, 255, 255, 0.35)";
-
-  // Y-axis ticks: always show GLITCH token amounts
-  const yTicks = useMemo(() => {
-    const ticks: { val: number; label: string }[] = [];
-
-    ticks.push({
-      val: maxVal,
-      label: formatTokens(maxVal),
-    });
-
-    if (ticks.every((t) => t.val / yMax > 0.15)) {
-      ticks.push({ val: 0, label: "0" });
-    }
-
-    return ticks;
-  }, [maxVal, yMax]);
-
-  // X-axis ticks: 0, 100, 200, 300, 400, 500
-  const xTicks = useMemo(() => {
-    const ticks: { score: number; label: string }[] = [];
-    for (let s = 0; s <= MAX_SCORE; s += 100) {
-      ticks.push({ score: s, label: `${s}` });
-    }
-    return ticks;
+  const pointerToScore = useCallback((e: ReactPointerEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const svgX = (clientX / rect.width) * CHART_W;
+    const clampedX = Math.max(PAD_L, Math.min(svgX, PAD_L + PLOT_W));
+    const s = Math.round(((clampedX - PAD_L) / PLOT_W) * MAX_SCORE);
+    return Math.max(0, Math.min(s, MAX_SCORE));
   }, []);
-
-  // Draw animation
-  const pathRef = useRef<SVGPathElement>(null);
-  const [pathLength, setPathLength] = useState(0);
-  const [phase, setPhase] = useState<"hidden" | "ready" | "animate">("hidden");
-
-  useEffect(() => {
-    const path = pathRef.current;
-    if (!path) return;
-    const len = path.getTotalLength();
-    setPathLength(len);
-    setPhase("ready");
-  }, [stake, tokenPrice]);
-
-  useEffect(() => {
-    if (phase !== "ready") return;
-    const raf = requestAnimationFrame(() => setPhase("animate"));
-    return () => cancelAnimationFrame(raf);
-  }, [phase]);
-
-  const animated = phase === "animate";
-
-  // Pointer → score conversion for interactivity
-  const pointerToScore = useCallback(
-    (e: ReactPointerEvent<SVGSVGElement>) => {
-      const svg = svgRef.current;
-      if (!svg) return null;
-      const rect = svg.getBoundingClientRect();
-      // Map client position into SVG viewBox coordinates
-      const clientX = e.clientX - rect.left;
-      const svgX = (clientX / rect.width) * chartW;
-      // Clamp to plot area and convert to score
-      const clampedX = Math.max(padL, Math.min(svgX, padL + plotW));
-      const s = Math.round(((clampedX - padL) / plotW) * MAX_SCORE);
-      return Math.max(0, Math.min(s, MAX_SCORE));
-    },
-    [chartW, padL, plotW],
-  );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<SVGSVGElement>) => {
@@ -191,330 +149,247 @@ export const PayoutChart = ({
     },
     [pointerToScore],
   );
+  const handlePointerLeave = useCallback(() => setHoverScore(null), []);
 
-  const handlePointerLeave = useCallback(() => {
-    setHoverScore(null);
-  }, []);
-
-  // Hover reward value
   const hoverVal =
     hoverScore != null ? toTokens(cumulAt(rewards, hoverScore)) : 0;
 
-  // Pill dimensions
-  const pillH = 14;
-  const pillRx = 4;
+  const flagPoints = [
+    `${FLAG_TIP_W},${FLAG_H / 2}`,
+    "0,0",
+    `${FLAG_W},0`,
+    `${FLAG_W},${FLAG_H}`,
+    `0,${FLAG_H}`,
+  ].join(" ");
+  const flagTextX = FLAG_TIP_W + FLAG_BODY_W / 2;
+  const flagTextY = FLAG_H / 2;
+
+  const flagRightPct = ((CHART_W - FLAG_RIGHT) / CHART_W) * 100;
+  const hoverHx = hoverScore != null ? toX(hoverScore) : 0;
+  const hoverHy = hoverScore != null ? toY(hoverVal) : 0;
+  const hxPct = (hoverHx / CHART_W) * 100;
+  const hyPct = (hoverHy / CHART_H) * 100;
+  const yPillLeftPct = (PAD_L / CHART_W) * 100;
+
+  const scoreSx = showScore ? toX(score) : 0;
+  const scoreSy = showScore ? toY(scoreVal) : 0;
+  const scoreXPct = (scoreSx / CHART_W) * 100;
+  const scoreYPct = (scoreSy / CHART_H) * 100;
 
   return (
-    <svg
-      ref={svgRef}
-      viewBox={`0 0 ${chartW} ${chartH}`}
-      className="w-full"
-      style={{ fontFamily: "inherit", touchAction: "none" }}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+    <div
+      className="@container/pc flex h-full w-full min-h-0 min-w-0 flex-1 flex-col font-secondary"
+      style={{ containerType: "inline-size" }}
     >
-      <defs>
-        <filter id="label-shadow">
-          <feDropShadow
-            dx="0.5"
-            dy="0.5"
-            stdDeviation="0"
-            floodColor="rgba(0,0,0,0.25)"
-          />
-        </filter>
-      </defs>
-
-      {/* Token price label */}
-      {hasPrice && (
-        <text
-          x={padL + plotW}
-          y={padT - 2}
-          textAnchor="end"
-          fill={labelColor}
-          fontSize={7}
-          className="font-secondary"
+      <div className="relative min-h-0 min-w-0 flex-1">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+          className="absolute inset-0 block h-full w-full"
+          preserveAspectRatio="none"
+          style={{ touchAction: "none" }}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+          aria-label="Payout Chart"
+          role="img"
         >
-          1 USD = {formatTokens(1 / tokenPrice)} GLITCH
-        </text>
-      )}
+          {showBaseCurve && (
+            <path
+              d={basePath}
+              fill="none"
+              stroke={BASE_LINE_COLOR}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
 
-      {/* Horizontal grid at 0 */}
-      <line
-        x1={padL}
-        y1={toY(0)}
-        x2={padL + plotW}
-        y2={toY(0)}
-        stroke={gridColor}
-        strokeWidth={0.5}
-      />
-
-      {/* Base tier reference curve (dimmed staircase) */}
-      {showBaseCurve && (
-        <>
           <path
-            d={basePath}
+            d={curvePath}
             fill="none"
-            stroke="rgba(54, 248, 24, 0.20)"
-            strokeWidth={1}
+            stroke={LINE_COLOR}
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
+            style={{
+              filter:
+                "drop-shadow(2px 2px 0 rgba(255,0,0,0.35)) drop-shadow(-2px -2px 0 rgba(0,0,255,0.35))",
+            }}
           />
-          <text
-            x={padL + plotW - 2}
-            y={toY(toTokens(cumulAt(baseRewardsArr, MAX_SCORE))) + 10}
-            textAnchor="end"
-            fill={labelColor}
-            fontSize={7}
-            className="font-secondary"
-          >
-            1x
-          </text>
-        </>
-      )}
 
-      {/* Main payout staircase — animated draw */}
-      <path
-        ref={pathRef}
-        d={curvePath}
-        fill="none"
-        stroke={lineColor}
-        strokeWidth={1.5}
-        className="glitch-icon"
-        style={
-          pathLength > 0
-            ? {
-                strokeDasharray: pathLength,
-                strokeDashoffset: animated ? 0 : pathLength,
-                transition: animated
-                  ? "stroke-dashoffset 1.2s ease-out"
-                  : "none",
-              }
-            : { opacity: 0 }
-        }
-      />
-
-      {/* Hover crosshairs + reward tooltip */}
-      {hoverScore != null &&
-        (() => {
-          const hx = toX(hoverScore);
-          const hy = toY(hoverVal);
-          const tooltipLabel = `${formatTokens(hoverVal)} GLITCH`;
-          const tooltipW = tooltipLabel.length * 4.2 + 14;
-          // Place tooltip above the dot; if near top, place below
-          const tooltipAbove = hy - 20 >= padT;
-          const tooltipY = tooltipAbove ? hy - 18 : hy + 8;
-          // Clamp horizontally
-          const tooltipX = Math.max(
-            padL,
-            Math.min(hx - tooltipW / 2, padL + plotW - tooltipW),
-          );
-          return (
+          {hoverScore != null && (
             <>
-              {/* Vertical dashed line: dot → X-axis */}
               <line
-                x1={hx}
-                y1={hy}
-                x2={hx}
-                y2={toY(0)}
-                stroke={labelColor}
-                strokeWidth={0.6}
-                strokeDasharray="2 2"
-              />
-              {/* Horizontal dashed line: Y-axis → dot */}
-              <line
-                x1={padL}
-                y1={hy}
-                x2={hx}
-                y2={hy}
-                stroke={labelColor}
-                strokeWidth={0.6}
-                strokeDasharray="2 2"
-              />
-              {/* Dot on curve */}
-              <circle
-                cx={hx}
-                cy={hy}
-                r={3}
-                fill={lineColor}
-                stroke="rgba(0,0,0,0.3)"
-                strokeWidth={0.5}
-              />
-              {/* Tooltip pill */}
-              <rect
-                x={tooltipX}
-                y={tooltipY}
-                width={tooltipW}
-                height={pillH}
-                rx={pillRx}
-                fill={pillBg}
-                stroke={pillBorder}
-                strokeWidth={0.5}
-              />
-              <text
-                x={tooltipX + tooltipW / 2}
-                y={tooltipY + pillH / 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={valueColor}
-                fontSize={7}
-                letterSpacing="0.03em"
-                className="font-secondary"
-                filter="url(#label-shadow)"
-              >
-                {tooltipLabel}
-              </text>
-              {/* Score label on X-axis */}
-              <text
-                x={hx}
-                y={padT + plotH + 14}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={valueColor}
-                fontSize={8}
-                letterSpacing="0.04em"
-                className="font-secondary"
-              >
-                {hoverScore}
-              </text>
-            </>
-          );
-        })()}
-
-      {/* Score marker crosshairs (rendered after curve so they appear on top) */}
-      {showScore &&
-        (() => {
-          const sx = toX(score);
-          const sy = toY(scoreVal);
-          const dotR = 4;
-          const markerColor = scoreColor;
-          const markerPillBg = scorePillBg;
-          const markerPillBorder = scorePillBorder;
-          // Place pill above the dot; if near top, place below
-          const pillAbove = sy - dotR - pillH - 4 >= padT;
-          const pillY = pillAbove ? sy - dotR - pillH - 2 : sy + dotR + 2;
-          const youPillW = 30;
-          // Clamp horizontally so pill stays inside chart
-          const pillX = Math.max(
-            padL,
-            Math.min(sx - youPillW / 2, padL + plotW - youPillW),
-          );
-          return (
-            <>
-              {/* Vertical dashed line: dot → X-axis */}
-              <line
-                x1={sx}
-                y1={sy + dotR}
-                x2={sx}
-                y2={toY(0)}
-                stroke={markerPillBorder}
-                strokeWidth={0.8}
+                x1={hoverHx}
+                y1={hoverHy}
+                x2={hoverHx}
+                y2={CHART_H}
+                stroke={TOOLTIP_DASH}
+                strokeWidth={1}
                 strokeDasharray="3 3"
+                vectorEffect="non-scaling-stroke"
               />
+              <line
+                x1={PAD_L}
+                y1={hoverHy}
+                x2={hoverHx}
+                y2={hoverHy}
+                stroke={TOOLTIP_DASH}
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                vectorEffect="non-scaling-stroke"
+              />
+            </>
+          )}
 
-              {/* Horizontal dashed line: Y-axis → dot */}
+          {showScore && !isHovering && (
+            <>
+              <line
+                x1={scoreSx}
+                y1={scoreSy}
+                x2={scoreSx}
+                y2={CHART_H}
+                stroke={TOOLTIP_PILL_BORDER}
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                vectorEffect="non-scaling-stroke"
+              />
               {score > 0 && (
                 <line
-                  x1={padL}
-                  y1={sy}
-                  x2={sx - dotR}
-                  y2={sy}
-                  stroke={markerPillBorder}
-                  strokeWidth={0.8}
+                  x1={PAD_L}
+                  y1={scoreSy}
+                  x2={scoreSx}
+                  y2={scoreSy}
+                  stroke={TOOLTIP_PILL_BORDER}
+                  strokeWidth={1}
                   strokeDasharray="3 3"
+                  vectorEffect="non-scaling-stroke"
                 />
               )}
-
-              {/* Score dot */}
-              <circle
-                cx={sx}
-                cy={sy}
-                r={dotR}
-                fill={markerColor}
-                stroke="rgba(0,0,0,0.4)"
-                strokeWidth={0.5}
-                style={{
-                  opacity: animated ? 1 : 0,
-                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-                }}
-              />
-
-              {/* "YOU" pill above/below the dot */}
-              <rect
-                x={pillX}
-                y={pillY}
-                width={youPillW}
-                height={pillH}
-                rx={pillRx}
-                fill={markerPillBg}
-                stroke={markerPillBorder}
-                strokeWidth={0.5}
-                style={{
-                  opacity: animated ? 1 : 0,
-                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-                }}
-              />
-              <text
-                x={pillX + youPillW / 2}
-                y={pillY + pillH / 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={markerColor}
-                fontSize={7}
-                letterSpacing="0.06em"
-                className="font-secondary"
-                filter="url(#label-shadow)"
-                style={{
-                  opacity: animated ? 1 : 0,
-                  transition: animated ? "opacity 0.3s ease-out 1s" : "none",
-                }}
-              >
-                YOU
-              </text>
             </>
-          );
-        })()}
+          )}
+        </svg>
 
-      {/* Y-axis ticks */}
-      {yTicks.map((tick) => {
-        const y = toY(tick.val);
-        const textX = padL - 4;
-        return (
-          <g key={`y-${tick.val}`}>
-            <text
-              x={textX}
-              y={y}
-              textAnchor="end"
-              dominantBaseline="central"
-              fill={labelColor}
-              fontSize={7}
-              letterSpacing="0.03em"
-              className="font-secondary"
-            >
-              {tick.label}
-            </text>
-          </g>
-        );
-      })}
+        {maxUsdLabel && (
+          <div className="pointer-events-none absolute left-0 top-0 z-10 font-secondary text-tertiary-100">
+            <div className="flex items-start gap-[2px]">
+              <span className="font-secondary text-[32px] leading-[0.7]">
+                {maxUsdLabel}
+              </span>
+            </div>
+            <div className="mt-[6px] font-secondary text-[16px] leading-[0.7]">
+              Max Reward
+            </div>
+          </div>
+        )}
 
-      {/* X-axis ticks */}
-      {xTicks.map((tick) => {
-        const x = toX(tick.score);
-        const y = padT + plotH + 14;
-        return (
-          <g key={`x-${tick.score}`}>
+        <div
+          className="pointer-events-none absolute top-0 z-10"
+          style={{
+            right: `calc(${flagRightPct}% - 1.25px)`,
+            width: `${FLAG_W}px`,
+            height: `${FLAG_H}px`,
+          }}
+        >
+          <svg
+            viewBox={`0 0 ${FLAG_W} ${FLAG_H}`}
+            className="block h-full w-full"
+            aria-hidden="true"
+          >
+            <polygon points={flagPoints} fill={FLAG_FILL} />
             <text
-              x={x}
-              y={y}
+              x={flagTextX}
+              y={flagTextY}
               textAnchor="middle"
               dominantBaseline="central"
-              fill={labelColor}
-              fontSize={8}
-              letterSpacing="0.04em"
+              fill={FLAG_TEXT_COLOR}
+              fontSize={16}
+              letterSpacing="0.02em"
               className="font-secondary"
             >
-              {tick.label}
+              {flagLabel}
             </text>
-          </g>
-        );
-      })}
-    </svg>
+          </svg>
+        </div>
+
+        {hoverScore != null && (
+          <>
+            <div
+              className="pointer-events-none absolute z-20 size-[6px] rounded-full border border-black/60 bg-white"
+              style={{
+                left: `${hxPct}%`,
+                top: `${hyPct}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute z-20 whitespace-nowrap rounded-[4px] bg-[#1a1d1e] px-[6px] py-[4px] font-secondary text-[14px] leading-[0.7] text-white"
+              style={{
+                left: `${yPillLeftPct}%`,
+                top: `${hyPct}%`,
+                transform: "translateY(-50%)",
+              }}
+            >
+              {formatTokens(hoverVal)} GLITCH
+            </div>
+          </>
+        )}
+
+        {showScore && !isHovering && (
+          <>
+            <div
+              className="pointer-events-none absolute z-20 size-[8px] rounded-full border border-black/60 bg-white"
+              style={{
+                left: `${scoreXPct}%`,
+                top: `${scoreYPct}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute z-20 rounded-[4px] border border-white/35 bg-white/12 px-[6px] py-[3px] font-secondary text-[10px] font-bold uppercase leading-none tracking-[0.1em] text-white"
+              style={{
+                left: `${scoreXPct}%`,
+                top: `${scoreYPct}%`,
+                transform: "translate(-50%, calc(-100% - 10px))",
+              }}
+            >
+              YOU
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="relative flex items-center pt-3 font-secondary text-white-100">
+        {hoverScore != null && (
+          <div
+            className="pointer-events-none absolute top-0 h-3 border-l border-dashed border-white/35"
+            style={{ left: `${(toX(hoverScore) / CHART_W) * 100}%` }}
+          />
+        )}
+        {showScore && !isHovering && (
+          <div
+            className="pointer-events-none absolute top-0 h-3 border-l border-dashed border-white/35"
+            style={{ left: `${(toX(score) / CHART_W) * 100}%` }}
+          />
+        )}
+        <span className="flex-1 text-center font-secondary text-[14px] leading-[0.7] uppercase">
+          Score
+        </span>
+        {X_TICK_VALUES.map((n) => (
+          <span
+            key={n}
+            className="flex-1 text-center font-secondary text-[14px] leading-[0.7]"
+          >
+            {n}+
+          </span>
+        ))}
+        {isHovering && hoverScore != null && (
+          <span
+            className="pointer-events-none absolute top-3 -translate-x-1/2 whitespace-nowrap rounded-[4px] bg-[#1a1d1e] px-[6px] py-[4px] font-secondary text-[14px] leading-[0.7]"
+            style={{ left: `${(toX(hoverScore) / CHART_W) * 100}%` }}
+          >
+            {hoverScore}
+          </span>
+        )}
+      </div>
+    </div>
   );
 };

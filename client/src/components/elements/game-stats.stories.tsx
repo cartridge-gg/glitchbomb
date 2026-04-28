@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { GameStats } from "./game-stats";
 
 const meta = {
-  title: "Elements/GameStats",
+  title: "Elements/Game Stats",
   component: GameStats,
   parameters: {
     layout: "centered",

@@ -29,36 +29,36 @@ interface DistributionProps {
 const SEGMENT_CONFIGS: SegmentConfig[] = [
   {
     key: "bombs",
-    bgColor: "rgba(255, 255, 255, 0.16)", // White-700 for bomb segment
-    iconColor: "#FFFFFF", // White for bomb icons
+    bgColor: "var(--white-700)", // White-700 for bomb segment
+    iconColor: "var(--white-100)", // White for bomb icons
     Icon: BombOrbIcon,
     order: 0,
   },
   {
     key: "points",
-    bgColor: "var(--green-900)", // Custom green from preset
-    iconColor: "var(--green-400)", // Custom green from preset
+    bgColor: "var(--green-700)", // Custom green from preset
+    iconColor: "var(--green-100)", // Custom green from preset
     Icon: SparklesIcon,
     order: 1,
   },
   {
     key: "multipliers",
-    bgColor: "var(--orb-multiplier-faded)",
-    iconColor: "var(--orb-multiplier)",
+    bgColor: "var(--blue-700)",
+    iconColor: "var(--blue-100)",
     Icon: CrossIcon,
     order: 3,
   },
   {
     key: "health",
-    bgColor: "var(--orb-heart-faded)",
-    iconColor: "var(--orb-heart)",
+    bgColor: "var(--salmon-700)",
+    iconColor: "var(--salmon-100)",
     Icon: HeartIcon,
     order: 2,
   },
   {
     key: "special",
-    bgColor: "var(--orb-moonrock-faded)",
-    iconColor: "var(--orb-moonrock)",
+    bgColor: "var(--purple-700)",
+    iconColor: "var(--purple-100)",
     Icon: BoltIcon,
     order: 4,
   },
@@ -106,7 +106,6 @@ export const Distribution = ({
           cy={center}
           r={radius}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
           strokeWidth={thickness}
         />
 

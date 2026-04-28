@@ -81,6 +81,19 @@ export const getCollectionAddress = (chainId: bigint) => {
   return getContractAddress(chainId, NAMESPACE, "Collection");
 };
 
+export const getFaucetAddress = (chainId: bigint) => {
+  const decodedChainId = shortString.decodeShortString(
+    `0x${chainId.toString(16)}`,
+  );
+  const fromEnv = import.meta.env[`VITE_${decodedChainId}_FAUCET`];
+  if (fromEnv && BigInt(fromEnv) !== 0n) return fromEnv as string;
+  return getContractAddress(chainId, NAMESPACE, "Faucet");
+};
+
 export const getGameAddress = (chainId: bigint) => {
   return getContractAddress(chainId, NAMESPACE, "Play");
+};
+
+export const getSetupAddress = (chainId: bigint) => {
+  return getContractAddress(chainId, NAMESPACE, "Setup");
 };

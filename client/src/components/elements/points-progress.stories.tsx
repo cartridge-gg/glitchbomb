@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PointsProgress } from "./points-progress";
 
 const meta = {
-  title: "Elements/PointsProgress",
+  title: "Elements/Points Progress",
   component: PointsProgress,
   parameters: {
     layout: "padded",

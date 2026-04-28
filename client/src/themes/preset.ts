@@ -62,6 +62,18 @@ export const preset: Partial<Config> = {
           800: "var(--white-800)",
           900: "var(--white-900)",
         },
+        gray: {
+          DEFAULT: "var(--gray-100)",
+          100: "var(--gray-100)",
+          200: "var(--gray-200)",
+          300: "var(--gray-300)",
+          400: "var(--gray-400)",
+          500: "var(--gray-500)",
+          600: "var(--gray-600)",
+          700: "var(--gray-700)",
+          800: "var(--gray-800)",
+          900: "var(--gray-900)",
+        },
         black: {
           DEFAULT: "var(--black-100)",
           100: "var(--black-100)",
@@ -307,6 +319,9 @@ export const preset: Partial<Config> = {
         "accordion-up": "accordion-up 0.2s ease-out",
         shimmer: "shimmer 2s linear infinite",
         glitch: "font-glitch 5s step-end infinite",
+        "glitch-text": "glitch-text 2.5s infinite linear",
+        "glitch-full":
+          "font-glitch 5s step-end infinite, glitch-text 2.5s infinite linear",
       },
     },
   },

@@ -72,12 +72,37 @@ export function amount(score: number, multiplier: bigint): bigint {
   return (b * multiplier) / MULTIPLIER_PRECISION;
 }
 
-export function tokenPayout(score: number, multiplier: bigint): bigint {
-  return amount(score, multiplier);
+/**
+ * Preview (stake = tier 1–10): tier × supplyMultiplier.
+ * In-game (stake = pre-computed MULTIPLIER_PRECISION-based value from contract): used as-is.
+ */
+function effectiveMultiplier(
+  stake: number,
+  supply: bigint,
+  target: bigint,
+): bigint {
+  if (stake > STARTERPACK_COUNT) {
+    return BigInt(stake);
+  }
+  return BigInt(stake) * supplyMultiplier(supply, target);
+}
+
+export function tokenPayout(
+  score: number,
+  stake: number,
+  supply: bigint,
+  target: bigint,
+): bigint {
+  return amount(score, effectiveMultiplier(stake, supply, target));
 }
 
 export function toTokens(rawAmount: bigint | number): number {
   return Number(rawAmount) / 10 ** TOKEN_DECIMALS;
+}
+
+/** Convert a USDC raw amount (6 decimals) to a USD `number`. */
+export function toUsd(rawAmount: bigint | number): number {
+  return Number(rawAmount) / 10 ** QUOTE_DECIMALS;
 }
 
 /** Tier price in USDC raw units: stake * base_price * (PM - stake * PM / 100) / PM */
@@ -100,17 +125,25 @@ export const TIER_PRICES: bigint[] = Array.from(
   (_, i) => tierPrice(i + 1),
 );
 
-/** Reward at each score from 1 through MAX_SCORE (human-readable). */
-export function scoreRewards(multiplier: bigint): number[] {
+export function scoreRewards(
+  stake: number,
+  supply: bigint,
+  target: bigint,
+): number[] {
+  const multiplier = effectiveMultiplier(stake, supply, target);
   const result: number[] = [];
   for (let s = 1; s <= MAX_SCORE; s++) {
-    result.push(toTokens(amount(s, multiplier)));
+    result.push(Number(amount(s, multiplier)));
   }
   return result;
 }
 
-export function maxPayout(multiplier: bigint): number {
-  return toTokens(amount(MAX_SCORE, multiplier));
+export function maxPayout(
+  stake: number,
+  supply: bigint,
+  target: bigint,
+): bigint {
+  return amount(MAX_SCORE, effectiveMultiplier(stake, supply, target));
 }
 
 /** First score where token reward (USD) covers USDC cost. MAX_SCORE if unavailable. */

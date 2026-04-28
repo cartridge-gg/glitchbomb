@@ -1,8 +1,16 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { LaurelIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
+
+export interface AchievementCountProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof achievementCountVariants> {
+  count: number;
+  total: number;
+}
 
 const achievementCountVariants = cva(
-  "inline-flex items-center gap-2 rounded-lg bg-white-900 px-4 py-3",
+  "flex justify-center items-center p-2.5 gap-2 bg-white-900 rounded-lg",
   {
     variants: {
       variant: {
@@ -15,13 +23,6 @@ const achievementCountVariants = cva(
   },
 );
 
-export interface AchievementCountProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof achievementCountVariants> {
-  count: number;
-  total: number;
-}
-
 export const AchievementCount = ({
   count,
   total,
@@ -31,17 +32,15 @@ export const AchievementCount = ({
 }: AchievementCountProps) => {
   return (
     <div
-      className={achievementCountVariants({ variant, className })}
+      className={cn(achievementCountVariants({ variant, className }))}
       {...props}
     >
-      <LaurelIcon size="md" className="text-green-100" />
-      <p>
-        <span className="font-secondary text-2xl/5 text-green-100">
-          <span className="font-inherit">{count}</span>
-          <span className="font-inherit text-white-400">/</span>
-          <span className="font-inherit text-white-100">{total}</span>
-        </span>
-      </p>
+      <LaurelIcon size="md" className="text-primary-100" />
+      <div className="flex items-center gap-1 text-2xl/[13px]">
+        <span className="text-primary-100 font-secondary">{count}</span>
+        <span className="text-white-400 font-secondary">/</span>
+        <span className="text-white-100 font-secondary">{total}</span>
+      </div>
     </div>
   );
 };

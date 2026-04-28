@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { HeartsDisplay } from "./hearts-display";
 
 const meta = {
-  title: "Elements/HeartsDisplay",
+  title: "Elements/Hearts Display",
   component: HeartsDisplay,
   parameters: {
     layout: "centered",

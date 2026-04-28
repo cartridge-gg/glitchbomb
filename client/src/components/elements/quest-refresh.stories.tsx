@@ -5,11 +5,20 @@ const meta = {
   title: "Elements/Quest Refresh",
   component: QuestRefresh,
   parameters: {
-    layout: "centered",
+    layout: "padded",
   },
   globals: {
     backgrounds: {
       value: "dark",
+    },
+  },
+  argTypes: {
+    expiration: {
+      control: "number",
+    },
+    variant: {
+      control: "select",
+      options: ["default"],
     },
   },
 } satisfies Meta<typeof QuestRefresh>;
@@ -19,6 +28,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    timeLeft: "12h 24m",
+    expiration: Math.floor(Date.now() / 1000) + 12 * 3600 + 24 * 60,
+    variant: "default",
   },
 };

@@ -28,6 +28,20 @@ export const iconVariants = cva(base, {
 });
 
 export * from "./bombs";
-export * from "./exotics";
+export * from "./effects";
+export {
+  FistIcon,
+  GlitchBombIcon,
+  GlitchTokenLargeIcon,
+  NumsLogoIcon,
+  OrbBombIcon,
+  OrbChipIcon,
+  OrbHealthIcon,
+  OrbIcon,
+  OrbMoonrockIcon,
+  OrbMultiplierIcon,
+  OrbPointIcon,
+  QuoteIcon,
+} from "./exotics";
 export * from "./regulars";
 export * from "./states";

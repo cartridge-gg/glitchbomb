@@ -5,6 +5,7 @@
 
 # npm/pnpm config (local only, not for Vercel)
 **/.npmrc
+.playwright-mcp
 
 # Logs
 logs

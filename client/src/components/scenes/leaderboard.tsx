@@ -38,7 +38,7 @@ export const LeaderboardScene = ({
       {...props}
     >
       {onClose && (
-        <Close size="md" onClick={onClose} className="absolute top-3 right-3" />
+        <Close size="md" onClick={onClose} className="absolute top-4 right-4" />
       )}
 
       <h2 className="text-2xl/8 md:text-[2.5rem] text-green-100 uppercase tracking-tight">

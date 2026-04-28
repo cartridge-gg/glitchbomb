@@ -99,7 +99,7 @@ const TapTooltip = ({
   const childArray = React.Children.toArray(children);
   const trigger = childArray.find(
     (child) => React.isValidElement(child) && child.type === TooltipTrigger,
-  ) as React.ReactElement | undefined;
+  ) as React.ReactElement<{ children?: React.ReactNode }> | undefined;
   const rest = childArray.filter(
     (child) => !(React.isValidElement(child) && child.type === TooltipTrigger),
   );

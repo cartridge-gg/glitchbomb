@@ -28,6 +28,7 @@ type Story = StoryObj<typeof meta>;
 const sampleQuests = [
   {
     id: "quest-1",
+    icon: "fa-layer-group",
     title: "Bag Builder",
     description: "Pull 3 multiplier orbs in a single run.",
     count: 1,
@@ -35,6 +36,7 @@ const sampleQuests = [
   },
   {
     id: "quest-2",
+    icon: "fa-bomb",
     title: "Bomb Squad",
     description: "Defuse 5 bombs before cashing out.",
     count: 5,
@@ -42,6 +44,7 @@ const sampleQuests = [
   },
   {
     id: "quest-3",
+    icon: "fa-circle-dot",
     title: "Orb Collector",
     description: "Pull 10 point orbs across any runs.",
     count: 6,
@@ -49,10 +52,14 @@ const sampleQuests = [
   },
 ];
 
+const EXPIRATION = Math.floor(Date.now() / 1000) + 12 * 3600 + 24 * 60;
+
 export const Default: Story = {
   args: {
-    quests: sampleQuests,
-    timeLeft: "12h 24m",
+    questsProps: {
+      quests: sampleQuests,
+      expiration: EXPIRATION,
+    },
     onClose: fn(),
     className: "w-full",
   },
@@ -60,8 +67,10 @@ export const Default: Story = {
 
 export const AllCompleted: Story = {
   args: {
-    quests: sampleQuests.map((quest) => ({ ...quest, count: quest.total })),
-    timeLeft: "12h 24m",
+    questsProps: {
+      quests: sampleQuests.map((quest) => ({ ...quest, count: quest.total })),
+      expiration: EXPIRATION,
+    },
     onClose: fn(),
     className: "w-full",
   },
@@ -69,8 +78,10 @@ export const AllCompleted: Story = {
 
 export const Empty: Story = {
   args: {
-    quests: [],
-    timeLeft: "12h 24m",
+    questsProps: {
+      quests: [],
+      expiration: EXPIRATION,
+    },
     onClose: fn(),
     className: "w-full",
   },

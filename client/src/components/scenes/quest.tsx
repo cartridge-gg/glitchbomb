@@ -7,7 +7,7 @@ import { QuestRefresh } from "@/components/elements/quest-refresh";
 import { GlitchText } from "@/components/ui/glitch-text";
 
 const questSceneVariants = cva(
-  "relative flex flex-col gap-6 overflow-hidden rounded-lg bg-[#040603] p-6 outline outline-4 -outline-offset-4 outline-green-600 md:p-8",
+  "relative flex flex-col gap-6 overflow-hidden rounded-lg bg-[#040603] p-6 outline outline-4 -outline-offset-4 outline-green-600 md:p-8 md:items-center",
   {
     variants: {
       variant: {
@@ -23,53 +23,56 @@ const questSceneVariants = cva(
 export interface QuestSceneProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof questSceneVariants> {
-  quests: QuestsProps["quests"];
-  timeLeft: string;
+  questsProps: QuestsProps;
   onClose?: () => void;
 }
 
 export const QuestScene = ({
-  quests,
-  timeLeft,
+  questsProps,
   onClose,
   variant,
   className,
   ...props
 }: QuestSceneProps) => {
-  const completedCount = quests.filter(
+  const completedCount = questsProps.quests.filter(
     (quest) => quest.count >= quest.total,
   ).length;
 
   return (
     <div className={questSceneVariants({ variant, className })} {...props}>
       {onClose ? (
-        <Close size="md" className="absolute top-3 right-3" onClick={onClose} />
+        <Close size="md" className="absolute top-4 right-4" onClick={onClose} />
       ) : null}
 
-      <div className="flex flex-col gap-5">
-        <div className="pr-12 text-green-100 uppercase">
-          <h2 className="text-2xl/8 tracking-tight md:text-[2.5rem]">
-            <GlitchText
-              text="Quests"
-              style={{
-                textShadow:
-                  "2px 2px 0px rgba(255, 0, 0, 0.25), -2px -2px 0px rgba(0, 0, 255, 0.25)",
-              }}
-            />
-          </h2>
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <QuestCount count={completedCount} total={quests.length} />
-            <QuestGift />
+      <div className="h-full w-full max-w-[720px] self-center overflow-hidden flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
+          <div className="pr-12 text-green-100 uppercase">
+            <h2 className="text-2xl/8 tracking-tight md:text-[2.5rem]">
+              <GlitchText
+                text="Quests"
+                style={{
+                  textShadow:
+                    "2px 2px 0px rgba(255, 0, 0, 0.25), -2px -2px 0px rgba(0, 0, 255, 0.25)",
+                }}
+              />
+            </h2>
           </div>
 
-          <QuestRefresh timeLeft={timeLeft} />
-        </div>
-      </div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <QuestCount
+                count={completedCount}
+                total={questsProps.quests.length}
+              />
+              <QuestGift direction="left" />
+            </div>
 
-      <Quests quests={quests} className="min-h-0 flex-1" />
+            <QuestRefresh expiration={questsProps.expiration} />
+          </div>
+        </div>
+
+        <Quests {...questsProps} className="min-h-0 flex-1" />
+      </div>
     </div>
   );
 };

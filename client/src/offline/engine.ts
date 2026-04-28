@@ -122,7 +122,7 @@ export function cashOut(game: OfflineGame): {
 export function enterShop(
   game: OfflineGame,
   seed: bigint,
-): { game: OfflineGame; shop: OfflineShopState } {
+): { game: OfflineGame; shop: OfflineShopState; cost: number } {
   assertNotOver(game);
   assertNotInShop(game);
   assertCompleted(game);

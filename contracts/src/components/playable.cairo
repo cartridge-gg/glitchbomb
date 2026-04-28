@@ -12,7 +12,6 @@ pub mod PlayableComponent {
     use quest::component::Component::InternalImpl as QuestableInternalImpl;
     use starknet::ContractAddress;
     use crate::constants;
-
     use crate::elements::tasks::index::{Task, TaskTrait};
     use crate::helpers::random::RandomImpl;
     use crate::helpers::rewarder::Rewarder;

@@ -1,22 +1,39 @@
+import { ToriiGrpcClient } from "@dojoengine/grpc";
+import * as torii from "@dojoengine/torii-wasm";
 import { DEFAULT_CHAIN_ID, dojoConfigs } from "@/config";
 
-function getToriiUrl(): string {
-  return dojoConfigs[DEFAULT_CHAIN_ID].toriiUrl;
+let clientInstance: torii.ToriiClient | null = null;
+let clientPromise: Promise<torii.ToriiClient> | null = null;
+
+export async function initToriiClient(): Promise<torii.ToriiClient> {
+  if (clientInstance) return clientInstance;
+  if (clientPromise) return clientPromise;
+
+  const toriiUrl = dojoConfigs[DEFAULT_CHAIN_ID].toriiUrl;
+
+  clientPromise = (async () => {
+    const client = await new torii.ToriiClient({
+      toriiUrl,
+      worldAddress: "0x0",
+    });
+    clientInstance = client;
+    return client;
+  })();
+
+  return clientPromise;
 }
 
-export async function executeSql(
-  query: string,
-): Promise<Record<string, unknown>[]> {
-  const toriiUrl = getToriiUrl();
-  const response = await fetch(`${toriiUrl}/sql`, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: query,
+let grpcInstance: ToriiGrpcClient | null = null;
+
+export function initGrpcClient(): ToriiGrpcClient {
+  if (grpcInstance) return grpcInstance;
+
+  const toriiUrl = dojoConfigs[DEFAULT_CHAIN_ID].toriiUrl;
+
+  grpcInstance = new ToriiGrpcClient({
+    toriiUrl,
+    worldAddress: "0x0",
   });
 
-  if (!response.ok) {
-    throw new Error(`Torii SQL query failed: ${response.statusText}`);
-  }
-
-  return response.json();
+  return grpcInstance;
 }

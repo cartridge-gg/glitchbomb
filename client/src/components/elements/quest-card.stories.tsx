@@ -5,15 +5,33 @@ const meta = {
   title: "Elements/Quest Card",
   component: QuestCard,
   parameters: {
-    layout: "centered",
+    layout: "padded",
   },
   globals: {
     backgrounds: {
       value: "dark",
     },
   },
-  args: {
-    className: "w-[22rem]",
+  argTypes: {
+    icon: {
+      control: "text",
+    },
+    title: {
+      control: "text",
+    },
+    description: {
+      control: "text",
+    },
+    count: {
+      control: "number",
+    },
+    total: {
+      control: "number",
+    },
+    variant: {
+      control: "select",
+      options: ["default", "complete"],
+    },
   },
 } satisfies Meta<typeof QuestCard>;
 
@@ -22,20 +40,34 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    title: "Bag Builder",
-    description: "Pull 3 multiplier orbs in a single run.",
-    count: 1,
-    total: 3,
+    icon: "fa-table-cells",
+    title: "Orientation",
+    description: "The work is mysterious and important.",
+    count: 12,
+    total: 20,
     variant: "default",
   },
 };
 
 export const Complete: Story = {
   args: {
-    title: "Bomb Squad",
-    description: "Defuse 5 bombs before cashing out.",
-    count: 5,
-    total: 5,
+    icon: "fa-table-cells",
+    title: "Orientation",
+    description: "The work is mysterious and important.",
+    count: 20,
+    total: 20,
     variant: "complete",
+  },
+};
+
+export const WithNotification: Story = {
+  args: {
+    icon: "fa-table-cells",
+    title: "Orientation",
+    description: "The work is mysterious and important.",
+    count: 12,
+    total: 20,
+    variant: "default",
+    isNew: true,
   },
 };

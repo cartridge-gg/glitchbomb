@@ -1,130 +1,116 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { CheckboxCheckedIcon, CheckboxUncheckedIcon } from "@/components/icons";
+import {
+  CheckboxCheckedIcon,
+  CheckboxUncheckedIcon,
+  CheckIcon,
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
-
-const questCardVariants = cva(
-  "flex w-full flex-col gap-3 rounded-lg p-4 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
-  {
-    variants: {
-      variant: {
-        default: "bg-white-900",
-        complete: "bg-green-900",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
+import { AchievementIcon } from "./achievement-icon";
+import { AchievementProgress } from "./achievement-progress";
+import { NotificationPing } from "./notification-ping";
 
 export interface QuestCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof questCardVariants> {
+  icon: string;
   title: string;
   description: string;
   count: number;
   total: number;
-  icon?: React.ReactNode;
+  isNew?: boolean;
 }
 
+const questCardVariants = cva("select-none flex flex-col w-full", {
+  variants: {
+    variant: {
+      default:
+        "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-white-900 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
+      complete:
+        "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-green-900 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
 export const QuestCard = ({
+  icon,
   title,
   description,
   count,
   total,
-  icon,
+  isNew,
   variant,
   className,
   ...props
 }: QuestCardProps) => {
-  const safeCount = Math.max(0, count);
-  const safeTotal = Math.max(0, total);
-  const progress =
-    safeTotal > 0 ? Math.min((safeCount / safeTotal) * 100, 100) : 0;
-  const isComplete = variant === "complete" || safeCount >= safeTotal;
+  const isComplete = count >= total;
 
   return (
-    <div className={questCardVariants({ variant, className })} {...props}>
-      <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "flex size-12 shrink-0 items-center justify-center rounded-lg",
-            isComplete ? "bg-green-800" : "bg-white-900",
-          )}
-        >
-          {icon ?? (
-            <div
-              className={cn(
-                "size-6 rounded-md",
-                isComplete ? "bg-green-400" : "bg-white-400",
-              )}
-            />
-          )}
-        </div>
+    <div
+      className={cn("relative", questCardVariants({ variant, className }))}
+      {...props}
+    >
+      {isNew && <NotificationPing />}
+      <div className="flex gap-2 items-center">
+        <AchievementIcon
+          icon={icon}
+          size="lg"
+          className={isComplete ? "text-white-400" : "text-white-100"}
+        />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h3
+        <div className="flex flex-col gap-1 flex-1 overflow-hidden">
+          <p
             className={cn(
-              "min-w-0 truncate",
-              isComplete ? "text-green-400" : "text-white-100",
+              "font-secondary text-2xl/4 whitespace-nowrap",
+              isComplete ? "text-white-400" : "text-white-100",
             )}
+            style={{ textShadow: "2px 2px 0px rgba(0, 0, 0, 0.24)" }}
           >
-            <span className="font-secondary text-xl/5">{title}</span>
-          </h3>
+            {title}
+          </p>
 
-          <div className="flex items-start gap-2">
+          <div className="flex gap-1 items-center">
             {isComplete ? (
-              <CheckboxCheckedIcon
-                size="sm"
-                className="mt-0.5 shrink-0 text-white-400"
-              />
+              <CheckboxCheckedIcon size="sm" className="text-white-400" />
             ) : (
-              <CheckboxUncheckedIcon
-                size="sm"
-                className="mt-0.5 shrink-0 text-white-400"
-              />
+              <CheckboxUncheckedIcon size="sm" className="text-white-400" />
             )}
-            <p className="min-w-0 flex-1">
-              <span
-                className={cn(
-                  "font-secondary text-lg/4",
-                  isComplete ? "text-green-400 line-through" : "text-white-400",
-                )}
-              >
-                {description}
-              </span>
-            </p>
+            <span
+              className={cn(
+                "text-base/5 font-secondary flex-1 whitespace-nowrap truncate",
+                isComplete ? "text-white-400 line-through" : "text-white-100",
+              )}
+            >
+              {description}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div
-          className={cn(
-            "h-4 flex-1 overflow-hidden rounded-lg p-1",
-            isComplete ? "bg-green-800" : "bg-white-900",
-          )}
-        >
-          <div
-            className={cn(
-              "h-full rounded-md transition-[width] duration-300",
-              isComplete ? "bg-green-100" : "bg-white-100",
-            )}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+      <div className="h-5 flex gap-3 items-center">
+        <AchievementProgress
+          count={Math.min(count, total)}
+          total={total}
+          variant={isComplete ? "complete" : "default"}
+          className={cn("flex-1", !isComplete && "text-white-100")}
+        />
 
-        <p className="shrink-0 text-right">
-          <span className="font-secondary text-lg/4 text-white-100">
-            <span
-              className={cn("font-inherit", isComplete && "text-green-100")}
-            >
-              {safeCount}
-            </span>
-            <span className="font-inherit text-white-400"> of </span>
-            <span className="font-inherit">{safeTotal}</span>
+        <div className="flex gap-1 items-center">
+          <CheckIcon
+            size="sm"
+            className={isComplete ? "text-green-100" : "hidden"}
+          />
+          <span
+            className={cn(
+              "text-base/5 font-secondary",
+              isComplete ? "text-green-100" : "text-white-100",
+            )}
+          >
+            {count.toLocaleString("en-US")} of {total.toLocaleString("en-US")}
           </span>
-        </p>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { Ref } from "react";
 import { HeartIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 
@@ -44,9 +44,9 @@ export interface GameStatsProps {
   /** Increment to trigger dramatic glitch burst on points counter */
   pointsBurst?: number;
   /** Ref attached to the points counter element (fly target) */
-  pointsRef?: RefObject<HTMLDivElement | null>;
+  pointsRef?: Ref<HTMLDivElement>;
   /** Ref attached to the health display element (fly target) */
-  healthRef?: RefObject<HTMLDivElement | null>;
+  healthRef?: Ref<HTMLDivElement>;
 }
 
 export const GameStats = ({

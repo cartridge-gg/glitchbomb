@@ -78,7 +78,7 @@ const RAINBOW_SEQUENCE = [
   VARIANT_COLORS.point,
   VARIANT_COLORS.moonrock,
 ] as const;
-const DEFAULT_GLOW_POSITION = { x: 30, y: 25 } as const;
+const DEFAULT_GLOW_POSITION: { x: number; y: number } = { x: 30, y: 25 };
 
 export interface PullerProps
   extends Omit<HTMLMotionProps<"button">, "ref">,
@@ -154,8 +154,7 @@ export const Puller = memo(function Puller({
 
       return () => clearInterval(interval);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant]);
+  }, [variant, controls]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -197,7 +196,6 @@ export const Puller = memo(function Puller({
   const loadingLabelFontSize = Math.round(resolvedSizePx * 0.14);
   const loadingLabelLineHeight = Math.round(loadingLabelFontSize * 0.9);
   const mergedStyle = {
-    boxShadow: "0px 0px 50px 30px #000000",
     ...(sizePx ? { width: resolvedSizePx, height: resolvedSizePx } : {}),
     ...style,
   };
@@ -221,12 +219,12 @@ export const Puller = memo(function Puller({
       style={mergedStyle}
       disabled={disabled || isLoading}
       aria-busy={isLoading}
-      onHoverStart={(event) => {
-        onHoverStart?.(event);
+      onHoverStart={(event, info) => {
+        onHoverStart?.(event, info);
         setIsHovering(true);
       }}
-      onHoverEnd={(event) => {
-        onHoverEnd?.(event);
+      onHoverEnd={(event, info) => {
+        onHoverEnd?.(event, info);
         setIsHovering(false);
         glowX.set(DEFAULT_GLOW_POSITION.x);
         glowY.set(DEFAULT_GLOW_POSITION.y);

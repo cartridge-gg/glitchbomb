@@ -1,104 +1,119 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { AlertIcon, TrophyIcon } from "@/components/icons";
+import {
+  CheckboxCheckedIcon,
+  CheckboxUncheckedIcon,
+  CheckIcon,
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
-
-const achievementCardVariants = cva(
-  "flex aspect-[162/126] min-h-[127px] w-full flex-col items-center justify-center gap-3 rounded-lg p-4 text-center shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)] md:p-5",
-  {
-    variants: {
-      variant: {
-        complete:
-          "bg-green-800 outline outline-1 -outline-offset-1 outline-green-600",
-        inProgress: "bg-white-900",
-        locked: "bg-white-900",
-        empty: "bg-white-900",
-      },
-    },
-    defaultVariants: {
-      variant: "inProgress",
-    },
-  },
-);
+import { AchievementIcon } from "./achievement-icon";
+import { AchievementProgress } from "./achievement-progress";
 
 export interface AchievementCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof achievementCardVariants> {
-  title?: string;
-  icon?: React.ReactNode;
-  count?: number;
-  total?: number;
+  icon: string;
+  title: string;
+  description: string;
+  count: number;
+  total: number;
+  hidden?: boolean;
 }
 
-const AchievementCardFallbackIcon = ({
-  variant,
-}: {
-  variant: NonNullable<AchievementCardProps["variant"]>;
-}) => {
-  if (variant === "locked") {
-    return <TrophyIcon variant="line" size="xl" className="text-white-500" />;
-  }
-
-  return (
-    <AlertIcon
-      size="xl"
-      className={cn(
-        variant === "complete" ? "text-green-100" : "text-white-500",
-      )}
-    />
-  );
-};
+const achievementCardVariants = cva(
+  "select-none flex flex-col w-full overflow-hidden",
+  {
+    variants: {
+      variant: {
+        default:
+          "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-white-900 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
+        complete:
+          "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-green-800 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
+        float:
+          "gap-2 p-6 rounded-xl bg-black-200 border-2 border-black-100 shadow-[0px_4px_4px_rgba(0,0,0,0.25)] backdrop-blur-[12px]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
 
 export const AchievementCard = ({
-  title,
   icon,
-  count = 0,
-  total = 0,
-  variant = "inProgress",
+  title,
+  description,
+  count,
+  total,
+  variant,
   className,
   ...props
 }: AchievementCardProps) => {
-  if (variant === "empty") {
-    return (
-      <div
-        className={achievementCardVariants({ variant, className })}
-        {...props}
-      />
-    );
-  }
-
-  const progress = total > 0 ? Math.min((count / total) * 100, 100) : 0;
-  const resolvedTitle = variant === "locked" ? "Hidden" : title;
-  const iconNode = icon ?? <AchievementCardFallbackIcon variant={variant} />;
+  const isComplete = count >= total;
 
   return (
-    <div className={achievementCardVariants({ variant, className })} {...props}>
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 self-stretch">
-        <div className="flex size-14 items-center justify-center md:size-16">
-          {iconNode}
-        </div>
+    <div
+      className={cn(achievementCardVariants({ variant, className }))}
+      {...props}
+    >
+      <div className="flex gap-2 items-center">
+        <AchievementIcon
+          icon={icon}
+          size="lg"
+          className={isComplete ? "text-green-100" : "text-white-400"}
+        />
 
-        <p className="w-full">
-          <span
+        <div className="flex flex-col gap-1 flex-1 overflow-hidden">
+          <p
             className={cn(
-              "block truncate font-secondary text-[2rem]/[0.95] tracking-tight md:text-[2.25rem]/[0.95]",
-              variant === "complete" && "text-green-100",
-              variant === "inProgress" && "text-white-400",
-              variant === "locked" && "text-white-400",
+              "font-secondary text-2xl/4 whitespace-nowrap",
+              isComplete ? "text-green-100" : "text-white-100",
             )}
+            style={{ textShadow: "2px 2px 0px rgba(0, 0, 0, 0.24)" }}
           >
-            {resolvedTitle}
-          </span>
-        </p>
+            {title}
+          </p>
+
+          <div className="flex gap-1 items-center">
+            {isComplete ? (
+              <CheckboxCheckedIcon size="sm" className="text-white-400" />
+            ) : (
+              <CheckboxUncheckedIcon size="sm" className="text-white-400" />
+            )}
+            <span
+              className={cn(
+                "text-base/5 font-secondary flex-1 whitespace-nowrap truncate",
+                isComplete ? "text-white-400 line-through" : "text-white-100",
+              )}
+            >
+              {description}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {variant === "inProgress" ? (
-        <div className="h-4 w-full overflow-hidden rounded-lg bg-white-900 p-1">
-          <div
-            className="h-full rounded-md bg-white-100 transition-[width] duration-300"
-            style={{ width: `${progress}%` }}
-          />
+      <div className="h-5 flex gap-3 items-center">
+        <AchievementProgress
+          count={count}
+          total={total}
+          variant={isComplete ? "complete" : "default"}
+          className="flex-1"
+        />
+
+        <div className="flex gap-1 items-center">
+          {isComplete ? (
+            <>
+              <CheckIcon size="sm" className="text-green-100" />
+              <span className="text-base/5 font-secondary text-green-100">
+                {total !== 1 ? count.toLocaleString("en-US") : "Completed"}
+              </span>
+            </>
+          ) : (
+            <span className="text-base/5 font-secondary text-white-100">
+              {count.toLocaleString("en-US")} of {total.toLocaleString("en-US")}
+            </span>
+          )}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };

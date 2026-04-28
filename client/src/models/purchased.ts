@@ -1,0 +1,82 @@
+import type { EventProps } from "@/components/elements";
+import { MULTIPLIER_PRECISION } from "@/constants";
+import type { RawPurchased } from "@/models";
+
+const MODEL_NAME = "Purchased";
+
+export class Purchased {
+  constructor(
+    public player_id: string,
+    public starterpack_id: number,
+    public quantity: number,
+    public multiplier: number,
+    public time: number,
+    public price: bigint,
+  ) {
+    this.player_id = player_id;
+    this.starterpack_id = starterpack_id;
+    this.quantity = quantity;
+    this.multiplier = multiplier;
+    this.time = time;
+    this.price = price;
+  }
+
+  static getModelName(): string {
+    return MODEL_NAME;
+  }
+
+  static from(data: RawPurchased): Purchased {
+    return Purchased.parse(data);
+  }
+
+  static parse(data: RawPurchased) {
+    const props = {
+      player_id: data.player_id.value,
+      starterpack_id: Number(data.starterpack_id.value),
+      quantity: Number(data.quantity.value),
+      multiplier: Number(data.multiplier.value) / Number(MULTIPLIER_PRECISION),
+      price: BigInt(data?.price?.value || "0"),
+      time: Number(data.time.value),
+    };
+    return new Purchased(
+      props.player_id,
+      props.starterpack_id,
+      props.quantity,
+      props.multiplier,
+      props.time,
+      props.price,
+    );
+  }
+
+  static dedupe(purchaseds: Purchased[]): Purchased[] {
+    return purchaseds.filter(
+      (purchased, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.player_id === purchased.player_id && t.time === purchased.time,
+        ),
+    );
+  }
+
+  static getUuid(purchased: Purchased): string {
+    return `${purchased.player_id}-${purchased.starterpack_id}-${purchased.time}`;
+  }
+
+  hasExpired(): boolean {
+    // Event expires in 30 seconds
+    return this.time + 30 < Math.floor(Date.now() / 1000);
+  }
+
+  getEvent(): EventProps {
+    return {
+      uuid: Purchased.getUuid(this),
+      username: this.player_id,
+      multiplier: this.multiplier,
+      earning: undefined,
+      timestamp: this.time,
+      id: "",
+      price: this.price,
+    };
+  }
+}

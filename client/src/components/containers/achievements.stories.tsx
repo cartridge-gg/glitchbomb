@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { AlertIcon, BoltIcon, GearIcon, TrophyIcon } from "@/components/icons";
 import { Achievements } from "./achievements";
 
 const meta = {
@@ -27,96 +26,52 @@ type Story = StoryObj<typeof meta>;
 
 const sampleAchievements = [
   {
-    id: "earned-1",
+    id: "FIRST_MILLION",
+    icon: "fa-coins",
+    title: "First Million",
+    description: "Claim NUMS Tokens",
+    count: 100000,
+    total: 100000,
+  },
+  {
+    id: "NOVICE",
+    icon: "fa-graduation-cap",
+    title: "Novice",
+    description: "Play 10 games",
+    count: 10,
+    total: 10,
+  },
+  {
+    id: "EMERGENCY_MODE",
+    icon: "fa-bolt",
     title: "Emergency Mode",
-    variant: "complete" as const,
-    icon: <AlertIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-2",
-    title: "Bomb Tech",
-    variant: "complete" as const,
-    icon: <BoltIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-3",
-    title: "Tuned Up",
-    variant: "complete" as const,
-    icon: <GearIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "remaining-1",
-    title: "Double Up",
-    variant: "inProgress" as const,
-    count: 3,
+    description: "Use 5 power-ups in a single game",
+    count: 5,
     total: 5,
-    icon: <AlertIcon size="xl" className="text-white-500" />,
   },
   {
-    id: "remaining-2",
-    title: "Shockproof",
-    variant: "inProgress" as const,
-    count: 2,
-    total: 4,
-    icon: <BoltIcon size="xl" className="text-white-500" />,
-  },
-  {
-    id: "remaining-3",
-    title: "Grease Monkey",
-    variant: "inProgress" as const,
-    count: 1,
-    total: 6,
-    icon: <GearIcon size="xl" className="text-white-500" />,
-  },
-  {
-    id: "remaining-4",
-    variant: "locked" as const,
-    icon: <TrophyIcon variant="line" size="xl" className="text-white-500" />,
-  },
-];
-
-const allEarnedAchievements = [
-  {
-    id: "earned-1",
-    title: "Emergency Mode",
-    variant: "complete" as const,
-    icon: <AlertIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-2",
-    title: "Bomb Tech",
-    variant: "complete" as const,
-    icon: <BoltIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-3",
-    title: "Tuned Up",
-    variant: "complete" as const,
-    icon: <GearIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-4",
+    id: "DOUBLE_UP",
+    icon: "fa-arrow-up",
     title: "Double Up",
-    variant: "complete" as const,
-    icon: <AlertIcon size="xl" className="text-green-100" />,
+    description: "Use the double power-up 10 times",
+    count: 3,
+    total: 10,
   },
   {
-    id: "earned-5",
-    title: "Shockproof",
-    variant: "complete" as const,
-    icon: <BoltIcon size="xl" className="text-green-100" />,
+    id: "MONEY_MACHINE",
+    icon: "fa-money-bill",
+    title: "Money Machine",
+    description: "Earn 2K Nums cumulated",
+    count: 500,
+    total: 2000,
   },
   {
-    id: "earned-6",
-    title: "Grease Monkey",
-    variant: "complete" as const,
-    icon: <GearIcon size="xl" className="text-green-100" />,
-  },
-  {
-    id: "earned-7",
-    title: "Secret Finder",
-    variant: "complete" as const,
-    icon: <TrophyIcon variant="solid" size="xl" className="text-green-100" />,
+    id: "ROLLING_IN_IT",
+    icon: "fa-trophy",
+    title: "Rolling in it",
+    description: "Win a jackpot",
+    count: 0,
+    total: 1,
   },
 ];
 
@@ -128,12 +83,25 @@ export const Default: Story = {
 
 export const AllEarned: Story = {
   args: {
-    achievements: allEarnedAchievements,
+    achievements: sampleAchievements.map((a) => ({
+      ...a,
+      count: a.total,
+    })),
   },
 };
 
-export const Empty: Story = {
+export const NoneEarned: Story = {
   args: {
-    achievements: [],
+    achievements: sampleAchievements.map((a) => ({
+      ...a,
+      count: Math.min(a.count, a.total - 1),
+    })),
+  },
+};
+
+export const WithNotifications: Story = {
+  args: {
+    achievements: sampleAchievements,
+    newAchievementIds: new Set(["FIRST_MILLION", "EMERGENCY_MODE"]),
   },
 };

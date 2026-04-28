@@ -332,7 +332,6 @@ export const GameShop = ({
     setQuantities((prev) => {
       const currentQty = prev[lastIndex] || 0;
       if (currentQty <= 1) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [lastIndex]: _, ...rest } = prev;
         return rest;
       }
@@ -355,7 +354,6 @@ export const GameShop = ({
       setQuantities((prev) => {
         const currentQty = prev[shopIndex] || 0;
         if (currentQty <= 1) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { [shopIndex]: _, ...rest } = prev;
           return rest;
         }

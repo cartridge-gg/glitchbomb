@@ -67,7 +67,7 @@ async function lookupStake(
     .build();
   const result = await client.getEntities(query);
   for (const entity of result.items) {
-    const model = entity.models[GAME_MODEL] as
+    const model = entity.models[GAME_MODEL] as unknown as
       | { stake: { value: string } }
       | undefined;
     if (model) {
