@@ -211,7 +211,7 @@ export const GameCards = ({
                   },
                   {
                     label: "Expires In",
-                    value: formatExpiry(game.created_at),
+                    value: formatExpiry(game.created_at) || "24H",
                   },
                   {
                     label: "Game ID",
