@@ -61,7 +61,7 @@ export const GameOver = ({
   const { glitch, usd } = useMemo(() => {
     if (stake == null || moonrocksEarned <= 0)
       return { glitch: 0, usd: null as number | null };
-    const raw = tokenPayout(moonrocksEarned, stake, supply, target);
+    const raw = tokenPayout(moonrocksEarned, stake, supply ?? 0n, target ?? 0n);
     const tokens = toTokens(raw);
     const usdVal =
       tokenPrice != null && tokenPrice > 0 ? tokens * tokenPrice : null;
@@ -154,9 +154,12 @@ export const GameOver = ({
 
             {/* Payout chart */}
             {stake != null ? (
-              <GradientBorder color="green" className="rounded-xl">
+              <GradientBorder
+                color="green"
+                className="rounded-xl flex-1 min-h-0"
+              >
                 <div
-                  className="rounded-xl p-3"
+                  className="rounded-xl p-3 h-full w-full"
                   style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
                 >
                   <PayoutChart

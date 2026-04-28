@@ -5,6 +5,58 @@ use crate::types::orb::Orb;
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::event]
+pub struct Purchased {
+    #[key]
+    pub player_id: felt252,
+    pub starterpack_id: u32,
+    pub quantity: u32,
+    pub multiplier: u128,
+    pub time: u64,
+    pub price: u256,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct Started {
+    #[key]
+    pub player_id: felt252,
+    #[key]
+    pub game_id: u64,
+    pub multiplier: u128,
+    pub time: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct Claimed {
+    #[key]
+    pub player_id: felt252,
+    #[key]
+    pub game_id: u64,
+    pub reward: u128,
+    pub time: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct VaultPaid {
+    #[key]
+    pub player_id: felt252,
+    pub amount: u256,
+    pub time: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct VaultClaimed {
+    #[key]
+    pub user: felt252,
+    pub amount: u256,
+    pub time: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
 pub struct GameStarted {
     #[key]
     pub game_id: u64,
@@ -63,101 +115,6 @@ pub impl PLDataPointImpl of PLDataPointTrait {
     #[inline]
     fn new(id: u32, game: @Game, potential_moonrocks: u16, orb: u8) -> PLDataPoint {
         PLDataPoint { game_id: *game.id, id, potential_moonrocks, orb }
-    }
-}
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::event]
-pub struct ShopEntered {
-    #[key]
-    pub game_id: u64,
-    pub shop: u128,
-    pub chips: u16,
-}
-
-#[generate_trait]
-pub impl ShopEnteredImpl of ShopEnteredTrait {
-    #[inline]
-    fn new(game: @Game) -> ShopEntered {
-        ShopEntered { game_id: *game.id, shop: *game.shop, chips: *game.chips }
-    }
-}
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::event]
-pub struct OrbPurchased {
-    #[key]
-    pub game_id: u64,
-    pub orb_id: u8,
-    pub cost: u16,
-    pub chips: u16,
-}
-
-#[generate_trait]
-pub impl OrbPurchasedImpl of OrbPurchasedTrait {
-    #[inline]
-    fn new(game: @Game, orb_id: u8, cost: u16) -> OrbPurchased {
-        OrbPurchased { game_id: *game.id, orb_id: orb_id, cost: cost, chips: *game.chips }
-    }
-}
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::event]
-pub struct ShopRefreshed {
-    #[key]
-    pub game_id: u64,
-    pub shop: u128,
-    pub chips: u16,
-}
-
-#[generate_trait]
-pub impl ShopRefreshedImpl of ShopRefreshedTrait {
-    #[inline]
-    fn new(game: @Game) -> ShopRefreshed {
-        ShopRefreshed { game_id: *game.id, shop: *game.shop, chips: *game.chips }
-    }
-}
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::event]
-pub struct OrbBurned {
-    #[key]
-    pub game_id: u64,
-    pub orb_id: u8,
-    pub bag_index: u8,
-    pub chips: u16,
-}
-
-#[generate_trait]
-pub impl OrbBurnedImpl of OrbBurnedTrait {
-    #[inline]
-    fn new(game: @Game, orb_id: u8, bag_index: u8) -> OrbBurned {
-        OrbBurned { game_id: *game.id, orb_id: orb_id, bag_index: bag_index, chips: *game.chips }
-    }
-}
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::event]
-pub struct ShopExited {
-    #[key]
-    pub game_id: u64,
-    pub level: u8,
-    pub health: u8,
-    pub milestone: u16,
-    pub cost: u16,
-}
-
-#[generate_trait]
-pub impl ShopExitedImpl of ShopExitedTrait {
-    #[inline]
-    fn new(game: @Game, cost: u16) -> ShopExited {
-        ShopExited {
-            game_id: *game.id,
-            level: *game.level,
-            health: *game.health,
-            milestone: *game.milestone,
-            cost: cost,
-        }
     }
 }
 

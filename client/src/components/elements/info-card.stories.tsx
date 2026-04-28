@@ -3,7 +3,7 @@ import { ChipIcon, MoonrockIcon } from "@/components/icons";
 import { InfoCard } from "./info-card";
 
 const meta = {
-  title: "Elements/InfoCard",
+  title: "Elements/Info Card",
   component: InfoCard,
   parameters: {
     layout: "centered",

@@ -8,7 +8,7 @@ import {
   WAIT_PULL_STEPS,
 } from "./steps";
 import { TutorialContext } from "./tutorial-context";
-import type { TutorialState } from "./types";
+import type { TutorialContextValue, TutorialState } from "./types";
 
 const TUTORIAL_STORAGE_KEY = "glitchbomb-tutorial";
 
@@ -97,7 +97,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
         return { ...prev, step: TutorialStep.HOME_REWARD };
       }
 
-      if (!prev.active && prev.step !== TutorialStep.HOME_WELCOME) return prev;
+      if (!prev.active) return prev;
       const nextStep = prev.step + 1;
       if (nextStep >= TutorialStep.COMPLETE) {
         return {

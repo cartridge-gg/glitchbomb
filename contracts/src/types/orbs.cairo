@@ -1,7 +1,7 @@
 use core::num::traits::Pow;
 use crate::helpers::deck::{Deck, DeckTrait};
 use crate::helpers::packer::Packer;
-use crate::types::orb::Orb;
+use crate::types::orb::{Orb, OrbTrait};
 
 pub type Orbs = Array<Orb>;
 
@@ -71,6 +71,24 @@ pub impl OrbsImpl of OrbsTrait {
         }
         // [Return] The shop orbs
         shop
+    }
+
+    #[inline]
+    fn counts(self: Orbs) -> (u8, u8, u8, u8, u8, u8) {
+        let mut bombs: u8 = 0;
+        let mut points: u8 = 0;
+        let mut specials: u8 = 0;
+        let mut multipliers: u8 = 0;
+        let mut healths: u8 = 0;
+        for orb in self {
+            bombs += orb.one_if_bomb();
+            points += orb.one_if_point();
+            specials += orb.one_if_special();
+            multipliers += orb.one_if_multiplier();
+            healths += orb.one_if_health();
+        }
+        let total = bombs + points + specials + multipliers + healths;
+        (bombs, points, specials, multipliers, healths, total)
     }
 
     #[inline]

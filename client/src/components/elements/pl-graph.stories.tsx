@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { type PLDataPoint, PLGraph } from "./pl-graph";
 
 const meta: Meta<typeof PLGraph> = {
-  title: "Elements/PLGraph",
+  title: "Elements/PL Graph",
   component: PLGraph,
   tags: ["autodocs"],
   parameters: {

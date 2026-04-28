@@ -1,6 +1,6 @@
 import type { RawPLDataPoint } from "./index";
 
-export const PL_DATA_POINT = "PLDataPoint";
+const MODEL_NAME = "PLDataPoint";
 
 export class PLDataPoint {
   gameId: bigint;
@@ -96,7 +96,7 @@ export class PLDataPoint {
   }
 
   static getModelName(): string {
-    return PL_DATA_POINT;
+    return MODEL_NAME;
   }
 
   static deduplicate(points: PLDataPoint[]): PLDataPoint[] {

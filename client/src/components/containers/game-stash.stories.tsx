@@ -13,7 +13,7 @@ const mockOrbs = [
 ];
 
 const meta = {
-  title: "Containers/GameStash",
+  title: "Containers/Game Stash",
   component: GameStash,
   parameters: {
     layout: "fullscreen",

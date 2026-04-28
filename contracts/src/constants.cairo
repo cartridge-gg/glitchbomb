@@ -1,4 +1,4 @@
-pub const CONFIG_ID: felt252 = 0;
+use core::num::traits::Pow;
 
 pub const MAX_HEALTH: u8 = 5;
 pub const MAX_CAPACITY: u32 = 50;
@@ -17,6 +17,19 @@ pub const MAX_SCORE: u16 = 524;
 /// Scale factor applied to base_reward values (which are *100 for readability)
 /// to produce raw token units for a 6-decimal token: 10^6 / 100 = 10_000.
 pub const REWARD_SCALE: u256 = 10_000;
+
+pub const WORLD_RESOURCE: felt252 = 0;
+pub const TEN_POW_18: u128 = 10_u128.pow(18);
+pub const TEN_POW_36: u128 = 10_u128.pow(36);
+pub const MULTIPLIER_PRECISION: u128 = 1_000_000;
+
+pub const VAULT_LOCKUP_DURATION: u64 = 0;
+
+pub const EMA_MIN_TIME: u64 = 1; // 1 second
+pub const EMA_MIN_SCORE: u8 = 5;
+pub const EMA_SCORE_PRECISION: u32 = 1000;
+pub const EMA_INITIAL_WEIGTH: u16 = 100;
+pub const EMA_MAX_WEIGTH: u16 = 1000;
 
 #[inline]
 pub fn NAMESPACE() -> ByteArray {

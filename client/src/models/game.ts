@@ -1,51 +1,32 @@
 import type { BombDetails, DistributionValues } from "@/components/elements";
+import { DEFAULT_EXPIRATION } from "@/constants";
 import { Packer } from "@/helpers/packer";
 import type { RawGame } from "@/models";
 import { Orb, OrbType } from "./orb";
 
-export const GAME = "Game";
+const MODEL_NAME = "Game";
 
 export class Game {
-  id: number;
-  over: boolean;
-  level: number;
-  health: number;
-  immunity: number;
-  curses: number;
-  pull_count: number;
-  points: number;
-  milestone: number;
-  multiplier: number;
-  chips: number;
-  discards: boolean[];
-  bag: Orb[];
-  shop: Orb[];
-  shopPurchaseCounts: number[];
-  pullables: Orb[];
-  moonrocks: number;
-  stake: number;
-  created_at: number;
-
   constructor(
-    id: number,
-    over: boolean,
-    level: number,
-    health: number,
-    immunity: number,
-    curses: number,
-    pull_count: number,
-    points: number,
-    milestone: number,
-    multiplier: number,
-    chips: number,
-    discards: boolean[],
-    bag: Orb[],
-    shop: Orb[],
-    shopPurchaseCounts: number[],
-    pullables: Orb[],
-    moonrocks: number,
-    stake: number,
-    created_at: number,
+    public id: number,
+    public over: boolean,
+    public level: number,
+    public health: number,
+    public immunity: number,
+    public curses: number,
+    public pull_count: number,
+    public points: number,
+    public milestone: number,
+    public multiplier: number,
+    public chips: number,
+    public discards: boolean[],
+    public bag: Orb[],
+    public shop: Orb[],
+    public shopPurchaseCounts: number[],
+    public pullables: Orb[],
+    public moonrocks: number,
+    public stake: number,
+    public created_at: number,
   ) {
     this.id = id;
     this.over = over;
@@ -69,7 +50,7 @@ export class Game {
   }
 
   static getModelName(): string {
-    return GAME;
+    return MODEL_NAME;
   }
 
   static from(data: RawGame): Game {
@@ -77,9 +58,11 @@ export class Game {
   }
 
   static parse(data: RawGame): Game {
+    const overValue = BigInt(data.over.value);
+    const expiration = Number(data.expiration.value);
     const props = {
       id: Number(data.id.value),
-      over: data.over.value,
+      over: overValue !== 0n,
       level: Number(data.level.value),
       health: Number(data.health.value),
       immunity: Number(data.immunity.value),
@@ -101,7 +84,7 @@ export class Game {
       shopPurchaseCounts: Game.parsePurchaseCounts(BigInt(data.shop.value)),
       moonrocks: Number(data.moonrocks.value),
       stake: Number(data.stake.value),
-      created_at: Number(data.created_at.value),
+      created_at: expiration > 0 ? expiration - DEFAULT_EXPIRATION : 0,
     };
     // Computed fields
     // - pullables: corresponding to the bag without the discards

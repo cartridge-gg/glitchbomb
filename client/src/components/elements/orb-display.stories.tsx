@@ -3,7 +3,7 @@ import { Orb } from "@/models";
 import { OrbDisplay } from "./orb-display";
 
 const meta = {
-  title: "Elements/OrbDisplay",
+  title: "Elements/Orb Display",
   component: OrbDisplay,
   parameters: {
     layout: "centered",
@@ -23,6 +23,9 @@ const meta = {
       </div>
     ),
   ],
+  args: {
+    orb: Orb.from(1),
+  },
 } satisfies Meta<typeof OrbDisplay>;
 
 export default meta;
@@ -30,49 +33,49 @@ type Story = StoryObj<typeof meta>;
 
 export const Point5: Story = {
   args: {
-    orb: new Orb(1), // Point5
+    orb: Orb.from(1), // Point5
     size: "lg",
   },
 };
 
 export const Point8: Story = {
   args: {
-    orb: new Orb(2), // Point8
+    orb: Orb.from(2), // Point8
     size: "lg",
   },
 };
 
 export const Health: Story = {
   args: {
-    orb: new Orb(5), // Health1
+    orb: Orb.from(5), // Health1
     size: "lg",
   },
 };
 
 export const Multiplier: Story = {
   args: {
-    orb: new Orb(8), // Multiplier1
+    orb: Orb.from(8), // Multiplier1
     size: "lg",
   },
 };
 
 export const Special: Story = {
   args: {
-    orb: new Orb(12), // Special1
+    orb: Orb.from(12), // Special1
     size: "lg",
   },
 };
 
 export const SmallSize: Story = {
   args: {
-    orb: new Orb(1),
+    orb: Orb.from(1),
     size: "sm",
   },
 };
 
 export const MediumSize: Story = {
   args: {
-    orb: new Orb(1),
+    orb: Orb.from(1),
     size: "md",
   },
 };
@@ -80,9 +83,9 @@ export const MediumSize: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex items-end gap-4">
-      <OrbDisplay orb={new Orb(1)} size="sm" />
-      <OrbDisplay orb={new Orb(2)} size="md" />
-      <OrbDisplay orb={new Orb(5)} size="lg" />
+      <OrbDisplay orb={Orb.from(1)} size="sm" />
+      <OrbDisplay orb={Orb.from(2)} size="md" />
+      <OrbDisplay orb={Orb.from(5)} size="lg" />
     </div>
   ),
 };
@@ -90,10 +93,10 @@ export const AllSizes: Story = {
 export const AllTypes: Story = {
   render: () => (
     <div className="flex flex-wrap gap-4">
-      <OrbDisplay orb={new Orb(1)} size="lg" />
-      <OrbDisplay orb={new Orb(5)} size="lg" />
-      <OrbDisplay orb={new Orb(8)} size="lg" />
-      <OrbDisplay orb={new Orb(12)} size="lg" />
+      <OrbDisplay orb={Orb.from(1)} size="lg" />
+      <OrbDisplay orb={Orb.from(5)} size="lg" />
+      <OrbDisplay orb={Orb.from(8)} size="lg" />
+      <OrbDisplay orb={Orb.from(12)} size="lg" />
     </div>
   ),
 };

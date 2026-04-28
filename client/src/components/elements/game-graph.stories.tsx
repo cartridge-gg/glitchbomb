@@ -8,13 +8,13 @@ const createMockPulls = (count: number): OrbPulled[] => {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
     game_id: 1,
-    orb: new Orb(orbTypes[i % orbTypes.length]),
+    orb: Orb.from(orbTypes[i % orbTypes.length]),
     potential_moonrocks: 0,
   }));
 };
 
 const meta = {
-  title: "Elements/GameGraph",
+  title: "Elements/Game Graph",
   component: GameGraph,
   parameters: {
     layout: "padded",

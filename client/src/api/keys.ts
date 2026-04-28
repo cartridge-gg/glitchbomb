@@ -1,0 +1,47 @@
+import { Achievement } from "./torii/achievement";
+import { Activities } from "./torii/activities";
+import { BundleApi } from "./torii/bundle";
+import { Config } from "./torii/config";
+import { Event } from "./torii/event";
+import { Game } from "./torii/game";
+import { LeaderboardReferral } from "./torii/leaderboard-referral";
+import { LeaderboardScore } from "./torii/leaderboard-score";
+import { Owner } from "./torii/owner";
+import { Quest } from "./torii/quest";
+import { Referral } from "./torii/referral";
+import { Vault } from "./torii/vault";
+
+export const queryKeys = {
+  games: Game.keys,
+  bundles: BundleApi.keys,
+
+  tokens: {
+    contracts: (contractAddresses: string[], contractType: string) =>
+      ["tokenContracts", contractAddresses, contractType] as const,
+    balances: (contractAddresses: string[], accountAddresses: string[]) =>
+      ["tokenBalances", contractAddresses, accountAddresses] as const,
+  },
+
+  vault: Vault.keys,
+
+  owner: Owner.keys,
+  leaderboardScore: LeaderboardScore.keys,
+  leaderboardReferrals: LeaderboardReferral.keys,
+  activities: Activities.keys,
+  referrals: Referral.keys,
+
+  controllers: () => ["controllers"] as const,
+
+  banners: () => ["bannerConfigs"] as const,
+
+  prices: (tokenAddresses: string, quoteAddress: string) =>
+    ["tokenUsdPrices", tokenAddresses, quoteAddress] as const,
+
+  config: Config.keys.all,
+  starterpacks: Config.keys.starterpacks,
+  events: Event.keys,
+
+  achievements: Achievement.keys,
+
+  quests: Quest.keys,
+} as const;

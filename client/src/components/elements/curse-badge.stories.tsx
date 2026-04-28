@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CurseBadge } from "./curse-badge";
 
 const meta = {
-  title: "Elements/CurseBadge",
+  title: "Elements/Curse Badge",
   component: CurseBadge,
   parameters: {
     layout: "centered",

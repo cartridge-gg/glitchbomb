@@ -1,7 +1,7 @@
 import { getChecksumAddress } from "starknet";
 import type { RawStarterpack } from "@/models";
 
-export const STARTERPACK = "Starterpack";
+const MODEL_NAME = "Starterpack";
 
 export class Starterpack {
   id: string;
@@ -25,6 +25,10 @@ export class Starterpack {
     this.multiplier = multiplier;
     this.price = price;
     this.payment_token = payment_token;
+  }
+
+  static getModelName(): string {
+    return MODEL_NAME;
   }
 
   static from(data: RawStarterpack): Starterpack | null {
@@ -59,6 +63,12 @@ export class Starterpack {
       props.multiplier,
       props.price,
       props.payment_token,
+    );
+  }
+
+  static dedupe(packs: Starterpack[]): Starterpack[] {
+    return packs.filter(
+      (pack, index, self) => index === self.findIndex((p) => p.id === pack.id),
     );
   }
 }

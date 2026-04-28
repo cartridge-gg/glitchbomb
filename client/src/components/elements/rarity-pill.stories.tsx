@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { RarityPill } from "./rarity-pill";
 
 const meta = {
-  title: "Elements/RarityPill",
+  title: "Elements/Rarity Pill",
   component: RarityPill,
   parameters: {
     layout: "centered",

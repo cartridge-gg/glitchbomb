@@ -1,4 +1,6 @@
 use alexandria_encoding::base64::Base64ByteArrayEncoder;
+use bundle::types::item::ItemTrait as BundleItemTrait;
+use bundle::types::metadata::MetadataTrait as BundleMetadataTrait;
 use collection::types::attribute::{Attribute, AttributeTrait};
 use graffiti::json::JsonImpl;
 use crate::types::image::Image;
@@ -25,6 +27,24 @@ pub impl Metadata of MetadataTrait {
             .add_array("attributes", attributes)
             .build();
         "data:application/json;base64," + Base64ByteArrayEncoder::encode(metadata)
+    }
+
+    #[inline]
+    fn bundle(
+        payment_tokens: Span<starknet::ContractAddress>, conditions: Span<ByteArray>,
+    ) -> ByteArray {
+        let item = BundleItemTrait::new(
+            name: "Glitchbomb Game", description: "Glitchbomb", image_uri: Image::get(),
+        );
+        let metadata = BundleMetadataTrait::new(
+            name: "Glitchbomb Games",
+            description: "Glitchbomb games can be played on glitchbomb.xyz",
+            image_uri: Image::get(),
+            items: array![item].span(),
+            tokens: payment_tokens,
+            conditions: conditions,
+        );
+        metadata.jsonify()
     }
 }
 

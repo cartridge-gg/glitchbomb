@@ -88,6 +88,50 @@ pub impl OrbImpl of OrbTrait {
             _ => 0,
         }
     }
+
+    #[inline]
+    fn one_if_special(self: @Orb) -> u8 {
+        match self {
+            Orb::Moonrock15 => 1,
+            Orb::Moonrock40 => 1,
+            Orb::Chips15 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_multiplier(self: @Orb) -> u8 {
+        match self {
+            Orb::Multiplier50 => 1,
+            Orb::Multiplier100 => 1,
+            Orb::Multiplier150 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_health(self: @Orb) -> u8 {
+        match self {
+            Orb::Health1 => 1,
+            Orb::Health2 => 1,
+            Orb::Health3 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_point(self: @Orb) -> u8 {
+        match self {
+            Orb::Point5 => 1,
+            Orb::Point6 => 1,
+            Orb::Point7 => 1,
+            Orb::Point8 => 1,
+            Orb::Point9 => 1,
+            Orb::PointOrb1 => 1,
+            Orb::PointBomb4 => 1,
+            _ => 0,
+        }
+    }
 }
 
 pub impl IntoOrbU8 of Into<Orb, u8> {

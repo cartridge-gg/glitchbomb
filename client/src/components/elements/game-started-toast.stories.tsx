@@ -94,7 +94,7 @@ function ToastTrigger({
 }
 
 const meta = {
-  title: "Elements/GameStartedToast",
+  title: "Elements/Game Started Toast",
   component: ToastTrigger,
   parameters: {
     layout: "centered",

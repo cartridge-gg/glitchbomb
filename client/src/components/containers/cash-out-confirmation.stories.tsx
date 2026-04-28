@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CashOutConfirmation } from "./cash-out-confirmation";
 
 const meta = {
-  title: "Containers/CashOutConfirmation",
+  title: "Containers/Cash Out Confirmation",
   component: CashOutConfirmation,
   parameters: {
     layout: "fullscreen",

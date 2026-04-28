@@ -55,7 +55,7 @@ const mockItems: ActivityItem[] = [
 ];
 
 const meta = {
-  title: "Elements/ActivityTicker",
+  title: "Elements/Activity Ticker",
   component: ActivityTicker,
   parameters: {
     layout: "fullscreen",
