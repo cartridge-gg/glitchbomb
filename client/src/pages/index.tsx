@@ -38,9 +38,7 @@ import { useQuestScene } from "@/hooks/quests";
 import { useReferral } from "@/hooks/referral";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useControllerUsername } from "@/hooks/use-controller-username";
-import { selectGame, useOfflineStore } from "@/offline/store";
 import { TutorialOverlay, useTutorial } from "@/tutorial";
-import { isMobile } from "@/utils/mobile";
 
 export { Game } from "./game";
 export { Home } from "./home";
@@ -90,7 +88,6 @@ export const Main = ({ children }: MainProps) => {
   const { getGlitchPrice } = usePrices();
   const { setReady } = useLoadingContext();
   const { games: onchainGames } = useOwnedGames();
-  const offlineState = useOfflineStore();
 
   const [bundleIndex, setBundleIndex] = useState(1);
   const purchaseGameIdsRef = useRef<Set<number> | null>(null);
@@ -100,14 +97,7 @@ export const Main = ({ children }: MainProps) => {
     return p ? parseFloat(p) : null;
   }, [getGlitchPrice]);
 
-  const ownedGames = useMemo(() => {
-    if (!isMobile) return onchainGames;
-    return Object.keys(offlineState.games)
-      .map(Number)
-      .map((id) => selectGame(offlineState, id))
-      .filter((g): g is NonNullable<typeof g> => !!g)
-      .sort((a, b) => b.id - a.id);
-  }, [offlineState, onchainGames]);
+  const ownedGames = onchainGames;
 
   const { data: leaderboardRows, refetch: refetchLeaderboard } = useLeaderboard(
     { enabled: showLeaderboard },
@@ -296,11 +286,7 @@ export const Main = ({ children }: MainProps) => {
 
   const onProfileClick = useCallback(() => {
     const controller = (connector as never as ControllerConnector)?.controller;
-    if (isMobile) {
-      controller?.openSettings();
-    } else {
-      controller?.openProfile("inventory");
-    }
+    controller?.openProfile("inventory");
   }, [connector]);
 
   const toggleLeaderboard = useCallback(
@@ -417,7 +403,7 @@ export const Main = ({ children }: MainProps) => {
         </div>
       )}
 
-      {!isMobile && showPurchase && (
+      {showPurchase && (
         <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
           <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1 flex items-center justify-center">
             <PurchaseScene

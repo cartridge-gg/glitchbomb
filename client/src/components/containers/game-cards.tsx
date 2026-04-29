@@ -4,13 +4,13 @@ import { GameCard } from "@/components/elements/game-card";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { isMobile } from "@/utils/mobile";
 
 export interface GameCardsGame {
   id: number;
   moonrocks: number;
   points: number;
-  created_at: number;
+  /** Unix timestamp at which the game expires; 0 = not yet started. */
+  expiration: number;
   multiplier: number;
   stake: number;
 }
@@ -22,7 +22,7 @@ export interface GameCardsProps
   gameId?: number;
   setGameId: (id: number) => void;
   loadingGameId: number | null;
-  formatExpiry: (createdAt: number) => string;
+  formatExpiry: (expiration: number) => string;
   formatMaxPayout: (stake: number) => string;
   onPlay: (gameId: number) => void;
   onNewGame: () => void;
@@ -211,7 +211,7 @@ export const GameCards = ({
                   },
                   {
                     label: "Expires In",
-                    value: formatExpiry(game.created_at) || "24H",
+                    value: formatExpiry(game.expiration) || "24H",
                   },
                   {
                     label: "Game ID",
@@ -219,7 +219,7 @@ export const GameCards = ({
                   },
                   {
                     label: "Max Payout",
-                    value: isMobile ? "---" : formatMaxPayout(game.stake),
+                    value: formatMaxPayout(game.stake),
                   },
                 ]}
                 onClick={() => {
@@ -242,13 +242,7 @@ export const GameCards = ({
               ]}
               onClick={() => {
                 if (didDrag.current) return;
-                requireLogin(() => {
-                  if (isMobile) {
-                    onPractice();
-                  } else {
-                    onNewGame();
-                  }
-                });
+                requireLogin(() => onNewGame());
               }}
             />
           </div>

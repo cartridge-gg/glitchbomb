@@ -32,7 +32,6 @@ import { SoundProvider } from "@/contexts/sound";
 import { ThemeProvider } from "@/contexts/theme";
 import { Game, Home, Main, Support } from "@/pages";
 import { TutorialProvider } from "@/tutorial";
-import { isMobile } from "@/utils/mobile";
 import { BundlesProvider } from "./contexts/bundles";
 
 const provider = jsonRpcProvider({
@@ -98,8 +97,8 @@ const buildChains = () => {
 const options: ControllerOptions = {
   defaultChainId: DEFAULT_CHAIN_ID,
   chains: buildChains(),
-  ...(isMobile ? {} : { policies: buildPolicies() }),
-  preset: isMobile ? "glitch-bomb-mobile" : "glitch-bomb",
+  policies: buildPolicies(),
+  preset: "glitch-bomb",
   // namespace: "GLITCHBOMB",
   slot: "glitchbomb",
 };

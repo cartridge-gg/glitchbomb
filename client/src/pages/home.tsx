@@ -24,14 +24,8 @@ import { useOwnedGames } from "@/hooks/packs";
 import { useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useControllerUsername } from "@/hooks/use-controller-username";
-import {
-  createOfflineGame,
-  resetOfflineState,
-  selectGame,
-  useOfflineStore,
-} from "@/offline/store";
+import { createOfflineGame, resetOfflineState } from "@/offline/store";
 import { useTutorial } from "@/tutorial";
-import { isMobile } from "@/utils/mobile";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -62,16 +56,7 @@ export const Home = () => {
     !gamesLoading && !tokensLoading && tokenContracts.length > 0;
   useLoadingSignal("home", isHomeReady);
 
-  const offlineState = useOfflineStore();
-
-  const ownedGames = useMemo(() => {
-    if (!isMobile) return onchainGames;
-    return Object.keys(offlineState.games)
-      .map(Number)
-      .map((id) => selectGame(offlineState, id))
-      .filter((g): g is NonNullable<typeof g> => !!g)
-      .sort((a, b) => b.id - a.id);
-  }, [offlineState, onchainGames]);
+  const ownedGames = onchainGames;
   const { startMusic } = useAudio();
   const tutorial = useTutorial();
   const { username } = useControllerUsername();
@@ -216,7 +201,7 @@ export const Home = () => {
         gameId: `#${g.id}`,
         moonrocks: g.moonrocks,
         payout: cashedOut ? formatPayout(g.moonrocks, g.stake) : "GLITCHED",
-        to: mobilePath(`/play?game=${g.id}&view=true`),
+        to: `/game/${g.id}`,
         variant: cashedOut ? ("default" as const) : ("glitched" as const),
         timestamp: g.over,
       };
