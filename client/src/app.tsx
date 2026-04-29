@@ -138,7 +138,10 @@ function AuthenticatedApp() {
                               <Routes>
                                 <Route path="/" element={<Home />} />
                                 <Route path="/game/:id" element={<Game />} />
-                                <Route path="/game" element={<LoadingScene />} />
+                                <Route
+                                  path="/game"
+                                  element={<LoadingScene />}
+                                />
                                 <Route path="/practice" element={<Game />} />
                                 <Route path="/tutorial" element={<Game />} />
                               </Routes>

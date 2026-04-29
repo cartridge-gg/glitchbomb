@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export interface LoadingSceneProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+export type LoadingSceneProps = React.HTMLAttributes<HTMLDivElement>;
 
 export const LoadingScene = ({ className, ...props }: LoadingSceneProps) => {
   return (
