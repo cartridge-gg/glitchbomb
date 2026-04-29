@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { DEFAULT_EXPIRATION } from "@/constants";
 import { Game, Orb, OrbPulled, PLDataPoint } from "@/models";
-import { isMobile } from "@/utils/mobile";
 import { DEFAULT_MOONROCKS } from "./constants";
 import {
   buyFromShop,
@@ -19,61 +19,24 @@ import type {
   OfflineState,
 } from "./types";
 
-const STORAGE_KEY = "glitchbomb-practice-games";
-const MAX_STORED_GAMES = 50;
-
 type Listener = () => void;
 
 const listeners = new Set<Listener>();
-let state: OfflineState = loadState();
+let state: OfflineState = defaultState();
 
 function defaultState(): OfflineState {
   return {
     version: 1,
     nextGameId: 1,
+    activeGameId: null,
     games: {},
     pulls: [],
     plDataPoints: [],
   };
 }
 
-function loadState(): OfflineState {
-  if (!isMobile) return defaultState();
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    return JSON.parse(raw) as OfflineState;
-  } catch {
-    return defaultState();
-  }
-}
-
-function saveState(s: OfflineState) {
-  if (!isMobile) return;
-  try {
-    // Trim to MAX_STORED_GAMES most recent games
-    const gameIds = Object.keys(s.games)
-      .map(Number)
-      .sort((a, b) => b - a)
-      .slice(0, MAX_STORED_GAMES);
-    const gameIdSet = new Set(gameIds);
-    const trimmed: OfflineState = {
-      ...s,
-      games: Object.fromEntries(
-        Object.entries(s.games).filter(([id]) => gameIdSet.has(Number(id))),
-      ),
-      pulls: s.pulls.filter((p) => gameIdSet.has(p.game_id)),
-      plDataPoints: s.plDataPoints.filter((p) => gameIdSet.has(p.game_id)),
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-  } catch {
-    // Storage full or unavailable — silently ignore
-  }
-}
-
 function setState(updater: (prev: OfflineState) => OfflineState) {
   state = updater(state);
-  saveState(state);
   for (const listener of listeners) {
     listener();
   }
@@ -116,7 +79,6 @@ export function createOfflineGame(): number {
     createdId = id;
     const game = createGameEngine(id, DEFAULT_MOONROCKS, 1);
 
-    // Start the game immediately (fill bag, deduct entry cost)
     const { game: started, cost } = startGame(game);
     started.moonrocks = game.moonrocks - cost;
 
@@ -131,6 +93,7 @@ export function createOfflineGame(): number {
     return {
       ...prev,
       nextGameId: id + 1,
+      activeGameId: id,
       games: { ...prev.games, [id]: started },
       plDataPoints: [...prev.plDataPoints, plStart],
     };
@@ -338,10 +301,12 @@ function toGameModel(game: OfflineGame): Game {
   const discards = normalizeDiscards(game.discards, bag.length);
   const shop = game.shop ? game.shop.orbs.map((orb) => Orb.from(orb)) : [];
   const pullables = bag.filter((_orb, index) => !discards[index]);
+  const expiration =
+    game.created_at > 0 ? game.created_at + DEFAULT_EXPIRATION : 0;
 
   return new Game(
     game.id,
-    game.over,
+    false,
     game.level,
     game.health,
     game.immunity,
@@ -351,14 +316,19 @@ function toGameModel(game: OfflineGame): Game {
     game.milestone,
     game.multiplier / 100,
     game.chips,
+    game.moonrocks,
+    game.over,
+    expiration,
     discards,
-    bag,
     shop,
+    game.stake,
+    0n,
+    0n,
+    bag,
+    0n,
+    0n,
     game.purchaseCounts ?? [],
     pullables,
-    game.moonrocks,
-    game.stake,
-    game.created_at,
   );
 }
 
