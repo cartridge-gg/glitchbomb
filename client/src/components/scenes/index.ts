@@ -2,6 +2,7 @@ export * from "./achievement";
 export * from "./game";
 export * from "./home";
 export * from "./leaderboard";
+export * from "./loading";
 export * from "./purchase";
 export * from "./quest";
 export * from "./referral";

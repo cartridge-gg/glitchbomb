@@ -12,6 +12,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/elements/loading-screen";
 import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
+import { LoadingScene } from "@/components/scenes/loading";
 import {
   chains,
   DEFAULT_CHAIN_ID,
@@ -137,6 +138,10 @@ function AuthenticatedApp() {
                             <Main>
                               <Routes>
                                 <Route path="/" element={<Home />} />
+                                <Route path="/game/:id" element={<Game />} />
+                                <Route path="/game" element={<LoadingScene />} />
+                                <Route path="/practice" element={<Game />} />
+                                <Route path="/tutorial" element={<Game />} />
                                 <Route path="/play" element={<Game />} />
                               </Routes>
                             </Main>
