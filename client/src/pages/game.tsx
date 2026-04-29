@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ConfirmationDialog,
   type OrbOutcome,
@@ -37,9 +37,8 @@ import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
-import { createOfflineGame } from "@/offline/store";
+import { createOfflineGame, useOfflineStore } from "@/offline/store";
 import { TutorialStep, useTutorial } from "@/tutorial";
-import { mobilePath } from "@/utils/mobile";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -70,7 +69,19 @@ type OverlayView = "none" | "stash";
 
 export const Game = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { id: idParam } = useParams<{ id: string }>();
+  const { pathname } = useLocation();
+  const offlineState = useOfflineStore();
+  const isPracticeRoute =
+    pathname === "/practice" || pathname === "/tutorial";
+  const onchainGameId = useMemo(() => {
+    if (isPracticeRoute) return null;
+    if (!idParam) return null;
+    const parsed = Number.parseInt(idParam, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [idParam, isPracticeRoute]);
+  const practiceGameId = isPracticeRoute ? offlineState.activeGameId : null;
+  const resolvedGameId = onchainGameId ?? practiceGameId;
   const { chain } = useNetwork();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { game, config, setGameId } = useEntitiesContext();
@@ -253,27 +264,23 @@ export const Game = () => {
     startMusic("glitched");
   }, [startMusic]);
 
-  // Set game ID from URL params
   useEffect(() => {
-    const gameId = searchParams.get("game");
-    if (gameId) {
-      setGameId(Number(gameId));
-      resetOrbPitchProgression();
-      // Reset all local state when game changes
-      lastPullIdRef.current = null;
-      prevLevelRef.current = null;
-      milestoneShownRef.current = false;
-      setCurrentOrb(undefined);
-      setOverlay("none");
-      setIsEnteringShop(false);
-      setIsExitingShop(false);
-      setIsPulling(false);
-      setShowLevelComplete(false);
-      setShowLevelEnter(false);
-      setShowRewardOverlay(false);
-      setRevealedSegments(new Set());
-    }
-  }, [resetOrbPitchProgression, setGameId, searchParams]);
+    if (resolvedGameId === null) return;
+    setGameId(resolvedGameId);
+    resetOrbPitchProgression();
+    lastPullIdRef.current = null;
+    prevLevelRef.current = null;
+    milestoneShownRef.current = false;
+    setCurrentOrb(undefined);
+    setOverlay("none");
+    setIsEnteringShop(false);
+    setIsExitingShop(false);
+    setIsPulling(false);
+    setShowLevelComplete(false);
+    setShowLevelEnter(false);
+    setShowRewardOverlay(false);
+    setRevealedSegments(new Set());
+  }, [resolvedGameId, resetOrbPitchProgression, setGameId]);
 
   // Show reward overlay for fresh games (skip expired ones and tutorial games)
   useEffect(() => {
@@ -282,8 +289,8 @@ export const Game = () => {
 
     const isExpired =
       game &&
-      game.created_at > 0 &&
-      game.created_at + 86400 <= Math.floor(Date.now() / 1000);
+      game.expiration > 0 &&
+      game.expiration <= Math.floor(Date.now() / 1000);
     if (
       game &&
       game.level === 1 &&
@@ -684,33 +691,30 @@ export const Game = () => {
     return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
 
-  const gameIdParam = searchParams.get("game");
   const isGameReady = !!game && tokenContracts.length > 0;
   useLoadingSignal("game", isGameReady);
 
   const handlePlayAgain = useCallback(() => {
     if (isPractice) {
-      const newGameId = createOfflineGame();
-      navigate(mobilePath(`/play?game=${newGameId}`));
-    } else {
-      navigate(mobilePath("/"));
+      createOfflineGame();
+      return;
     }
+    navigate("/");
   }, [isPractice, navigate]);
 
-  if (!gameIdParam) return null;
+  if (resolvedGameId === null) return null;
   if (!isGameReady) return null;
 
-  // Expired: created_at + 24h has passed without completion
+  // Expired: expiration timestamp reached without completion
   const isExpired =
-    game.created_at > 0 &&
-    game.created_at + 86400 <= Math.floor(Date.now() / 1000);
+    game.expiration > 0 && game.expiration <= Math.floor(Date.now() / 1000);
 
   // Keep the "play" screen during the death sequence so the fatal bomb
   // animation plays before transitioning to GameOver.
   const sceneGame: GameSceneGame = deathPending
     ? {
         id: game.id,
-        over: false,
+        over: 0,
         level: game.level,
         health: game.health,
         points: game.points,
@@ -719,7 +723,7 @@ export const Game = () => {
         moonrocks: game.moonrocks,
         chips: game.chips,
         stake: game.stake,
-        created_at: game.created_at,
+        expiration: game.expiration,
         pullablesCount: game.pullables.length,
         shop: game.shop,
         bag: game.pullables,
@@ -736,7 +740,7 @@ export const Game = () => {
         moonrocks: game.moonrocks,
         chips: game.chips,
         stake: game.stake,
-        created_at: game.created_at,
+        expiration: game.expiration,
         pullablesCount: game.pullables.length,
         shop: game.shop,
         bag: game.pullables,

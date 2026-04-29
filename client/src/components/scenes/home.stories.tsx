@@ -18,9 +18,9 @@ const NOW = Math.floor(Date.now() / 1000);
 const HOUR = 3600;
 const DAY = 24 * HOUR;
 
-const formatExpiry = (createdAt: number) => {
-  if (!createdAt) return "--";
-  const remaining = createdAt + 86400 - NOW;
+const formatExpiry = (expiration: number) => {
+  if (!expiration) return "--";
+  const remaining = expiration - NOW;
   if (remaining <= 0) return "EXPIRED";
   const hours = Math.floor(remaining / HOUR);
   const minutes = Math.floor((remaining % HOUR) / 60);
@@ -37,7 +37,7 @@ const sampleActiveGames: GameCardsGame[] = [
     id: 1042,
     moonrocks: 128,
     points: 45,
-    created_at: NOW - 2 * HOUR,
+    expiration: NOW - 2 * HOUR + DAY,
     multiplier: 2,
     stake: 3,
   },
@@ -45,7 +45,7 @@ const sampleActiveGames: GameCardsGame[] = [
     id: 1039,
     moonrocks: 76,
     points: 12,
-    created_at: NOW - 8 * HOUR,
+    expiration: NOW - 8 * HOUR + DAY,
     multiplier: 1,
     stake: 1,
   },
@@ -53,7 +53,7 @@ const sampleActiveGames: GameCardsGame[] = [
     id: 1036,
     moonrocks: 240,
     points: 88,
-    created_at: NOW - 20 * HOUR,
+    expiration: NOW - 20 * HOUR + DAY,
     multiplier: 3,
     stake: 5,
   },
@@ -64,7 +64,7 @@ const samplePlayerActivities: ActivityItem[] = [
     gameId: "#1030",
     moonrocks: 180,
     payout: "$5.20",
-    to: "/play?game=1030&view=true",
+    to: "/game/1030",
     variant: "default",
     timestamp: NOW - 1 * HOUR,
   },
@@ -72,7 +72,7 @@ const samplePlayerActivities: ActivityItem[] = [
     gameId: "#1028",
     moonrocks: 42,
     payout: "GLITCHED",
-    to: "/play?game=1028&view=true",
+    to: "/game/1028",
     variant: "glitched",
     timestamp: NOW - 4 * HOUR,
   },
@@ -80,7 +80,7 @@ const samplePlayerActivities: ActivityItem[] = [
     gameId: "#1022",
     moonrocks: 95,
     payout: "EXPIRED",
-    to: "/play?game=1022&view=true",
+    to: "/game/1022",
     variant: "expired",
     timestamp: NOW - 1 * DAY,
   },
@@ -88,7 +88,7 @@ const samplePlayerActivities: ActivityItem[] = [
     gameId: "#1021",
     moonrocks: 312,
     payout: "$12.40",
-    to: "/play?game=1021&view=true",
+    to: "/game/1021",
     variant: "default",
     timestamp: NOW - 1 * DAY - 6 * HOUR,
   },
@@ -96,7 +96,7 @@ const samplePlayerActivities: ActivityItem[] = [
     gameId: "#1009",
     moonrocks: 18,
     payout: "GLITCHED",
-    to: "/play?game=1009&view=true",
+    to: "/game/1009",
     variant: "glitched",
     timestamp: NOW - 3 * DAY,
   },
@@ -107,7 +107,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9142",
     moonrocks: 512,
     payout: "$24.60",
-    to: "/play?game=9142&view=true",
+    to: "/game/9142",
     variant: "default",
     timestamp: NOW - 30 * 60,
   },
@@ -115,7 +115,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9140",
     moonrocks: 224,
     payout: "$8.40",
-    to: "/play?game=9140&view=true",
+    to: "/game/9140",
     variant: "default",
     timestamp: NOW - 2 * HOUR,
   },
@@ -123,7 +123,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9137",
     moonrocks: 68,
     payout: "GLITCHED",
-    to: "/play?game=9137&view=true",
+    to: "/game/9137",
     variant: "glitched",
     timestamp: NOW - 5 * HOUR,
   },
@@ -131,7 +131,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9132",
     moonrocks: 156,
     payout: "$6.10",
-    to: "/play?game=9132&view=true",
+    to: "/game/9132",
     variant: "default",
     timestamp: NOW - 9 * HOUR,
   },
@@ -139,7 +139,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9101",
     moonrocks: 44,
     payout: "EXPIRED",
-    to: "/play?game=9101&view=true",
+    to: "/game/9101",
     variant: "expired",
     timestamp: NOW - 1 * DAY,
   },
@@ -147,7 +147,7 @@ const sampleAllActivities: ActivityItem[] = [
     gameId: "#9098",
     moonrocks: 388,
     payout: "$15.80",
-    to: "/play?game=9098&view=true",
+    to: "/game/9098",
     variant: "default",
     timestamp: NOW - 1 * DAY - 4 * HOUR,
   },

@@ -142,7 +142,6 @@ function AuthenticatedApp() {
                                 <Route path="/game" element={<LoadingScene />} />
                                 <Route path="/practice" element={<Game />} />
                                 <Route path="/tutorial" element={<Game />} />
-                                <Route path="/play" element={<Game />} />
                               </Routes>
                             </Main>
                             <Toaster

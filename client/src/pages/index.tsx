@@ -40,7 +40,7 @@ import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useControllerUsername } from "@/hooks/use-controller-username";
 import { selectGame, useOfflineStore } from "@/offline/store";
 import { TutorialOverlay, useTutorial } from "@/tutorial";
-import { isMobile, mobilePath } from "@/utils/mobile";
+import { isMobile } from "@/utils/mobile";
 
 export { Game } from "./game";
 export { Home } from "./home";
@@ -230,7 +230,7 @@ export const Main = ({ children }: MainProps) => {
         controllerEl.style.display = "none";
       }
       closeModal();
-      navigate(mobilePath(`/play?game=${newGame.id}`));
+      navigate(`/game/${newGame.id}`);
     }
   }, [ownedGames, navigate, closeModal]);
 

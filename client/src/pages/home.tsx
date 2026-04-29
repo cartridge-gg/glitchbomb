@@ -18,6 +18,7 @@ import {
   tokenPayout,
   toTokens,
 } from "@/helpers/payout";
+import { useActivities } from "@/hooks/activities";
 import { useBanners } from "@/hooks/banner";
 import { useOwnedGames } from "@/hooks/packs";
 import { useTokens } from "@/hooks/tokens";
@@ -30,7 +31,7 @@ import {
   useOfflineStore,
 } from "@/offline/store";
 import { useTutorial } from "@/tutorial";
-import { isMobile, mobilePath } from "@/utils/mobile";
+import { isMobile } from "@/utils/mobile";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -84,6 +85,13 @@ export const Home = () => {
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   const [gameId, setGameId] = useState<number | undefined>(undefined);
   const { banners } = useBanners();
+  const {
+    activities: sqlActivities,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    refetch: refetchActivities,
+  } = useActivities();
 
   useEffect(() => {
     const interval = setInterval(
@@ -98,12 +106,10 @@ export const Home = () => {
     startMusic("normal");
   }, [startMusic]);
 
-  const GAME_EXPIRATION = 86400;
-
   const formatExpiry = useCallback(
-    (createdAt: number) => {
-      if (!createdAt) return "--";
-      const remaining = createdAt + GAME_EXPIRATION - now;
+    (expiration: number) => {
+      if (!expiration) return "--";
+      const remaining = expiration - now;
       if (remaining <= 0) return "EXPIRED";
       const hours = Math.floor(remaining / 3600);
       const minutes = Math.floor((remaining % 3600) / 60);
@@ -154,10 +160,8 @@ export const Home = () => {
   const gameList = useMemo(() => {
     return [...ownedGames].sort((a, b) => {
       // 1. Expiry urgency: less time remaining = higher priority
-      const aRemaining =
-        a.created_at > 0 ? a.created_at + GAME_EXPIRATION - now : Infinity;
-      const bRemaining =
-        b.created_at > 0 ? b.created_at + GAME_EXPIRATION - now : Infinity;
+      const aRemaining = a.expiration > 0 ? a.expiration - now : Infinity;
+      const bRemaining = b.expiration > 0 ? b.expiration - now : Infinity;
       if (aRemaining !== bRemaining) return aRemaining - bRemaining;
       // 2. Higher level first
       if (a.level !== b.level) return b.level - a.level;
@@ -168,12 +172,10 @@ export const Home = () => {
     });
   }, [ownedGames, now]);
 
-  // Check if a non-completed game has expired (24h elapsed)
+  // Check if a non-completed game has expired
   const isExpired = useCallback(
-    (game: { created_at: number; over: boolean }) =>
-      !game.over &&
-      game.created_at > 0 &&
-      game.created_at + GAME_EXPIRATION <= now,
+    (game: { expiration: number; over: number }) =>
+      !game.over && game.expiration > 0 && game.expiration <= now,
     [now],
   );
 
@@ -204,9 +206,9 @@ export const Home = () => {
       gameId: `#${g.id}`,
       moonrocks: g.moonrocks,
       payout: "EXPIRED",
-      to: mobilePath(`/play?game=${g.id}&view=true`),
+      to: `/game/${g.id}`,
       variant: "expired" as const,
-      timestamp: g.created_at,
+      timestamp: g.expiration,
     }));
     const completed = completedGames.map((g) => {
       const cashedOut = g.health > 0;
@@ -216,16 +218,29 @@ export const Home = () => {
         payout: cashedOut ? formatPayout(g.moonrocks, g.stake) : "GLITCHED",
         to: mobilePath(`/play?game=${g.id}&view=true`),
         variant: cashedOut ? ("default" as const) : ("glitched" as const),
-        timestamp: g.created_at,
+        timestamp: g.over,
       };
     });
     return [...expired, ...completed].sort((a, b) => b.timestamp - a.timestamp);
   }, [completedGames, expiredGames, formatPayout]);
 
+  const allActivityItems = useMemo<GameActivitiesProps["activities"]>(() => {
+    return sqlActivities.map((row) => ({
+      gameId: row.username ? row.username : `#${row.gameId}`,
+      moonrocks: row.score,
+      payout: tokenPrice
+        ? `$${(row.reward * tokenPrice).toFixed(2)}`
+        : `${row.reward.toFixed(1)} GLITCH`,
+      to: row.to,
+      variant: "default" as const,
+      timestamp: row.timestamp,
+    }));
+  }, [sqlActivities, tokenPrice]);
+
   const handlePlay = useCallback(
     (id: number) => {
       setLoadingGameId(id);
-      navigate(mobilePath(`/play?game=${id}`));
+      navigate(`/game/${id}`);
     },
     [navigate],
   );
@@ -235,15 +250,13 @@ export const Home = () => {
   }, [openPurchaseScene]);
 
   const handlePractice = useCallback(() => {
-    if (!isMobile) {
-      resetOfflineState();
-    }
-    // Start tutorial for first-time players
-    if (!tutorial.state.completed) {
+    resetOfflineState();
+    const isFirstPlay = !tutorial.state.completed;
+    if (isFirstPlay) {
       tutorial.startTutorial();
     }
-    const offlineGameId = createOfflineGame();
-    navigate(mobilePath(`/play?game=${offlineGameId}`));
+    createOfflineGame();
+    navigate(isFirstPlay ? "/tutorial" : "/practice");
   }, [navigate, tutorial]);
 
   const isLoggedIn = !!account && !!username;
@@ -291,9 +304,13 @@ export const Home = () => {
   );
 
   const allActivities: GameActivitiesProps = useMemo(
-    () => ({ activities: [] }),
-    [],
+    () => ({ activities: allActivityItems }),
+    [allActivityItems],
   );
+
+  const handleLoadMoreActivities = useCallback(() => {
+    if (!isFetchingNextPage && hasNextPage) fetchNextPage();
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   if (!isHomeReady) return null;
 
@@ -307,6 +324,9 @@ export const Home = () => {
         showDetails={showDetails}
         onBuyGame={handleBuyGame}
         onShowDetailsChange={setShowDetails}
+        onLoadMoreActivities={handleLoadMoreActivities}
+        hasMoreActivities={hasNextPage}
+        onRefreshActivities={refetchActivities}
       />
     </div>
   );
