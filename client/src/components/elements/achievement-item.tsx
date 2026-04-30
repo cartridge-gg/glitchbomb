@@ -3,8 +3,8 @@ import { useId } from "react";
 import { cn } from "@/lib/utils";
 import { ShadowEffect } from "../icons";
 import { AchievementIcon } from "./achievement-icon";
-import { AchievementProgress } from "./achievement-progress";
 import { NotificationPing } from "./notification-ping";
+import { ProgressBar } from "./progress-bar";
 
 export interface AchievementItemProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -89,7 +89,7 @@ export const AchievementItem = ({
       </p>
 
       {!hidden && count > 0 && !isComplete && (
-        <AchievementProgress
+        <ProgressBar
           count={count}
           total={total}
           variant={isComplete ? "complete" : "default"}

@@ -20,6 +20,7 @@ pub mod PlayableComponent {
     use crate::store::{StoreImpl, StoreTrait};
     use crate::systems::collection::NAME as COLLECTION;
     use crate::systems::token::{ITokenDispatcher, ITokenDispatcherTrait, NAME as TOKEN};
+    use crate::types::orb::{Orb, OrbTrait};
 
     // Constants
 
@@ -128,7 +129,10 @@ pub mod PlayableComponent {
             //   HighScorer (LevelScorer45),
             //   DeepDive/Marathon/Ironlung (Bottomless15/25/40),
             //   TripleThreat (Armageddon3), Minefield (GameBombs15),
-            //   FieldMedic (Immortal5), ChainReaction (BombStreak3)
+            //   FieldMedic (Immortal5), ChainReaction (BombStreak3),
+            //   Mileage/Roadrunner (OrbPuller), PointHunter (PointsPuller),
+            //   PowerUp (MultiplierPuller), BombSquad (BombPuller),
+            //   FirstAid (HealthPuller), Connoisseur (SpecialPuller)
             let player = self.owner(world, game_id);
             let mut quest = get_dep_component_mut!(ref self, Quest);
             let mut achievement = get_dep_component_mut!(ref self, Achievement);
@@ -144,6 +148,39 @@ pub mod PlayableComponent {
             }
             if game.pullable_points_count() == 0 {
                 achievement.progress(world, player.into(), Task::Flatline.identifier(), 1, true);
+            }
+
+            // -- Per-orb pulls (Mileage/Roadrunner OrbPuller, PointHunter PointsPuller,
+            //    PowerUp MultiplierPuller, BombSquad BombPuller, FirstAid HealthPuller,
+            //    Connoisseur SpecialPuller) --
+            // [Note] Iterate over every orb pulled (1 normally, 2 with DoubleDraw curse)
+            // and increment the relevant per-type quest counters. We rely on the existing
+            // OrbTrait::one_if_* helpers to classify each orb consistently with the rest
+            // of the codebase (e.g. StickyBomb counts as a bomb, PointBomb4 as a point).
+            let mut i: u32 = 0;
+            while i < orbs.len() {
+                let orb: Orb = *orbs.at(i);
+                // Total orbs pulled (Mileage, Roadrunner)
+                quest.progress(world, player.into(), Task::OrbPuller.identifier(), 1, true);
+                if orb.one_if_multiplier() == 1 {
+                    quest
+                        .progress(
+                            world, player.into(), Task::MultiplierPuller.identifier(), 1, true,
+                        );
+                }
+                if orb.one_if_bomb() == 1 {
+                    quest.progress(world, player.into(), Task::BombPuller.identifier(), 1, true);
+                }
+                if orb.one_if_health() == 1 {
+                    quest.progress(world, player.into(), Task::HealthPuller.identifier(), 1, true);
+                }
+                if orb.one_if_point() == 1 {
+                    quest.progress(world, player.into(), Task::PointsPuller.identifier(), 1, true);
+                }
+                if orb.one_if_special() == 1 {
+                    quest.progress(world, player.into(), Task::SpecialPuller.identifier(), 1, true);
+                }
+                i += 1;
             }
 
             // -- Single-pull points (Surge20 → SharpShot quest, Surge/Overload → achievements)
@@ -429,16 +466,17 @@ pub mod PlayableComponent {
             let mut quest = get_dep_component_mut!(ref self, Quest);
             let player = self.owner(world, game_id);
             let (_bombs, points, specials, multipliers, healths, total) = game.counts();
-            if 100 * points / total >= 80 {
+            let total: u32 = total.into();
+            if 100 * points.into() / total >= 80 {
                 achievement.progress(world, player.into(), Task::Linear.identifier(), 1, true);
             }
-            if 100 * multipliers / total >= 50 {
+            if 100 * multipliers.into() / total >= 50 {
                 achievement.progress(world, player.into(), Task::Exponential.identifier(), 1, true);
             }
-            if 100 * specials / total >= 40 {
+            if 100 * specials.into() / total >= 40 {
                 achievement.progress(world, player.into(), Task::Metagamer.identifier(), 1, true);
             }
-            if 100 * healths / total >= 25 {
+            if 100 * healths.into() / total >= 25 {
                 achievement.progress(world, player.into(), Task::Medic.identifier(), 1, true);
             }
             if game.level >= 4 {

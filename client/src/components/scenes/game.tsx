@@ -4,23 +4,29 @@ import { type Ref, useMemo } from "react";
 import {
   type BombDetails,
   BombSlots,
+  GameBalances,
+  GameChoices,
   GameOver,
   type GameOverProps,
   GamePull,
   GameShop,
   type GameShopProps,
+  GameStats,
   type OrbOutcome,
 } from "@/components/containers";
 import {
   type DistributionValues,
-  GameStats,
-  MilestoneChoice,
-  type MilestoneChoiceProps,
   Outcome,
   PLChartTabs,
   type PLDataPoint,
 } from "@/components/elements";
-import { BagIcon } from "@/components/icons";
+import {
+  BagIcon,
+  Bomb2xIcon,
+  ChipIcon,
+  MoonrockIcon,
+  StickyBombIcon,
+} from "@/components/icons";
 import type { OrbPulled } from "@/models";
 import { Button } from "../ui/button";
 
@@ -44,10 +50,10 @@ export interface GameSceneGame {
   shopPurchaseCounts?: number[];
 }
 
-const gameSceneVariants = cva("flex min-h-full flex-col mx-auto", {
+const gameSceneVariants = cva("flex flex-col mx-auto h-full p-4 gap-3", {
   variants: {
     variant: {
-      default: "max-w-[420px] px-4 pb-[clamp(6px,1.1svh,12px)]",
+      default: "max-w-[420px]",
     },
   },
   defaultVariants: {
@@ -79,8 +85,8 @@ export interface GameSceneProps
   showRewardOverlay?: boolean;
   showDistributionPercent?: boolean;
 
-  formatCashOutValue?: string;
-  ante?: MilestoneChoiceProps["ante"];
+  cashOutValue?: number;
+  ante?: number;
   nextCurseLabel?: string;
   isEnteringShop?: boolean;
   isCashingOut?: boolean;
@@ -124,7 +130,7 @@ export const GameScene = ({
   pointsBurst,
   showRewardOverlay = false,
   showDistributionPercent = false,
-  formatCashOutValue,
+  cashOutValue,
   ante,
   nextCurseLabel,
   isEnteringShop = false,
@@ -230,6 +236,10 @@ export const GameScene = ({
 
   return (
     <div className={gameSceneVariants({ variant, className })} {...props}>
+      <GameBalances
+        moonrocks={{ value: game.moonrocks }}
+        chips={{ value: game.chips }}
+      />
       {screen === "milestone" ? (
         <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto overflow-x-hidden pb-[clamp(6px,1.1svh,12px)]">
           <GameStats
@@ -246,34 +256,71 @@ export const GameScene = ({
             goal={chartGoal}
           />
           <div className="flex-1 min-h-0 flex items-center justify-center">
-            <MilestoneChoice
-              moonrocks={game.moonrocks}
-              points={game.points}
-              ante={ante}
-              cashOutValue={formatCashOutValue}
-              onCashOut={onOpenCashout}
-              onEnterShop={onEnterShop}
-              isEnteringShop={isEnteringShop}
-              isCashingOut={isCashingOut}
-              nextCurseLabel={nextCurseLabel}
+            <GameChoices
+              className="h-full"
+              continue={{
+                value: ante ?? 0,
+                details: [
+                  {
+                    category: "chips",
+                    icon: <ChipIcon size="md" />,
+                    value: `+${game.points}`,
+                    label: "Chips",
+                  },
+                  ...(nextCurseLabel
+                    ? [
+                        {
+                          category: "curse" as const,
+                          icon:
+                            nextCurseLabel === "Bomberang" ? (
+                              <StickyBombIcon className="w-6 h-6 glitch-icon" />
+                            ) : (
+                              <Bomb2xIcon className="w-6 h-6 glitch-icon" />
+                            ),
+                          value: "",
+                          label:
+                            nextCurseLabel === "Bomberang"
+                              ? "Bomberang"
+                              : "2x Bomb",
+                        },
+                      ]
+                    : []),
+                ],
+                onClick: onEnterShop,
+                disabled: isEnteringShop || isCashingOut,
+                loading: isEnteringShop,
+                "data-tutorial-id": "continue-button",
+              }}
+              cashOut={{
+                value: cashOutValue ?? 0,
+                details: [
+                  {
+                    category: "moonrocks",
+                    icon: <MoonrockIcon size="md" />,
+                    value: String(game.moonrocks + game.points),
+                    label: "Moon Rocks",
+                  },
+                ],
+                onClick: onOpenCashout,
+                disabled: isEnteringShop || isCashingOut,
+                loading: isCashingOut,
+              }}
             />
           </div>
         </div>
       ) : (
-        <div className="flex flex-1 flex-col">
-          <div className="flex flex-1 min-h-0 flex-col gap-[clamp(6px,2svh,18px)]">
+        <div className="flex flex-1 min-h-0 flex-col gap-4">
+          <div className="flex flex-col gap-3 h-full">
             <GameStats
               points={game.points}
               milestone={game.milestone}
               health={game.health}
               level={game.level}
-              pointsBurst={pointsBurst}
-              pointsRef={pointsRef}
-              healthRef={healthRef}
             />
             {/* PL Chart with outcome overlay */}
-            <div className="relative">
+            <div className="relative max-h-[100px]">
               <PLChartTabs
+                className="h-full overflow-hidden max-h-[100px]"
                 data={plData}
                 pulls={pulls}
                 mode="absolute"
@@ -351,7 +398,6 @@ export const GameScene = ({
               </AnimatePresence>
             </div>
             <GamePull
-              className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
               pullerRef={pullerRef}
               lives={game.health}
               bombs={distribution.bombs}
@@ -364,11 +410,17 @@ export const GameScene = ({
               showPercentages={showDistributionPercent}
               onPull={onPull}
             />
+            <div className="flex flex-col gap-3 md:gap-4">
+              <BombSlots
+                details={bombDetails}
+                data-tutorial-id="bomb-tracker"
+              />
+              <Actions
+                onOpenStash={onOpenStash}
+                onOpenCashout={onOpenCashout}
+              />
+            </div>
           </div>
-          <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
-            <BombSlots details={bombDetails} data-tutorial-id="bomb-tracker" />
-          </div>
-          <Actions onOpenStash={onOpenStash} onOpenCashout={onOpenCashout} />
         </div>
       )}
     </div>

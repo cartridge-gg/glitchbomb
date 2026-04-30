@@ -6,8 +6,8 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { AchievementIcon } from "./achievement-icon";
-import { AchievementProgress } from "./achievement-progress";
 import { NotificationPing } from "./notification-ping";
+import { ProgressBar } from "./progress-bar";
 
 export interface QuestCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -90,7 +90,7 @@ export const QuestCard = ({
       </div>
 
       <div className="h-5 flex gap-3 items-center">
-        <AchievementProgress
+        <ProgressBar
           count={Math.min(count, total)}
           total={total}
           variant={isComplete ? "complete" : "default"}

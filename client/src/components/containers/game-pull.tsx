@@ -67,10 +67,10 @@ const useViewportSize = () => {
   return size;
 };
 
-const gamePullVariants = cva("relative w-full h-full", {
+const gamePullVariants = cva("relative py-4", {
   variants: {
     variant: {
-      default: "",
+      default: "flex items-center justify-center",
     },
   },
   defaultVariants: {
@@ -104,10 +104,6 @@ export const GamePull = ({
   const pullerSizePx = Math.round(clamp(125, distributionSize * 0.59, 185));
   const heightScale = clamp(0.7, viewportHeight / 800, 1);
   const badgeSizePx = Math.round(clamp(36, 72 * heightScale, 72));
-  const badgeOffsetTop = Math.round(
-    (badgeSizePx * 1.05 + pullerSizePx * 0.22) * heightScale,
-  );
-  const badgeOffsetX = 104;
   const multiplierMagnitude = Math.floor(
     Math.min(Math.max(1, multiplier), 5),
   ) as 1 | 2 | 3 | 4 | 5;
@@ -124,16 +120,49 @@ export const GamePull = ({
       {...props}
     >
       {/* Distribution */}
-      <div
-        ref={pullerRef}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
+      <div ref={pullerRef} className="">
         <Distribution
           values={values}
           size={distributionSize}
           thickness={distributionThickness}
           showPercentages={showPercentages}
         />
+      </div>
+
+      {/* Multiplier Badge - top right of puller */}
+      <div className="absolute top-0 right-0" data-tutorial-id="multiplier">
+        <TooltipProvider delayDuration={0}>
+          <TapTooltip>
+            <TooltipTrigger asChild>
+              <div style={{ width: badgeSizePx, height: badgeSizePx }}>
+                <Multiplier
+                  count={multiplier}
+                  cornerRadius={50}
+                  className="h-full w-full"
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              align="center"
+              collisionPadding={16}
+              className="bg-black border border-white/10 px-3 py-2 max-w-[200px]"
+            >
+              <p
+                className="font-secondary text-xs font-bold"
+                style={{ color: multiplierColor }}
+              >
+                {multiplier}x Multiplier
+              </p>
+              <p
+                className="font-secondary text-xs mt-0.5 opacity-50"
+                style={{ color: multiplierColor }}
+              >
+                All points earned are multiplied by {multiplier}x
+              </p>
+            </TooltipContent>
+          </TapTooltip>
+        </TooltipProvider>
       </div>
 
       {/* Puller — always visible so user can spam pulls */}
@@ -149,45 +178,6 @@ export const GamePull = ({
             bombs={bombs}
             isLoading={pullLoading}
           />
-          {/* Multiplier Badge - top right of puller */}
-          <div
-            className="absolute z-30"
-            data-tutorial-id="multiplier"
-            style={{ top: -badgeOffsetTop, right: -badgeOffsetX }}
-          >
-            <TooltipProvider delayDuration={0}>
-              <TapTooltip>
-                <TooltipTrigger asChild>
-                  <div style={{ width: badgeSizePx, height: badgeSizePx }}>
-                    <Multiplier
-                      count={multiplier}
-                      cornerRadius={50}
-                      className="h-full w-full"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  collisionPadding={16}
-                  className="bg-black border border-white/10 px-3 py-2 max-w-[200px]"
-                >
-                  <p
-                    className="font-secondary text-xs font-bold"
-                    style={{ color: multiplierColor }}
-                  >
-                    {multiplier}x Multiplier
-                  </p>
-                  <p
-                    className="font-secondary text-xs mt-0.5 opacity-50"
-                    style={{ color: multiplierColor }}
-                  >
-                    All points earned are multiplied by {multiplier}x
-                  </p>
-                </TooltipContent>
-              </TapTooltip>
-            </TooltipProvider>
-          </div>
         </div>
       </div>
     </div>

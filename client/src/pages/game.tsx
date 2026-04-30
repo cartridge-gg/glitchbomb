@@ -119,7 +119,7 @@ export const Game = () => {
   );
   const target = config?.target_supply ?? 0n;
 
-  const formatCashOutValue = useMemo(() => {
+  const cashOutValue = useMemo(() => {
     if (!game || !tokenPrice) return undefined;
     // Include points only when milestone is reached (matches contract behavior)
     const milestoneReached =
@@ -129,7 +129,7 @@ export const Game = () => {
       : game.moonrocks;
     if (score <= 0) return undefined;
     const glitch = toTokens(tokenPayout(score, game.stake, supply, target));
-    return `$${(glitch * tokenPrice).toFixed(2)}`;
+    return Number((glitch * tokenPrice).toFixed(2));
   }, [game, tokenPrice, supply, target]);
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
@@ -782,7 +782,7 @@ export const Game = () => {
           pointsBurst={pointsBurst}
           showRewardOverlay={showRewardOverlay}
           showDistributionPercent={displaySettings.showDistributionPercent}
-          formatCashOutValue={formatCashOutValue}
+          cashOutValue={cashOutValue}
           ante={milestoneCost(game.level + 1)}
           nextCurseLabel={nextCurseLabel}
           isEnteringShop={isEnteringShop}

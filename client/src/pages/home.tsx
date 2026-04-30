@@ -188,7 +188,7 @@ export const Home = () => {
       return {
         gameId: `#${g.id}`,
         moonrocks: g.moonrocks,
-        payout: cashedOut ? formatPayout(g.moonrocks, g.stake) : "GLITCHED",
+        payout: formatPayout(g.moonrocks, g.stake),
         to: `/game/${g.id}`,
         variant: cashedOut ? ("default" as const) : ("glitched" as const),
         timestamp: g.over,

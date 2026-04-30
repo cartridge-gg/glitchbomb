@@ -9,12 +9,12 @@ import { GradientBorder } from "@/components/ui/gradient-border";
 import { tokenPayout, toTokens } from "@/helpers/payout";
 import type { OrbPulled } from "@/models";
 import {
-  GameStats,
   InfoCard,
   PayoutChart,
   PLChartTabs,
   type PLDataPoint,
 } from "../elements";
+import { GameStats } from "./game-stats";
 
 export interface GameOverProps {
   level: number;

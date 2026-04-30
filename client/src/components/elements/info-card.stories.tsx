@@ -8,13 +8,6 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  decorators: [
-    (Story) => (
-      <div className="w-[380px] h-[220px] bg-green-950 p-4">
-        <Story />
-      </div>
-    ),
-  ],
   argTypes: {
     variant: {
       control: { type: "select" },

@@ -23,6 +23,17 @@ export interface PLGraphProps {
   goal?: number; // Goal value for the level — sets the chart's y-axis max
 }
 
+const interactionEnabled = false;
+
+const VERTICAL_GRID_POSITIONS = Array.from(
+  { length: 12 },
+  (_, i) => (i + 1) * 7.7,
+);
+const HORIZONTAL_GRID_POSITIONS = Array.from(
+  { length: 8 },
+  (_, i) => (i + 1) * 11.1,
+);
+
 // Map variant to actual color
 const getVariantColor = (variant: PLDataPoint["variant"]): string => {
   switch (variant) {
@@ -49,7 +60,6 @@ export const PLGraph = ({
   baseline: baselineProp,
   goal,
 }: PLGraphProps) => {
-  const interactionEnabled = false;
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const isPanningRef = useRef(false);
@@ -285,7 +295,7 @@ export const PLGraph = ({
         return { scale: nextScale, x: nextX, y: nextY };
       });
     },
-    [zoomMax, zoomMin],
+    [],
   );
 
   const handleWheelEvent = useCallback(
@@ -315,7 +325,7 @@ export const PLGraph = ({
     const listener = (event: WheelEvent) => handleWheelEvent(event);
     target.addEventListener("wheel", listener, { passive: false });
     return () => target.removeEventListener("wheel", listener);
-  }, [handleWheelEvent, interactionEnabled]);
+  }, [handleWheelEvent]);
 
   useEffect(() => {
     if (!interactionEnabled) return;
@@ -343,7 +353,7 @@ export const PLGraph = ({
       target.removeEventListener("gesturestart", onGestureStart);
       target.removeEventListener("gesturechange", onGestureChange);
     };
-  }, [applyZoomAt, interactionEnabled]);
+  }, [applyZoomAt]);
 
   if (data.length === 0) {
     return null;
@@ -387,14 +397,21 @@ export const PLGraph = ({
     setIsPanning(false);
   };
 
+  const interactionHandlers = interactionEnabled
+    ? {
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerUp,
+        onPointerLeave: handlePointerUp,
+        onPointerCancel: handlePointerUp,
+        onDoubleClick: resetView,
+      }
+    : {};
+
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       {/* Graph container */}
-      <div
-        className="relative w-full h-[clamp(100px,20svh,200px)]"
-        aria-label={title}
-        role="img"
-      >
+      <div className="relative w-full h-[100px]" aria-label={title} role="img">
         {/* Y-axis labels as pills */}
         <div className="absolute left-0 top-0 bottom-0 z-10">
           {yAxisLabels.map((label, index) => (
@@ -443,14 +460,14 @@ export const PLGraph = ({
             WebkitMaskComposite: "source-in",
           }}
         >
-          <svg className="absolute inset-0 w-full h-full">
+          <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
             {/* Vertical grid lines */}
-            {Array.from({ length: 12 }).map((_, i) => (
+            {VERTICAL_GRID_POSITIONS.map((pos) => (
               <line
-                key={`v-${i}`}
-                x1={`${(i + 1) * 7.7}%`}
+                key={`v-${pos}`}
+                x1={`${pos}%`}
                 y1="0"
-                x2={`${(i + 1) * 7.7}%`}
+                x2={`${pos}%`}
                 y2="100%"
                 stroke="rgba(20, 83, 45, 0.4)"
                 strokeWidth="1"
@@ -458,13 +475,13 @@ export const PLGraph = ({
               />
             ))}
             {/* Horizontal grid lines */}
-            {Array.from({ length: 8 }).map((_, i) => (
+            {HORIZONTAL_GRID_POSITIONS.map((pos) => (
               <line
-                key={`h-${i}`}
+                key={`h-${pos}`}
                 x1="0"
-                y1={`${(i + 1) * 11.1}%`}
+                y1={`${pos}%`}
                 x2="100%"
-                y2={`${(i + 1) * 11.1}%`}
+                y2={`${pos}%`}
                 stroke="rgba(20, 83, 45, 0.4)"
                 strokeWidth="1"
                 strokeDasharray="4 4"
@@ -479,12 +496,7 @@ export const PLGraph = ({
             ref={zoomRef}
             className={`absolute inset-0 ${interactionEnabled ? (isPanning ? "cursor-grabbing" : "cursor-grab") : "cursor-default"}`}
             style={{ touchAction: interactionEnabled ? "none" : "auto" }}
-            onPointerDown={interactionEnabled ? handlePointerDown : undefined}
-            onPointerMove={interactionEnabled ? handlePointerMove : undefined}
-            onPointerUp={interactionEnabled ? handlePointerUp : undefined}
-            onPointerLeave={interactionEnabled ? handlePointerUp : undefined}
-            onPointerCancel={interactionEnabled ? handlePointerUp : undefined}
-            onDoubleClick={interactionEnabled ? resetView : undefined}
+            {...interactionHandlers}
           >
             <div
               className="absolute inset-0"
@@ -501,7 +513,10 @@ export const PLGraph = ({
               />
 
               {/* Chart area for points and lines */}
-              <svg className="absolute inset-0 w-full h-full overflow-visible">
+              <svg
+                className="absolute inset-0 w-full h-full overflow-visible"
+                aria-hidden="true"
+              >
                 <defs>
                   {/* Glow filters for each color */}
                   <filter

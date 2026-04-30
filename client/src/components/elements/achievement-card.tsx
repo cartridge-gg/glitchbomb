@@ -6,7 +6,7 @@ import {
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { AchievementIcon } from "./achievement-icon";
-import { AchievementProgress } from "./achievement-progress";
+import { ProgressBar } from "./progress-bar";
 
 export interface AchievementCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -92,7 +92,7 @@ export const AchievementCard = ({
       </div>
 
       <div className="h-5 flex gap-3 items-center">
-        <AchievementProgress
+        <ProgressBar
           count={count}
           total={total}
           variant={isComplete ? "complete" : "default"}

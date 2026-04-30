@@ -61,6 +61,7 @@ export const Header = ({
   className,
   ...props
 }: HeaderProps) => {
+  const isRoot = window.location.pathname === "/";
   const [faucetLoading, setFaucetLoading] = useState(false);
   const prevFaucetBalance = useRef(faucetBalance);
 
@@ -95,7 +96,12 @@ export const Header = ({
       </Link>
       <div className="flex items-center justify-start gap-2 md:gap-4">
         {onLeaderboard && (
-          <Button variant="secondary" size="icon" onClick={onLeaderboard}>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="hidden md:flex"
+            onClick={onLeaderboard}
+          >
             <TrophyIcon variant="solid" size="md" />
           </Button>
         )}
@@ -122,7 +128,7 @@ export const Header = ({
           </Button>
         )}
         {/* Faucet balance */}
-        {faucetBalance !== undefined && !!onFaucet && !onConnect && (
+        {faucetBalance !== undefined && !!onFaucet && !onConnect && isRoot && (
           <Balance
             variant="faucet"
             size="md"
@@ -132,7 +138,7 @@ export const Header = ({
           />
         )}
         {/* Glitch balance */}
-        {tokenBalance !== undefined && !onConnect && (
+        {tokenBalance !== undefined && !onConnect && isRoot && (
           <Balance
             variant="default"
             size="md"

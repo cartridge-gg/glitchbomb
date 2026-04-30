@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { GameStats } from "./game-stats";
 
 const meta = {
-  title: "Elements/Game Stats",
+  title: "Containers/Game Stats",
   component: GameStats,
   parameters: {
     layout: "centered",
@@ -35,6 +35,15 @@ const meta = {
       control: { type: "number" },
       description: "Current level",
     },
+    pointsBurst: {
+      control: { type: "number", min: 0, max: 10, step: 1 },
+      description: "Increment to trigger glitch burst on points",
+    },
+    variant: {
+      control: "select",
+      options: ["default"],
+      description: "Visual variant",
+    },
   },
   args: {
     points: 50,
@@ -42,6 +51,7 @@ const meta = {
     health: 5,
     maxHealth: 5,
     level: 5,
+    variant: "default",
   },
 } satisfies Meta<typeof GameStats>;
 
