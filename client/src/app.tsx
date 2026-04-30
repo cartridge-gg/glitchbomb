@@ -7,9 +7,12 @@ import {
   StarknetConfig,
   voyager,
 } from "@starknet-react/core";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/elements/loading-screen";
 import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
+import { LoadingScene } from "@/components/scenes/loading";
 import {
   chains,
   DEFAULT_CHAIN_ID,
@@ -18,10 +21,18 @@ import {
   getVrfAddress,
 } from "@/config";
 import { EntitiesProvider } from "@/contexts";
+import { AchievementsProvider } from "@/contexts/achievements";
 import { AppDataProvider } from "@/contexts/app-data-provider";
+import { AudioProvider } from "@/contexts/audio";
 import { LoadingProvider } from "@/contexts/loading-context";
-import Router from "@/routes";
-import { isMobile } from "@/utils/mobile";
+import { ModalProvider } from "@/contexts/modal";
+import { PricesProvider } from "@/contexts/prices";
+import { QuestsProvider } from "@/contexts/quests";
+import { SoundProvider } from "@/contexts/sound";
+import { ThemeProvider } from "@/contexts/theme";
+import { Game, Home, Main, Support } from "@/pages";
+import { TutorialProvider } from "@/tutorial";
+import { BundlesProvider } from "./contexts/bundles";
 
 const provider = jsonRpcProvider({
   rpc: (chain: Chain) => {
@@ -86,17 +97,82 @@ const buildChains = () => {
 const options: ControllerOptions = {
   defaultChainId: DEFAULT_CHAIN_ID,
   chains: buildChains(),
-  ...(isMobile ? {} : { policies: buildPolicies() }),
-  preset: isMobile ? "glitch-bomb-mobile" : "glitch-bomb",
+  policies: buildPolicies(),
+  preset: "glitch-bomb",
   // namespace: "GLITCHBOMB",
-  slot: "gb-bal",
+  slot: "glitchbomb",
 };
 
 const connectors = [new ControllerConnector(options) as never as Connector];
 
+const queryClient = new QueryClient();
+
+function DeployGate() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/support" element={<Support />} />
+        <Route path="/*" element={<AuthenticatedApp />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function AuthenticatedApp() {
+  return (
+    <LoadingProvider>
+      <AudioProvider>
+        <SoundProvider>
+          <EntitiesProvider>
+            <PricesProvider>
+              <AppDataProvider>
+                <BundlesProvider>
+                  <QuestsProvider>
+                    <AchievementsProvider>
+                      <TutorialProvider>
+                        <ThemeProvider>
+                          <ModalProvider>
+                            <LoadingScreen />
+                            <GameStartedNotifier />
+                            <Main>
+                              <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/game/:id" element={<Game />} />
+                                <Route
+                                  path="/game"
+                                  element={<LoadingScene />}
+                                />
+                                <Route path="/practice" element={<Game />} />
+                                <Route path="/tutorial" element={<Game />} />
+                              </Routes>
+                            </Main>
+                            <Toaster
+                              position="top-left"
+                              duration={3000}
+                              expand
+                              visibleToasts={4}
+                              gap={8}
+                              offset={80}
+                              richColors
+                            />
+                          </ModalProvider>
+                        </ThemeProvider>
+                      </TutorialProvider>
+                    </AchievementsProvider>
+                  </QuestsProvider>
+                </BundlesProvider>
+              </AppDataProvider>
+            </PricesProvider>
+          </EntitiesProvider>
+        </SoundProvider>
+      </AudioProvider>
+    </LoadingProvider>
+  );
+}
+
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <StarknetConfig
         autoConnect
         chains={[chains[DEFAULT_CHAIN_ID]]}
@@ -104,26 +180,9 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
-        <LoadingProvider>
-          <EntitiesProvider>
-            <AppDataProvider>
-              <LoadingScreen />
-              <GameStartedNotifier />
-              <Router />
-            </AppDataProvider>
-          </EntitiesProvider>
-        </LoadingProvider>
+        <DeployGate />
       </StarknetConfig>
-      <Toaster
-        position="top-left"
-        duration={3000}
-        expand
-        visibleToasts={4}
-        gap={8}
-        offset={80}
-        richColors
-      />
-    </>
+    </QueryClientProvider>
   );
 }
 

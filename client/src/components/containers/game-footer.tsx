@@ -1,15 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import {
-  Action,
-  BombTracker,
-  type BombTrackerProps,
-} from "@/components/elements";
+import { Action } from "@/components/elements";
 import { ArrowDownIcon, ListIcon } from "@/components/icons";
+import { type BombDetails, BombSlots } from "./bomb-slots";
 
 export interface GameFooterProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameFooterVariants> {
-  details: BombTrackerProps["details"];
+  details: BombDetails;
   onLeftClick?: () => void;
   onRightClick: () => void;
 }
@@ -38,7 +35,7 @@ export const GameFooter = ({
       <Action onClick={onLeftClick}>
         <ListIcon />
       </Action>
-      <BombTracker details={details} />
+      <BombSlots details={details} />
       <Action onClick={onRightClick}>
         <ArrowDownIcon />
       </Action>

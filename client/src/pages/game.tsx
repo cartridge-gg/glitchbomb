@@ -1,5 +1,4 @@
-import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccount, useNetwork } from "@starknet-react/core";
+import { useNetwork } from "@starknet-react/core";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   useCallback,
@@ -9,35 +8,26 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ConfirmationDialog,
-  GameHeader,
-  GameOver,
-  GameScene,
-  GameShop,
+  type OrbOutcome,
   StashModal,
 } from "@/components/containers";
 import {
   isCashoutConfirmDismissed,
   setCashoutConfirmDismissed,
 } from "@/components/containers/confirmation-prefs";
-import type { OrbOutcome } from "@/components/containers/game-scene";
 import {
-  BombTracker,
   type DistributionKey,
-  GameStats,
   LevelUpOverlay,
-  MilestoneChoice,
-  Outcome,
-  PLChartTabs,
   type PLDataPoint as PLDataPointComponent,
   RewardOverlay,
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
-import { BagIcon } from "@/components/icons";
-import { GradientBorder } from "@/components/ui/gradient-border";
+import { GameScene, type GameSceneGame } from "@/components/scenes";
 import { getTokenAddress } from "@/config";
+import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingSignal } from "@/contexts/use-loading";
@@ -45,12 +35,10 @@ import { tokenPayout, toTokens } from "@/helpers/payout";
 import { usePLDataPoints, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
-import { useControllerUsername } from "@/hooks/use-controller-username";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
 import { milestoneCost } from "@/offline/milestone";
-import { createOfflineGame } from "@/offline/store";
-import { TutorialOverlay, TutorialStep, useTutorial } from "@/tutorial";
-import { isMobile, mobilePath } from "@/utils/mobile";
+import { createOfflineGame, useOfflineStore } from "@/offline/store";
+import { TutorialStep, useTutorial } from "@/tutorial";
 
 // Initial game values for optimistic rendering
 const INITIAL_GAME_VALUES = {
@@ -81,17 +69,22 @@ type OverlayView = "none" | "stash";
 
 export const Game = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { connector } = useAccount();
+  const { id: idParam } = useParams<{ id: string }>();
+  const { pathname } = useLocation();
+  const offlineState = useOfflineStore();
+  const isPracticeRoute = pathname === "/practice" || pathname === "/tutorial";
+  const onchainGameId = useMemo(() => {
+    if (isPracticeRoute) return null;
+    if (!idParam) return null;
+    const parsed = Number.parseInt(idParam, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [idParam, isPracticeRoute]);
+  const practiceGameId = isPracticeRoute ? offlineState.activeGameId : null;
+  const resolvedGameId = onchainGameId ?? practiceGameId;
   const { chain } = useNetwork();
   const { cashOut, pull, enter, buyAndExit } = useActions();
   const { game, config, setGameId } = useEntitiesContext();
   const {
-    settings: audioSettings,
-    setMusicMuted,
-    setSfxMuted,
-    setMusicVolume,
-    setSfxVolume,
     playOrbSound,
     playFatalBombSound,
     playRewardSound,
@@ -102,14 +95,18 @@ export const Game = () => {
     resetOrbPitchProgression,
     startMusic,
   } = useAudio();
-  const { displaySettings, setShowDistributionPercent, setStashViewMode } =
-    useDisplaySettings();
+  const { displaySettings } = useDisplaySettings();
   const tutorial = useTutorial();
-  const { username } = useControllerUsername();
 
   // Payout chart data
-  const tokenAddress = config?.token || getTokenAddress(chain.id);
-  const { tokenContracts, tokenPrice } = useAppData();
+  const tokenAddress = getTokenAddress(chain.id);
+  const { tokenContracts } = useAppData();
+  const { getGlitchPrice } = usePrices();
+  const tokenPrice = useMemo(() => {
+    const p = getGlitchPrice();
+    return p ? parseFloat(p) : null;
+  }, [getGlitchPrice]);
+
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
     return tokenContracts.find(
@@ -122,7 +119,7 @@ export const Game = () => {
   );
   const target = config?.target_supply ?? 0n;
 
-  const formatCashOutValue = useMemo(() => {
+  const cashOutValue = useMemo(() => {
     if (!game || !tokenPrice) return undefined;
     // Include points only when milestone is reached (matches contract behavior)
     const milestoneReached =
@@ -132,22 +129,19 @@ export const Game = () => {
       : game.moonrocks;
     if (score <= 0) return undefined;
     const glitch = toTokens(tokenPayout(score, game.stake, supply, target));
-    return `$${(glitch * tokenPrice).toFixed(2)}`;
+    return Number((glitch * tokenPrice).toFixed(2));
   }, [game, tokenPrice, supply, target]);
 
   const [overlay, setOverlay] = useState<OverlayView>("none");
+
   const [showCashoutConfirm, setShowCashoutConfirm] = useState(false);
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
-  const [animateHeaderCount, setAnimateHeaderCount] = useState(false);
   const moonrocksRef = useRef<HTMLDivElement>(null);
-  const gameSceneRef = useRef<HTMLDivElement>(null);
+  const pullerRef = useRef<HTMLDivElement>(null);
   const [revealedSegments, setRevealedSegments] = useState<Set<string>>(
     new Set(),
   );
   const rewardShownForGameRef = useRef<number | null>(null);
-  const [shopBalanceOverride, setShopBalanceOverride] = useState<number | null>(
-    null,
-  );
   const [currentOrb, setCurrentOrb] = useState<OrbOutcome | undefined>(
     undefined,
   );
@@ -264,43 +258,28 @@ export const Game = () => {
     return lastValue - game.points + game.milestone;
   }, [game, plData]);
 
-  const onProfileClick = useCallback(() => {
-    const controller = (connector as never as ControllerConnector)?.controller;
-    if (isMobile) {
-      controller?.openSettings();
-    } else {
-      controller?.openProfile("inventory");
-    }
-  }, [connector]);
-
   // Start glitched music on mount (crossfades from home track)
   useEffect(() => {
     startMusic("glitched");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startMusic]);
 
-  // Set game ID from URL params
   useEffect(() => {
-    const gameId = searchParams.get("game");
-    if (gameId) {
-      setGameId(Number(gameId));
-      resetOrbPitchProgression();
-      // Reset all local state when game changes
-      lastPullIdRef.current = null;
-      prevLevelRef.current = null;
-      milestoneShownRef.current = false;
-      setCurrentOrb(undefined);
-      setOverlay("none");
-      setIsEnteringShop(false);
-      setIsExitingShop(false);
-      setIsPulling(false);
-      setShowLevelComplete(false);
-      setShowLevelEnter(false);
-      setShowRewardOverlay(false);
-      setAnimateHeaderCount(false);
-      setRevealedSegments(new Set());
-    }
-  }, [resetOrbPitchProgression, setGameId, searchParams]);
+    if (resolvedGameId === null) return;
+    setGameId(resolvedGameId);
+    resetOrbPitchProgression();
+    lastPullIdRef.current = null;
+    prevLevelRef.current = null;
+    milestoneShownRef.current = false;
+    setCurrentOrb(undefined);
+    setOverlay("none");
+    setIsEnteringShop(false);
+    setIsExitingShop(false);
+    setIsPulling(false);
+    setShowLevelComplete(false);
+    setShowLevelEnter(false);
+    setShowRewardOverlay(false);
+    setRevealedSegments(new Set());
+  }, [resolvedGameId, resetOrbPitchProgression, setGameId]);
 
   // Show reward overlay for fresh games (skip expired ones and tutorial games)
   useEffect(() => {
@@ -309,8 +288,8 @@ export const Game = () => {
 
     const isExpired =
       game &&
-      game.created_at > 0 &&
-      game.created_at + 86400 <= Math.floor(Date.now() / 1000);
+      game.expiration > 0 &&
+      game.expiration <= Math.floor(Date.now() / 1000);
     if (
       game &&
       game.level === 1 &&
@@ -323,14 +302,7 @@ export const Game = () => {
       rewardShownForGameRef.current = game.id;
       setShowRewardOverlay(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    game?.id,
-    game?.level,
-    game?.pull_count,
-    game?.over,
-    tutorial.state.active,
-  ]);
+  }, [game, tutorial.state.active]);
 
   // Reset loading states when data changes
   useEffect(() => {
@@ -342,9 +314,6 @@ export const Game = () => {
       // Shop cleared - reset exiting shop loading state
       setIsExitingShop(false);
     }
-    if (!game?.shop || game.shop.length === 0) {
-      setShopBalanceOverride(null);
-    }
   }, [game?.shop]);
 
   // Close cashout dialog when game ends
@@ -355,15 +324,19 @@ export const Game = () => {
     }
   }, [game?.over]);
 
-  // Tutorial: detect game over
+  // Tutorial: detect game over.
+  // The ref guard fires onGameEnd at most once per game.id; without it the
+  // tutorial state mutation triggers a re-render of `tutorial` and the effect
+  // would re-enter the body and call onGameEnd in a loop.
+  const tutorialGameOverFiredForGameRef = useRef<number | null>(null);
   useEffect(() => {
     if (!tutorial.state.active) return;
-    if (game?.over) {
-      const won = (game?.health ?? 0) > 0;
-      tutorial.onGameEnd(won);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.over]);
+    if (!game?.over) return;
+    if (tutorialGameOverFiredForGameRef.current === game.id) return;
+    tutorialGameOverFiredForGameRef.current = game.id;
+    const won = (game.health ?? 0) > 0;
+    tutorial.onGameEnd(won);
+  }, [game, tutorial]);
 
   // Detect milestone reached — delay overlay so the winning pull animation plays first
   // During tutorial scripted phase, suppress the built-in overlay (tutorial has its own)
@@ -382,8 +355,7 @@ export const Game = () => {
         return () => clearTimeout(timer);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.points, game?.milestone]);
+  }, [game, tutorial, playLevelCompleteSound]);
 
   // Detect level-up after exiting shop — show "Entering Level X"
   // Suppress during tutorial scripted phase (tutorial shows its own messages)
@@ -399,8 +371,7 @@ export const Game = () => {
       }
     }
     prevLevelRef.current = game.level;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.level]);
+  }, [game, tutorial, playLevelStartSound]);
 
   useEffect(() => {
     if (!isPulling) return;
@@ -414,20 +385,21 @@ export const Game = () => {
     };
   }, [isPulling, startPulling, stopPulling]);
 
-  // Initialize lastPullIdRef when initial fetch completes
+  // Read pulls via ref so the init effect below does not re-run on new
+  // pulls — that would clobber the next-pull detection useLayoutEffect.
+  const pullsRef = useRef(pulls);
+  pullsRef.current = pulls;
+
+  // Initialize lastPullIdRef when initial fetch completes.
+  // Using 0 as sentinel means any real pull (id >= 1) will trigger animation.
   useEffect(() => {
     if (!initialFetchComplete) return;
-
-    // Set to 0 if no existing pulls, otherwise set to the max existing pull id
-    // Using 0 as sentinel means any real pull (id >= 1) will trigger animation
-    if (pulls.length === 0) {
+    const currentPulls = pullsRef.current;
+    if (currentPulls.length === 0) {
       lastPullIdRef.current = 0;
     } else {
-      const maxId = Math.max(...pulls.map((p) => p.id));
-      lastPullIdRef.current = maxId;
+      lastPullIdRef.current = Math.max(...currentPulls.map((p) => p.id));
     }
-    // Only run once when initialFetchComplete becomes true
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFetchComplete]);
 
   // Detect new pulls and show outcome animation
@@ -584,8 +556,7 @@ export const Game = () => {
       tutorial.onPullAnimationComplete();
     }
     prevOrbRef.current = currentOrb;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentOrb]);
+  }, [currentOrb, tutorial]);
 
   // Flying particle → cleanup when it arrives at target
   useEffect(() => {
@@ -613,21 +584,6 @@ export const Game = () => {
     }
     setOutcomeShowMultiplied(false);
   }, [currentOrb]);
-
-  // Displayed outcome content (updates when multiplier breakdown reveals)
-  const outcomeHasMultEffect =
-    currentOrb?.variant === "point" &&
-    currentOrb?.multipliedPoints !== undefined &&
-    currentOrb?.activeMultiplier !== undefined &&
-    (currentOrb?.activeMultiplier ?? 0) > 1;
-
-  const outcomeContent = useMemo(() => {
-    if (!currentOrb) return "";
-    if (outcomeHasMultEffect && outcomeShowMultiplied) {
-      return `+${currentOrb.multipliedPoints} pts`;
-    }
-    return currentOrb.content;
-  }, [currentOrb, outcomeHasMultEffect, outcomeShowMultiplied]);
 
   const handleCashOut = useCallback(async () => {
     if (!game) return;
@@ -690,10 +646,6 @@ export const Game = () => {
   );
   const dismissLevelEnter = useCallback(() => setShowLevelEnter(false), []);
 
-  // Bars always reflect actual game state immediately
-  const displayedPoints = game?.points ?? 0;
-  const displayedHealth = game?.health ?? 0;
-
   // Memoize computed values to prevent recalculation
   const distribution = useMemo(
     () => (game ? game.distribution() : INITIAL_GAME_VALUES.distribution),
@@ -738,266 +690,65 @@ export const Game = () => {
     return NEXT_LEVEL_CURSES[nextLevel];
   }, [game?.level]);
 
-  const gameIdParam = searchParams.get("game");
   const isGameReady = !!game && tokenContracts.length > 0;
   useLoadingSignal("game", isGameReady);
 
   const handlePlayAgain = useCallback(() => {
     if (isPractice) {
-      const newGameId = createOfflineGame();
-      navigate(mobilePath(`/play?game=${newGameId}`));
-    } else {
-      navigate(mobilePath("/"));
+      createOfflineGame();
+      return;
     }
+    navigate("/");
   }, [isPractice, navigate]);
 
-  if (!gameIdParam) return null;
+  if (resolvedGameId === null) return null;
   if (!isGameReady) return null;
 
-  // Determine which screen to show
-  const renderScreen = () => {
-    // Expired (created_at + 24h has passed without completion)
-    const isExpired =
-      game.created_at > 0 &&
-      game.created_at + 86400 <= Math.floor(Date.now() / 1000);
+  // Expired: expiration timestamp reached without completion
+  const isExpired =
+    game.expiration > 0 && game.expiration <= Math.floor(Date.now() / 1000);
 
-    if (!game.over && isExpired) {
-      return (
-        <GameOver
-          level={game.level}
-          moonrocksEarned={0}
-          plData={plData}
-          pulls={pulls}
-          cashedOut={false}
-          expired={true}
-          onPlayAgain={handlePlayAgain}
-          onOpenStash={openStash}
-          health={game.health}
-          points={game.points}
-          milestone={game.milestone}
-        />
-      );
-    }
+  // Keep the "play" screen during the death sequence so the fatal bomb
+  // animation plays before transitioning to GameOver.
+  const sceneGame: GameSceneGame = deathPending
+    ? {
+        id: game.id,
+        over: 0,
+        level: game.level,
+        health: game.health,
+        points: game.points,
+        milestone: game.milestone,
+        multiplier: game.multiplier,
+        moonrocks: game.moonrocks,
+        chips: game.chips,
+        stake: game.stake,
+        expiration: game.expiration,
+        pullablesCount: game.pullables.length,
+        shop: game.shop,
+        bag: game.pullables,
+        shopPurchaseCounts: game.shopPurchaseCounts,
+      }
+    : {
+        id: game.id,
+        over: game.over,
+        level: game.level,
+        health: game.health,
+        points: game.points,
+        milestone: game.milestone,
+        multiplier: game.multiplier,
+        moonrocks: game.moonrocks,
+        chips: game.chips,
+        stake: game.stake,
+        expiration: game.expiration,
+        pullablesCount: game.pullables.length,
+        shop: game.shop,
+        bag: game.pullables,
+        shopPurchaseCounts: game.shopPurchaseCounts,
+      };
 
-    // Game over (terminal state) — delayed during death sequence so bomb animation plays
-    if (game.over && !deathPending) {
-      const cashedOut = game.health > 0;
-      // When died (health = 0), moonrocks earned on death (from recent PR #148)
-      // When cashed out, game.moonrocks has the full score
-      const moonrocksEarned = game.moonrocks;
-
-      return (
-        <GameOver
-          level={game.level}
-          moonrocksEarned={moonrocksEarned}
-          plData={plData}
-          pulls={pulls}
-          cashedOut={cashedOut}
-          onPlayAgain={handlePlayAgain}
-          onOpenStash={openStash}
-          health={game.health}
-          points={game.points}
-          milestone={game.milestone}
-          stake={game.stake}
-          tokenPrice={tokenPrice}
-          supply={supply}
-          target={target}
-        />
-      );
-    }
-
-    // Priority 2: Shop (when shop has items)
-    if (game.shop.length > 0) {
-      return (
-        <GameShop
-          balance={game.chips}
-          orbs={game.shop}
-          bag={game.pullables}
-          initialPurchaseCounts={game.shopPurchaseCounts}
-          onConfirm={handleBuyAndExit}
-          isLoading={isExitingShop}
-          onBalanceChange={(bal) => {
-            setShopBalanceOverride(bal);
-            // Tutorial: detect first orb added to cart (balance dropped)
-            if (bal < game.chips) tutorial.onOrbBought();
-          }}
-        />
-      );
-    }
-
-    // Check if milestone reached
-    const milestoneReached = game.points >= game.milestone;
-
-    // Main gameplay view - inlined to prevent remount on re-render
-    return (
-      <div className="flex min-h-full flex-col max-w-[420px] mx-auto px-4 pb-[clamp(6px,1.1svh,12px)]">
-        {milestoneReached && !currentOrb ? (
-          <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto overflow-x-hidden pb-[clamp(6px,1.1svh,12px)]">
-            <GameStats
-              points={game.points}
-              milestone={game.milestone}
-              health={game.health}
-              level={game.level}
-            />
-            <PLChartTabs
-              data={plData}
-              pulls={pulls}
-              mode="absolute"
-              title="POTENTIAL"
-              goal={chartGoal}
-            />
-            <div className="flex-1 min-h-0 flex items-center justify-center">
-              <MilestoneChoice
-                moonrocks={game.moonrocks}
-                points={game.points}
-                ante={milestoneCost(game.level + 1)}
-                cashOutValue={formatCashOutValue}
-                onCashOut={openCashout}
-                onEnterShop={handleEnterShop}
-                isEnteringShop={isEnteringShop}
-                isCashingOut={isCashingOut}
-                nextCurseLabel={nextCurseLabel}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-1 flex-col">
-            <div className="flex flex-1 min-h-0 flex-col gap-[clamp(6px,2svh,18px)]">
-              <GameStats
-                points={displayedPoints}
-                milestone={game.milestone}
-                health={displayedHealth}
-                level={game.level}
-                pointsBurst={pointsBurst}
-                pointsRef={pointsRef}
-                healthRef={healthRef}
-              />
-              {/* PL Chart with outcome overlay */}
-              <div className="relative">
-                <PLChartTabs
-                  data={plData}
-                  pulls={pulls}
-                  mode="absolute"
-                  title="POTENTIAL"
-                  goal={chartGoal}
-                />
-                {/* Outcome overlay — shown on chart so puller stays clickable */}
-                <AnimatePresence>
-                  {currentOrb && (
-                    <motion.div
-                      key={outcomeKey}
-                      className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0, transition: { duration: 0.15 } }}
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                        animate={{
-                          opacity: 1,
-                          scale: isFatalBomb ? 1.4 : 1,
-                          y: 0,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: isFatalBomb ? 180 : 400,
-                          damping: isFatalBomb ? 10 : 15,
-                          mass: isFatalBomb ? 1.5 : 0.8,
-                        }}
-                      >
-                        <div
-                          ref={outcomeRef}
-                          className="flex flex-col items-center gap-0"
-                        >
-                          <motion.div
-                            animate={
-                              outcomeShowMultiplied
-                                ? { scale: [1.2, 1], opacity: [0.7, 1] }
-                                : { scale: 1 }
-                            }
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                          >
-                            <Outcome
-                              content={outcomeContent}
-                              variant={currentOrb.variant ?? "default"}
-                              size="md"
-                            />
-                          </motion.div>
-                          {/* Multiplier breakdown */}
-                          <AnimatePresence>
-                            {outcomeHasMultEffect && outcomeShowMultiplied && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.3, y: -4 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 500,
-                                  damping: 15,
-                                }}
-                                className="mt-1"
-                              >
-                                <Outcome
-                                  content={`${currentOrb.basePoints} × ${currentOrb.activeMultiplier}x`}
-                                  variant="multiplier"
-                                  size="sm"
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              <GameScene
-                className="mt-[clamp(16px,2.4svh,28px)] min-h-[clamp(220px,40svh,340px)] h-full flex-1"
-                sceneRef={gameSceneRef}
-                lives={game.health}
-                bombs={distribution.bombs}
-                orbs={game.pullables.length}
-                multiplier={game.multiplier}
-                values={
-                  showRewardOverlay ? progressiveDistribution : distribution
-                }
-                pullLoading={isPulling}
-                showPercentages={displaySettings.showDistributionPercent}
-                onPull={handlePull}
-              />
-            </div>
-            <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
-              <BombTracker details={bombDetails} size="lg" />
-            </div>
-            <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
-              <div className="flex-1" data-tutorial-id="bag-button">
-                <GradientBorder color="green" className="w-full">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                    onClick={openStash}
-                  >
-                    <BagIcon className="w-5 h-5" />
-                    ORBS
-                  </button>
-                </GradientBorder>
-              </div>
-              <div className="flex-1" data-tutorial-id="cash-out-button">
-                <GradientBorder color="green" className="w-full">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                    onClick={openCashout}
-                  >
-                    CASH OUT
-                  </button>
-                </GradientBorder>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+  const handleShopBalanceChange = (bal: number) => {
+    // Tutorial: detect first orb added to cart (balance dropped)
+    if (bal < game.chips) tutorial.onOrbBought();
   };
 
   return (
@@ -1013,26 +764,45 @@ export const Game = () => {
       }
       transition={deathPending ? { duration: 0.6, ease: "easeOut" } : undefined}
     >
-      <GameHeader
-        moonrocks={game?.moonrocks ?? 100}
-        chips={shopBalanceOverride ?? game?.chips ?? INITIAL_GAME_VALUES.chips}
-        username={username}
-        moonrocksRef={moonrocksRef}
-        animateCount={animateHeaderCount}
-        rewardOverlayOpen={showRewardOverlay}
-        audioSettings={audioSettings}
-        onMusicMutedChange={setMusicMuted}
-        onSfxMutedChange={setSfxMuted}
-        onMusicVolumeChange={setMusicVolume}
-        onSfxVolumeChange={setSfxVolume}
-        showDistributionPercent={displaySettings.showDistributionPercent}
-        onShowDistributionPercentChange={setShowDistributionPercent}
-        stashViewMode={displaySettings.stashViewMode}
-        onStashViewModeChange={setStashViewMode}
-        onProfileClick={onProfileClick}
-      />
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
-        {renderScreen()}
+        <GameScene
+          game={sceneGame}
+          expired={isExpired}
+          plData={plData}
+          pulls={pulls}
+          chartGoal={chartGoal}
+          distribution={distribution}
+          progressiveDistribution={progressiveDistribution}
+          bombDetails={bombDetails}
+          currentOrb={currentOrb}
+          outcomeKey={outcomeKey}
+          outcomeShowMultiplied={outcomeShowMultiplied}
+          isFatalBomb={isFatalBomb}
+          isPulling={isPulling}
+          pointsBurst={pointsBurst}
+          showRewardOverlay={showRewardOverlay}
+          showDistributionPercent={displaySettings.showDistributionPercent}
+          cashOutValue={cashOutValue}
+          ante={milestoneCost(game.level + 1)}
+          nextCurseLabel={nextCurseLabel}
+          isEnteringShop={isEnteringShop}
+          isCashingOut={isCashingOut}
+          isExitingShop={isExitingShop}
+          tokenPrice={tokenPrice}
+          supply={supply}
+          target={target}
+          pullerRef={pullerRef}
+          pointsRef={pointsRef}
+          healthRef={healthRef}
+          outcomeRef={outcomeRef}
+          onPull={handlePull}
+          onOpenStash={openStash}
+          onOpenCashout={openCashout}
+          onEnterShop={handleEnterShop}
+          onBuyAndExit={handleBuyAndExit}
+          onShopBalanceChange={handleShopBalanceChange}
+          onPlayAgain={handlePlayAgain}
+        />
       </div>
       <StashModal
         open={overlay === "stash"}
@@ -1058,17 +828,13 @@ export const Game = () => {
       />
       <RewardOverlay
         open={showRewardOverlay}
-        onDismiss={() => {
-          setShowRewardOverlay(false);
-          setAnimateHeaderCount(false);
-        }}
-        onAnimationStart={() => setAnimateHeaderCount(true)}
+        onDismiss={() => setShowRewardOverlay(false)}
         onOrbArrive={(key: DistributionKey) =>
           setRevealedSegments((prev) => new Set([...prev, key]))
         }
         onTakeAll={playRewardSound}
         targetRef={moonrocksRef}
-        orbTargetRef={gameSceneRef}
+        orbTargetRef={pullerRef}
         reward={{
           variant: "moonrock",
           count: game?.moonrocks ?? 0,
@@ -1150,7 +916,6 @@ export const Game = () => {
           />
         )}
       </AnimatePresence>
-      <TutorialOverlay />
     </motion.div>
   );
 };

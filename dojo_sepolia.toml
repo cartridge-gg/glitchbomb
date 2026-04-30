@@ -1,6 +1,6 @@
 [world]
 name = "Glitch Bomb"
-seed = "glitchbomb-v0.1.1"
+seed = "glitchbomb-v0.0.30"
 description = "Glitch Bomb is a cosmic-themed push-your-luck rogue-like bag-building game where players draw orbs from a bag to score points while avoiding bombs. What makes this game compelling is its brilliant tension between greed and survival, where every tap of the moon bag could yield valuable points or deal devastating damage, ending a nail-biting, breath taking, one of a lifetime run. Will you risk it for moon rocks, or will you just kick rocks?"
 website = "https://glitchbomb.gg"
 
@@ -9,35 +9,65 @@ default = "GLITCHBOMB"
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
-world_address = "0x0406ad504e4aff4a66c0e35132b6d1659c066804e7bb5ff38523ea3417406ebd"
-account_address = "0x025Ee38b230906EA41B00401cC12bb51f58DC62198cf058a336655696908863D"
+world_address = "0x06e93be73d7980ad655b7e019148074edcb75e524b187a8b7997595ea16e2c93"
+account_address = "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753"
 keystore_path = "./keystore_sepolia.json"
 
 [migration]
 order_inits = [
+  "GLITCHBOMB-Token",
   "GLITCHBOMB-Setup",
   "GLITCHBOMB-Play",
   "GLITCHBOMB-Collection",
-  "GLITCHBOMB-Token",
+  "GLITCHBOMB-Vault",
+  "GLITCHBOMB-Faucet",
 ]
-skip_contracts = ["GLITCHBOMB-VRF", "GLITCHBOMB-Registry"]
+skip_contracts = ["GLITCHBOMB-VRF"]
 disable_multicall = true
 
 [writers]
-"GLITCHBOMB" = ["GLITCHBOMB-Play"]
+"GLITCHBOMB" = ["GLITCHBOMB-Play", "GLITCHBOMB-Setup"]
 
 [owners]
-"GLITCHBOMB" = ["GLITCHBOMB-Setup", "GLITCHBOMB-Collection"]
+"GLITCHBOMB" = [
+  "GLITCHBOMB-Collection",
+  "GLITCHBOMB-Vault",
+  "GLITCHBOMB-Faucet",
+  "GLITCHBOMB-Token",
+]
 
 [init_call_args]
+"GLITCHBOMB-Vault" = [
+  "0x1", # open: true
+  "0x0", # fee: 500 basis points (10000 basis points = 100%)
+]
+"GLITCHBOMB-Governor" = []
+"GLITCHBOMB-Treasury" = [
+  "0xe10",                                                              # min_delay: 1 hour
+  "0x0000000000000000000000000000000000000000000000000000000000000000", # Admin address
+]
+"GLITCHBOMB-Token" = [
+  "0xD3C21BCECCEDA1000000",                                             # initial_supply: 1.0M GLITCH
+  "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # recipient
+]
+"GLITCHBOMB-Faucet" = [
+  "0x2540BE400",                                                        # initial_supply: 10K USDC
+  "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # recipient
+]
 "GLITCHBOMB-Setup" = [
-  "0x0",                                                                # Token
-  "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f", # VRF
-  "0x03eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43", # Starterpack Registry
-  "0x025Ee38b230906EA41B00401cC12bb51f58DC62198cf058a336655696908863D", # Owner
-  "0x053b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080", # Quote (USDC Sepolia)
-  "0x050d4da9f66589eadaa1d5e31cf73b08ac1a67c8b4dcd88e6fd4fe501c628af2", # Ekubo Router (Sepolia)
-  "0x1E8480",                                                           # Entry Price: 2,000,000 (2 USDC)
-  "0x38D7EA4C68000",                                                    # Target Supply (u256 low): 1,000,000,000 tokens
-  "0x0",                                                                # Target Supply (u256 high)
+  "0x0",                                                                # Option::Some
+  "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f", # vrf_address
+  "0x1",                                                                # quote_address: None
+  "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # team_address
+  "0x050d4da9f66589eadaa1d5e31cf73b08ac1a67c8b4dcd88e6fd4fe501c628af2", # ekubo router address
+  "0x06a2aee84bb0ed5dded4384ddd0e40e9c1372b818668375ab8e3ec08807417e5", # ekubo positions address
+  "0x1E8480",                                                           # entry_price: 2.000000 USDC
+  "0xD3C21BCECCEDA1000000",                                             # target_supply: 1M GLITCH
+  "0x46",                                                               # burn_percentage: 70%,
+  "0x32",                                                               # vault_percentage: 50%,
+  "0xA",                                                                # average_score: 10,
+  "0xccccccccccccccccccccccccccccccc",                                  # pool_fee,
+  "0x56a4c",                                                            # pool_tick_spacing,
+  "0x073ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971", # pool_extension,
+  "0x005974abf73ca39b2c71a5e9459590f50649e53b296e747d2fc414bbd8839aab", # bundle_allower
 ]

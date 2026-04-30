@@ -3,7 +3,6 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { useCallback } from "react";
 import { Connect, Profile } from "@/components/elements";
 import { useControllerUsername } from "@/hooks/use-controller-username";
-import { isMobile } from "@/utils/mobile";
 
 export const Connection = () => {
   const { account, connector } = useAccount();
@@ -12,11 +11,7 @@ export const Connection = () => {
 
   const onProfileClick = useCallback(async () => {
     const controller = (connector as never as ControllerConnector)?.controller;
-    if (isMobile) {
-      controller?.openSettings();
-    } else {
-      controller?.openProfile("inventory");
-    }
+    controller?.openProfile("inventory");
   }, [connector]);
 
   const onConnectClick = useCallback(async () => {

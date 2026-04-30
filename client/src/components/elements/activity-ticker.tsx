@@ -1,7 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ActivityItem } from "@/hooks/activity-feed";
-import { mobilePath } from "@/utils/mobile";
 
 interface ActivityTickerProps {
   items: ActivityItem[];
@@ -97,7 +96,7 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
     if (!dragged && target) {
       const item = target.closest<HTMLElement>("[data-game-id]");
       if (item) {
-        navigate(mobilePath(`/play?game=${item.dataset.gameId}&view=true`));
+        navigate(`/game/${item.dataset.gameId}`);
       }
     }
 

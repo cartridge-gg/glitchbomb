@@ -7,7 +7,8 @@ export interface OfflineShopState {
 export interface OfflineGame {
   id: number;
   seed: string;
-  over: boolean;
+  /** Unix timestamp at which the game ended; 0 = still in progress. */
+  over: number;
   level: number;
   health: number;
   immunity: number;
@@ -43,6 +44,7 @@ export interface OfflinePLDataPoint {
 export interface OfflineState {
   version: number;
   nextGameId: number;
+  activeGameId: number | null;
   games: Record<number, OfflineGame>;
   pulls: OfflineOrbPulled[];
   plDataPoints: OfflinePLDataPoint[];

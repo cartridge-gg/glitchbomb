@@ -3,18 +3,11 @@ import { ChipIcon, MoonrockIcon } from "@/components/icons";
 import { InfoCard } from "./info-card";
 
 const meta = {
-  title: "Elements/InfoCard",
+  title: "Elements/Info Card",
   component: InfoCard,
   parameters: {
     layout: "centered",
   },
-  decorators: [
-    (Story) => (
-      <div className="w-[380px] h-[220px] bg-green-950 p-4">
-        <Story />
-      </div>
-    ),
-  ],
   argTypes: {
     variant: {
       control: { type: "select" },

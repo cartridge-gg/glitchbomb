@@ -1,38 +1,12 @@
+use crate::constants::{MULTIPLIER_PRECISION, TEN_POW_18};
+
+const BASE_MULTIPLIER: u128 = 100;
+
 #[generate_trait]
-pub impl RewarderImpl of RewarderTrait {
-    /// Compute the reward for a given score, token supply, and target supply.
-    /// Uses a stepped lookup table that maps score ranges to base rewards,
-    /// then scales by REWARD_SCALE to produce raw token units (6-decimal token),
-    /// then scales linearly based on supply vs target (2x at zero supply, 1x at target, 0x at
-    /// 2*target).
-    fn amount(score: u16, supply: u256, target: u256) -> u64 {
-        if score == 0 {
-            return 0;
-        }
-
-        // No reward if supply meets or exceeds 2x target
-        if supply >= target * 2 {
-            return 0;
-        }
-
-        let base: u256 = Self::base_reward(score).into();
-        if base == 0 {
-            return 0;
-        }
-
-        // Scale table values to raw token units (table is *100, token has 6 decimals)
-        let scaled: u256 = base * crate::constants::REWARD_SCALE;
-
-        // Supply adjustment: (2 * target - supply) / target
-        // Yields 2 at supply=0, 1 at supply=target, 0 at supply=2*target
-        let reward: u256 = scaled * (2 * target - supply) / target;
-
-        reward.try_into().unwrap()
-    }
-
-    /// Stepped lookup table: score thresholds map to base reward values (table values * 100).
-    fn base_reward(score: u16) -> u16 {
-        if score >= 524 {
+pub impl Rewarder of RewarderTrait {
+    /// Calculate the base reward for a given score..
+    fn base(score: u16) -> u256 {
+        let base: u128 = if score >= 524 {
             1000
         } else if score >= 428 {
             720
@@ -76,111 +50,253 @@ pub impl RewarderImpl of RewarderTrait {
             1
         } else {
             0
+        };
+        (base * TEN_POW_18 / BASE_MULTIPLIER).into()
+    }
+
+    /// Calculate the supply multiplier for a given supply and target.
+    /// # Arguments
+    /// * `supply` - The current supply of the game.
+    /// * `target` - The target supply of the game.
+    /// # Returns
+    /// The supply multiplier on a 100-based scale.
+    #[inline]
+    fn supply_multiplier(supply: u256, target: u256) -> u128 {
+        if supply > target * 2 || target == 0 {
+            return 0;
         }
+        ((2 * target - supply) * MULTIPLIER_PRECISION.into() / target).try_into().unwrap()
+    }
+
+    /// Calculate the burn multiplier for a given burn amount and score.
+    /// # Arguments
+    /// * `burn` - The burn amount.
+    /// * `score` - The score.
+    /// # Returns
+    /// The burn multiplier on a 100-based scale.
+    #[inline]
+    fn burn_multiplier(burn: u256, score: u16) -> u128 {
+        let mint = Self::base(score);
+        if mint == 0 {
+            return 0;
+        }
+        (burn * MULTIPLIER_PRECISION.into() / mint).try_into().unwrap()
+    }
+
+    /// Calculate the multiplier for a given supply, target, burn, score, and slot count.
+    /// # Arguments
+    /// * `supply` - The current supply of the game.
+    /// * `target` - The target supply of the game.
+    /// * `burn` - The burn amount.
+    /// * `score` - The score.
+    /// # Returns
+    /// The multiplier on a 100-based scale.
+    #[inline]
+    fn multiplier(supply: u256, target: u256, burn: u256, score: u16) -> u128 {
+        let supply_multiplier: u128 = Self::supply_multiplier(supply, target);
+        let burn_multiplier: u128 = Self::burn_multiplier(burn, score);
+        let multiplier: u128 = supply_multiplier * burn_multiplier / MULTIPLIER_PRECISION;
+        multiplier
+    }
+
+    /// Calculate the reward amount for a given score and multiplier.
+    /// # Arguments
+    /// * `score` - The score.
+    /// * `multiplier` - The multiplier for the reward.
+    /// # Returns
+    /// The reward amount.
+    #[inline]
+    fn amount(score: u16, multiplier: u128) -> u256 {
+        let base = Self::base(score);
+        let amount = base * multiplier.into() / MULTIPLIER_PRECISION.into();
+        amount
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::RewarderImpl;
+    use super::*;
 
-    const TARGET: u256 = 1_000_000_000;
-
-    // All expected values = base_reward * REWARD_SCALE(10_000) * supply_factor
+    const BURN: u256 = 1 * TEN_POW_18.into();
+    const TARGET_SUPPLY: u256 = 1_000_000;
+    const AVG_SCORE: u16 = 148;
 
     #[test]
-    fn test_reward_at_max_score() {
-        // Score 524 at target supply => base 1000 * 10_000 = 10_000_000 (10 GLITCH)
-        let reward = RewarderImpl::amount(524, TARGET, TARGET);
-        assert(reward == 10_000_000, 'max score reward');
+    fn test_rewarder_at_target_at_average() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        let err = (BURN - reward) * MULTIPLIER_PRECISION.into() / BURN;
+        assert_le!(err, MULTIPLIER_PRECISION.into());
     }
 
     #[test]
-    fn test_reward_at_500() {
-        // Score 500 falls in [428, 524) => base 720 * 10_000 = 7_200_000
-        let reward = RewarderImpl::amount(500, TARGET, TARGET);
-        assert(reward == 7_200_000, 'score 500 reward');
+    fn test_rewarder_at_target_below_average() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(100, multiplier);
+        assert_lt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_at_400() {
-        // Score 400 falls in [356, 428) => base 530 * 10_000 = 5_300_000
-        let reward = RewarderImpl::amount(400, TARGET, TARGET);
-        assert(reward == 5_300_000, 'score 400 reward');
+    fn test_rewarder_at_target_above_average() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(200, multiplier);
+        assert_gt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_at_100() {
-        // Score 100 falls in [100, 106) => base 40 * 10_000 = 400_000
-        let reward = RewarderImpl::amount(100, TARGET, TARGET);
-        assert(reward == 400_000, 'score 100 reward');
+    fn test_rewarder_below_target_at_average() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY / 2, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        assert_gt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_zero_score() {
-        let reward = RewarderImpl::amount(0, TARGET, TARGET);
-        assert(reward == 0, 'zero score reward == 0');
+    fn test_rewarder_above_target_at_average() {
+        let multiplier = Rewarder::multiplier(
+            TARGET_SUPPLY * 3 / 2, TARGET_SUPPLY, BURN, AVG_SCORE,
+        );
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        assert_lt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_below_threshold() {
-        // Score 64 is below the first tier (65)
-        let reward = RewarderImpl::amount(64, TARGET, TARGET);
-        assert(reward == 0, 'below 65 => 0');
+    fn test_rewarder_at_target_at_lowest() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(0, multiplier);
+        assert_eq!(reward, 0);
     }
 
     #[test]
-    fn test_reward_zero_when_supply_exceeds_double_target() {
-        let reward = RewarderImpl::amount(524, TARGET * 2 + 1, TARGET);
-        assert(reward == 0, 'over 2x target => 0');
+    fn test_rewarder_at_target_at_highest() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(524, multiplier);
+        assert_gt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_higher_when_supply_below_target() {
-        let reward_at_target = RewarderImpl::amount(524, TARGET, TARGET);
-        let reward_below = RewarderImpl::amount(524, TARGET / 2, TARGET);
-        assert(reward_below > reward_at_target, 'below target => higher reward');
-        // base 1000 * 10_000, factor = 1.5 => 15_000_000
-        assert(reward_below == 15_000_000, 'half supply => 1.5x');
+    fn test_rewarder_at_lowest_at_average() {
+        let multiplier = Rewarder::multiplier(0, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        assert_gt!(reward, BURN);
     }
 
     #[test]
-    fn test_reward_lower_when_supply_above_target() {
-        let reward_at_target = RewarderImpl::amount(524, TARGET, TARGET);
-        let reward_above = RewarderImpl::amount(524, TARGET + TARGET / 2, TARGET);
-        assert(reward_above < reward_at_target, 'above target => lower reward');
-        // base 1000 * 10_000, factor = 0.5 => 5_000_000
-        assert(reward_above == 5_000_000, '1.5x supply => 0.5x');
+    fn test_rewarder_at_highest_at_average() {
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY * 2, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        assert_eq!(reward, 0);
+        let multiplier = Rewarder::multiplier(TARGET_SUPPLY * 3, TARGET_SUPPLY, BURN, AVG_SCORE);
+        let reward = Rewarder::amount(AVG_SCORE, multiplier);
+        assert_eq!(reward, 0);
     }
 
     #[test]
-    fn test_reward_at_exactly_double_target() {
-        let reward = RewarderImpl::amount(524, TARGET * 2, TARGET);
-        assert(reward == 0, 'at 2x target => 0');
+    fn test_base_zero_score() {
+        assert_eq!(Rewarder::base(0), 0);
     }
 
     #[test]
-    fn test_reward_at_zero_supply() {
-        // At zero supply, factor = 2 => 1000 * 10_000 * 2 = 20_000_000
-        let reward = RewarderImpl::amount(524, 0, TARGET);
-        assert(reward == 20_000_000, 'zero supply => 2x');
+    fn test_base_below_threshold() {
+        assert_eq!(Rewarder::base(64), 0);
     }
 
     #[test]
-    fn test_reward_score_10() {
-        // Score 10 is below the 65 threshold
-        let reward = RewarderImpl::amount(10, TARGET, TARGET);
-        assert(reward == 0, 'score 10 => 0');
+    fn test_base_at_min_threshold() {
+        // score=65, lookup=1 => 1 * TEN_POW_18 / 100
+        let expected: u256 = (TEN_POW_18 / 100).into();
+        assert_eq!(Rewarder::base(65), expected);
     }
 
     #[test]
-    fn test_base_reward_boundaries() {
-        // Check a few boundary values
-        assert(RewarderImpl::base_reward(65) == 1, 'base at 65');
-        assert(RewarderImpl::base_reward(77) == 1, 'base at 77');
-        assert(RewarderImpl::base_reward(78) == 13, 'base at 78');
-        assert(RewarderImpl::base_reward(148) == 100, 'base at 148');
-        assert(RewarderImpl::base_reward(523) == 720, 'base at 523');
-        assert(RewarderImpl::base_reward(524) == 1000, 'base at 524');
+    fn test_base_at_max_score() {
+        // score=524, lookup=1000 => 1000 * TEN_POW_18 / 100 = 10 * TEN_POW_18
+        let expected: u256 = (10 * TEN_POW_18).into();
+        assert_eq!(Rewarder::base(524), expected);
+    }
+
+    #[test]
+    fn test_base_tier_boundaries() {
+        let base_77: u256 = (TEN_POW_18 / 100).into();
+        let base_78: u256 = (13 * TEN_POW_18 / 100).into();
+        assert_eq!(Rewarder::base(77), base_77);
+        assert_eq!(Rewarder::base(78), base_78);
+        assert_gt!(Rewarder::base(78), Rewarder::base(77));
+    }
+
+    #[test]
+    fn test_supply_multiplier_at_target() {
+        let m = Rewarder::supply_multiplier(TARGET_SUPPLY, TARGET_SUPPLY);
+        assert_eq!(m, MULTIPLIER_PRECISION);
+    }
+
+    #[test]
+    fn test_supply_multiplier_at_zero_supply() {
+        let m = Rewarder::supply_multiplier(0, TARGET_SUPPLY);
+        assert_eq!(m, 2 * MULTIPLIER_PRECISION);
+    }
+
+    #[test]
+    fn test_supply_multiplier_at_double_target() {
+        let m = Rewarder::supply_multiplier(TARGET_SUPPLY * 2, TARGET_SUPPLY);
+        assert_eq!(m, 0);
+    }
+
+    #[test]
+    fn test_supply_multiplier_above_double_target() {
+        let m = Rewarder::supply_multiplier(TARGET_SUPPLY * 3, TARGET_SUPPLY);
+        assert_eq!(m, 0);
+    }
+
+    #[test]
+    fn test_supply_multiplier_zero_target() {
+        let m = Rewarder::supply_multiplier(100, 0);
+        assert_eq!(m, 0);
+    }
+
+    #[test]
+    fn test_supply_multiplier_half_target() {
+        let m = Rewarder::supply_multiplier(TARGET_SUPPLY / 2, TARGET_SUPPLY);
+        assert_eq!(m, 3 * MULTIPLIER_PRECISION / 2);
+    }
+
+    #[test]
+    fn test_burn_multiplier_equals_base() {
+        let base_val = Rewarder::base(AVG_SCORE);
+        let m = Rewarder::burn_multiplier(base_val, AVG_SCORE);
+        assert_eq!(m, MULTIPLIER_PRECISION);
+    }
+
+    #[test]
+    fn test_burn_multiplier_zero_score() {
+        let m = Rewarder::burn_multiplier(BURN, 0);
+        assert_eq!(m, 0);
+    }
+
+    #[test]
+    fn test_burn_multiplier_double_burn() {
+        let base_val = Rewarder::base(AVG_SCORE);
+        let m = Rewarder::burn_multiplier(2 * base_val, AVG_SCORE);
+        assert_eq!(m, 2 * MULTIPLIER_PRECISION);
+    }
+
+    // ==================== Unit tests: amount ====================
+
+    #[test]
+    fn test_amount_zero_score() {
+        let reward = Rewarder::amount(0, MULTIPLIER_PRECISION);
+        assert_eq!(reward, 0);
+    }
+
+    #[test]
+    fn test_amount_zero_multiplier() {
+        let reward = Rewarder::amount(524, 0);
+        assert_eq!(reward, 0);
+    }
+
+    #[test]
+    fn test_amount_at_precision() {
+        // When multiplier = MULTIPLIER_PRECISION, amount = base
+        let reward = Rewarder::amount(AVG_SCORE, MULTIPLIER_PRECISION);
+        assert_eq!(reward, Rewarder::base(AVG_SCORE));
     }
 }

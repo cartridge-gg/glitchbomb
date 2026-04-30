@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MilestoneChoice } from "./milestone-choice";
 
 const meta = {
-  title: "Elements/MilestoneChoice",
+  title: "Elements/Milestone Choice",
   component: MilestoneChoice,
   parameters: {
     layout: "centered",

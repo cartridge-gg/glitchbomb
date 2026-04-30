@@ -1,4 +1,4 @@
-world_address = "0x0406ad504e4aff4a66c0e35132b6d1659c066804e7bb5ff38523ea3417406ebd"
+world_address = "0x06e93be73d7980ad655b7e019148074edcb75e524b187a8b7997595ea16e2c93"
 rpc = "https://api.cartridge.gg/x/starknet/sepolia"
 
 [server]
@@ -8,6 +8,7 @@ http_cors_origins = ["*"]
 optimistic = true
 
 [indexing]
+debug = true
 world_block = 0
 controllers = true
 pending = true
@@ -15,8 +16,12 @@ pre_confirmed = true
 polling_interval = 250
 contracts = []
 
-[http]
-cors_origins = ["*"]
+[sql]
+historical = [
+  "GLITCHBOMB-TrophyProgression",
+  "GLITCHBOMB-QuestProgression",
+  "GLITCHBOMB-BundleIssued",
+]
 
 [erc]
 metadata_updates = true

@@ -1,0 +1,27 @@
+export const ShadowEffect = ({
+  filterId,
+  opacity = 0.24,
+}: {
+  filterId: string;
+  opacity?: number;
+}) => {
+  return (
+    <svg
+      width="0"
+      height="0"
+      style={{ position: "absolute" }}
+      aria-hidden="true"
+    >
+      <defs>
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow
+            dx="2"
+            dy="2"
+            stdDeviation="0"
+            floodColor={`rgba(0, 0, 0, ${opacity})`}
+          />
+        </filter>
+      </defs>
+    </svg>
+  );
+};

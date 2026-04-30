@@ -5,6 +5,7 @@ import {
 } from "@dojoengine/sdk";
 import * as torii from "@dojoengine/torii-wasm";
 import { useAccount } from "@starknet-react/core";
+import { useSetAtom } from "jotai";
 import {
   type MutableRefObject,
   type ReactNode,
@@ -14,25 +15,23 @@ import {
   useRef,
   useState,
 } from "react";
+import { toriiClientAtom } from "@/atoms";
 import { NAMESPACE } from "@/constants";
 import { useLoadingSignal } from "@/contexts/use-loading";
 import {
-  CONFIG,
   Config,
-  GAME,
   Game,
   type RawConfig,
   type RawGame,
   type RawStarterpack,
-  STARTERPACK,
   Starterpack,
 } from "@/models";
 import { selectGame, useOfflineStore } from "@/offline/store";
 import { EntitiesContext, type EntitiesContextType } from "./entities-context";
 
 const getEntityQuery = (namespace: string) => {
-  const config: `${string}-${string}` = `${namespace}-${CONFIG}`;
-  const starterpack: `${string}-${string}` = `${namespace}-${STARTERPACK}`;
+  const config: `${string}-${string}` = `${namespace}-${Config.getModelName()}`;
+  const starterpack: `${string}-${string}` = `${namespace}-${Starterpack.getModelName()}`;
   const clauses = new ClauseBuilder().keys(
     [config, starterpack],
     [undefined],
@@ -44,7 +43,7 @@ const getEntityQuery = (namespace: string) => {
 };
 
 const getGameQuery = (gameId: number) => {
-  const game: `${string}-${string}` = `${NAMESPACE}-${GAME}`;
+  const game: `${string}-${string}` = `${NAMESPACE}-${Game.getModelName()}`;
   const clauses = new ClauseBuilder().keys(
     [game],
     [`0x${gameId.toString(16).padStart(16, "0")}`],
@@ -59,6 +58,7 @@ function useEntitiesValue(): EntitiesContextType {
   const { address: accountAddress } = useAccount();
   const offlineState = useOfflineStore();
   const [client, setClient] = useState<torii.ToriiClient>();
+  const setToriiClient = useSetAtom(toriiClientAtom);
   const entitiesSubscriptionRef = useRef<torii.Subscription | null>(null);
   const gameSubscriptionRef = useRef<torii.Subscription | null>(null);
   const cancelSubscription = useCallback(
@@ -113,25 +113,26 @@ function useEntitiesValue(): EntitiesContextType {
         worldAddress: "0x0",
       });
       setClient(nextClient);
+      setToriiClient(nextClient);
     };
     getClient();
-  }, [client]);
+  }, [client, setToriiClient]);
 
   // Handler for entity updates
   const onEntityUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
       (data.data || [data] || []).forEach((entity) => {
-        if (entity.models[`${NAMESPACE}-${CONFIG}`]) {
+        if (entity.models[`${NAMESPACE}-${Config.getModelName()}`]) {
           const model = entity.models[
-            `${NAMESPACE}-${CONFIG}`
+            `${NAMESPACE}-${Config.getModelName()}`
           ] as unknown as RawConfig;
           const parsed = Config.parse(model);
           if (parsed) setConfig(parsed);
         }
-        if (entity.models[`${NAMESPACE}-${STARTERPACK}`]) {
+        if (entity.models[`${NAMESPACE}-${Starterpack.getModelName()}`]) {
           const model = entity.models[
-            `${NAMESPACE}-${STARTERPACK}`
+            `${NAMESPACE}-${Starterpack.getModelName()}`
           ] as unknown as RawStarterpack;
           const parsed = Starterpack.parse(model);
           if (parsed)
@@ -145,9 +146,9 @@ function useEntitiesValue(): EntitiesContextType {
               return [...prev, parsed];
             });
         }
-        if (entity.models[`${NAMESPACE}-${GAME}`]) {
+        if (entity.models[`${NAMESPACE}-${Game.getModelName()}`]) {
           const model = entity.models[
-            `${NAMESPACE}-${GAME}`
+            `${NAMESPACE}-${Game.getModelName()}`
           ] as unknown as RawGame;
           setOnchainGame(Game.parse(model));
         }

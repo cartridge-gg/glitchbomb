@@ -1,15 +1,9 @@
-import { AppHeader } from "@/components/containers";
-import { mobilePath } from "@/utils/mobile";
+import { Header } from "@/components/containers";
 
 export function Support() {
   return (
     <div className="absolute inset-0 flex flex-col">
-      <AppHeader
-        moonrocks={0}
-        hideBalance
-        showBack={false}
-        backPath={mobilePath("/")}
-      />
+      <Header />
 
       <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 pb-8 max-w-[600px] w-full mx-auto font-secondary text-sm tracking-wide leading-relaxed text-green-700 [&_*]:font-secondary">
         {/* How to Play */}

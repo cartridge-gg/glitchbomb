@@ -112,7 +112,7 @@ const samplePulls: OrbPulled[] = [
 ] as OrbPulled[];
 
 const meta = {
-  title: "Containers/GameOver",
+  title: "Containers/Game Over",
   component: GameOver,
   parameters: {
     layout: "fullscreen",
@@ -148,6 +148,9 @@ const meta = {
     plData: samplePLData,
     pulls: samplePulls,
     cashedOut: false,
+    health: 3,
+    points: 42,
+    milestone: 100,
   },
 } satisfies Meta<typeof GameOver>;
 

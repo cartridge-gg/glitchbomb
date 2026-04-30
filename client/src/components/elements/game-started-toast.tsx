@@ -1,5 +1,6 @@
 import { EyeIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { usePreserveSearchNavigate } from "@/lib/router";
 
 interface GameStartedToastProps {
   gameId: number;
@@ -32,6 +33,7 @@ export function GameStartedToast({
   duration = 3000,
 }: GameStartedToastProps) {
   const stakeColor = getStakeColor(stake);
+  const navigate = usePreserveSearchNavigate();
 
   return (
     <>
@@ -60,7 +62,7 @@ export function GameStartedToast({
           gradient="green"
           className="shrink-0 h-9 w-9 p-0"
           onClick={() => {
-            window.location.href = `/play?game=${gameId}&view=true`;
+            navigate(`/game/${gameId}`);
           }}
           aria-label="Watch game"
         >

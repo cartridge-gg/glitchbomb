@@ -154,7 +154,7 @@ export const GlitchText = ({
         ...style,
         textShadow: `${style?.textShadow ? `${style.textShadow}, ` : ""}-3px 0 rgba(255, 0, 50, 0.8), 3px 0 rgba(0, 100, 255, 0.8)`,
       }
-    : style;
+    : (style ?? {});
 
   return (
     <span className={className} style={burstStyle}>

@@ -12,6 +12,7 @@ export const size = {
   sm: "h-5 w-5",
   md: "h-6 w-6",
   lg: "h-8 w-8",
+  "lg*": "h-9 w-9",
   "lg+": "h-10 w-10",
   xl: "h-12 w-12",
   "2xl": "h-14 w-14",
@@ -27,47 +28,21 @@ export const iconVariants = cva(base, {
   },
 });
 
-export * from "./arrow-down";
-export * from "./arrow-left";
-export * from "./arrow-right";
-export * from "./bag";
-export * from "./bolt";
-export * from "./bomb";
-export * from "./bomb-1x";
-export * from "./bomb-2x";
-export * from "./bomb-3x";
-export * from "./bomb-orb";
-export * from "./bracket-arrow";
-export * from "./chip";
-export * from "./controller";
-export * from "./credits";
-export * from "./cross";
-export * from "./dot";
-export * from "./eye";
-export * from "./fire";
-export * from "./gear";
-export * from "./glitch-bomb";
-export * from "./glitch-token-large";
-export * from "./heart";
-export * from "./heart-outline";
-export * from "./home";
-export * from "./list";
-export * from "./moonrock";
-export * from "./moonrock-large";
-export * from "./nums-logo";
-export * from "./orb";
-export * from "./orb-bomb";
-export * from "./orb-chip";
-export * from "./orb-health";
-export * from "./orb-moonrock";
-export * from "./orb-multiplier";
-export * from "./orb-point";
-export * from "./refresh";
-export * from "./sparkle";
-export * from "./sparkles";
-export * from "./speaker";
-export * from "./sticky-bomb";
-export * from "./tick";
-export * from "./token";
-export * from "./trash";
-export * from "./warning";
+export * from "./bombs";
+export * from "./effects";
+export {
+  FistIcon,
+  GlitchBombIcon,
+  GlitchTokenLargeIcon,
+  NumsLogoIcon,
+  OrbBombIcon,
+  OrbChipIcon,
+  OrbHealthIcon,
+  OrbIcon,
+  OrbMoonrockIcon,
+  OrbMultiplierIcon,
+  OrbPointIcon,
+  QuoteIcon,
+} from "./exotics";
+export * from "./regulars";
+export * from "./states";

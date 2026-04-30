@@ -1,0 +1,99 @@
+import type { EventProps } from "@/components/elements";
+import { MULTIPLIER_PRECISION } from "@/constants";
+
+export interface RawStarted {
+  player_id: {
+    type: "primitive";
+    type_name: "felt252";
+    value: string;
+    key: boolean;
+  };
+  game_id: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+  multiplier: {
+    type: "primitive";
+    type_name: "u128";
+    value: string;
+    key: boolean;
+  };
+  time: {
+    type: "primitive";
+    type_name: "u64";
+    value: string;
+    key: boolean;
+  };
+}
+
+const MODEL_NAME = "Started";
+
+export class Started {
+  constructor(
+    public player_id: string,
+    public game_id: number,
+    public multiplier: number,
+    public time: number,
+  ) {
+    this.player_id = player_id;
+    this.game_id = game_id;
+    this.multiplier = multiplier;
+    this.time = time;
+  }
+
+  static getModelName(): string {
+    return MODEL_NAME;
+  }
+
+  static from(data: RawStarted): Started {
+    return Started.parse(data);
+  }
+
+  static parse(data: RawStarted) {
+    const props = {
+      player_id: data.player_id.value,
+      game_id: Number(data.game_id.value),
+      multiplier: Number(data.multiplier.value) / Number(MULTIPLIER_PRECISION),
+      time: Number(data.time.value),
+    };
+    return new Started(
+      props.player_id,
+      props.game_id,
+      props.multiplier,
+      props.time,
+    );
+  }
+
+  static dedupe(starteds: Started[]): Started[] {
+    return starteds.filter(
+      (started, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.player_id === started.player_id && t.game_id === started.game_id,
+        ),
+    );
+  }
+
+  static getUuid(started: Started): string {
+    return `${started.player_id}-${started.game_id}`;
+  }
+
+  hasExpired(): boolean {
+    // Event expires in 30 seconds
+    return this.time + 30 < Math.floor(Date.now() / 1000);
+  }
+
+  getEvent(): EventProps {
+    return {
+      uuid: Started.getUuid(this),
+      username: this.player_id,
+      multiplier: this.multiplier,
+      earning: undefined,
+      timestamp: this.time,
+      id: String(this.game_id),
+    };
+  }
+}

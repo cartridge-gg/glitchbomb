@@ -23,7 +23,7 @@ export function createGame(
   return {
     id: gameId,
     seed: "0",
-    over: false,
+    over: 0,
     level: DEFAULT_LEVEL,
     health: MAX_HEALTH,
     immunity: 0,
@@ -112,7 +112,7 @@ export function cashOut(game: OfflineGame): {
   // Use accumulated moonrocks as score (clamped to MAX_SCORE)
   const score = Math.min(next.moonrocks, MAX_SCORE);
   next.points = 0;
-  next.over = true;
+  next.over = Math.floor(Date.now() / 1000);
   // Offline mode: assume supply = target (baseline rewards)
   const target = 1_000_000_000n;
   const reward = computeReward(score, target, target) * next.stake;
@@ -122,7 +122,7 @@ export function cashOut(game: OfflineGame): {
 export function enterShop(
   game: OfflineGame,
   seed: bigint,
-): { game: OfflineGame; shop: OfflineShopState } {
+): { game: OfflineGame; shop: OfflineShopState; cost: number } {
   assertNotOver(game);
   assertNotInShop(game);
   assertCompleted(game);
@@ -256,7 +256,7 @@ export function pullOrbs(
   }
 
   if (next.health <= 0) {
-    next.over = true;
+    next.over = Math.floor(Date.now() / 1000);
   }
 
   return { game: next, orbs: pulled, earnings: totalEarnings };

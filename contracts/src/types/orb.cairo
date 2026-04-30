@@ -88,6 +88,50 @@ pub impl OrbImpl of OrbTrait {
             _ => 0,
         }
     }
+
+    #[inline]
+    fn one_if_special(self: @Orb) -> u8 {
+        match self {
+            Orb::Moonrock15 => 1,
+            Orb::Moonrock40 => 1,
+            Orb::Chips15 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_multiplier(self: @Orb) -> u8 {
+        match self {
+            Orb::Multiplier50 => 1,
+            Orb::Multiplier100 => 1,
+            Orb::Multiplier150 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_health(self: @Orb) -> u8 {
+        match self {
+            Orb::Health1 => 1,
+            Orb::Health2 => 1,
+            Orb::Health3 => 1,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn one_if_point(self: @Orb) -> u8 {
+        match self {
+            Orb::Point5 => 1,
+            Orb::Point6 => 1,
+            Orb::Point7 => 1,
+            Orb::Point8 => 1,
+            Orb::Point9 => 1,
+            Orb::PointOrb1 => 1,
+            Orb::PointBomb4 => 1,
+            _ => 0,
+        }
+    }
 }
 
 pub impl IntoOrbU8 of Into<Orb, u8> {
@@ -182,6 +226,104 @@ pub impl TryIntoU256Orb of TryInto<u256, Orb> {
         match TryInto::<u256, u8>::try_into(self) {
             Option::Some(value) => Option::Some(value.into()),
             Option::None => Option::None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Orb, OrbTrait};
+
+    // The `one_if_*` helpers classify each orb into a single quest-tracking
+    // bucket. They are consumed by `playable.cairo::pull` to drive the
+    // `*Puller` quest tasks (PowerUp, BombSquad, FirstAid, PointHunter,
+    // Connoisseur, Mileage, Roadrunner). Any change here must be mirrored
+    // in those quest definitions.
+
+    fn all_orbs() -> Array<Orb> {
+        array![
+            Orb::Bomb1, Orb::Bomb2, Orb::Bomb3, Orb::StickyBomb, Orb::Health1, Orb::Health2,
+            Orb::Health3, Orb::Multiplier50, Orb::Multiplier100, Orb::Multiplier150, Orb::Point5,
+            Orb::Point6, Orb::Point7, Orb::Point8, Orb::Point9, Orb::PointOrb1, Orb::PointBomb4,
+            Orb::Moonrock15, Orb::Moonrock40, Orb::Chips15, Orb::CurseScoreDecrease,
+        ]
+    }
+
+    #[test]
+    fn test_one_if_bomb_classifies_only_bombs() {
+        // Bomb1/2/3 + StickyBomb are bombs; PointBomb4 is NOT a bomb (it's a
+        // point orb whose value depends on bomb history).
+        assert_eq!(Orb::Bomb1.one_if_bomb(), 1, "Bomb1 must be a bomb");
+        assert_eq!(Orb::Bomb2.one_if_bomb(), 1, "Bomb2 must be a bomb");
+        assert_eq!(Orb::Bomb3.one_if_bomb(), 1, "Bomb3 must be a bomb");
+        assert_eq!(Orb::StickyBomb.one_if_bomb(), 1, "StickyBomb must be a bomb");
+        assert_eq!(Orb::PointBomb4.one_if_bomb(), 0, "PointBomb4 is NOT a bomb");
+        assert_eq!(Orb::Point5.one_if_bomb(), 0, "Point5 is not a bomb");
+        assert_eq!(Orb::Health1.one_if_bomb(), 0, "Health1 is not a bomb");
+        assert_eq!(Orb::Multiplier100.one_if_bomb(), 0, "Multiplier100 is not a bomb");
+    }
+
+    #[test]
+    fn test_one_if_multiplier_classifies_only_multipliers() {
+        assert_eq!(Orb::Multiplier50.one_if_multiplier(), 1, "Multiplier50 expected");
+        assert_eq!(Orb::Multiplier100.one_if_multiplier(), 1, "Multiplier100 expected");
+        assert_eq!(Orb::Multiplier150.one_if_multiplier(), 1, "Multiplier150 expected");
+        assert_eq!(Orb::Bomb1.one_if_multiplier(), 0, "Bomb1 is not a multiplier");
+        assert_eq!(Orb::Point5.one_if_multiplier(), 0, "Point5 is not a multiplier");
+        assert_eq!(Orb::Health1.one_if_multiplier(), 0, "Health1 is not a multiplier");
+    }
+
+    #[test]
+    fn test_one_if_health_classifies_only_health() {
+        assert_eq!(Orb::Health1.one_if_health(), 1, "Health1 expected");
+        assert_eq!(Orb::Health2.one_if_health(), 1, "Health2 expected");
+        assert_eq!(Orb::Health3.one_if_health(), 1, "Health3 expected");
+        assert_eq!(Orb::Bomb1.one_if_health(), 0, "Bomb1 is not health");
+        assert_eq!(Orb::Multiplier100.one_if_health(), 0, "Multiplier100 is not health");
+    }
+
+    #[test]
+    fn test_one_if_point_classifies_all_point_orbs() {
+        // PointBomb4 and PointOrb1 are dynamic point orbs but still count.
+        assert_eq!(Orb::Point5.one_if_point(), 1, "Point5 expected");
+        assert_eq!(Orb::Point6.one_if_point(), 1, "Point6 expected");
+        assert_eq!(Orb::Point7.one_if_point(), 1, "Point7 expected");
+        assert_eq!(Orb::Point8.one_if_point(), 1, "Point8 expected");
+        assert_eq!(Orb::Point9.one_if_point(), 1, "Point9 expected");
+        assert_eq!(Orb::PointOrb1.one_if_point(), 1, "PointOrb1 expected");
+        assert_eq!(Orb::PointBomb4.one_if_point(), 1, "PointBomb4 expected");
+        assert_eq!(Orb::Bomb1.one_if_point(), 0, "Bomb1 is not a point orb");
+        assert_eq!(Orb::Health1.one_if_point(), 0, "Health1 is not a point orb");
+    }
+
+    #[test]
+    fn test_one_if_special_classifies_only_resource_orbs() {
+        assert_eq!(Orb::Moonrock15.one_if_special(), 1, "Moonrock15 expected");
+        assert_eq!(Orb::Moonrock40.one_if_special(), 1, "Moonrock40 expected");
+        assert_eq!(Orb::Chips15.one_if_special(), 1, "Chips15 expected");
+        assert_eq!(Orb::Bomb1.one_if_special(), 0, "Bomb1 is not special");
+        assert_eq!(Orb::Point5.one_if_special(), 0, "Point5 is not special");
+        assert_eq!(
+            Orb::CurseScoreDecrease.one_if_special(), 0, "CurseScoreDecrease is not special",
+        );
+    }
+
+    #[test]
+    fn test_each_orb_has_at_most_one_classification() {
+        // Quest progressions assume each orb maps to a single bucket so we
+        // do not over-count (e.g. PowerUp must not progress from a Bomb1).
+        // OrbPuller is the only counter that fires for every pulled orb.
+        let orbs = all_orbs();
+        let mut i: u32 = 0;
+        while i < orbs.len() {
+            let orb: Orb = *orbs.at(i);
+            let total: u8 = orb.one_if_bomb()
+                + orb.one_if_multiplier()
+                + orb.one_if_health()
+                + orb.one_if_point()
+                + orb.one_if_special();
+            assert!(total <= 1, "Orb at index {} matches multiple buckets (total={})", i, total);
+            i += 1;
         }
     }
 }
