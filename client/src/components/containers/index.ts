@@ -1,5 +1,6 @@
 export * from "./achievements";
 export * from "./banners";
+export * from "./bomb-slots";
 export * from "./cash-out-confirmation";
 export * from "./confirmation-dialog";
 export * from "./confirmation-prefs";

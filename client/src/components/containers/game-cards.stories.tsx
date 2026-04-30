@@ -5,45 +5,36 @@ import { GameCards, type GameCardsGame } from "./game-cards";
 
 const NOW = Math.floor(Date.now() / 1000);
 const HOUR = 3600;
-
-const formatExpiry = (createdAt: number) => {
-  if (!createdAt) return "--";
-  const remaining = createdAt + 86400 - NOW;
-  if (remaining <= 0) return "EXPIRED";
-  const hours = Math.floor(remaining / HOUR);
-  const minutes = Math.floor((remaining % HOUR) / 60);
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-};
-
-const formatMaxPayout = (stake: number) => `$${(stake * 4.2).toFixed(2)}`;
+const DAY = 24 * HOUR;
 
 const sampleActiveGames: GameCardsGame[] = [
   {
-    id: 1042,
-    moonrocks: 128,
-    points: 45,
-    created_at: NOW - 2 * HOUR,
-    multiplier: 2,
-    stake: 3,
+    gameId: 1042,
+    moonrocks: 173,
+    expiration: NOW - 2 * HOUR + DAY,
+    payout: "$12.60",
   },
   {
-    id: 1039,
-    moonrocks: 76,
-    points: 12,
-    created_at: NOW - 8 * HOUR,
-    multiplier: 1,
-    stake: 1,
+    gameId: 1039,
+    moonrocks: 88,
+    expiration: NOW - 8 * HOUR + DAY,
+    payout: "$4.20",
   },
   {
-    id: 1036,
-    moonrocks: 240,
-    points: 88,
-    created_at: NOW - 20 * HOUR,
-    multiplier: 3,
-    stake: 5,
+    gameId: 1036,
+    moonrocks: 328,
+    expiration: NOW - 20 * HOUR + DAY,
+    payout: "$21.00",
   },
 ];
+
+const newGameCard: GameCardsGame = {
+  gameId: 0,
+  expiration: NOW + DAY,
+  payout: "$4.20",
+};
+
+const sampleGames: GameCardsGame[] = [...sampleActiveGames, newGameCard];
 
 const meta = {
   title: "Containers/Game Cards",
@@ -64,8 +55,6 @@ const meta = {
     ),
   ],
   args: {
-    formatExpiry,
-    formatMaxPayout,
     onPlay: fn(),
     onNewGame: fn(),
     onPractice: fn(),
@@ -82,8 +71,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    activeGames: sampleActiveGames,
-    gameId: sampleActiveGames[0].id,
+    games: sampleGames,
+    gameId: sampleActiveGames[0].gameId,
     setGameId: fn(),
     loadingGameId: null,
   },
@@ -91,7 +80,7 @@ export const Default: Story = {
 
 export const NewGameSelected: Story = {
   args: {
-    activeGames: sampleActiveGames,
+    games: sampleGames,
     gameId: 0,
     setGameId: fn(),
     loadingGameId: null,
@@ -100,16 +89,16 @@ export const NewGameSelected: Story = {
 
 export const Loading: Story = {
   args: {
-    activeGames: sampleActiveGames,
-    gameId: sampleActiveGames[0].id,
+    games: sampleGames,
+    gameId: sampleActiveGames[0].gameId,
     setGameId: fn(),
-    loadingGameId: sampleActiveGames[0].id,
+    loadingGameId: sampleActiveGames[0].gameId,
   },
 };
 
 export const Empty: Story = {
   args: {
-    activeGames: [],
+    games: [newGameCard],
     gameId: undefined,
     setGameId: fn(),
     loadingGameId: null,
@@ -118,8 +107,8 @@ export const Empty: Story = {
 
 export const SingleGame: Story = {
   args: {
-    activeGames: [sampleActiveGames[0]],
-    gameId: sampleActiveGames[0].id,
+    games: [sampleActiveGames[0], newGameCard],
+    gameId: sampleActiveGames[0].gameId,
     setGameId: fn(),
     loadingGameId: null,
   },

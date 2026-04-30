@@ -18,46 +18,36 @@ const NOW = Math.floor(Date.now() / 1000);
 const HOUR = 3600;
 const DAY = 24 * HOUR;
 
-const formatExpiry = (expiration: number) => {
-  if (!expiration) return "--";
-  const remaining = expiration - NOW;
-  if (remaining <= 0) return "EXPIRED";
-  const hours = Math.floor(remaining / HOUR);
-  const minutes = Math.floor((remaining % HOUR) / 60);
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-};
-
-const formatMaxPayout = (stake: number) => `$${(stake * 4.2).toFixed(2)}`;
-
 type ActivityItem = GameActivitiesProps["activities"][number];
 
 const sampleActiveGames: GameCardsGame[] = [
   {
-    id: 1042,
-    moonrocks: 128,
-    points: 45,
+    gameId: 1042,
+    moonrocks: 173,
     expiration: NOW - 2 * HOUR + DAY,
-    multiplier: 2,
-    stake: 3,
+    payout: "$12.60",
   },
   {
-    id: 1039,
-    moonrocks: 76,
-    points: 12,
+    gameId: 1039,
+    moonrocks: 88,
     expiration: NOW - 8 * HOUR + DAY,
-    multiplier: 1,
-    stake: 1,
+    payout: "$4.20",
   },
   {
-    id: 1036,
-    moonrocks: 240,
-    points: 88,
+    gameId: 1036,
+    moonrocks: 328,
     expiration: NOW - 20 * HOUR + DAY,
-    multiplier: 3,
-    stake: 5,
+    payout: "$21.00",
   },
 ];
+
+const newGameCard: GameCardsGame = {
+  gameId: 0,
+  expiration: NOW + DAY,
+  payout: "$4.20",
+};
+
+const sampleGames: GameCardsGame[] = [...sampleActiveGames, newGameCard];
 
 const samplePlayerActivities: ActivityItem[] = [
   {
@@ -170,13 +160,11 @@ const sampleBanners: BannerProps[] = [
 ];
 
 const buildGamesProps = (
-  activeGames: GameCardsGame[],
+  games: GameCardsGame[],
   loadingGameId: number | null,
 ): Omit<GameCardsProps, "gameId" | "setGameId"> => ({
-  activeGames,
+  games,
   loadingGameId,
-  formatExpiry,
-  formatMaxPayout,
   onPlay: fn(),
   onNewGame: fn(),
   onPractice: fn(),
@@ -208,7 +196,7 @@ const meta = {
     onShowDetailsChange: fn(),
   },
   render: (args: HomeSceneProps) => {
-    const initialId = args.gamesProps.activeGames[0]?.id;
+    const initialId = args.gamesProps.games.find((g) => g.gameId)?.gameId;
     const [gameId, setGameId] = useState<number | undefined>(initialId);
     return (
       <HomeScene
@@ -225,8 +213,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     gamesProps: {
-      ...buildGamesProps(sampleActiveGames, null),
-      gameId: sampleActiveGames[0].id,
+      ...buildGamesProps(sampleGames, null),
+      gameId: sampleActiveGames[0].gameId,
       setGameId: fn(),
     },
     allActivities: { activities: sampleAllActivities },
@@ -239,7 +227,7 @@ export const Default: Story = {
 export const Empty: Story = {
   args: {
     gamesProps: {
-      ...buildGamesProps([], null),
+      ...buildGamesProps([newGameCard], null),
       gameId: undefined,
       setGameId: fn(),
     },

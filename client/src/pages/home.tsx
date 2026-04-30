@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type {
   GameActivitiesProps,
+  GameCardsGame,
   GameCardsProps,
 } from "@/components/containers";
 import { HomeScene } from "@/components/scenes";
@@ -90,19 +91,6 @@ export const Home = () => {
   useEffect(() => {
     startMusic("normal");
   }, [startMusic]);
-
-  const formatExpiry = useCallback(
-    (expiration: number) => {
-      if (!expiration) return "--";
-      const remaining = expiration - now;
-      if (remaining <= 0) return "EXPIRED";
-      const hours = Math.floor(remaining / 3600);
-      const minutes = Math.floor((remaining % 3600) / 60);
-      if (hours > 0) return `${hours}h ${minutes}m`;
-      return `${minutes}m`;
-    },
-    [now],
-  );
 
   const tokenContract = useMemo(() => {
     if (!tokenAddress) return undefined;
@@ -257,25 +245,36 @@ export const Home = () => {
     [isLoggedIn, onConnectClick],
   );
 
+  const games = useMemo<GameCardsGame[]>(() => {
+    const active: GameCardsGame[] = activeGames.map((g) => ({
+      gameId: g.id,
+      moonrocks: g.moonrocks + g.points,
+      expiration: g.expiration,
+      payout: formatMaxPayout(g.stake),
+    }));
+    const newGame: GameCardsGame = {
+      gameId: 0,
+      expiration: now + 24 * 3600,
+      payout: formatMaxPayout(1),
+    };
+    return [...active, newGame];
+  }, [activeGames, formatMaxPayout, now]);
+
   const gamesProps: GameCardsProps = useMemo(
     () => ({
-      activeGames,
+      games,
       gameId,
       setGameId,
       loadingGameId,
-      formatExpiry,
-      formatMaxPayout,
       onPlay: handlePlay,
       onNewGame: handleNewGame,
       onPractice: handlePractice,
       requireLogin,
     }),
     [
-      activeGames,
+      games,
       gameId,
       loadingGameId,
-      formatExpiry,
-      formatMaxPayout,
       handlePlay,
       handleNewGame,
       handlePractice,

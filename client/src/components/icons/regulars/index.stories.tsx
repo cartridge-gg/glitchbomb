@@ -65,6 +65,7 @@ const regularIcons = [
   { name: "QuestionmarkIcon", component: Icons.QuestionmarkIcon },
   { name: "ReferralIcon", component: Icons.ReferralIcon },
   { name: "RefreshIcon", component: Icons.RefreshIcon },
+  { name: "SlotIcon", component: Icons.SlotIcon },
   { name: "SparkleIcon", component: Icons.SparkleIcon },
   { name: "SparklesIcon", component: Icons.SparklesIcon },
   { name: "SpeakerIcon", component: Icons.SpeakerIcon },

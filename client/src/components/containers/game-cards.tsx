@@ -1,29 +1,26 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameCard } from "@/components/elements/game-card";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface GameCardsGame {
-  id: number;
-  moonrocks: number;
-  points: number;
-  /** Unix timestamp at which the game expires; 0 = not yet started. */
+  /** Falsy (0/undefined) marks the placeholder "new game" card. */
+  gameId?: number;
+  moonrocks?: number;
+  /** Unix seconds; for the new card, set to now + 24h to display "24h". */
   expiration: number;
-  multiplier: number;
-  stake: number;
+  payout: string;
 }
 
 export interface GameCardsProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onPlay">,
     VariantProps<typeof gameCardsVariants> {
-  activeGames: GameCardsGame[];
+  games: GameCardsGame[];
   gameId?: number;
   setGameId: (id: number) => void;
   loadingGameId: number | null;
-  formatExpiry: (expiration: number) => string;
-  formatMaxPayout: (stake: number) => string;
   onPlay: (gameId: number) => void;
   onNewGame: () => void;
   onPractice: () => void;
@@ -45,40 +42,55 @@ const NEW_GAME_ID = 0;
 const SWIPE_DISTANCE_THRESHOLD = 0.2;
 const SWIPE_VELOCITY_THRESHOLD = 0.5;
 const DRAG_DETECTION_PX = 5;
+const COUNTDOWN_TICK_MS = 60_000;
+
+const formatExpiry = (expiration: number, now: number): string => {
+  if (!expiration) return "24h";
+  const remaining = expiration - now;
+  if (remaining <= 0) return "EXPIRED";
+  const hours = Math.floor(remaining / 3600);
+  const minutes = Math.floor((remaining % 3600) / 60);
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
+};
 
 export const GameCards = ({
-  activeGames,
+  games,
   gameId,
   setGameId,
   loadingGameId,
-  formatExpiry,
-  formatMaxPayout,
   onPlay,
   onNewGame,
-  onPractice,
+  onPractice: _onPractice,
   requireLogin,
   variant,
   className,
   ...props
 }: GameCardsProps) => {
-  const totalSlides = activeGames.length + 1;
-  const newCardIndex = activeGames.length;
+  const totalSlides = games.length;
+  const activeGameCount = useMemo(
+    () => games.filter((g) => !!g.gameId).length,
+    [games],
+  );
+  const newCardIndex = useMemo(() => {
+    const idx = games.findIndex((g) => !g.gameId);
+    return idx >= 0 ? idx : Math.max(0, games.length - 1);
+  }, [games]);
 
   const activeGameIndex = useMemo(() => {
     if (!gameId) return newCardIndex;
-    const idx = activeGames.findIndex((g) => g.id === gameId);
+    const idx = games.findIndex((g) => g.gameId === gameId);
     return idx >= 0 ? idx : newCardIndex;
-  }, [gameId, activeGames, newCardIndex]);
+  }, [gameId, games, newCardIndex]);
 
   const setIndex = useCallback(
     (idx: number) => {
-      if (idx >= activeGames.length) {
-        setGameId(NEW_GAME_ID);
-      } else if (idx >= 0) {
-        setGameId(activeGames[idx].id);
-      }
+      const target = games[idx];
+      if (!target) return;
+      setGameId(target.gameId ?? NEW_GAME_ID);
     },
-    [activeGames, setGameId],
+    [games, setGameId],
   );
 
   const handlePrev = useCallback(() => {
@@ -96,6 +108,15 @@ export const GameCards = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef<{ x: number; time: number } | null>(null);
   const didDrag = useRef(false);
+
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const interval = setInterval(
+      () => setNow(Math.floor(Date.now() / 1000)),
+      COUNTDOWN_TICK_MS,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -155,7 +176,7 @@ export const GameCards = ({
             MY GAMES
           </h2>
           <div className="h-6 flex items-center px-2 rounded-full text-primary-100 bg-primary-800">
-            <span className="font-secondary text-xl">{activeGames.length}</span>
+            <span className="font-secondary text-xl">{activeGameCount}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -198,54 +219,50 @@ export const GameCards = ({
             transform: `translateX(calc(-${activeGameIndex * 100}% + ${dragOffset}px))`,
           }}
         >
-          {activeGames.map((game, idx) => (
-            <div key={game.id} className="w-full shrink-0">
-              <GameCard
-                variant="active"
-                seed={42 + idx}
-                loading={loadingGameId === game.id}
-                fields={[
-                  {
-                    label: "Moonrocks",
-                    value: String(game.moonrocks + game.points || "---"),
-                  },
-                  {
-                    label: "Expires In",
-                    value: formatExpiry(game.expiration) || "24H",
-                  },
-                  {
-                    label: "Game ID",
-                    value: game.id ? `#${game.id}` : "---",
-                  },
-                  {
-                    label: "Max Payout",
-                    value: formatMaxPayout(game.stake),
-                  },
-                ]}
-                onClick={() => {
-                  if (didDrag.current) return;
-                  requireLogin(() => onPlay(game.id));
-                }}
-              />
-            </div>
-          ))}
-
-          <div key="new-game" className="w-full shrink-0">
-            <GameCard
-              variant="new"
-              seed={99}
-              fields={[
-                { label: "Moonrocks", value: "---" },
-                { label: "Expires In", value: "---" },
-                { label: "Multiplier", value: "---" },
-                { label: "Max Payout", value: "---" },
-              ]}
-              onClick={() => {
-                if (didDrag.current) return;
-                requireLogin(() => onNewGame());
-              }}
-            />
-          </div>
+          {games.map((game, idx) => {
+            const isNew = !game.gameId;
+            return (
+              <div
+                key={game.gameId ?? `new-${idx}`}
+                className="w-full shrink-0"
+              >
+                <GameCard
+                  variant={isNew ? "new" : "active"}
+                  seed={isNew ? 99 : 42 + idx}
+                  loading={!isNew && loadingGameId === game.gameId}
+                  fields={[
+                    {
+                      label: "Moonrocks",
+                      value:
+                        game.moonrocks !== undefined && game.moonrocks > 0
+                          ? String(game.moonrocks)
+                          : "---",
+                    },
+                    {
+                      label: "Expires In",
+                      value: formatExpiry(game.expiration, now),
+                    },
+                    {
+                      label: "Game ID",
+                      value: game.gameId ? `#${game.gameId}` : "---",
+                    },
+                    {
+                      label: "Max Payout",
+                      value: game.payout,
+                    },
+                  ]}
+                  onClick={() => {
+                    if (didDrag.current) return;
+                    if (isNew) {
+                      requireLogin(() => onNewGame());
+                    } else if (game.gameId) {
+                      requireLogin(() => onPlay(game.gameId as number));
+                    }
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

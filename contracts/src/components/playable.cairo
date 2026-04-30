@@ -502,7 +502,7 @@ pub mod PlayableComponent {
                     leaderboard_id: LEADERBOARD_ID,
                     game_id: game.id,
                     player_id: player.into(),
-                    score: game.level.into(),
+                    score: game.moonrocks.into(),
                     time: time,
                     to_store: false,
                 );

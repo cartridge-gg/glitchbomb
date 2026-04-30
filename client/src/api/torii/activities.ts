@@ -10,30 +10,20 @@ export interface ActivityRow {
   timestamp: number;
 }
 
-function parseHexDigit(char: string): number {
-  if (char >= "0" && char <= "9") return Number.parseInt(char, 16);
-  if (char >= "a" && char <= "f") return char.charCodeAt(0) - 87;
-  return 0;
-}
-
-function parseHexScore(scoreHex: string): number {
-  const s = scoreHex.toLowerCase();
-  return parseHexDigit(s[s.length - 2]) * 16 + parseHexDigit(s[s.length - 1]);
-}
-
 async function fetch(limit: number, offset: number): Promise<ActivityRow[]> {
   const client = initGrpcClient();
   const query = `SELECT
     c.username,
-    g.slots,
-    g.reward,
+    g.moonrocks,
+    r.reward,
     s.player,
     s.game_id,
     s.score,
     s.timestamp
 FROM "${NAMESPACE}-LeaderboardScore" AS s
-JOIN controllers AS c ON s.player = c.address
-JOIN "${NAMESPACE}-Game" AS g ON LTRIM(REPLACE(s.game_id, '0x', ''), '0') = LTRIM(REPLACE(g.id, '0x', ''), '0')
+LEFT JOIN controllers AS c ON s.player = c.address
+LEFT JOIN "${NAMESPACE}-Game" AS g ON LTRIM(REPLACE(s.game_id, '0x', ''), '0') = LTRIM(REPLACE(g.id, '0x', ''), '0')
+LEFT JOIN "${NAMESPACE}-Claimed" AS r ON r.game_id = g.id
 ORDER BY timestamp DESC
 LIMIT ${limit}
 OFFSET ${offset};`;
@@ -42,7 +32,7 @@ OFFSET ${offset};`;
 
   return rows.map((row) => {
     const gameId = Number(row.game_id) || 0;
-    const score = parseHexScore(String(row.score || "0"));
+    const score = Number(parseInt(String(row.moonrocks), 10));
     const reward = Number(BigInt(String(row.reward || "0x0")) / 10n ** 18n);
     return {
       username: String(row.username || ""),

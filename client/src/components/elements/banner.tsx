@@ -144,7 +144,8 @@ const Game = ({
   ).filter((o: string) => o !== "*");
   const rawOrigin = (originOverride ?? configOrigins[0] ?? "")
     .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "");
+    .replace(/^www\./, "")
+    .replace(/^\*\.*/, "");
   const origin = `https://${rawOrigin}`;
   const theme = config.theme;
   const name = theme?.name ?? "Game";

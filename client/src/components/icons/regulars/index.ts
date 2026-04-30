@@ -46,6 +46,7 @@ export * from "./quest";
 export * from "./questionmark";
 export * from "./referral";
 export * from "./refresh";
+export * from "./slot";
 export * from "./sparkle";
 export * from "./sparkles";
 export * from "./speaker";

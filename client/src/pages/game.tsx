@@ -72,8 +72,7 @@ export const Game = () => {
   const { id: idParam } = useParams<{ id: string }>();
   const { pathname } = useLocation();
   const offlineState = useOfflineStore();
-  const isPracticeRoute =
-    pathname === "/practice" || pathname === "/tutorial";
+  const isPracticeRoute = pathname === "/practice" || pathname === "/tutorial";
   const onchainGameId = useMemo(() => {
     if (isPracticeRoute) return null;
     if (!idParam) return null;

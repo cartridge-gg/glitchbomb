@@ -7,7 +7,7 @@ export * from "./action";
 export * from "./activity-tab";
 export * from "./balance";
 export * from "./banner";
-export * from "./bomb-tracker";
+export * from "./bomb-slot";
 export * from "./card-divider";
 export * from "./cash-out-choice";
 export * from "./close";

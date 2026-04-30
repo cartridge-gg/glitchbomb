@@ -2,6 +2,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { type Ref, useMemo } from "react";
 import {
+  type BombDetails,
+  BombSlots,
   GameOver,
   type GameOverProps,
   GamePull,
@@ -10,8 +12,6 @@ import {
   type OrbOutcome,
 } from "@/components/containers";
 import {
-  type BombDetails,
-  BombTracker,
   type DistributionValues,
   GameStats,
   MilestoneChoice,
@@ -21,12 +21,13 @@ import {
   type PLDataPoint,
 } from "@/components/elements";
 import { BagIcon } from "@/components/icons";
-import { GradientBorder } from "@/components/ui/gradient-border";
 import type { OrbPulled } from "@/models";
+import { Button } from "../ui/button";
 
 export interface GameSceneGame {
   id: number;
-  over: boolean;
+  /** Unix timestamp at which the game ended; 0 = still in progress. */
+  over: number;
   level: number;
   health: number;
   points: number;
@@ -35,7 +36,8 @@ export interface GameSceneGame {
   moonrocks: number;
   chips: number;
   stake: number;
-  created_at: number;
+  /** Unix timestamp at which the game expires; 0 = not yet started. */
+  expiration: number;
   pullablesCount: number;
   shop: GameShopProps["orbs"];
   bag: GameShopProps["bag"];
@@ -364,35 +366,40 @@ export const GameScene = ({
             />
           </div>
           <div className="flex items-center justify-center pb-[clamp(2px,0.6svh,6px)]">
-            <BombTracker details={bombDetails} size="lg" />
+            <BombSlots details={bombDetails} data-tutorial-id="bomb-tracker" />
           </div>
-          <div className="pt-[clamp(4px,0.8svh,8px)] pb-[clamp(4px,0.8svh,8px)] flex items-stretch gap-[clamp(8px,2.4svh,20px)]">
-            <div className="flex-1" data-tutorial-id="bag-button">
-              <GradientBorder color="green" className="w-full">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={onOpenStash}
-                >
-                  <BagIcon className="w-5 h-5" />
-                  ORBS
-                </button>
-              </GradientBorder>
-            </div>
-            <div className="flex-1" data-tutorial-id="cash-out-button">
-              <GradientBorder color="green" className="w-full">
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center min-h-[clamp(40px,6svh,56px)] font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest text-green-400 rounded-lg transition-all duration-200 hover:brightness-110 bg-[#0D2518]"
-                  onClick={onOpenCashout}
-                >
-                  CASH OUT
-                </button>
-              </GradientBorder>
-            </div>
-          </div>
+          <Actions onOpenStash={onOpenStash} onOpenCashout={onOpenCashout} />
         </div>
       )}
+    </div>
+  );
+};
+
+export const Actions = ({
+  onOpenStash,
+  onOpenCashout,
+}: Pick<GameSceneProps, "onOpenStash" | "onOpenCashout">) => {
+  return (
+    <div className="flex gap-3 md:gap-4">
+      <div className="flex-1" data-tutorial-id="bag-button">
+        <Button
+          variant="secondary"
+          className="w-full h-12"
+          onClick={onOpenStash}
+        >
+          <BagIcon size="sm" />
+          <span className="font-secondary text-2xl uppercase">Orbs</span>
+        </Button>
+      </div>
+      <div className="flex-1" data-tutorial-id="cash-out-button">
+        <Button
+          variant="constructive"
+          className="w-full h-12"
+          onClick={onOpenCashout}
+        >
+          <span className="font-secondary text-2xl uppercase">Cash Out</span>
+        </Button>
+      </div>
     </div>
   );
 };

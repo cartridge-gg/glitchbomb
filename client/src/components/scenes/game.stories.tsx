@@ -47,7 +47,7 @@ const samplePulls = [
 
 const baseGame: GameSceneGame = {
   id: 1,
-  over: false,
+  over: 0,
   level: 2,
   health: 4,
   points: 28,
@@ -56,7 +56,7 @@ const baseGame: GameSceneGame = {
   moonrocks: 120,
   chips: 30,
   stake: 2,
-  created_at: Math.floor(Date.now() / 1000) - 600,
+  expiration: Math.floor(Date.now() / 1000) - 600 + 86400,
   pullablesCount: 8,
   shop: [],
   bag: [
@@ -238,7 +238,7 @@ export const GameOverCashedOut: Story = {
   args: {
     game: {
       ...baseGame,
-      over: true,
+      over: Math.floor(Date.now() / 1000),
       health: 3,
       points: 82,
       moonrocks: 340,
@@ -253,7 +253,7 @@ export const GameOverDied: Story = {
   args: {
     game: {
       ...baseGame,
-      over: true,
+      over: Math.floor(Date.now() / 1000),
       health: 0,
       points: 35,
       moonrocks: 60,
@@ -268,7 +268,7 @@ export const Expired: Story = {
   args: {
     game: {
       ...baseGame,
-      created_at: Math.floor(Date.now() / 1000) - 90_000,
+      expiration: Math.floor(Date.now() / 1000) - 600,
     },
     expired: true,
   },

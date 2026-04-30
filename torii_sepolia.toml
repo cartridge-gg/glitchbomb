@@ -8,15 +8,13 @@ http_cors_origins = ["*"]
 optimistic = true
 
 [indexing]
+debug = true
 world_block = 0
 controllers = true
 pending = true
 pre_confirmed = true
 polling_interval = 250
 contracts = []
-
-[http]
-cors_origins = ["*"]
 
 [sql]
 historical = [
