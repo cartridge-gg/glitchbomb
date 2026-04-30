@@ -23,16 +23,11 @@ const meta = {
       description:
         "Whether the bomb is still live (drives data-active styling)",
     },
-    empty: {
-      control: "boolean",
-      description: "Marks the slot as empty",
-    },
   },
   args: {
     value: 1,
     variant: "default",
     active: true,
-    empty: false,
   },
 } satisfies Meta<typeof BombSlot>;
 
@@ -41,20 +36,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const Empty: Story = {
-  args: {
-    value: 0,
-    empty: true,
-  },
-};
-
 export const Values: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
-      <BombSlot {...args} value={0} empty />
-      <BombSlot {...args} value={1} empty={false} />
-      <BombSlot {...args} value={2} empty={false} />
-      <BombSlot {...args} value={3} empty={false} />
+      <BombSlot {...args} value={0} />
+      <BombSlot {...args} value={1} />
+      <BombSlot {...args} value={2} />
+      <BombSlot {...args} value={3} />
     </div>
   ),
 };

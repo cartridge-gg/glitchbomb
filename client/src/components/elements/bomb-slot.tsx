@@ -25,7 +25,6 @@ export interface BombSlotProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">,
     VariantProps<typeof bombSlotVariants> {
   value: number;
-  empty?: boolean;
   active?: boolean;
 }
 
@@ -44,7 +43,6 @@ function getIcon(value: number) {
 
 export const BombSlot = ({
   value,
-  empty = true,
   active = false,
   variant,
   className,

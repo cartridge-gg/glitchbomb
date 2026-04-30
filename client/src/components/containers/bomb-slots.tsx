@@ -79,11 +79,7 @@ export const BombSlots = ({
         const key = `bomb-${index}`;
         return (
           <div key={key} className="flex-1 min-w-0 flex justify-center">
-            <BombSlot
-              value={slot.value}
-              active={slot.active}
-              empty={slot.empty}
-            />
+            <BombSlot value={slot.value} active={slot.active} />
           </div>
         );
       })}
