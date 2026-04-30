@@ -6,7 +6,7 @@ import {
   useNetwork,
 } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Header, Settings } from "@/components/containers";
 import {
   AchievementScene,
@@ -28,7 +28,6 @@ import { usePrices } from "@/contexts/prices";
 import { PurchaseModalProvider } from "@/contexts/purchase-modal";
 import { useSound } from "@/contexts/sound";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
-import { useLoadingContext } from "@/contexts/use-loading";
 import { MAX_SCORE, toUsd } from "@/helpers/payout";
 import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
@@ -83,14 +82,15 @@ export const Main = ({ children }: MainProps) => {
   const showPurchase = isOpen("purchase");
 
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { config } = useEntitiesContext();
   const { paidBundles: bundles } = useBundles();
   const { getGlitchPrice } = usePrices();
-  const { setReady } = useLoadingContext();
-  const { games: onchainGames } = useOwnedGames();
+  const { games: onchainGames, isLoading: onchainGamesLoading } =
+    useOwnedGames();
 
   const [bundleIndex, setBundleIndex] = useState(1);
-  const purchaseGameIdsRef = useRef<Set<number> | null>(null);
+  const previousGamesLengthRef = useRef<number | null>(null);
 
   const tokenPrice = useMemo(() => {
     const p = getGlitchPrice();
@@ -188,41 +188,65 @@ export const Main = ({ children }: MainProps) => {
     if (!bundle || !chain) return;
     const controller = connector as ControllerConnector | undefined;
     if (!controller?.controller) return;
-    purchaseGameIdsRef.current = new Set(ownedGames.map((g) => g.id));
     const registry = getSetupAddress(chain.id);
     await controller.controller.openBundle(bundle.id, registry, {
       onPurchaseComplete: () => {
-        // Fired only when the user completes the purchase — not on cancel.
-        // Show loading screen while the indexer picks up the new game.
-        setReady("purchase", false);
+        // Fires on bundle modal close after a successful purchase (not on cancel).
+        // Detection effect below will then redirect to /game/{id}.
+        closeModal();
+        navigate("/game");
       },
     });
-  }, [bundle, chain, connector, ownedGames, setReady]);
+  }, [bundle, chain, connector, navigate, closeModal]);
 
   const openPurchaseScene = useCallback(
     () => openModal("purchase"),
     [openModal],
   );
 
-  // Detect new game after purchase and navigate to it
+  // Detect new game and navigate to it
   useEffect(() => {
-    if (!purchaseGameIdsRef.current) return;
-    const newGame = ownedGames.find(
-      (g) => !purchaseGameIdsRef.current?.has(g.id),
-    );
-    if (newGame) {
-      purchaseGameIdsRef.current = null;
-      // Close the controller iframe before navigating
-      const controllerEl = document.getElementById("controller");
-      if (controllerEl) {
-        document.body.style.overflow = "auto";
-        controllerEl.style.opacity = "0";
-        controllerEl.style.display = "none";
-      }
-      closeModal();
-      navigate(`/game/${newGame.id}`);
+    if (onchainGamesLoading) return;
+
+    const currentLength = ownedGames.length;
+    const previousLength = previousGamesLengthRef.current;
+
+    if (previousLength === null) {
+      previousGamesLengthRef.current = currentLength;
+      return;
     }
-  }, [ownedGames, navigate, closeModal]);
+
+    if (currentLength > previousLength) {
+      // NFT token IDs are minted sequentially, so max id = newest game
+      const newestGame = ownedGames.reduce<(typeof ownedGames)[number] | null>(
+        (acc, game) => (acc === null || game.id > acc.id ? game : acc),
+        null,
+      );
+      if (!newestGame) {
+        previousGamesLengthRef.current = currentLength;
+        return;
+      }
+
+      const controllerIframe = document.getElementById("controller");
+      const isControllerOpen =
+        controllerIframe && getComputedStyle(controllerIframe).opacity === "1";
+
+      if (pathname === "/game" || (pathname === "/" && isControllerOpen)) {
+        closeModal();
+        navigate(`/game/${newestGame.id}`);
+        (connector as ControllerConnector | undefined)?.controller?.close?.();
+      }
+    }
+
+    previousGamesLengthRef.current = currentLength;
+  }, [
+    ownedGames,
+    onchainGamesLoading,
+    navigate,
+    closeModal,
+    pathname,
+    connector,
+  ]);
 
   useEffect(() => {
     if (showLeaderboard) refetchLeaderboard();

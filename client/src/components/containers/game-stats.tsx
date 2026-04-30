@@ -43,7 +43,12 @@ export const GameStats = ({
         <GamePoints points={points} level={level} />
       </div>
       <div data-tutorial-id="goal-bar" className="flex-1">
-        <GameStat variant="goal" value={points} max={milestone} />
+        <GameStat
+          variant="goal"
+          value={milestone}
+          count={points}
+          max={milestone}
+        />
       </div>
     </div>
   );

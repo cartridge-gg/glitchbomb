@@ -24,6 +24,7 @@ export interface GameStatProps
     VariantProps<typeof gameStatVariants> {
   value: number;
   max: number;
+  count?: number;
 }
 
 const getIcon = (variant: NonNullable<GameStatProps["variant"]>) => {
@@ -47,6 +48,7 @@ const getLabel = (variant: NonNullable<GameStatProps["variant"]>) => {
 export const GameStat = ({
   value,
   max,
+  count,
   variant,
   className,
   ...props
@@ -66,7 +68,7 @@ export const GameStat = ({
         </div>
       </div>
       <ProgressBar
-        count={value}
+        count={count ?? value}
         total={max}
         className="rounded-md p-0.5 h-4"
         barClassName={cn(
