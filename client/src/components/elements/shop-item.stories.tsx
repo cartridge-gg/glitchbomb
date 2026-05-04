@@ -9,13 +9,6 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  decorators: [
-    (Story) => (
-      <div className="bg-green-950 p-4 max-w-[420px]">
-        <Story />
-      </div>
-    ),
-  ],
   args: {
     orb: new Orb(OrbType.Point5),
     price: 10,

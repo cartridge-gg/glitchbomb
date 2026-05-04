@@ -112,7 +112,7 @@ const ListTab = ({ orbs, discards }: { orbs: Orb[]; discards?: boolean[] }) => {
                     {orb.name()}
                   </h3>
                   {!orb.isBomb() && (
-                    <RarityPill rarity={orb.rarity()} className="ml-auto" />
+                    <RarityPill variant={orb.rarity()} className="ml-auto" />
                   )}
                 </div>
                 <p className="text-white/60 font-secondary text-[10px] tracking-[0.2em]">

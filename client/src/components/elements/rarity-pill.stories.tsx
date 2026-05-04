@@ -9,14 +9,14 @@ const meta = {
     backgrounds: { default: "dark" },
   },
   argTypes: {
-    rarity: {
+    variant: {
       control: { type: "select" },
       options: ["common", "rare", "cosmic"],
-      description: "Rarity level",
+      description: "Rarity variant",
     },
   },
   args: {
-    rarity: "common",
+    variant: "common",
   },
 } satisfies Meta<typeof RarityPill>;
 
@@ -25,28 +25,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Common: Story = {
   args: {
-    rarity: "common",
+    variant: "common",
   },
 };
 
 export const Rare: Story = {
   args: {
-    rarity: "rare",
+    variant: "rare",
   },
 };
 
 export const Cosmic: Story = {
   args: {
-    rarity: "cosmic",
+    variant: "cosmic",
   },
 };
 
-export const AllRarities: Story = {
+export const Variants: Story = {
   render: () => (
     <div className="flex gap-4">
-      <RarityPill rarity="common" />
-      <RarityPill rarity="rare" />
-      <RarityPill rarity="cosmic" />
+      <RarityPill variant="common" />
+      <RarityPill variant="rare" />
+      <RarityPill variant="cosmic" />
     </div>
   ),
 };

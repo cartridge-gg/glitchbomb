@@ -8,6 +8,7 @@ import {
   type ShopItemProps,
 } from "@/components/elements";
 import type { Orb } from "@/models";
+import { GameBalances } from "../containers";
 import { ConfirmationDialog } from "../containers/confirmation-dialog";
 import {
   isShopExitConfirmDismissed,
@@ -16,14 +17,12 @@ import {
 import { ShopItems } from "../containers/shop-items";
 import { StashModal } from "../containers/stash-modal";
 import { GradientBorder } from "../ui/gradient-border";
+import type { GameSceneGame } from "./game";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameShopVariants> {
-  balance: number;
-  orbs: Orb[];
-  bag: Orb[];
-  initialPurchaseCounts?: number[];
+  game: GameSceneGame;
   onConfirm: (indices: number[]) => void;
   isLoading?: boolean;
   onBalanceChange?: (balance: number) => void;
@@ -55,10 +54,7 @@ const getParticleCategory = (orb: Orb) => {
 };
 
 export const GameShop = ({
-  balance,
-  orbs,
-  bag,
-  initialPurchaseCounts = [],
+  game,
   variant,
   className,
   onConfirm,
@@ -66,6 +62,13 @@ export const GameShop = ({
   onBalanceChange,
   ...props
 }: GameShopProps) => {
+  const {
+    chips: balance,
+    shop: orbs,
+    bag,
+    shopPurchaseCounts: initialPurchaseCounts = [],
+  } = game;
+
   // Store quantities per orb index
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   // History of actions for undo (stores the index of each add)
@@ -319,6 +322,11 @@ export const GameShop = ({
 
   return (
     <div className={gameShopVariants({ variant, className })} {...props}>
+      <GameBalances
+        moonrocks={{ value: game.moonrocks }}
+        chips={{ value: game.chips }}
+      />
+
       <div className="flex-1 min-h-0 flex flex-col justify-center">
         {/* Scrollable content */}
         <div
