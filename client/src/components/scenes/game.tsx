@@ -9,8 +9,6 @@ import {
   GameOver,
   type GameOverProps,
   GamePull,
-  GameShop,
-  type GameShopProps,
   GameStats,
   type OrbOutcome,
 } from "@/components/containers";
@@ -29,6 +27,7 @@ import {
 } from "@/components/icons";
 import type { OrbPulled } from "@/models";
 import { Button } from "../ui/button";
+import { GameShop, type GameShopProps } from "./game-shop";
 
 export interface GameSceneGame {
   id: number;

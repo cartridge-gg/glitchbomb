@@ -5,18 +5,17 @@ import {
   LoadingSpinner,
   OrbCategorySummary,
   OrbDisplay,
-  RarityPill,
+  type ShopItemProps,
 } from "@/components/elements";
-import { ChipIcon } from "@/components/icons";
-import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
-import { GradientBorder } from "../ui/gradient-border";
-import { ConfirmationDialog } from "./confirmation-dialog";
+import { ConfirmationDialog } from "../containers/confirmation-dialog";
 import {
   isShopExitConfirmDismissed,
   setShopExitConfirmDismissed,
-} from "./confirmation-prefs";
-import { StashModal } from "./stash-modal";
+} from "../containers/confirmation-prefs";
+import { ShopItems } from "../containers/shop-items";
+import { StashModal } from "../containers/stash-modal";
+import { GradientBorder } from "../ui/gradient-border";
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -45,16 +44,6 @@ const gameShopVariants = cva(
   },
 );
 
-// Get short name for orb type
-const getOrbTypeName = (orb: Orb): string => {
-  if (orb.isPoint()) return "POINTS ORB";
-  if (orb.isMultiplier()) return "MULTIPLIER ORB";
-  if (orb.isHealth()) return "HEART ORB";
-  if (orb.isChips()) return "CHIPS ORB";
-  if (orb.isMoonrock()) return "MOONROCK ORB";
-  return "ORB";
-};
-
 const getParticleCategory = (orb: Orb) => {
   if (orb.isBomb()) return "bomb";
   if (orb.isPoint()) return "point";
@@ -63,96 +52,6 @@ const getParticleCategory = (orb: Orb) => {
   if (orb.isChips()) return "special";
   if (orb.isMoonrock()) return "special";
   return "point";
-};
-
-interface ShopItemProps {
-  orb: Orb;
-  price: number;
-  disabled: boolean;
-  onAdd: () => void;
-  buttonRef?: React.Ref<HTMLButtonElement>;
-}
-
-const ShopItem = ({
-  orb,
-  price,
-  disabled,
-  onAdd,
-  buttonRef,
-}: ShopItemProps) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const handleAdd = () => {
-    if (disabled) return;
-    setIsAnimating(true);
-    onAdd();
-    setTimeout(() => setIsAnimating(false), 300);
-  };
-
-  return (
-    <motion.div
-      className={cn(
-        "flex items-center gap-[clamp(8px,2svh,16px)] py-[clamp(4px,1.2svh,8px)]",
-        disabled && "opacity-50",
-      )}
-      animate={isAnimating ? { scale: [1, 1.02, 1] } : {}}
-      transition={{ duration: 0.2 }}
-    >
-      {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
-
-      {/* Title/rarity and description */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h3 className="text-white font-secondary text-sm tracking-wide flex-1 min-w-0">
-            {getOrbTypeName(orb)}
-          </h3>
-          {!orb.isBomb() && (
-            <RarityPill rarity={orb.rarity()} className="ml-auto" />
-          )}
-        </div>
-        <p className="text-white/60 font-secondary text-xs tracking-wide">
-          {orb.description()}
-        </p>
-      </div>
-
-      {/* Price and add button */}
-      <div
-        className="flex items-center rounded-lg overflow-hidden min-w-[128px] justify-between"
-        style={{
-          backgroundColor: "rgba(0, 15, 0, 0.6)",
-        }}
-      >
-        <div className="flex items-center gap-2 px-3">
-          <ChipIcon size="sm" className="text-orange-100" />
-          <motion.span
-            key={price}
-            initial={{ scale: 1.3 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="font-secondary text-sm text-orange-100"
-          >
-            {price}
-          </motion.span>
-        </div>
-        <button
-          ref={buttonRef}
-          type="button"
-          className="h-10 w-14 p-0 rounded-r-lg"
-          style={{ backgroundColor: "rgba(0, 100, 0, 0.3)" }}
-          disabled={disabled}
-          onClick={handleAdd}
-        >
-          <span
-            className="text-3xl font-secondary text-green-400"
-            style={{ fontWeight: 100 }}
-          >
-            +
-          </span>
-        </button>
-      </div>
-    </motion.div>
-  );
 };
 
 export const GameShop = ({
@@ -378,18 +277,29 @@ export const GameShop = ({
     [existingBag, pendingOrbs],
   );
 
-  // Sort shop items by rarity (common → rare → cosmic), then by base cost
-  const sortedIndices = useMemo(() => {
+  // Sort shop entries by rarity (common → rare → cosmic), then by base cost
+  const sortedShopEntries = useMemo(() => {
     const rarityOrder = { common: 0, rare: 1, cosmic: 2 } as const;
     return orbs
-      .map((_, i) => i)
+      .map((orb, index) => ({ orb, index }))
       .sort((a, b) => {
-        const ra = rarityOrder[orbs[a].rarity()];
-        const rb = rarityOrder[orbs[b].rarity()];
+        const ra = rarityOrder[a.orb.rarity()];
+        const rb = rarityOrder[b.orb.rarity()];
         if (ra !== rb) return ra - rb;
-        return orbs[a].cost() - orbs[b].cost();
+        return a.orb.cost() - b.orb.cost();
       });
   }, [orbs]);
+
+  const shopItems: ShopItemProps[] = sortedShopEntries.map(({ orb, index }) => {
+    const price = getNextPrice(orb);
+    return {
+      orb,
+      price,
+      disabled: price > virtualBalance,
+      onAdd: () => handleIncrement(index),
+      buttonRef: setButtonRef(index),
+    };
+  });
 
   const hasSelections = basketIndices.length > 0;
 
@@ -421,24 +331,7 @@ export const GameShop = ({
           </p>
 
           {/* Shop items */}
-          <div className="flex flex-col gap-1">
-            {sortedIndices.map((index) => {
-              const orb = orbs[index];
-              const nextPrice = getNextPrice(orb);
-              const canAfford = nextPrice <= virtualBalance;
-
-              return (
-                <ShopItem
-                  key={`${orb.value}-${index}`}
-                  orb={orb}
-                  price={nextPrice}
-                  disabled={!canAfford}
-                  onAdd={() => handleIncrement(index)}
-                  buttonRef={setButtonRef(index)}
-                />
-              );
-            })}
-          </div>
+          <ShopItems items={shopItems} />
         </div>
       </div>
 

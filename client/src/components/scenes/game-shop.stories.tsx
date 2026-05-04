@@ -4,7 +4,7 @@ import { Orb, OrbType } from "@/models/orb";
 import { GameShop } from "./game-shop";
 
 const meta = {
-  title: "Containers/Game Shop",
+  title: "Scenes/Game Shop",
   component: GameShop,
   parameters: {
     layout: "fullscreen",
