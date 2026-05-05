@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import { type Ref, useMemo } from "react";
+import { type Ref, useMemo, useState } from "react";
 import {
+  Bag,
   type BombDetails,
   BombSlots,
   GameBalances,
@@ -27,6 +28,7 @@ import {
 } from "@/components/icons";
 import type { Orb, OrbPulled } from "@/models";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 
 export interface GameSceneGame {
   id: number;
@@ -44,6 +46,7 @@ export interface GameSceneGame {
   expiration: number;
   pullablesCount: number;
   bag: Orb[];
+  discards?: boolean[];
 }
 
 const gameSceneVariants = cva("flex flex-col mx-auto h-full p-4 gap-3", {
@@ -97,7 +100,6 @@ export interface GameSceneProps
   outcomeRef?: Ref<HTMLDivElement>;
 
   onPull: () => void;
-  onOpenStash: () => void;
   onOpenCashout: () => void;
   onEnterShop: () => void;
   onPlayAgain?: () => void;
@@ -135,7 +137,6 @@ export const GameScene = ({
   healthRef,
   outcomeRef,
   onPull,
-  onOpenStash,
   onOpenCashout,
   onEnterShop,
   onPlayAgain,
@@ -143,6 +144,14 @@ export const GameScene = ({
   className,
   ...props
 }: GameSceneProps) => {
+  const [showStash, setShowStash] = useState(false);
+  const openStash = () => setShowStash(true);
+
+  const bagOrbs = useMemo(
+    () => game.bag.filter((orb) => !orb.isNone()),
+    [game.bag],
+  );
+
   const screen = useMemo<Screen>(() => {
     if (!game.over && expired) return "expired";
     if (game.over) return "over";
@@ -168,19 +177,27 @@ export const GameScene = ({
 
   if (screen === "expired") {
     return (
-      <GameOver
-        level={game.level}
-        moonrocksEarned={0}
-        plData={plData}
-        pulls={pulls}
-        cashedOut={false}
-        expired
-        onPlayAgain={onPlayAgain}
-        onOpenStash={onOpenStash}
-        health={game.health}
-        points={game.points}
-        milestone={game.milestone}
-      />
+      <>
+        <GameOver
+          level={game.level}
+          moonrocksEarned={0}
+          plData={plData}
+          pulls={pulls}
+          cashedOut={false}
+          expired
+          onPlayAgain={onPlayAgain}
+          onOpenStash={openStash}
+          health={game.health}
+          points={game.points}
+          milestone={game.milestone}
+        />
+        <BagDialog
+          open={showStash}
+          onOpenChange={setShowStash}
+          orbs={bagOrbs}
+          discards={game.discards}
+        />
+      </>
     );
   }
 
@@ -189,22 +206,30 @@ export const GameScene = ({
     // When cashed out, game.moonrocks has the full score.
     const cashedOut = game.health > 0;
     return (
-      <GameOver
-        level={game.level}
-        moonrocksEarned={game.moonrocks}
-        plData={plData}
-        pulls={pulls}
-        cashedOut={cashedOut}
-        onPlayAgain={onPlayAgain}
-        onOpenStash={onOpenStash}
-        health={game.health}
-        points={game.points}
-        milestone={game.milestone}
-        stake={game.stake}
-        tokenPrice={tokenPrice}
-        supply={supply}
-        target={target}
-      />
+      <>
+        <GameOver
+          level={game.level}
+          moonrocksEarned={game.moonrocks}
+          plData={plData}
+          pulls={pulls}
+          cashedOut={cashedOut}
+          onPlayAgain={onPlayAgain}
+          onOpenStash={openStash}
+          health={game.health}
+          points={game.points}
+          milestone={game.milestone}
+          stake={game.stake}
+          tokenPrice={tokenPrice}
+          supply={supply}
+          target={target}
+        />
+        <BagDialog
+          open={showStash}
+          onOpenChange={setShowStash}
+          orbs={bagOrbs}
+          discards={game.discards}
+        />
+      </>
     );
   }
 
@@ -389,22 +414,55 @@ export const GameScene = ({
                 details={bombDetails}
                 data-tutorial-id="bomb-tracker"
               />
-              <Actions
-                onOpenStash={onOpenStash}
-                onOpenCashout={onOpenCashout}
-              />
+              <Actions onOpenStash={openStash} onOpenCashout={onOpenCashout} />
             </div>
           </div>
         </div>
       )}
+      <BagDialog
+        open={showStash}
+        onOpenChange={setShowStash}
+        orbs={bagOrbs}
+        discards={game.discards}
+      />
     </div>
   );
 };
 
-export const Actions = ({
-  onOpenStash,
-  onOpenCashout,
-}: Pick<GameSceneProps, "onOpenStash" | "onOpenCashout">) => {
+interface BagDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  orbs: Orb[];
+  discards?: boolean[];
+}
+
+const BagDialog = ({ open, onOpenChange, orbs, discards }: BagDialogProps) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="w-[calc(100%-2rem)] md:w-full rounded-lg border-4 border-primary-600 bg-black-100 md:max-w-[420px] p-6 md:p-6">
+      <DialogTitle className="sr-only">Your bag</DialogTitle>
+      <Bag
+        pendingItems={{
+          title: "Purchasing (0)",
+          items: [],
+        }}
+        bagItems={{
+          title: `Your orbs (${orbs.length})`,
+          items: orbs.map((orb, i) => ({
+            orb,
+            discarded: discards?.[i] ?? false,
+          })),
+        }}
+      />
+    </DialogContent>
+  </Dialog>
+);
+
+export interface ActionsProps {
+  onOpenStash: () => void;
+  onOpenCashout: () => void;
+}
+
+export const Actions = ({ onOpenStash, onOpenCashout }: ActionsProps) => {
   return (
     <div className="flex gap-3 md:gap-4">
       <div className="flex-1" data-tutorial-id="bag-button">

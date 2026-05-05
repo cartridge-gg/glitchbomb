@@ -1,17 +1,17 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LoadingSpinner, type ShopItemProps } from "@/components/elements";
 import type { Orb } from "@/models";
-import { GameBalances, SummaryItems } from "../containers";
+import { Bag, GameBalances, SummaryItems } from "../containers";
 import { ConfirmationDialog } from "../containers/confirmation-dialog";
 import {
   isShopExitConfirmDismissed,
   setShopExitConfirmDismissed,
 } from "../containers/confirmation-prefs";
 import { ShopItems } from "../containers/shop-items";
-import { StashModal } from "../containers/stash-modal";
 import { RefreshIcon } from "../icons";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 
 export interface GameShopGame {
   chips: number;
@@ -176,27 +176,6 @@ export const GameShop = ({
     });
   };
 
-  const handleRemovePending = useCallback(
-    (pendingIndex: number) => {
-      const shopIndex = basketIndices[pendingIndex];
-      if (shopIndex === undefined) return;
-      // Remove the last occurrence of this shop index from history
-      const lastHistoryIndex = history.lastIndexOf(shopIndex);
-      if (lastHistoryIndex === -1) return;
-
-      setHistory((prev) => prev.filter((_, i) => i !== lastHistoryIndex));
-      setQuantities((prev) => {
-        const currentQty = prev[shopIndex] || 0;
-        if (currentQty <= 1) {
-          const { [shopIndex]: _, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, [shopIndex]: currentQty - 1 };
-      });
-    },
-    [basketIndices, history],
-  );
-
   // Existing bag orbs (excluding None)
   const existingBag = useMemo(() => bag.filter((orb) => !orb.isNone()), [bag]);
 
@@ -307,13 +286,21 @@ export const GameShop = ({
         </Button>
       </div>
 
-      <StashModal
-        open={showStash}
-        onOpenChange={setShowStash}
-        orbs={existingBag}
-        pendingOrbs={pendingOrbs}
-        onRemovePending={handleRemovePending}
-      />
+      <Dialog open={showStash} onOpenChange={setShowStash}>
+        <DialogContent className="w-[calc(100%-2rem)] md:w-full rounded-lg border-4 border-primary-600 bg-black-100 md:max-w-[420px] p-6 md:p-8">
+          <DialogTitle className="sr-only">Your bag</DialogTitle>
+          <Bag
+            pendingItems={{
+              title: `Purchasing (${pendingOrbs.length})`,
+              items: pendingOrbs.map((orb) => ({ orb })),
+            }}
+            bagItems={{
+              title: `Your orbs (${existingBag.length})`,
+              items: existingBag.map((orb) => ({ orb })),
+            }}
+          />
+        </DialogContent>
+      </Dialog>
       <ConfirmationDialog
         open={showExitConfirmation}
         onOpenChange={setShowExitConfirmation}

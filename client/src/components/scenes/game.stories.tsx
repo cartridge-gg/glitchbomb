@@ -132,7 +132,6 @@ const meta = {
     showRewardOverlay: false,
     showDistributionPercent: false,
     onPull: fn(),
-    onOpenStash: fn(),
     onOpenCashout: fn(),
     onEnterShop: fn(),
     onPlayAgain: fn(),

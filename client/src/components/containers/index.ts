@@ -1,4 +1,6 @@
 export * from "./achievements";
+export * from "./bag";
+export * from "./bag-items";
 export * from "./banners";
 export * from "./bomb-slots";
 export * from "./cash-out-confirmation";
@@ -25,5 +27,4 @@ export * from "./shop-items";
 export * from "./stakes";
 export * from "./staking";
 export * from "./staking-only";
-export * from "./stash-modal";
 export * from "./summary-items";
