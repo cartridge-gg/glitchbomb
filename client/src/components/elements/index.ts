@@ -20,6 +20,7 @@ export * from "./external";
 export * from "./game-activity";
 export * from "./game-balance";
 export * from "./game-card";
+export * from "./game-chart";
 export * from "./game-choice";
 export * from "./game-graph";
 export * from "./game-points";

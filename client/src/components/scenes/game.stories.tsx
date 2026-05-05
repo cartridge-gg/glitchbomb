@@ -1,36 +1,75 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import type { OrbOutcome } from "@/components/containers";
-import type { PLDataPoint } from "@/components/elements";
+import type { GameChartDataPoint } from "@/components/elements";
 import { Orb, type OrbPulled, OrbType } from "@/models";
 import { GameScene, type GameSceneGame } from "./game";
 
-const createMockOrb = (value: string): OrbPulled["orb"] =>
-  ({
+const createMockOrb = (value: string): OrbPulled["orb"] => {
+  const isPoint =
+    value.startsWith("Point") ||
+    value === "PointOrb1" ||
+    value === "PointBomb4";
+  const isMultiplier = value.startsWith("Multiplier");
+  const isBomb = value.startsWith("Bomb");
+  const isHealth = value.startsWith("Health");
+  const isMoonrock = value.startsWith("Moonrock");
+  const isChips = value.startsWith("Chips");
+  const isCurse = value.startsWith("Curse");
+  const logCategory = isPoint
+    ? "POINTS"
+    : isMultiplier
+      ? "MULTIPLIER"
+      : isBomb
+        ? "BOMB"
+        : isHealth
+          ? "HEALTH"
+          : isMoonrock
+            ? "MOONROCK"
+            : isChips
+              ? "CHIPS"
+              : isCurse
+                ? "CURSE"
+                : "SPECIAL";
+  const color = isBomb
+    ? "#FFFFFF"
+    : isHealth
+      ? "var(--orb-heart)"
+      : isMultiplier
+        ? "var(--orb-multiplier)"
+        : isPoint
+          ? "var(--green-100)"
+          : isMoonrock
+            ? "var(--orb-moonrock)"
+            : isChips
+              ? "var(--orb-chips)"
+              : "var(--white-100)";
+  return {
     value,
     name: () => value,
-    isPoint: () =>
-      value.startsWith("Point") ||
-      value === "PointOrb1" ||
-      value === "PointBomb4",
-    isMultiplier: () => value.startsWith("Multiplier"),
-    isBomb: () => value.startsWith("Bomb"),
-    isHealth: () => value.startsWith("Health"),
-    isMoonrock: () => value.startsWith("Moonrock"),
-    isChips: () => value.startsWith("Chips"),
-    isCurse: () => value.startsWith("Curse"),
-  }) as OrbPulled["orb"];
+    color: () => color,
+    logCategory: () => logCategory,
+    logEffect: () => value.toUpperCase(),
+    isPoint: () => isPoint,
+    isMultiplier: () => isMultiplier,
+    isBomb: () => isBomb,
+    isHealth: () => isHealth,
+    isMoonrock: () => isMoonrock,
+    isChips: () => isChips,
+    isCurse: () => isCurse,
+  } as OrbPulled["orb"];
+};
 
-const samplePlData: PLDataPoint[] = [
+const samplePlData: GameChartDataPoint[] = [
   { value: 90, variant: "yellow", id: 0 },
   { value: 90, variant: "yellow", id: 1 },
-  { value: 90, variant: "red", id: 2 },
-  { value: 95, variant: "green", id: 3 },
-  { value: 95, variant: "red", id: 4 },
-  { value: 105, variant: "green", id: 5 },
-  { value: 85, variant: "red", id: 6 },
+  { value: 90, variant: "red", id: 2, pullId: 1 },
+  { value: 95, variant: "green", id: 3, pullId: 2 },
+  { value: 95, variant: "red", id: 4, pullId: 3 },
+  { value: 105, variant: "green", id: 5, pullId: 4 },
+  { value: 85, variant: "red", id: 6, pullId: 5 },
   { value: 85, variant: "yellow", id: 7 },
-  { value: 90, variant: "green", id: 8 },
+  { value: 90, variant: "green", id: 8, pullId: 6 },
   { value: 90, variant: "blue", id: 9 },
   { value: 105, variant: "green", id: 10 },
   { value: 120, variant: "green", id: 11 },

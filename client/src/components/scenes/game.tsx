@@ -15,9 +15,9 @@ import {
 } from "@/components/containers";
 import {
   type DistributionValues,
+  GameChart,
+  type GameChartDataPoint,
   Outcome,
-  PLChartTabs,
-  type PLDataPoint,
 } from "@/components/elements";
 import {
   BagIcon,
@@ -66,7 +66,7 @@ export interface GameSceneProps
   game: GameSceneGame;
   expired?: boolean;
 
-  plData: PLDataPoint[];
+  plData: GameChartDataPoint[];
   pulls: OrbPulled[];
   chartGoal?: number;
 
@@ -247,7 +247,8 @@ export const GameScene = ({
             health={game.health}
             level={game.level}
           />
-          <PLChartTabs
+          <GameChart
+            className="min-h-[140px] max-h-[140px]"
             data={plData}
             pulls={pulls}
             mode="absolute"
@@ -317,9 +318,9 @@ export const GameScene = ({
               level={game.level}
             />
             {/* PL Chart with outcome overlay */}
-            <div className="relative max-h-[100px]">
-              <PLChartTabs
-                className="h-full overflow-hidden max-h-[100px]"
+            <div className="relative">
+              <GameChart
+                className="min-h-[140px] max-h-[140px]"
                 data={plData}
                 pulls={pulls}
                 mode="absolute"

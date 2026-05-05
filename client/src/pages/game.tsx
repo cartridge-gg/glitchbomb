@@ -16,8 +16,8 @@ import {
 } from "@/components/containers/confirmation-prefs";
 import {
   type DistributionKey,
+  type GameChartDataPoint,
   LevelUpOverlay,
-  type PLDataPoint as PLDataPointComponent,
   RewardOverlay,
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
@@ -189,7 +189,7 @@ export const Game = () => {
   });
 
   // Convert PLDataPoint events to graph format
-  const plData: PLDataPointComponent[] = useMemo(() => {
+  const plData: GameChartDataPoint[] = useMemo(() => {
     if (dataPoints.length === 0) return [];
 
     const rawSorted = [...dataPoints].sort((a, b) => a.id - b.id);
@@ -217,10 +217,17 @@ export const Game = () => {
       sorted = rawSorted;
     }
 
+    // Pair each non-marker data point with the next pull in chronological
+    // order. PLDataPoint ids and OrbPulled ids live in different id
+    // spaces (the contract uses different ID formulas) so we can't match
+    // by id; we walk both sequences in chronological order instead.
+    const sortedPulls = [...pulls].sort((a, b) => a.id - b.id);
+    let pullCursor = 0;
+
     return sorted.map((point, index) => {
       const orbType = point.orb;
 
-      // Level cost / game start entries (orb=0) → yellow
+      // Level cost / game start entries (orb=0) → yellow, no associated pull
       if (orbType === 0) {
         return {
           value: point.potentialMoonrocks,
@@ -240,9 +247,18 @@ export const Game = () => {
         }
       }
 
-      return { value: point.potentialMoonrocks, variant, id: point.id };
+      // Associate with the next pull in chronological order.
+      const matchedPull = sortedPulls[pullCursor];
+      pullCursor += 1;
+
+      return {
+        value: point.potentialMoonrocks,
+        variant,
+        id: point.id,
+        pullId: matchedPull?.id,
+      };
     });
-  }, [dataPoints, isPractice]);
+  }, [dataPoints, isPractice, pulls]);
 
   // Compute goal line for chart: baseMoonrocks + milestone
   // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
