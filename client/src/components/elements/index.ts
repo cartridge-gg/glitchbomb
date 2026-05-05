@@ -58,6 +58,7 @@ export * from "./referral-payment";
 export * from "./referral-stat";
 export * from "./reward-overlay";
 export * from "./score";
+export * from "./shop-item";
 export * from "./sound";
 export * from "./stake-change";
 export * from "./stake-state";

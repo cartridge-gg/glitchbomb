@@ -280,6 +280,15 @@ export class Orb {
     }
   }
 
+  public category(): string {
+    if (this.isPoint()) return "POINTS ORB";
+    if (this.isMultiplier()) return "MULTIPLIER ORB";
+    if (this.isHealth()) return "HEART ORB";
+    if (this.isChips()) return "CHIPS ORB";
+    if (this.isMoonrock()) return "MOONROCK ORB";
+    return "ORB";
+  }
+
   public variant():
     | "green"
     | "yellow"

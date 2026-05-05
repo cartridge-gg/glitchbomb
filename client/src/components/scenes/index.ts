@@ -1,5 +1,6 @@
 export * from "./achievement";
 export * from "./game";
+export * from "./game-shop";
 export * from "./home";
 export * from "./leaderboard";
 export * from "./loading";

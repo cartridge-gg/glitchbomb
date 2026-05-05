@@ -9,8 +9,6 @@ import {
   GameOver,
   type GameOverProps,
   GamePull,
-  GameShop,
-  type GameShopProps,
   GameStats,
   type OrbOutcome,
 } from "@/components/containers";
@@ -27,8 +25,9 @@ import {
   MoonrockIcon,
   StickyBombIcon,
 } from "@/components/icons";
-import type { OrbPulled } from "@/models";
+import type { Orb, OrbPulled } from "@/models";
 import { Button } from "../ui/button";
+import { GameShop, type GameShopProps } from "./game-shop";
 
 export interface GameSceneGame {
   id: number;
@@ -45,8 +44,8 @@ export interface GameSceneGame {
   /** Unix timestamp at which the game expires; 0 = not yet started. */
   expiration: number;
   pullablesCount: number;
-  shop: GameShopProps["orbs"];
-  bag: GameShopProps["bag"];
+  shop: Orb[];
+  bag: Orb[];
   shopPurchaseCounts?: number[];
 }
 
@@ -223,10 +222,7 @@ export const GameScene = ({
   if (screen === "shop") {
     return (
       <GameShop
-        balance={game.chips}
-        orbs={game.shop}
-        bag={game.bag}
-        initialPurchaseCounts={game.shopPurchaseCounts}
+        game={game}
         onConfirm={onBuyAndExit}
         isLoading={isExitingShop}
         onBalanceChange={onShopBalanceChange}
