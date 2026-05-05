@@ -62,6 +62,7 @@
     "react-router-dom": "^6.22.3",
     "react-slot-counter": "^3.3.1",
     "react-time-ago": "^7.3.3",
+    "recharts": "^3.8.1",
     "snippet": "^0.1.0",
     "sonner": "^1.7.3",
     "starknet": "^8.1.2",

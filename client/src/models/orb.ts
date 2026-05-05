@@ -322,6 +322,73 @@ export class Orb {
     return "ORB";
   }
 
+  /**
+   * Short uppercase category label used in pull/log displays
+   * (e.g. tooltips on chart points). Differs from `category()` in that it
+   * also surfaces BOMB/CURSE and omits the trailing " ORB".
+   */
+  public logCategory(): string {
+    if (this.isPoint()) return "POINTS";
+    if (this.isMultiplier()) return "MULTIPLIER";
+    if (this.isBomb()) return "BOMB";
+    if (this.isHealth()) return "HEALTH";
+    if (this.isMoonrock()) return "MOONROCK";
+    if (this.isChips()) return "CHIPS";
+    if (this.isCurse()) return "CURSE";
+    return "SPECIAL";
+  }
+
+  /**
+   * Uppercase effect string used in pull/log displays
+   * (e.g. "+5 POINTS", "SINGLE BOMB: -1 HEALTH").
+   */
+  public logEffect(): string {
+    switch (this.value) {
+      case OrbType.Point5:
+        return "+5 POINTS";
+      case OrbType.Point6:
+        return "+6 POINTS";
+      case OrbType.Point7:
+        return "+7 POINTS";
+      case OrbType.Point8:
+        return "+8 POINTS";
+      case OrbType.Point9:
+        return "+9 POINTS";
+      case OrbType.PointOrb1:
+        return "+1 POINT PER ORB";
+      case OrbType.PointBomb4:
+        return "+4 POINTS PER BOMB";
+      case OrbType.Multiplier50:
+        return "+1X MULTIPLIER";
+      case OrbType.Multiplier100:
+        return "+2X MULTIPLIER";
+      case OrbType.Multiplier150:
+        return "+3X MULTIPLIER";
+      case OrbType.Bomb1:
+        return "SINGLE BOMB: -1 HEALTH";
+      case OrbType.Bomb2:
+        return "DOUBLE BOMB: -2 HEALTH";
+      case OrbType.Bomb3:
+        return "TRIPLE BOMB: -3 HEALTH";
+      case OrbType.Health1:
+        return "+1 HEALTH";
+      case OrbType.Health2:
+        return "+2 HEALTH";
+      case OrbType.Health3:
+        return "+3 HEALTH";
+      case OrbType.Moonrock15:
+        return "+15 MOONROCKS";
+      case OrbType.Moonrock40:
+        return "+40 MOONROCKS";
+      case OrbType.Chips15:
+        return "+15 CHIPS";
+      case OrbType.CurseScoreDecrease:
+        return "-20% SCORE";
+      default:
+        return this.name().toUpperCase();
+    }
+  }
+
   public variant():
     | "green"
     | "yellow"
