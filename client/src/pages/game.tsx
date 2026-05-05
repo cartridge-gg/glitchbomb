@@ -31,7 +31,7 @@ import {
   GameShop,
   type GameShopGame,
 } from "@/components/scenes";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getTokenAddress } from "@/config";
 import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
@@ -810,6 +810,7 @@ export const Game = () => {
         }}
       >
         <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+          <DialogTitle className="sr-only">Your bag</DialogTitle>
           <GameStash orbs={game?.bag ?? []} discards={game?.discards ?? []} />
         </DialogContent>
       </Dialog>

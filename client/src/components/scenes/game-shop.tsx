@@ -11,7 +11,7 @@ import {
 import { ShopItems } from "../containers/shop-items";
 import { RefreshIcon } from "../icons";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 
 export interface GameShopGame {
   chips: number;
@@ -288,6 +288,7 @@ export const GameShop = ({
 
       <Dialog open={showStash} onOpenChange={setShowStash}>
         <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+          <DialogTitle className="sr-only">Your bag</DialogTitle>
           <Bag
             pendingItems={{
               title: `Purchasing (${pendingOrbs.length})`,
