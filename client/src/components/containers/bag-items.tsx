@@ -43,6 +43,7 @@ export const BagItems = ({
                 key={`${item.orb.value}-${i}`}
                 orb={item.orb}
                 discarded={item.discarded}
+                className="px-0.5"
               />
             ))}
           </div>

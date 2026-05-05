@@ -9,11 +9,7 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import {
-  ConfirmationDialog,
-  GameStash,
-  type OrbOutcome,
-} from "@/components/containers";
+import { ConfirmationDialog, type OrbOutcome } from "@/components/containers";
 import {
   isCashoutConfirmDismissed,
   setCashoutConfirmDismissed,
@@ -31,7 +27,6 @@ import {
   GameShop,
   type GameShopGame,
 } from "@/components/scenes";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getTokenAddress } from "@/config";
 import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
@@ -70,8 +65,6 @@ const NEXT_LEVEL_CURSES: Record<number, string> = {
   6: "Bomberang",
   7: "Double Bomb",
 };
-
-type OverlayView = "none" | "stash";
 
 export const Game = () => {
   const navigate = useNavigate();
@@ -137,8 +130,6 @@ export const Game = () => {
     const glitch = toTokens(tokenPayout(score, game.stake, supply, target));
     return Number((glitch * tokenPrice).toFixed(2));
   }, [game, tokenPrice, supply, target]);
-
-  const [overlay, setOverlay] = useState<OverlayView>("none");
 
   const [showCashoutConfirm, setShowCashoutConfirm] = useState(false);
   const [showRewardOverlay, setShowRewardOverlay] = useState(false);
@@ -277,7 +268,6 @@ export const Game = () => {
     prevLevelRef.current = null;
     milestoneShownRef.current = false;
     setCurrentOrb(undefined);
-    setOverlay("none");
     setIsEnteringShop(false);
     setIsExitingShop(false);
     setIsPulling(false);
@@ -315,7 +305,6 @@ export const Game = () => {
     if (game?.shop && game.shop.length > 0) {
       // Shop loaded - reset entering shop loading state and close milestone
       setIsEnteringShop(false);
-      setOverlay("none");
     } else if (game?.shop && game.shop.length === 0) {
       // Shop cleared - reset exiting shop loading state
       setIsExitingShop(false);
@@ -635,10 +624,6 @@ export const Game = () => {
     [buyAndExit, game, tutorial],
   );
 
-  const openStash = useCallback(() => {
-    setOverlay("stash");
-    tutorial.onBagOpened();
-  }, [tutorial]);
   const openCashout = useCallback(() => {
     if (isCashoutConfirmDismissed()) {
       handleCashOut();
@@ -729,7 +714,8 @@ export const Game = () => {
     stake: game.stake,
     expiration: game.expiration,
     pullablesCount: game.pullables.length,
-    bag: game.pullables,
+    bag: game.bag,
+    discards: game.discards,
   };
 
   const shopGame: GameShopGame = {
@@ -795,25 +781,12 @@ export const Game = () => {
             healthRef={healthRef}
             outcomeRef={outcomeRef}
             onPull={handlePull}
-            onOpenStash={openStash}
             onOpenCashout={openCashout}
             onEnterShop={handleEnterShop}
             onPlayAgain={handlePlayAgain}
           />
         )}
       </div>
-      <Dialog
-        open={overlay === "stash"}
-        onOpenChange={(open) => {
-          setOverlay(open ? "stash" : "none");
-          if (!open) tutorial.onBagClosed();
-        }}
-      >
-        <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
-          <DialogTitle className="sr-only">Your bag</DialogTitle>
-          <GameStash orbs={game?.bag ?? []} discards={game?.discards ?? []} />
-        </DialogContent>
-      </Dialog>
       <ConfirmationDialog
         open={showCashoutConfirm}
         onOpenChange={setShowCashoutConfirm}

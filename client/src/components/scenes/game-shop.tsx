@@ -287,7 +287,7 @@ export const GameShop = ({
       </div>
 
       <Dialog open={showStash} onOpenChange={setShowStash}>
-        <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-[calc(100%-2rem)] md:w-full rounded-lg border-4 border-primary-600 bg-black-100 md:max-w-[420px] p-6 md:p-8">
           <DialogTitle className="sr-only">Your bag</DialogTitle>
           <Bag
             pendingItems={{
