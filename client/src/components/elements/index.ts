@@ -4,6 +4,7 @@ export * from "./achievement-icon";
 export * from "./achievement-item";
 export * from "./action";
 export * from "./activity-tab";
+export * from "./bag-item";
 export * from "./balance";
 export * from "./banner";
 export * from "./bomb-slot";
