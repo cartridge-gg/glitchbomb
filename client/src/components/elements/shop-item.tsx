@@ -4,19 +4,22 @@ import { ChipIcon, PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { Orb } from "@/models";
 import { Button } from "../ui/button";
-import { OrbDisplay } from "./orb-display";
+import { OrbIcon } from ".";
 import { RarityPill } from "./rarity-pill";
 
-const shopItemVariants = cva("flex items-center gap-3", {
-  variants: {
-    variant: {
-      default: "",
+const shopItemVariants = cva(
+  "flex items-center gap-3 data-[disabled=true]:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
     },
   },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+);
 
 export interface ShopItemProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -45,24 +48,22 @@ export const ShopItem = ({
 
   return (
     <div
-      className={cn(
-        shopItemVariants({ variant, className }),
-        disabled && "opacity-50",
-      )}
+      data-disabled={disabled}
+      className={cn(shopItemVariants({ variant, className }))}
       {...props}
     >
       {/* Orb icon with value */}
-      <OrbDisplay orb={orb} size="sm" valuePosition="top-right" />
+      <OrbIcon orb={orb} size="sm" className="self-end" />
 
       {/* Title/rarity and description */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h3 className="text-white-100 font-secondary text-xl">
+      <div className="flex-1 flex flex-col gap-1.5">
+        <div className="flex justify-between items-center gap-2">
+          <h3 className="text-white-100 font-secondary text-xl/4">
             {orb.category()}
           </h3>
           <RarityPill variant={orb.rarity()} />
         </div>
-        <p className="text-white/60 font-secondary text-xs tracking-wide">
+        <p className="text-white-300 font-secondary text-base/3">
           {orb.description()}
         </p>
       </div>

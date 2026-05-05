@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { ShopItem, type ShopItemProps } from "@/components/elements/shop-item";
 
-const shopItemsVariants = cva("flex flex-col gap-1", {
+const shopItemsVariants = cva("flex flex-col gap-6", {
   variants: {
     variant: {
       default: "",
@@ -27,7 +27,7 @@ export const ShopItems = ({
   return (
     <div className={shopItemsVariants({ variant, className })} {...props}>
       {items.map((item, index) => (
-        <ShopItem key={index} {...item} />
+        <ShopItem key={`${item.orb.value}-${index}`} {...item} />
       ))}
     </div>
   );

@@ -26,3 +26,4 @@ export * from "./stakes";
 export * from "./staking";
 export * from "./staking-only";
 export * from "./stash-modal";
+export * from "./summary-items";

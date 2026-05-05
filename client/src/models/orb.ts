@@ -1,4 +1,5 @@
 // Orb enum matching contracts/src/types/orb.cairo
+import * as Icons from "@/components/icons";
 export enum OrbType {
   None = "None",
   Bomb1 = "Bomb1",
@@ -31,6 +32,38 @@ export class Orb {
 
   constructor(value: OrbType) {
     this.value = value;
+  }
+
+  public getIcon() {
+    if (this.value === OrbType.StickyBomb) return Icons.StickyBombIcon;
+    if (this.isBomb()) {
+      if (this.value === OrbType.Bomb1) return Icons.Bomb1xIcon;
+      if (this.value === OrbType.Bomb2) return Icons.Bomb2xIcon;
+      if (this.value === OrbType.Bomb3) return Icons.Bomb3xIcon;
+      return Icons.BombOrbIcon;
+    }
+    if (this.isPoint()) return Icons.SparklesIcon;
+    if (this.isMultiplier()) return Icons.CrossIcon;
+    if (this.isHealth()) return Icons.HeartIcon;
+    if (this.isChips()) return Icons.ChipIcon;
+    if (this.isMoonrock()) return Icons.MoonrockIcon;
+    return Icons.SparklesIcon;
+  }
+
+  public getCategory() {
+    if (this.isBomb()) return "bomb";
+    if (this.isPoint()) return "point";
+    if (this.isMultiplier()) return "multiplier";
+    if (this.isHealth()) return "health";
+    return "special";
+  }
+
+  public getCategoryIcon() {
+    if (this.isBomb()) return Icons.BombIcon;
+    if (this.isPoint()) return Icons.SparklesIcon;
+    if (this.isMultiplier()) return Icons.CrossIcon;
+    if (this.isHealth()) return Icons.HeartIcon;
+    return Icons.BoltIcon;
   }
 
   public into(): number {
@@ -200,47 +233,47 @@ export class Orb {
   public description(): string {
     switch (this.value) {
       case OrbType.Bomb1:
-        return "Lose 1 health point.";
+        return "Lose 1 health point";
       case OrbType.Bomb2:
-        return "Lose 2 health points.";
+        return "Lose 2 health points";
       case OrbType.Bomb3:
-        return "Lose 3 health points.";
+        return "Lose 3 health points";
       case OrbType.StickyBomb:
-        return "Lose 1 health point.";
+        return "Lose 1 health point";
       case OrbType.Health1:
-        return "Restore 1 health point.";
+        return "Restore 1 health point";
       case OrbType.Health2:
-        return "Restore 2 health points.";
+        return "Restore 2 health points";
       case OrbType.Health3:
-        return "Restore 3 health points.";
+        return "Restore 3 health points";
       case OrbType.Multiplier50:
-        return "Boost your score multiplier by +0.5x.";
+        return "Boost your score multiplier by +0.5x";
       case OrbType.Multiplier100:
-        return "Boost your score multiplier by +1x.";
+        return "Boost your score multiplier by +1x";
       case OrbType.Multiplier150:
-        return "Boost your score multiplier by +1.5x.";
+        return "Boost your score multiplier by +1.5x";
       case OrbType.Point5:
-        return "Earn 5 points.";
+        return "Earn 5 points";
       case OrbType.Point6:
-        return "Earn 6 points.";
+        return "Earn 6 points";
       case OrbType.Point7:
-        return "Earn 7 points.";
+        return "Earn 7 points";
       case OrbType.Point8:
-        return "Earn 8 points.";
+        return "Earn 8 points";
       case OrbType.Point9:
-        return "Earn 9 points.";
+        return "Earn 9 points";
       case OrbType.PointOrb1:
-        return "Earn 1 point for each orb previously pulled.";
+        return "Earn 1 point for each orb previously pulled";
       case OrbType.PointBomb4:
-        return "Earn 4 points for each bomb previously pulled.";
+        return "Earn 4 points for each bomb previously pulled";
       case OrbType.Moonrock15:
-        return "Earn 15 Moonrocks.";
+        return "Earn 15 Moonrocks";
       case OrbType.Moonrock40:
-        return "Earn 40 Moonrocks.";
+        return "Earn 40 Moonrocks";
       case OrbType.Chips15:
-        return "Earn 15 Chips.";
+        return "Earn 15 Chips";
       case OrbType.CurseScoreDecrease:
-        return "Lose 20% of your score.";
+        return "Lose 20% of your score";
       default:
         return "";
     }
@@ -373,19 +406,19 @@ export class Orb {
       case OrbType.Multiplier150:
         return "var(--orb-multiplier)";
       case OrbType.Point5:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.Point6:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.Point7:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.Point8:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.Point9:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.PointOrb1:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.PointBomb4:
-        return "var(--green-400)";
+        return "var(--green-100)";
       case OrbType.Moonrock15:
         return "var(--orb-moonrock)";
       case OrbType.Moonrock40:
@@ -483,6 +516,53 @@ export class Orb {
         return "-20% pts";
       default:
         return "";
+    }
+  }
+
+  public label(): string {
+    switch (this.value) {
+      case OrbType.Bomb1:
+        return "1";
+      case OrbType.Bomb2:
+        return "P";
+      case OrbType.Bomb3:
+        return "3";
+      case OrbType.StickyBomb:
+        return "1*";
+      case OrbType.Health1:
+        return "1";
+      case OrbType.Health2:
+        return "2";
+      case OrbType.Health3:
+        return "3";
+      case OrbType.Multiplier50:
+        return "0.5x";
+      case OrbType.Multiplier100:
+        return "1x";
+      case OrbType.Multiplier150:
+        return "1.5x";
+      case OrbType.Point5:
+        return "5";
+      case OrbType.Point6:
+        return "6";
+      case OrbType.Point7:
+        return "7";
+      case OrbType.Point8:
+        return "8";
+      case OrbType.Point9:
+        return "9";
+      case OrbType.PointOrb1:
+        return "1*";
+      case OrbType.PointBomb4:
+        return "4*";
+      case OrbType.Moonrock15:
+        return "15";
+      case OrbType.Moonrock40:
+        return "40";
+      case OrbType.Chips15:
+        return "15";
+      default:
+        return "*";
     }
   }
 }

@@ -25,7 +25,12 @@ import {
   RewardOverlay,
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
-import { GameScene, type GameSceneGame } from "@/components/scenes";
+import {
+  GameScene,
+  type GameSceneGame,
+  GameShop,
+  type GameShopGame,
+} from "@/components/scenes";
 import { getTokenAddress } from "@/config";
 import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
@@ -710,46 +715,32 @@ export const Game = () => {
 
   // Keep the "play" screen during the death sequence so the fatal bomb
   // animation plays before transitioning to GameOver.
-  const sceneGame: GameSceneGame = deathPending
-    ? {
-        id: game.id,
-        over: 0,
-        level: game.level,
-        health: game.health,
-        points: game.points,
-        milestone: game.milestone,
-        multiplier: game.multiplier,
-        moonrocks: game.moonrocks,
-        chips: game.chips,
-        stake: game.stake,
-        expiration: game.expiration,
-        pullablesCount: game.pullables.length,
-        shop: game.shop,
-        bag: game.pullables,
-        shopPurchaseCounts: game.shopPurchaseCounts,
-      }
-    : {
-        id: game.id,
-        over: game.over,
-        level: game.level,
-        health: game.health,
-        points: game.points,
-        milestone: game.milestone,
-        multiplier: game.multiplier,
-        moonrocks: game.moonrocks,
-        chips: game.chips,
-        stake: game.stake,
-        expiration: game.expiration,
-        pullablesCount: game.pullables.length,
-        shop: game.shop,
-        bag: game.pullables,
-        shopPurchaseCounts: game.shopPurchaseCounts,
-      };
-
-  const handleShopBalanceChange = (bal: number) => {
-    // Tutorial: detect first orb added to cart (balance dropped)
-    if (bal < game.chips) tutorial.onOrbBought();
+  const sceneGame: GameSceneGame = {
+    id: game.id,
+    over: deathPending ? 0 : game.over,
+    level: game.level,
+    health: game.health,
+    points: game.points,
+    milestone: game.milestone,
+    multiplier: game.multiplier,
+    moonrocks: game.moonrocks,
+    chips: game.chips,
+    stake: game.stake,
+    expiration: game.expiration,
+    pullablesCount: game.pullables.length,
+    bag: game.pullables,
   };
+
+  const shopGame: GameShopGame = {
+    chips: game.chips,
+    moonrocks: game.moonrocks,
+    shop: game.shop,
+    bag: game.pullables,
+    shopPurchaseCounts: game.shopPurchaseCounts,
+  };
+
+  // Show shop scene when shop has orbs and the death sequence isn't running.
+  const showShop = !deathPending && game.shop.length > 0;
 
   return (
     <motion.div
@@ -765,44 +756,50 @@ export const Game = () => {
       transition={deathPending ? { duration: 0.6, ease: "easeOut" } : undefined}
     >
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
-        <GameScene
-          game={sceneGame}
-          expired={isExpired}
-          plData={plData}
-          pulls={pulls}
-          chartGoal={chartGoal}
-          distribution={distribution}
-          progressiveDistribution={progressiveDistribution}
-          bombDetails={bombDetails}
-          currentOrb={currentOrb}
-          outcomeKey={outcomeKey}
-          outcomeShowMultiplied={outcomeShowMultiplied}
-          isFatalBomb={isFatalBomb}
-          isPulling={isPulling}
-          pointsBurst={pointsBurst}
-          showRewardOverlay={showRewardOverlay}
-          showDistributionPercent={displaySettings.showDistributionPercent}
-          cashOutValue={cashOutValue}
-          ante={milestoneCost(game.level + 1)}
-          nextCurseLabel={nextCurseLabel}
-          isEnteringShop={isEnteringShop}
-          isCashingOut={isCashingOut}
-          isExitingShop={isExitingShop}
-          tokenPrice={tokenPrice}
-          supply={supply}
-          target={target}
-          pullerRef={pullerRef}
-          pointsRef={pointsRef}
-          healthRef={healthRef}
-          outcomeRef={outcomeRef}
-          onPull={handlePull}
-          onOpenStash={openStash}
-          onOpenCashout={openCashout}
-          onEnterShop={handleEnterShop}
-          onBuyAndExit={handleBuyAndExit}
-          onShopBalanceChange={handleShopBalanceChange}
-          onPlayAgain={handlePlayAgain}
-        />
+        {showShop ? (
+          <GameShop
+            game={shopGame}
+            onConfirm={handleBuyAndExit}
+            isLoading={isExitingShop}
+            className="h-full md:max-w-[420px] md:mx-auto p-4 md:p-8"
+          />
+        ) : (
+          <GameScene
+            game={sceneGame}
+            expired={isExpired}
+            plData={plData}
+            pulls={pulls}
+            chartGoal={chartGoal}
+            distribution={distribution}
+            progressiveDistribution={progressiveDistribution}
+            bombDetails={bombDetails}
+            currentOrb={currentOrb}
+            outcomeKey={outcomeKey}
+            outcomeShowMultiplied={outcomeShowMultiplied}
+            isFatalBomb={isFatalBomb}
+            isPulling={isPulling}
+            pointsBurst={pointsBurst}
+            showRewardOverlay={showRewardOverlay}
+            showDistributionPercent={displaySettings.showDistributionPercent}
+            cashOutValue={cashOutValue}
+            ante={milestoneCost(game.level + 1)}
+            nextCurseLabel={nextCurseLabel}
+            isEnteringShop={isEnteringShop}
+            isCashingOut={isCashingOut}
+            tokenPrice={tokenPrice}
+            supply={supply}
+            target={target}
+            pullerRef={pullerRef}
+            pointsRef={pointsRef}
+            healthRef={healthRef}
+            outcomeRef={outcomeRef}
+            onPull={handlePull}
+            onOpenStash={openStash}
+            onOpenCashout={openCashout}
+            onEnterShop={handleEnterShop}
+            onPlayAgain={handlePlayAgain}
+          />
+        )}
       </div>
       <StashModal
         open={overlay === "stash"}

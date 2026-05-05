@@ -1,14 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  LoadingSpinner,
-  OrbCategorySummary,
-  OrbDisplay,
-  type ShopItemProps,
-} from "@/components/elements";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoadingSpinner, type ShopItemProps } from "@/components/elements";
 import type { Orb } from "@/models";
-import { GameBalances } from "../containers";
+import { GameBalances, SummaryItems } from "../containers";
 import { ConfirmationDialog } from "../containers/confirmation-dialog";
 import {
   isShopExitConfirmDismissed,
@@ -16,25 +10,31 @@ import {
 } from "../containers/confirmation-prefs";
 import { ShopItems } from "../containers/shop-items";
 import { StashModal } from "../containers/stash-modal";
-import { GradientBorder } from "../ui/gradient-border";
-import type { GameSceneGame } from "./game";
+import { RefreshIcon } from "../icons";
+import { Button } from "../ui/button";
+
+export interface GameShopGame {
+  chips: number;
+  moonrocks: number;
+  shop: Orb[];
+  bag: Orb[];
+  shopPurchaseCounts?: number[];
+}
 
 export interface GameShopProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameShopVariants> {
-  game: GameSceneGame;
+  game: GameShopGame;
   onConfirm: (indices: number[]) => void;
   isLoading?: boolean;
-  onBalanceChange?: (balance: number) => void;
 }
 
 const gameShopVariants = cva(
-  "select-none relative flex flex-col gap-[clamp(8px,2svh,16px)]",
+  "select-none relative flex flex-col gap-4 md:gap-6",
   {
     variants: {
       variant: {
-        default:
-          "h-full min-h-0 max-w-[420px] mx-auto px-4 pt-[clamp(10px,2.4svh,18px)] pb-[clamp(10px,2.4svh,18px)]",
+        default: "h-full min-h-0 mx-auto p-4",
       },
     },
     defaultVariants: {
@@ -43,23 +43,12 @@ const gameShopVariants = cva(
   },
 );
 
-const getParticleCategory = (orb: Orb) => {
-  if (orb.isBomb()) return "bomb";
-  if (orb.isPoint()) return "point";
-  if (orb.isMultiplier()) return "multiplier";
-  if (orb.isHealth()) return "health";
-  if (orb.isChips()) return "special";
-  if (orb.isMoonrock()) return "special";
-  return "point";
-};
-
 export const GameShop = ({
   game,
   variant,
   className,
   onConfirm,
   isLoading = false,
-  onBalanceChange,
   ...props
 }: GameShopProps) => {
   const {
@@ -77,31 +66,6 @@ export const GameShop = ({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   // Show stash modal
   const [showStash, setShowStash] = useState(false);
-  const [stashPulse, setStashPulse] = useState(0);
-
-  // Refs for particle animation
-  const stashRef = useRef<HTMLButtonElement>(null);
-  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
-  const particleIdRef = useRef(0);
-
-  // Flying orb particles
-  const [particles, setParticles] = useState<
-    {
-      id: number;
-      startX: number;
-      startY: number;
-      endX: number;
-      endY: number;
-      orb: Orb;
-    }[]
-  >([]);
-
-  const setButtonRef = useCallback(
-    (index: number) => (el: HTMLButtonElement | null) => {
-      buttonRefs.current[index] = el;
-    },
-    [],
-  );
 
   // Create a stable key that changes when orbs or balance change
   const resetKey = useMemo(
@@ -170,9 +134,6 @@ export const GameShop = ({
   }, [orbs, history, initialPurchaseCounts]);
 
   const virtualBalance = balance - totalSpent;
-  useEffect(() => {
-    onBalanceChange?.(virtualBalance);
-  }, [virtualBalance, onBalanceChange]);
 
   // Build basket indices array (with duplicates for quantity)
   const basketIndices = useMemo(() => {
@@ -195,35 +156,6 @@ export const GameShop = ({
         [index]: (prev[index] || 0) + 1,
       }));
       setHistory((prev) => [...prev, index]);
-      setStashPulse((prev) => prev + 1);
-
-      // Spawn flying orb particle toward the matching category slot
-      const btnEl = buttonRefs.current[index];
-      const stashEl = stashRef.current;
-      if (btnEl && stashEl) {
-        const category = getParticleCategory(orb);
-        const targetEl =
-          stashEl.querySelector<HTMLElement>(
-            `[data-orb-category="${category}"]`,
-          ) ?? stashEl;
-        const btnRect = btnEl.getBoundingClientRect();
-        const targetRect = targetEl.getBoundingClientRect();
-        const id = ++particleIdRef.current;
-        setParticles((prev) => [
-          ...prev,
-          {
-            id,
-            startX: btnRect.left + btnRect.width / 2,
-            startY: btnRect.top + btnRect.height / 2,
-            endX: targetRect.left + targetRect.width / 2,
-            endY: targetRect.top + targetRect.height / 2,
-            orb,
-          },
-        ]);
-        setTimeout(() => {
-          setParticles((prev) => prev.filter((p) => p.id !== id));
-        }, 600);
-      }
     }
   };
 
@@ -293,14 +225,13 @@ export const GameShop = ({
       });
   }, [orbs]);
 
-  const shopItems: ShopItemProps[] = sortedShopEntries.map(({ orb, index }) => {
+  const items: ShopItemProps[] = sortedShopEntries.map(({ orb, index }) => {
     const price = getNextPrice(orb);
     return {
       orb,
       price,
       disabled: price > virtualBalance,
       onAdd: () => handleIncrement(index),
-      buttonRef: setButtonRef(index),
     };
   });
 
@@ -324,75 +255,56 @@ export const GameShop = ({
     <div className={gameShopVariants({ variant, className })} {...props}>
       <GameBalances
         moonrocks={{ value: game.moonrocks }}
-        chips={{ value: game.chips }}
+        chips={{ value: virtualBalance }}
       />
 
-      <div className="flex-1 min-h-0 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col gap-4 md:gap-6 overflow-hidden">
+        {/* Subtitle */}
+        <p className="text-primary-100 font-secondary uppercase text-[22px]/6">
+          Purchase Orbs
+        </p>
+
         {/* Scrollable content */}
         <div
-          className="flex flex-col gap-[clamp(8px,2svh,12px)] max-h-full overflow-y-auto px-1 -mx-1"
+          className="flex-1 flex flex-col overflow-y-auto"
           style={{ scrollbarWidth: "none" }}
         >
-          {/* Subtitle */}
-          <p className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wide">
-            Spend Chips to add orbs to your bag
-          </p>
-
           {/* Shop items */}
-          <ShopItems items={shopItems} />
+          <ShopItems items={items} />
         </div>
       </div>
 
-      {/* Your Orbs section - clickable category summary */}
-      <div className="flex flex-col gap-[clamp(6px,1.6svh,10px)] pt-[clamp(6px,1.6svh,12px)] shrink-0">
-        <h2 className="text-green-600 font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-wider uppercase">
+      {/* Orbs section */}
+      <div className="flex flex-col gap-3">
+        <h2 className="text-primary-100 font-secondary uppercase text-[22px]/6">
           Your Orbs
         </h2>
-        <motion.div
-          key={stashPulse}
-          initial={{ scale: 1 }}
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 0.25 }}
-        >
-          <OrbCategorySummary
-            ref={stashRef}
-            orbs={displayBag}
-            onClick={() => setShowStash(true)}
-          />
-        </motion.div>
+        <SummaryItems orbs={displayBag} onClick={() => setShowStash(true)} />
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-stretch gap-3 w-full pt-2 shrink-0">
-        <GradientBorder color="orange" className="flex-1">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all disabled:pointer-events-none disabled:opacity-30 hover:brightness-125"
-            style={{
-              color: "#F1721C",
-              background: "linear-gradient(180deg, #602A06 0%, #281202 100%)",
-            }}
-            disabled={history.length === 0 || isLoading}
-            onClick={handleUndo}
-          >
-            <span className="text-md leading-none translate-y-[1px]">↻</span>
-            UNDO
-          </button>
-        </GradientBorder>
-        <GradientBorder color="green" className="flex-1">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 min-h-[clamp(40px,6svh,56px)] w-full font-bold font-secondary text-[clamp(0.65rem,1.5svh,0.875rem)] tracking-widest rounded-lg transition-all disabled:pointer-events-none disabled:opacity-50 hover:brightness-125"
-            style={{
-              color: "#36F818",
-              background: "linear-gradient(180deg, #0D2518 0%, #061208 100%)",
-            }}
-            onClick={handleContinue}
-            disabled={isLoading}
-          >
-            {isLoading ? <LoadingSpinner size="sm" /> : "CONTINUE"}
-          </button>
-        </GradientBorder>
+      <div className="flex items-center gap-3 md:gap-4 text-primary-600 hover:text-primary-100">
+        <Button
+          variant="secondary"
+          className="flex-1 h-12"
+          disabled={history.length === 0 || isLoading}
+          onClick={handleUndo}
+        >
+          <RefreshIcon size="sm" />
+          <span className="font-secondary text-2xl uppercase">Undo</span>
+        </Button>
+        <Button
+          variant="secondary"
+          className="flex-1 h-12 bg-primary-600 hover:bg-primary-500"
+          disabled={isLoading}
+          onClick={handleContinue}
+        >
+          {isLoading ? (
+            <LoadingSpinner size="sm" />
+          ) : (
+            <span className="font-secondary text-2xl uppercase ">Continue</span>
+          )}
+        </Button>
       </div>
 
       <StashModal
@@ -412,38 +324,6 @@ export const GameShop = ({
         onDismiss={setShopExitConfirmDismissed}
         isConfirming={isLoading}
       />
-
-      {/* Flying orb particles */}
-      <AnimatePresence>
-        {particles.map((p) => (
-          <motion.div
-            key={p.id}
-            className="fixed z-[60] pointer-events-none"
-            style={{ left: 0, top: 0 }}
-            initial={{
-              x: p.startX - 24,
-              y: p.startY - 24,
-              scale: 1.2,
-              opacity: 1,
-            }}
-            animate={{
-              x: p.endX - 24,
-              y: p.endY - 24,
-              scale: 0.6,
-              opacity: [1, 1, 0],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 24,
-              opacity: { duration: 0.5, times: [0, 0.7, 1] },
-            }}
-          >
-            <OrbDisplay orb={p.orb} size="sm" showValue={false} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
     </div>
   );
 };

@@ -1,22 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { Orb, OrbType } from "@/models/orb";
-import type { GameSceneGame } from "./game";
-import { GameShop } from "./game-shop";
+import { GameShop, type GameShopGame } from "./game-shop";
 
-const baseGame: GameSceneGame = {
-  id: 1,
-  over: 0,
-  level: 2,
-  health: 4,
-  points: 28,
-  milestone: 40,
-  multiplier: 1.5,
-  moonrocks: 120,
+const baseGame: GameShopGame = {
   chips: 30,
-  stake: 2,
-  expiration: Math.floor(Date.now() / 1000) + 86400,
-  pullablesCount: 8,
+  moonrocks: 120,
   shop: [
     new Orb(OrbType.Point5),
     new Orb(OrbType.Multiplier50),
@@ -34,16 +23,10 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [
-    (Story) => (
-      <div className="h-screen bg-green-950">
-        <Story />
-      </div>
-    ),
-  ],
   args: {
     game: baseGame,
     onConfirm: fn(),
+    className: "md:max-w-[420px]",
   },
 } satisfies Meta<typeof GameShop>;
 

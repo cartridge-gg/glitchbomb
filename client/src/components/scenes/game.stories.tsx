@@ -78,7 +78,6 @@ const baseGame: GameSceneGame = {
   stake: 2,
   expiration: Math.floor(Date.now() / 1000) - 600 + 86400,
   pullablesCount: 8,
-  shop: [],
   bag: [
     new Orb(OrbType.Point5),
     new Orb(OrbType.Point7),
@@ -136,8 +135,6 @@ const meta = {
     onOpenStash: fn(),
     onOpenCashout: fn(),
     onEnterShop: fn(),
-    onBuyAndExit: fn(),
-    onShopBalanceChange: fn(),
     onPlayAgain: fn(),
   },
 } satisfies Meta<typeof GameScene>;
@@ -234,23 +231,6 @@ export const EnteringShop: Story = {
     cashOutValue: 1.23,
     ante: 20,
     isEnteringShop: true,
-  },
-};
-
-export const Shop: Story = {
-  args: {
-    game: {
-      ...baseGame,
-      shop: [
-        new Orb(OrbType.Point5),
-        new Orb(OrbType.Multiplier50),
-        new Orb(OrbType.Health1),
-        new Orb(OrbType.Moonrock15),
-        new Orb(OrbType.Chips15),
-        new Orb(OrbType.Point8),
-      ],
-      chips: 30,
-    },
   },
 };
 

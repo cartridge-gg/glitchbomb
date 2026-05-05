@@ -27,7 +27,6 @@ import {
 } from "@/components/icons";
 import type { Orb, OrbPulled } from "@/models";
 import { Button } from "../ui/button";
-import { GameShop, type GameShopProps } from "./game-shop";
 
 export interface GameSceneGame {
   id: number;
@@ -44,9 +43,7 @@ export interface GameSceneGame {
   /** Unix timestamp at which the game expires; 0 = not yet started. */
   expiration: number;
   pullablesCount: number;
-  shop: Orb[];
   bag: Orb[];
-  shopPurchaseCounts?: number[];
 }
 
 const gameSceneVariants = cva("flex flex-col mx-auto h-full p-4 gap-3", {
@@ -90,8 +87,6 @@ export interface GameSceneProps
   isEnteringShop?: boolean;
   isCashingOut?: boolean;
 
-  isExitingShop?: boolean;
-
   tokenPrice?: GameOverProps["tokenPrice"];
   supply?: GameOverProps["supply"];
   target?: GameOverProps["target"];
@@ -105,12 +100,10 @@ export interface GameSceneProps
   onOpenStash: () => void;
   onOpenCashout: () => void;
   onEnterShop: () => void;
-  onBuyAndExit: (indices: number[]) => void;
-  onShopBalanceChange?: GameShopProps["onBalanceChange"];
   onPlayAgain?: () => void;
 }
 
-type Screen = "expired" | "over" | "shop" | "milestone" | "play";
+type Screen = "expired" | "over" | "milestone" | "play";
 
 export const GameScene = ({
   game,
@@ -134,7 +127,6 @@ export const GameScene = ({
   nextCurseLabel,
   isEnteringShop = false,
   isCashingOut = false,
-  isExitingShop = false,
   tokenPrice,
   supply,
   target,
@@ -146,8 +138,6 @@ export const GameScene = ({
   onOpenStash,
   onOpenCashout,
   onEnterShop,
-  onBuyAndExit,
-  onShopBalanceChange,
   onPlayAgain,
   variant,
   className,
@@ -156,7 +146,6 @@ export const GameScene = ({
   const screen = useMemo<Screen>(() => {
     if (!game.over && expired) return "expired";
     if (game.over) return "over";
-    if (game.shop.length > 0) return "shop";
     const milestoneReached =
       game.points >= game.milestone && game.milestone > 0;
     if (milestoneReached && !currentOrb) return "milestone";
@@ -215,17 +204,6 @@ export const GameScene = ({
         tokenPrice={tokenPrice}
         supply={supply}
         target={target}
-      />
-    );
-  }
-
-  if (screen === "shop") {
-    return (
-      <GameShop
-        game={game}
-        onConfirm={onBuyAndExit}
-        isLoading={isExitingShop}
-        onBalanceChange={onShopBalanceChange}
       />
     );
   }
