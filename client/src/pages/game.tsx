@@ -11,8 +11,8 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ConfirmationDialog,
+  GameStash,
   type OrbOutcome,
-  StashModal,
 } from "@/components/containers";
 import {
   isCashoutConfirmDismissed,
@@ -31,6 +31,7 @@ import {
   GameShop,
   type GameShopGame,
 } from "@/components/scenes";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { getTokenAddress } from "@/config";
 import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
@@ -801,16 +802,21 @@ export const Game = () => {
           />
         )}
       </div>
-      <StashModal
+      <Dialog
         open={overlay === "stash"}
         onOpenChange={(open) => {
           setOverlay(open ? "stash" : "none");
           if (!open) tutorial.onBagClosed();
         }}
-        orbs={game?.bag ?? []}
-        discards={game?.discards ?? []}
-        viewMode={displaySettings.stashViewMode}
-      />
+      >
+        <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+          <GameStash
+            orbs={game?.bag ?? []}
+            discards={game?.discards ?? []}
+            viewMode={displaySettings.stashViewMode}
+          />
+        </DialogContent>
+      </Dialog>
       <ConfirmationDialog
         open={showCashoutConfirm}
         onOpenChange={setShowCashoutConfirm}

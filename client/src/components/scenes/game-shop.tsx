@@ -2,16 +2,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoadingSpinner, type ShopItemProps } from "@/components/elements";
 import type { Orb } from "@/models";
-import { GameBalances, SummaryItems } from "../containers";
+import { GameBalances, GameStash, SummaryItems } from "../containers";
 import { ConfirmationDialog } from "../containers/confirmation-dialog";
 import {
   isShopExitConfirmDismissed,
   setShopExitConfirmDismissed,
 } from "../containers/confirmation-prefs";
 import { ShopItems } from "../containers/shop-items";
-import { StashModal } from "../containers/stash-modal";
 import { RefreshIcon } from "../icons";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent } from "../ui/dialog";
 
 export interface GameShopGame {
   chips: number;
@@ -307,13 +307,15 @@ export const GameShop = ({
         </Button>
       </div>
 
-      <StashModal
-        open={showStash}
-        onOpenChange={setShowStash}
-        orbs={existingBag}
-        pendingOrbs={pendingOrbs}
-        onRemovePending={handleRemovePending}
-      />
+      <Dialog open={showStash} onOpenChange={setShowStash}>
+        <DialogContent className="w-[min(92vw,420px)] max-w-none border-4 border-[rgba(29,58,41,0.8)] bg-black p-0 h-[min(85vh,600px)] max-h-[85vh] overflow-hidden">
+          <GameStash
+            orbs={existingBag}
+            pendingOrbs={pendingOrbs}
+            onRemovePending={handleRemovePending}
+          />
+        </DialogContent>
+      </Dialog>
       <ConfirmationDialog
         open={showExitConfirmation}
         onOpenChange={setShowExitConfirmation}
