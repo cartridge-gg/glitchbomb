@@ -14,7 +14,7 @@ const meta = {
   title: "Containers/Bag Items",
   component: BagItems,
   parameters: {
-    layout: "fullscreen",
+    layout: "padded",
   },
   argTypes: {
     title: {
