@@ -1,4 +1,5 @@
 export * from "./achievements";
+export * from "./bag";
 export * from "./bag-items";
 export * from "./banners";
 export * from "./bomb-slots";

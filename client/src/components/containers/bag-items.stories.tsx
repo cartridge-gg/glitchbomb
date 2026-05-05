@@ -3,11 +3,27 @@ import { Orb, OrbType } from "@/models";
 import { BagItems } from "./bag-items";
 
 const mockItems = [
+  { orb: new Orb(OrbType.Bomb1) },
+  { orb: new Orb(OrbType.Bomb1) },
+  { orb: new Orb(OrbType.Bomb2) },
+  { orb: new Orb(OrbType.Bomb3) },
   { orb: new Orb(OrbType.Point5) },
+  { orb: new Orb(OrbType.Point5) },
+  { orb: new Orb(OrbType.Point6) },
+  { orb: new Orb(OrbType.Point7) },
   { orb: new Orb(OrbType.Point8) },
+  { orb: new Orb(OrbType.Point9) },
+  { orb: new Orb(OrbType.PointOrb1) },
+  { orb: new Orb(OrbType.PointBomb4) },
   { orb: new Orb(OrbType.Health1) },
+  { orb: new Orb(OrbType.Health2) },
+  { orb: new Orb(OrbType.Health3) },
   { orb: new Orb(OrbType.Multiplier50) },
+  { orb: new Orb(OrbType.Multiplier100) },
+  { orb: new Orb(OrbType.Multiplier150) },
   { orb: new Orb(OrbType.Moonrock15) },
+  { orb: new Orb(OrbType.Moonrock40) },
+  { orb: new Orb(OrbType.Chips15) },
 ];
 
 const meta = {

@@ -184,7 +184,7 @@ export class Orb {
   public name(): string {
     switch (this.value) {
       case OrbType.Bomb1:
-        return "Bomb";
+        return "Single Bomb";
       case OrbType.Bomb2:
         return "Double Bomb";
       case OrbType.Bomb3:

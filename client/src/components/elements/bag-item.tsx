@@ -44,15 +44,15 @@ export const BagItem = ({
             className="data-[discarded=true]:opacity-25"
           />
         </TooltipTrigger>
-        <TooltipContent className="bg-black border border-white/10 px-3 py-2 max-w-[200px]">
+        <TooltipContent className="flex flex-col gap-2 bg-black-100 border border-white-800 p-3 max-w-[200px]">
           <p
-            className="font-secondary text-xs font-bold"
+            className="font-secondary text-base/3 uppercase"
             style={{ color: orb.color() }}
           >
             {orb.name()}
           </p>
           <p
-            className="font-secondary text-xs mt-0.5 opacity-50"
+            className="font-secondary text-sm/3 opacity-80"
             style={{ color: orb.color() }}
           >
             {orb.description()}
