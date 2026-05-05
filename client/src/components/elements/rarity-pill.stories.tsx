@@ -40,13 +40,3 @@ export const Cosmic: Story = {
     variant: "cosmic",
   },
 };
-
-export const Variants: Story = {
-  render: () => (
-    <div className="flex gap-4">
-      <RarityPill variant="common" />
-      <RarityPill variant="rare" />
-      <RarityPill variant="cosmic" />
-    </div>
-  ),
-};

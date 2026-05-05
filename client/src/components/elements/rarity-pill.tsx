@@ -6,9 +6,10 @@ const rarityPillVariants = cva(
   {
     variants: {
       variant: {
-        common: "bg-green-100",
-        rare: "",
-        cosmic: "",
+        common: "text-green-100 border-green-600",
+        rare: "text-blue-100 border-blue-600",
+        cosmic:
+          "bg-clip-text text-transparent bg-gradient-to-t from-blue-100 to-purple-100 border-purple-600",
       },
     },
     defaultVariants: {
@@ -28,7 +29,7 @@ export const RarityPill = ({
 }: RarityPillProps) => {
   return (
     <div className={cn(rarityPillVariants({ variant, className }))} {...props}>
-      <p className="font-secondary">{variant ?? "common"}</p>
+      <p className="font-secondary text-base/4">{variant ?? "common"}</p>
     </div>
   );
 };
