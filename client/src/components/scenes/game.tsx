@@ -7,8 +7,6 @@ import {
   BombSlots,
   GameBalances,
   GameChoices,
-  GameOver,
-  type GameOverProps,
   GamePull,
   GameStats,
   type OrbOutcome,
@@ -32,8 +30,6 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 
 export interface GameSceneGame {
   id: number;
-  /** Unix timestamp at which the game ended; 0 = still in progress. */
-  over: number;
   level: number;
   health: number;
   points: number;
@@ -42,8 +38,6 @@ export interface GameSceneGame {
   moonrocks: number;
   chips: number;
   stake: number;
-  /** Unix timestamp at which the game expires; 0 = not yet started. */
-  expiration: number;
   pullablesCount: number;
   bag: Orb[];
   discards?: boolean[];
@@ -64,7 +58,6 @@ export interface GameSceneProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onPull">,
     VariantProps<typeof gameSceneVariants> {
   game: GameSceneGame;
-  expired?: boolean;
 
   plData: GameChartDataPoint[];
   pulls: OrbPulled[];
@@ -79,7 +72,6 @@ export interface GameSceneProps
   outcomeShowMultiplied: boolean;
   isFatalBomb: boolean;
   isPulling: boolean;
-  pointsBurst?: number;
 
   showRewardOverlay?: boolean;
   showDistributionPercent?: boolean;
@@ -90,26 +82,18 @@ export interface GameSceneProps
   isEnteringShop?: boolean;
   isCashingOut?: boolean;
 
-  tokenPrice?: GameOverProps["tokenPrice"];
-  supply?: GameOverProps["supply"];
-  target?: GameOverProps["target"];
-
   pullerRef?: Ref<HTMLDivElement>;
-  pointsRef?: Ref<HTMLDivElement>;
-  healthRef?: Ref<HTMLDivElement>;
   outcomeRef?: Ref<HTMLDivElement>;
 
   onPull: () => void;
   onOpenCashout: () => void;
   onEnterShop: () => void;
-  onPlayAgain?: () => void;
 }
 
-type Screen = "expired" | "over" | "milestone" | "play";
+type Screen = "milestone" | "play";
 
 export const GameScene = ({
   game,
-  expired = false,
   plData,
   pulls,
   chartGoal,
@@ -121,7 +105,6 @@ export const GameScene = ({
   outcomeShowMultiplied,
   isFatalBomb,
   isPulling,
-  pointsBurst,
   showRewardOverlay = false,
   showDistributionPercent = false,
   cashOutValue,
@@ -129,17 +112,11 @@ export const GameScene = ({
   nextCurseLabel,
   isEnteringShop = false,
   isCashingOut = false,
-  tokenPrice,
-  supply,
-  target,
   pullerRef,
-  pointsRef,
-  healthRef,
   outcomeRef,
   onPull,
   onOpenCashout,
   onEnterShop,
-  onPlayAgain,
   variant,
   className,
   ...props
@@ -153,13 +130,11 @@ export const GameScene = ({
   );
 
   const screen = useMemo<Screen>(() => {
-    if (!game.over && expired) return "expired";
-    if (game.over) return "over";
     const milestoneReached =
       game.points >= game.milestone && game.milestone > 0;
     if (milestoneReached && !currentOrb) return "milestone";
     return "play";
-  }, [game, expired, currentOrb]);
+  }, [game, currentOrb]);
 
   const outcomeHasMultEffect =
     currentOrb?.variant === "point" &&
@@ -174,64 +149,6 @@ export const GameScene = ({
     }
     return currentOrb.content;
   }, [currentOrb, outcomeHasMultEffect, outcomeShowMultiplied]);
-
-  if (screen === "expired") {
-    return (
-      <>
-        <GameOver
-          level={game.level}
-          moonrocksEarned={0}
-          plData={plData}
-          pulls={pulls}
-          cashedOut={false}
-          expired
-          onPlayAgain={onPlayAgain}
-          onOpenStash={openStash}
-          health={game.health}
-          points={game.points}
-          milestone={game.milestone}
-        />
-        <BagDialog
-          open={showStash}
-          onOpenChange={setShowStash}
-          orbs={bagOrbs}
-          discards={game.discards}
-        />
-      </>
-    );
-  }
-
-  if (screen === "over") {
-    // When died (health = 0), moonrocks earned on death (PR #148).
-    // When cashed out, game.moonrocks has the full score.
-    const cashedOut = game.health > 0;
-    return (
-      <>
-        <GameOver
-          level={game.level}
-          moonrocksEarned={game.moonrocks}
-          plData={plData}
-          pulls={pulls}
-          cashedOut={cashedOut}
-          onPlayAgain={onPlayAgain}
-          onOpenStash={openStash}
-          health={game.health}
-          points={game.points}
-          milestone={game.milestone}
-          stake={game.stake}
-          tokenPrice={tokenPrice}
-          supply={supply}
-          target={target}
-        />
-        <BagDialog
-          open={showStash}
-          onOpenChange={setShowStash}
-          orbs={bagOrbs}
-          discards={game.discards}
-        />
-      </>
-    );
-  }
 
   return (
     <div className={gameSceneVariants({ variant, className })} {...props}>

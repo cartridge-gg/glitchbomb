@@ -9,7 +9,11 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ConfirmationDialog, type OrbOutcome } from "@/components/containers";
+import {
+  Bag,
+  ConfirmationDialog,
+  type OrbOutcome,
+} from "@/components/containers";
 import {
   isCashoutConfirmDismissed,
   setCashoutConfirmDismissed,
@@ -22,11 +26,13 @@ import {
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
 import {
+  GameOver,
   GameScene,
   type GameSceneGame,
   GameShop,
   type GameShopGame,
 } from "@/components/scenes";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getTokenAddress } from "@/config";
 import { usePrices } from "@/contexts/prices";
 import { useAppData } from "@/contexts/use-app-data";
@@ -145,7 +151,6 @@ export const Game = () => {
   const lastPullIdRef = useRef<number | null>(null);
   const pointsRef = useRef<HTMLDivElement>(null);
   const healthRef = useRef<HTMLDivElement>(null);
-  const [pointsBurst, setPointsBurst] = useState(0);
   // Capture game state at time of pull initiation (before any state updates)
   const prePullMultiplierRef = useRef<number>(1);
 
@@ -169,6 +174,8 @@ export const Game = () => {
   const [isPulling, setIsPulling] = useState(false);
   const [showLevelComplete, setShowLevelComplete] = useState(false);
   const [showLevelEnter, setShowLevelEnter] = useState(false);
+  // Bag dialog opened from the Game Over scene.
+  const [showGameOverStash, setShowGameOverStash] = useState(false);
   const prevLevelRef = useRef<number | null>(null);
   const milestoneShownRef = useRef(false);
 
@@ -435,11 +442,6 @@ export const Game = () => {
       const multiplied = base !== null ? Math.floor(base * mult) : null;
       const hasMultEffect =
         base !== null && multiplied !== null && multiplied !== base && mult > 1;
-
-      // Trigger burst immediately so bars update at pull time
-      if (orb.isPoint()) {
-        setPointsBurst((prev) => prev + 1);
-      }
 
       setCurrentOrb({
         variant: orb.outcomeVariant(),
@@ -715,11 +717,8 @@ export const Game = () => {
   const isExpired =
     game.expiration > 0 && game.expiration <= Math.floor(Date.now() / 1000);
 
-  // Keep the "play" screen during the death sequence so the fatal bomb
-  // animation plays before transitioning to GameOver.
   const sceneGame: GameSceneGame = {
     id: game.id,
-    over: deathPending ? 0 : game.over,
     level: game.level,
     health: game.health,
     points: game.points,
@@ -728,11 +727,18 @@ export const Game = () => {
     moonrocks: game.moonrocks,
     chips: game.chips,
     stake: game.stake,
-    expiration: game.expiration,
     pullablesCount: game.pullables.length,
     bag: game.bag,
     discards: game.discards,
   };
+
+  // Render GameOver at page level once the game has truly ended (or expired)
+  // and the death-sequence animation has finished. During `deathPending` we
+  // keep the active game scene so the fatal-bomb animation plays first.
+  const showGameOver = !deathPending && (!!game.over || isExpired);
+  // When died (health = 0) the contract still credits earned moonrocks.
+  // When voluntarily cashed out, game.moonrocks holds the full score.
+  const gameOverCashedOut = game.health > 0;
 
   const shopGame: GameShopGame = {
     chips: game.chips,
@@ -742,8 +748,9 @@ export const Game = () => {
     shopPurchaseCounts: game.shopPurchaseCounts,
   };
 
-  // Show shop scene when shop has orbs and the death sequence isn't running.
-  const showShop = !deathPending && game.shop.length > 0;
+  // Show shop scene when shop has orbs, the death sequence isn't running and
+  // the game is still active (game over takes precedence over the shop).
+  const showShop = !deathPending && !showGameOver && game.shop.length > 0;
 
   return (
     <motion.div
@@ -759,7 +766,23 @@ export const Game = () => {
       transition={deathPending ? { duration: 0.6, ease: "easeOut" } : undefined}
     >
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
-        {showShop ? (
+        {showGameOver ? (
+          <div className="h-full md:max-w-[420px] md:mx-auto p-4">
+            <GameOver
+              moonrocksEarned={game.moonrocks}
+              plData={plData}
+              pulls={pulls}
+              cashedOut={gameOverCashedOut}
+              expired={isExpired}
+              stake={game.stake}
+              tokenPrice={tokenPrice}
+              supply={supply}
+              target={target}
+              onPlayAgain={handlePlayAgain}
+              onOpenStash={() => setShowGameOverStash(true)}
+            />
+          </div>
+        ) : showShop ? (
           <GameShop
             game={shopGame}
             onConfirm={handleBuyAndExit}
@@ -769,7 +792,6 @@ export const Game = () => {
         ) : (
           <GameScene
             game={sceneGame}
-            expired={isExpired}
             plData={plData}
             pulls={pulls}
             chartGoal={chartGoal}
@@ -781,7 +803,6 @@ export const Game = () => {
             outcomeShowMultiplied={outcomeShowMultiplied}
             isFatalBomb={isFatalBomb}
             isPulling={isPulling}
-            pointsBurst={pointsBurst}
             showRewardOverlay={showRewardOverlay}
             showDistributionPercent={displaySettings.showDistributionPercent}
             cashOutValue={cashOutValue}
@@ -789,20 +810,31 @@ export const Game = () => {
             nextCurseLabel={nextCurseLabel}
             isEnteringShop={isEnteringShop}
             isCashingOut={isCashingOut}
-            tokenPrice={tokenPrice}
-            supply={supply}
-            target={target}
             pullerRef={pullerRef}
-            pointsRef={pointsRef}
-            healthRef={healthRef}
             outcomeRef={outcomeRef}
             onPull={handlePull}
             onOpenCashout={openCashout}
             onEnterShop={handleEnterShop}
-            onPlayAgain={handlePlayAgain}
           />
         )}
       </div>
+      <Dialog open={showGameOverStash} onOpenChange={setShowGameOverStash}>
+        <DialogContent className="w-[calc(100%-2rem)] md:w-full rounded-lg border-4 border-primary-600 bg-black-100 md:max-w-[420px] p-6 md:p-6">
+          <DialogTitle className="sr-only">Your bag</DialogTitle>
+          <Bag
+            pendingItems={{ title: "Purchasing (0)", items: [] }}
+            bagItems={{
+              title: `Your orbs (${game.bag.filter((orb) => !orb.isNone()).length})`,
+              items: game.bag
+                .filter((orb) => !orb.isNone())
+                .map((orb, i) => ({
+                  orb,
+                  discarded: game.discards?.[i] ?? false,
+                })),
+            }}
+          />
+        </DialogContent>
+      </Dialog>
       <ConfirmationDialog
         open={showCashoutConfirm}
         onOpenChange={setShowCashoutConfirm}

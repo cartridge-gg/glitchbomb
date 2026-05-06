@@ -9,16 +9,21 @@ export interface GameBalanceProps
 }
 
 const gameBalanceVariants = cva(
-  "h-12 md:h-10 rounded-full w-full p-2 flex justify-center items-center",
+  "rounded-full w-full flex justify-center items-center",
   {
     variants: {
       variant: {
         moonrocks: "text-yellow-100 bg-yellow-900",
         chips: "text-orange-100 bg-orange-900",
       },
+      size: {
+        md: "h-12 md:h-10 p-2",
+        lg: "h-16 px-6 py-3",
+      },
     },
     defaultVariants: {
       variant: "moonrocks",
+      size: "md",
     },
   },
 );
@@ -35,14 +40,25 @@ const getIcon = (variant: NonNullable<GameBalanceProps["variant"]>) => {
 export const GameBalance = ({
   value,
   variant,
+  size,
   className,
   ...props
 }: GameBalanceProps) => {
   const Icon = getIcon(variant ?? "moonrocks");
   return (
-    <div className={cn(gameBalanceVariants({ variant, className }))} {...props}>
-      <Icon size="md" />
-      <p className="px-0.5 text-[22px] font-secondary">{value}</p>
+    <div
+      className={cn(gameBalanceVariants({ variant, size, className }))}
+      {...props}
+    >
+      <Icon className={size === "lg" ? "min-w-10 min-h-10" : undefined} />
+      <p
+        className={cn(
+          "px-0.5 text-[22px] font-secondary",
+          size === "lg" && "text-[2.5rem]",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 };
