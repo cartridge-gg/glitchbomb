@@ -106,7 +106,6 @@ const samplePulls = [
 
 const baseGame: GameSceneGame = {
   id: 1,
-  over: 0,
   level: 2,
   health: 4,
   points: 28,
@@ -115,7 +114,6 @@ const baseGame: GameSceneGame = {
   moonrocks: 120,
   chips: 30,
   stake: 2,
-  expiration: Math.floor(Date.now() / 1000) - 600 + 86400,
   pullablesCount: 8,
   bag: [
     new Orb(OrbType.Point5),
@@ -167,13 +165,11 @@ const meta = {
     outcomeShowMultiplied: false,
     isFatalBomb: false,
     isPulling: false,
-    pointsBurst: 0,
     showRewardOverlay: false,
     showDistributionPercent: false,
     onPull: fn(),
     onOpenCashout: fn(),
     onEnterShop: fn(),
-    onPlayAgain: fn(),
   },
 } satisfies Meta<typeof GameScene>;
 
@@ -269,45 +265,5 @@ export const EnteringShop: Story = {
     cashOutValue: 1.23,
     ante: 20,
     isEnteringShop: true,
-  },
-};
-
-export const GameOverCashedOut: Story = {
-  args: {
-    game: {
-      ...baseGame,
-      over: Math.floor(Date.now() / 1000),
-      health: 3,
-      points: 82,
-      moonrocks: 340,
-    },
-    supply: 100_000_000n,
-    target: 200_000_000n,
-    tokenPrice: 0.01,
-  },
-};
-
-export const GameOverDied: Story = {
-  args: {
-    game: {
-      ...baseGame,
-      over: Math.floor(Date.now() / 1000),
-      health: 0,
-      points: 35,
-      moonrocks: 60,
-    },
-    supply: 100_000_000n,
-    target: 200_000_000n,
-    tokenPrice: 0.01,
-  },
-};
-
-export const Expired: Story = {
-  args: {
-    game: {
-      ...baseGame,
-      expiration: Math.floor(Date.now() / 1000) - 600,
-    },
-    expired: true,
   },
 };

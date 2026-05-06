@@ -11,7 +11,6 @@ export * from "./game-balances";
 export * from "./game-cards";
 export * from "./game-choices";
 export * from "./game-footer";
-export * from "./game-over";
 export * from "./game-pull";
 export * from "./game-stash";
 export * from "./game-stats";
