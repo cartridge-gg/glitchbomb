@@ -26,6 +26,7 @@ import { EntitiesProvider } from "@/contexts";
 import { AchievementsProvider } from "@/contexts/achievements";
 import { AppDataProvider } from "@/contexts/app-data-provider";
 import { AudioProvider } from "@/contexts/audio";
+import { GamesProvider } from "@/contexts/games";
 import { LoadingProvider } from "@/contexts/loading-context";
 import { ModalProvider } from "@/contexts/modal";
 import { PricesProvider } from "@/contexts/prices";
@@ -127,45 +128,47 @@ function AuthenticatedApp() {
       <AudioProvider>
         <SoundProvider>
           <EntitiesProvider>
-            <PricesProvider>
-              <AppDataProvider>
-                <BundlesProvider>
-                  <QuestsProvider>
-                    <AchievementsProvider>
-                      <TutorialProvider>
-                        <ThemeProvider>
-                          <ModalProvider>
-                            <LoadingScreen />
-                            <GameStartedNotifier />
-                            <Main>
-                              <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/game/:id" element={<Game />} />
-                                <Route
-                                  path="/game"
-                                  element={<LoadingScene />}
-                                />
-                                <Route path="/practice" element={<Game />} />
-                                <Route path="/tutorial" element={<Game />} />
-                              </Routes>
-                            </Main>
-                            <Toaster
-                              position="top-left"
-                              duration={3000}
-                              expand
-                              visibleToasts={4}
-                              gap={8}
-                              offset={80}
-                              richColors
-                            />
-                          </ModalProvider>
-                        </ThemeProvider>
-                      </TutorialProvider>
-                    </AchievementsProvider>
-                  </QuestsProvider>
-                </BundlesProvider>
-              </AppDataProvider>
-            </PricesProvider>
+            <GamesProvider>
+              <PricesProvider>
+                <AppDataProvider>
+                  <BundlesProvider>
+                    <QuestsProvider>
+                      <AchievementsProvider>
+                        <TutorialProvider>
+                          <ThemeProvider>
+                            <ModalProvider>
+                              <LoadingScreen />
+                              <GameStartedNotifier />
+                              <Main>
+                                <Routes>
+                                  <Route path="/" element={<Home />} />
+                                  <Route path="/game/:id" element={<Game />} />
+                                  <Route
+                                    path="/game"
+                                    element={<LoadingScene />}
+                                  />
+                                  <Route path="/practice" element={<Game />} />
+                                  <Route path="/tutorial" element={<Game />} />
+                                </Routes>
+                              </Main>
+                              <Toaster
+                                position="top-left"
+                                duration={3000}
+                                expand
+                                visibleToasts={4}
+                                gap={8}
+                                offset={80}
+                                richColors
+                              />
+                            </ModalProvider>
+                          </ThemeProvider>
+                        </TutorialProvider>
+                      </AchievementsProvider>
+                    </QuestsProvider>
+                  </BundlesProvider>
+                </AppDataProvider>
+              </PricesProvider>
+            </GamesProvider>
           </EntitiesProvider>
         </SoundProvider>
       </AudioProvider>

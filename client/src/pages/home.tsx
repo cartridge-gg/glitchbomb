@@ -14,6 +14,7 @@ import { usePurchaseModal } from "@/contexts/purchase-modal";
 import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingSignal } from "@/contexts/use-loading";
+import { useOwnedGames } from "@/contexts/use-owned-games";
 import {
   maxPayout as maxPayoutRaw,
   tokenPayout,
@@ -21,7 +22,6 @@ import {
 } from "@/helpers/payout";
 import { useActivities } from "@/hooks/activities";
 import { useBanners } from "@/hooks/banner";
-import { useOwnedGames } from "@/hooks/packs";
 import { useTokens } from "@/hooks/tokens";
 import { useAudio } from "@/hooks/use-audio";
 import { useControllerUsername } from "@/hooks/use-controller-username";
