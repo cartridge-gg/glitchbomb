@@ -257,6 +257,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
             self.loadingView.isHidden = true
 
             self.overrideUIStyle()
+            triggerNotificationRegistrationCheck(in: webView)
             if iframeStorageDebugEnabled {
                 GlitchBomb.webView.evaluateJavaScript("window.__showIframeStorageDebugPanel && window.__showIframeStorageDebugPanel();", completionHandler: nil)
             }
@@ -696,10 +697,16 @@ extension ViewController: WKScriptMessageHandler {
             handlePushState()
         }
         if message.name == "push-token" {
-            handleFCMToken()
+            handlePushTokenRequest()
+        }
+        if message.name == "notification-session-ready" {
+            print("Notification session ready message received from web")
+            handleNotificationSessionReady()
         }
         if message.name == "cartridge-logout-cleanup" {
-            clearCartridgeWebsiteData()
+            disableRegisteredNotificationDevice {
+                clearCartridgeWebsiteData()
+            }
         }
   }
 }

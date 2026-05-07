@@ -10,6 +10,8 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
+import { NativeNotificationBridge } from "@/components/containers/native-notification-bridge";
+import { NotificationEvents } from "@/components/containers/notification-events";
 import { LoadingScreen } from "@/components/elements/loading-screen";
 import { GameStartedNotifier } from "@/components/modules/game-started-notifier";
 import { LoadingScene } from "@/components/scenes/loading";
@@ -110,6 +112,7 @@ const queryClient = new QueryClient();
 function DeployGate() {
   return (
     <BrowserRouter>
+      <NotificationEvents />
       <Routes>
         <Route path="/support" element={<Support />} />
         <Route path="/*" element={<AuthenticatedApp />} />
@@ -180,6 +183,7 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
+        <NativeNotificationBridge />
         <DeployGate />
       </StarknetConfig>
     </QueryClientProvider>
