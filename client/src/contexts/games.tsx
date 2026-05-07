@@ -11,22 +11,41 @@ import { GamesContext, type GamesContextType } from "./games-context";
 
 /**
  * Provides player-owned games via:
- *  - A single `client.getEntities(...)` initial fetch on the wildcard Game
- *    clause, cached in TanStack Query under `["games"]`.
- *  - A single `client.onEntityUpdated(...)` long-lived subscription on the
- *    same wildcard clause, that merges incoming entity updates into the cache.
- *  - An ERC721 token-balance subscription (`useAssets`) that yields the
- *    player's `gameIds`. The Game list is intersected with `gameIds` client
- *    side, so ownership is reactive without rebuilding the entity subscription.
+ *  - A scoped `client.getEntities(...)` initial fetch using an
+ *    `OrCompose(MemberClause(id, Eq, ...))` clause built from the player's
+ *    `gameIds` (derived from ERC721 balances). Cached in TanStack Query under
+ *    `["games", "owned", <idsKey>]`.
+ *  - A single long-lived wildcard `client.onEntityUpdated(...)` subscription
+ *    on the Game model. Updates are filtered client-side against the current
+ *    `gameIds` so we only persist the player's entities. Wildcard is required
+ *    here because newly minted/transferred games would otherwise be missed
+ *    (their id is unknown until the ERC721 balance subscription fires).
  *
- * This mirrors the architecture used in `nums/client/src/context/games.tsx`.
+ * This mirrors the architecture used in `nums/client/src/context/games.tsx`
+ * but bounds the initial fetch to the player's inventory rather than loading
+ * every game on the world.
  */
 export function GamesProvider({ children }: { children: ReactNode }) {
   const { client } = useEntitiesContext();
   const { gameIds, isLoading: assetsLoading } = useAssets();
 
+  // Stable string key for query cache + dependency comparisons.
+  const gameIdsKey = useMemo(
+    () =>
+      gameIds
+        .slice()
+        .sort((a, b) => a - b)
+        .join(","),
+    [gameIds],
+  );
+
+  // Always read from the latest `gameIds` inside the long-lived subscription
+  // callback — `gameIds` changes (mint/transfer) must not recreate the sub.
+  const gameIdsRef = useRef<number[]>(gameIds);
+  gameIdsRef.current = gameIds;
+
   const queryClient = useQueryClient();
-  const queryKey = useMemo(() => GameApi.keys.all(), []);
+  const queryKey = useMemo(() => GameApi.keys.byIds(gameIdsKey), [gameIdsKey]);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
 
   const {
@@ -37,10 +56,13 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     queryKey,
     queryFn: async () => {
       if (!client) throw new Error("Torii client not available");
-      const result = await client.getEntities(GameApi.allQuery().build());
+      if (gameIds.length === 0) return [];
+      const result = await client.getEntities(
+        GameApi.byIdsQuery(gameIds).build(),
+      );
       return GameModel.deduplicate(GameApi.parse(result.items));
     },
-    enabled: !!client,
+    enabled: !!client && !assetsLoading,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
@@ -49,15 +71,20 @@ export function GamesProvider({ children }: { children: ReactNode }) {
   const onSubscriptionUpdate = useCallback(
     (data: SubscriptionCallbackArgs<torii.Entity[], Error>) => {
       if (!data || data.error) return;
+      const ownedIds = gameIdsRef.current;
+      if (ownedIds.length === 0) return;
+      const ownedSet = new Set(ownedIds);
       const newGames: GameModel[] = [];
       (data.data || [data] || []).forEach((entity) => {
         const key = `${NAMESPACE}-${GameModel.getModelName()}`;
-        if (entity.models[key]) {
-          const parsed = GameModel.parse(
-            entity.models[key] as unknown as RawGame,
-          );
-          if (parsed) newGames.push(parsed);
-        }
+        if (!entity.models[key]) return;
+        const parsed = GameModel.parse(
+          entity.models[key] as unknown as RawGame,
+        );
+        // Drop updates for games the connected player does not own. The
+        // wildcard subscription is required (we can't enumerate ids ahead
+        // of mint), but we must not persist other players' state.
+        if (parsed && ownedSet.has(parsed.id)) newGames.push(parsed);
       });
       if (newGames.length === 0) return;
       queryClient.setQueryData<GameModel[]>(queryKey, (prev) =>
@@ -68,8 +95,9 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     [queryClient, queryKey],
   );
 
-  // Long-lived subscription on the wildcard Game clause. Created once per
+  // Long-lived wildcard subscription on the Game clause. Created once per
   // client and torn down on unmount; never recreated when gameIds change.
+  // Filtering by ownership happens in the callback.
   useEffect(() => {
     if (!client) return;
 
@@ -111,37 +139,13 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     };
   }, [client, onSubscriptionUpdate]);
 
-  // When ownership changes (new mint, transfer), refetch entities so any
-  // game that wasn't yet in the cache becomes visible immediately. The
-  // existing subscription will keep them up-to-date afterwards.
-  const gameIdsKey = useMemo(
-    () =>
-      gameIds
-        .slice()
-        .sort((a, b) => a - b)
-        .join(","),
-    [gameIds],
-  );
-  const prevGameIdsKeyRef = useRef(gameIdsKey);
-
-  useEffect(() => {
-    if (prevGameIdsKeyRef.current === gameIdsKey) return;
-    prevGameIdsKeyRef.current = gameIdsKey;
-    refresh();
-  }, [gameIdsKey, refresh]);
-
-  const playerGames = useMemo(
-    () => games.filter((game) => gameIds.includes(game.id)),
-    [games, gameIds],
-  );
-
   const value = useMemo<GamesContextType>(
     () => ({
-      games: playerGames,
-      isLoading: entitiesLoading || assetsLoading,
+      games,
+      isLoading: assetsLoading || (gameIds.length > 0 && entitiesLoading),
       refresh,
     }),
-    [playerGames, entitiesLoading, assetsLoading, refresh],
+    [games, assetsLoading, entitiesLoading, gameIds.length, refresh],
   );
 
   return (

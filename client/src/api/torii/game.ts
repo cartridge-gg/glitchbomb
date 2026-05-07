@@ -1,4 +1,10 @@
-import { ClauseBuilder, KeysClause, ToriiQueryBuilder } from "@dojoengine/sdk";
+import {
+  ClauseBuilder,
+  KeysClause,
+  MemberClause,
+  OrComposeClause,
+  ToriiQueryBuilder,
+} from "@dojoengine/sdk";
 import type * as torii from "@dojoengine/torii-wasm";
 import { NAMESPACE } from "@/constants";
 import type { RawGame } from "@/models";
@@ -33,6 +39,31 @@ function byIdQuery(gameId: number) {
     .withLimit(1);
 }
 
+/**
+ * Fetch entities filtered to the given game ids using an `OR` composition of
+ * `MemberClause(id, Eq, ...)`. Used for the initial fetch of player-owned
+ * games so we don't load the whole entity table.
+ *
+ * Caller must ensure `gameIds.length > 0`; with an empty list the SDK builder
+ * produces an invalid clause.
+ */
+function byIdsQuery(gameIds: number[]) {
+  const clauses = OrComposeClause(
+    gameIds.map((id) =>
+      MemberClause(
+        `${NAMESPACE}-${GameModel.getModelName()}`,
+        "id",
+        "Eq",
+        `0x${id.toString(16).padStart(16, "0")}`,
+      ),
+    ),
+  );
+  return new ToriiQueryBuilder()
+    .withClause(clauses.build())
+    .includeHashedKeys()
+    .withLimit(ENTITIES_LIMIT);
+}
+
 function parse(entities: torii.Entity[]): GameModel[] {
   const games: GameModel[] = [];
   const key = modelKey(GameModel.getModelName());
@@ -62,9 +93,12 @@ export const Game = {
   keys: {
     all: () => ["games"] as const,
     byId: (id: number) => ["game", id] as const,
+    /** Cache key for the player-owned subset; `idsKey` is a stable joined list. */
+    byIds: (idsKey: string) => ["games", "owned", idsKey] as const,
   },
   allQuery,
   byIdQuery,
+  byIdsQuery,
   parse,
   parseOne,
 };
