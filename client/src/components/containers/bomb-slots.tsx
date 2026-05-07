@@ -30,7 +30,7 @@ export interface BombSlotsProps
   details: BombDetails;
 }
 
-const MIN_SLOTS = 7;
+const MIN_SLOTS = 6;
 
 type Slot = {
   value: number;
@@ -52,7 +52,7 @@ const buildSlots = (details: BombDetails): Slot[] => {
   push(details.double, 2);
   push(details.triple, 3);
 
-  const target = Math.max(MIN_SLOTS, slots.length);
+  const target = Math.max(MIN_SLOTS + (slots.length % 2), slots.length);
   const padCount = target - slots.length;
   if (padCount > 0) {
     const padStart = Math.floor(padCount / 2);
