@@ -93,8 +93,6 @@ export const Game = {
   keys: {
     all: () => ["games"] as const,
     byId: (id: number) => ["game", id] as const,
-    /** Cache key for the player-owned subset; `idsKey` is a stable joined list. */
-    byIds: (idsKey: string) => ["games", "owned", idsKey] as const,
   },
   allQuery,
   byIdQuery,

@@ -13,8 +13,10 @@ import { GamesContext, type GamesContextType } from "./games-context";
  * Provides player-owned games via:
  *  - A scoped `client.getEntities(...)` initial fetch using an
  *    `OrCompose(MemberClause(id, Eq, ...))` clause built from the player's
- *    `gameIds` (derived from ERC721 balances). Cached in TanStack Query under
- *    `["games", "owned", <idsKey>]`.
+ *    `gameIds` (derived from ERC721 balances). The result is cached in
+ *    TanStack Query under a stable key (`["games"]`) so the cache is never
+ *    discarded when ownership changes — when `gameIds` evolves we manually
+ *    prune + refetch into the same key, avoiding a loading-state flash.
  *  - A single long-lived wildcard `client.onEntityUpdated(...)` subscription
  *    on the Game model. Updates are filtered client-side against the current
  *    `gameIds` so we only persist the player's entities. Wildcard is required
@@ -29,7 +31,8 @@ export function GamesProvider({ children }: { children: ReactNode }) {
   const { client } = useEntitiesContext();
   const { gameIds, isLoading: assetsLoading } = useAssets();
 
-  // Stable string key for query cache + dependency comparisons.
+  // Stable string key for dependency comparisons (drives the manual
+  // refetch effect when ownership changes).
   const gameIdsKey = useMemo(
     () =>
       gameIds
@@ -39,13 +42,18 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     [gameIds],
   );
 
-  // Always read from the latest `gameIds` inside the long-lived subscription
-  // callback — `gameIds` changes (mint/transfer) must not recreate the sub.
+  // Read the latest `gameIds` from refs inside async callbacks — neither
+  // the query function, the subscription callback, nor the cache write
+  // should be invalidated/recreated when ownership changes.
   const gameIdsRef = useRef<number[]>(gameIds);
   gameIdsRef.current = gameIds;
 
   const queryClient = useQueryClient();
-  const queryKey = useMemo(() => GameApi.keys.byIds(gameIdsKey), [gameIdsKey]);
+  // IMPORTANT: keep the cache key stable across ownership changes. If the
+  // key included `gameIdsKey`, every mint/transfer would create a brand
+  // new query without cached data, briefly flipping `isLoading` back to
+  // true and producing a loading flash on the home screen.
+  const queryKey = useMemo(() => GameApi.keys.all(), []);
   const subscriptionRef = useRef<torii.Subscription | null>(null);
 
   const {
@@ -56,10 +64,9 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     queryKey,
     queryFn: async () => {
       if (!client) throw new Error("Torii client not available");
-      if (gameIds.length === 0) return [];
-      const result = await client.getEntities(
-        GameApi.byIdsQuery(gameIds).build(),
-      );
+      const ids = gameIdsRef.current;
+      if (ids.length === 0) return [];
+      const result = await client.getEntities(GameApi.byIdsQuery(ids).build());
       return GameModel.deduplicate(GameApi.parse(result.items));
     },
     enabled: !!client && !assetsLoading,
@@ -94,6 +101,28 @@ export function GamesProvider({ children }: { children: ReactNode }) {
     },
     [queryClient, queryKey],
   );
+
+  // When ownership changes (mint/transfer), refetch entities so any newly
+  // owned game appears immediately, and prune cached entities that are no
+  // longer owned. The cached data stays populated during the refetch — no
+  // loading flash. Skip the very first run because the initial query already
+  // covers it.
+  const prevGameIdsKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (prevGameIdsKeyRef.current === gameIdsKey) return;
+    const isFirstRun = prevGameIdsKeyRef.current === null;
+    prevGameIdsKeyRef.current = gameIdsKey;
+    if (isFirstRun) return;
+
+    // Prune any cached entries the player no longer owns.
+    const ownedSet = new Set(gameIds);
+    queryClient.setQueryData<GameModel[]>(
+      queryKey,
+      (prev) => prev?.filter((g) => ownedSet.has(g.id)) ?? [],
+    );
+    // Pull fresh state for the (possibly extended) owned set.
+    refresh();
+  }, [gameIdsKey, gameIds, queryClient, queryKey, refresh]);
 
   // Long-lived wildcard subscription on the Game clause. Created once per
   // client and torn down on unmount; never recreated when gameIds change.
