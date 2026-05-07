@@ -290,7 +290,7 @@ pub impl GameImpl of GameTrait {
 
     #[inline]
     fn is_won(self: @Game) -> bool {
-        self.level == @MAX_LEVEL && self.is_completed()
+        self.health != @0 && self.level == @MAX_LEVEL && self.is_completed()
     }
 
     /// Determines if the game has expired based on the current timestamp.
@@ -549,7 +549,7 @@ pub impl GameImpl of GameTrait {
         // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
         let mut pulled_orbs: Array<Orb> = array![];
         let mut draws_done: u8 = 0;
-        let total_points: u16 = self.points;
+        let points: u16 = self.points;
         while draws_done < draw_count && deck.remaining > 0 {
             let index: u8 = deck.draw() - 1;
             let orb: Orb = *bag.at(index.into());
@@ -566,10 +566,11 @@ pub impl GameImpl of GameTrait {
         }
 
         // [Effect] Assess the game
+        let total_points = self.points - points;
         self.assess();
 
         // [Return] The pulled orbs and total earnings
-        (pulled_orbs, deck.remaining, self.points - total_points)
+        (pulled_orbs, deck.remaining, total_points)
     }
 
     #[inline]

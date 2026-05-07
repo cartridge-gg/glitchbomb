@@ -293,11 +293,6 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired();
 
-            // [Effect] If level completed (at milestone), convert points to moonrocks
-            if game.is_completed() {
-                game.moonrocks += game.points;
-            }
-
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();
             store.set_game(@game);
