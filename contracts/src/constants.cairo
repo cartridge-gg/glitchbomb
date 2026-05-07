@@ -13,6 +13,7 @@ pub const STARTERPACK_COUNT: u8 = 10;
 pub const GAME_EXPIRATION_TIME: u64 = 86400;
 
 pub const MAX_SCORE: u16 = 524;
+pub const MAX_LEVEL: u8 = 7;
 
 /// Scale factor applied to base_reward values (which are *100 for readability)
 /// to produce raw token units for a 6-decimal token: 10^6 / 100 = 10_000.

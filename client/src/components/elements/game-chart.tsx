@@ -336,9 +336,10 @@ export const GameChart = ({
     let min = dataMin;
     let max = goal != null ? Math.max(goal, dataMax) : dataMax;
 
-    // Add small padding (8%) so dots aren't right on the edge
+    // Add 30% padding on both ends so dots aren't right on the edge
+    // (keeps points away from the chart corners).
     const range = max - min || 1;
-    const padding = range * 0.08;
+    const padding = range * 0.3;
     min = Math.floor(min - padding);
     max = Math.ceil(max + padding);
 
@@ -439,14 +440,25 @@ export const GameChart = ({
         aria-label={title}
         role="img"
       >
-        {/* Y-axis labels as pills */}
-        <div className="absolute left-0 top-0 bottom-0 z-10 w-10 pointer-events-none">
+        {/* Y-axis labels as pills. The container is inset by CHART_MARGIN
+            so label `position` (a percentage of the plotting area) aligns
+            with Recharts' Y scale. Labels are centered on their position
+            via translateY(-50%), keeping them inside the chart canvas at
+            the extremes (top=0% and top=100%) instead of overflowing. */}
+        <div
+          className="absolute left-0 z-10 w-10 pointer-events-none"
+          style={{
+            top: `${CHART_MARGIN.top}px`,
+            bottom: `${CHART_MARGIN.bottom}px`,
+          }}
+        >
           {yAxisLabels.map((label, index) => (
             <span
               key={`label-${label.value}-${index}`}
               className="absolute inline-flex items-center justify-center w-10 h-5 font-secondary text-primary-100 text-base/5 leading-none bg-black-100 rounded-full"
               style={{
                 top: `${label.position}%`,
+                transform: "translateY(-50%)",
               }}
             >
               {label.value}

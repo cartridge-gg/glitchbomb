@@ -40,9 +40,9 @@ export { Claimed } from "./claimed";
 export { Config } from "./config";
 export { Game } from "./game";
 export { GameOver, GameOverReason, type RawGameOver } from "./game-over";
-export { Orb, OrbType } from "./orb";
+export { Marker } from "./marker";
+export { ExtendedOrb, Orb, OrbType } from "./orb";
 export { OrbPulled } from "./orb-pulled";
-export { PLDataPoint } from "./pl-data-point";
 export { Purchased } from "./purchased";
 export {
   QuestAdvancement,
@@ -460,7 +460,7 @@ export interface RawPurchased {
   };
 }
 
-export interface RawPLDataPoint {
+export interface RawMarker {
   game_id?: {
     type: "primitive";
     type_name: "u64";

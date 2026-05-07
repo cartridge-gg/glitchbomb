@@ -2,6 +2,7 @@ import type { BombDetails } from "@/components/containers";
 import type { DistributionValues } from "@/components/elements";
 import { Packer } from "@/helpers/packer";
 import type { RawGame } from "@/models";
+import { Milestone } from "@/types";
 import { Orb, OrbType } from "./orb";
 
 const MODEL_NAME = "Game";
@@ -112,6 +113,30 @@ export class Game {
     return items.filter(
       (item, index, self) => index === self.findIndex((t) => t.id === item.id),
     );
+  }
+
+  public isCompleted(): boolean {
+    return this.points >= Milestone.get(this.level);
+  }
+
+  public isGlitchedOut(): boolean {
+    return this.health === 0 && this.over > 0;
+  }
+
+  public isCashedOut(): boolean {
+    return this.health !== 0 && !this.isCompleted() && this.over > 0;
+  }
+
+  public isWon(): boolean {
+    return this.health !== 0 && this.isCompleted() && this.over > 0;
+  }
+
+  public isExpired(): boolean {
+    return this.expiration > 0 && Date.now() >= this.expiration * 1000;
+  }
+
+  public isOver(): boolean {
+    return this.over > 0 || this.isExpired();
   }
 
   bombs(): BombDetails {

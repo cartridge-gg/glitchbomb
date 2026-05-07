@@ -20,12 +20,12 @@ import {
 } from "@/components/containers/confirmation-prefs";
 import {
   type DistributionKey,
-  type GameChartDataPoint,
   LevelUpOverlay,
   RewardOverlay,
 } from "@/components/elements";
 import { isRewardOverlayDismissed } from "@/components/elements/reward-overlay-prefs";
 import {
+  GameMilestoneScene,
   GameOver,
   GameScene,
   type GameSceneGame,
@@ -39,7 +39,7 @@ import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingSignal } from "@/contexts/use-loading";
 import { tokenPayout, toTokens } from "@/helpers/payout";
-import { usePLDataPoints, usePulls } from "@/hooks";
+import { useMarkers, usePulls } from "@/hooks";
 import { useActions } from "@/hooks/actions";
 import { useAudio } from "@/hooks/use-audio";
 import { useDisplaySettings } from "@/hooks/use-display-settings";
@@ -187,85 +187,16 @@ export const Game = () => {
   const tutorialRef = useRef(tutorial.state);
   tutorialRef.current = tutorial.state;
 
-  const { dataPoints, isPractice } = usePLDataPoints({
+  // `useMarkers` returns the chart-ready `plData` and `chartPulls` so we
+  // don't have to massage the raw Marker stream here. See the hook for
+  // the band-based id layout it relies on.
+  const { plData, chartPulls, isPractice } = useMarkers({
     gameId: game?.id ?? 0,
   });
 
   const { pulls, initialFetchComplete } = usePulls({
     gameId: game?.id ?? 0,
   });
-
-  // Convert PLDataPoint events to graph format
-  const plData: GameChartDataPoint[] = useMemo(() => {
-    if (dataPoints.length === 0) return [];
-
-    const rawSorted = [...dataPoints].sort((a, b) => a.id - b.id);
-
-    // Fix level marker ordering for onchain data only: the contract's ante
-    // ID formula (1 + pull_count*2 + level) adds a level offset that pushes
-    // markers after the first pulls of the next level. Offline/practice IDs
-    // are sequential and don't need adjustment.
-    let sorted: typeof rawSorted;
-    if (!isPractice) {
-      let levelCount = 0;
-      const withKeys = rawSorted.map((point) => {
-        if (point.orb === 0) {
-          levelCount++;
-          return {
-            point,
-            key: point.id > 0 ? point.id - levelCount - 0.5 : -0.5,
-          };
-        }
-        return { point, key: point.id };
-      });
-      withKeys.sort((a, b) => a.key - b.key);
-      sorted = withKeys.map(({ point }) => point);
-    } else {
-      sorted = rawSorted;
-    }
-
-    // Pair each non-marker data point with the next pull in chronological
-    // order. PLDataPoint ids and OrbPulled ids live in different id
-    // spaces (the contract uses different ID formulas) so we can't match
-    // by id; we walk both sequences in chronological order instead.
-    const sortedPulls = [...pulls].sort((a, b) => a.id - b.id);
-    let pullCursor = 0;
-
-    return sorted.map((point, index) => {
-      const orbType = point.orb;
-
-      // Level cost / game start entries (orb=0) → yellow, no associated pull
-      if (orbType === 0) {
-        return {
-          value: point.potentialMoonrocks,
-          variant: "yellow" as const,
-          id: point.id,
-        };
-      }
-
-      // Determine color from orb type
-      let variant = point.variant();
-
-      // If value decreased from previous point, override to red
-      if (index > 0) {
-        const prevValue = sorted[index - 1].potentialMoonrocks;
-        if (point.potentialMoonrocks < prevValue) {
-          variant = "red";
-        }
-      }
-
-      // Associate with the next pull in chronological order.
-      const matchedPull = sortedPulls[pullCursor];
-      pullCursor += 1;
-
-      return {
-        value: point.potentialMoonrocks,
-        variant,
-        id: point.id,
-        pullId: matchedPull?.id,
-      };
-    });
-  }, [dataPoints, isPractice, pulls]);
 
   // Compute goal line for chart: baseMoonrocks + milestone
   // potential_moonrocks already excludes moonrock orb earnings (contract emits before applying)
@@ -713,10 +644,6 @@ export const Game = () => {
   if (resolvedGameId === null) return null;
   if (!isGameReady) return null;
 
-  // Expired: expiration timestamp reached without completion
-  const isExpired =
-    game.expiration > 0 && game.expiration <= Math.floor(Date.now() / 1000);
-
   const sceneGame: GameSceneGame = {
     id: game.id,
     level: game.level,
@@ -735,10 +662,7 @@ export const Game = () => {
   // Render GameOver at page level once the game has truly ended (or expired)
   // and the death-sequence animation has finished. During `deathPending` we
   // keep the active game scene so the fatal-bomb animation plays first.
-  const showGameOver = !deathPending && (!!game.over || isExpired);
-  // When died (health = 0) the contract still credits earned moonrocks.
-  // When voluntarily cashed out, game.moonrocks holds the full score.
-  const gameOverCashedOut = game.health > 0;
+  const showGameOver = !deathPending && game.isOver();
 
   const shopGame: GameShopGame = {
     chips: game.chips,
@@ -751,6 +675,15 @@ export const Game = () => {
   // Show shop scene when shop has orbs, the death sequence isn't running and
   // the game is still active (game over takes precedence over the shop).
   const showShop = !deathPending && !showGameOver && game.shop.length > 0;
+
+  // Show milestone scene once a milestone is reached and no orb outcome is
+  // currently being animated (so the pull outcome plays out before switching).
+  const showMilestone =
+    !showGameOver &&
+    !showShop &&
+    !currentOrb &&
+    game.milestone > 0 &&
+    game.points >= game.milestone;
 
   return (
     <motion.div
@@ -767,33 +700,44 @@ export const Game = () => {
     >
       <div className="flex-1 min-h-0 overflow-hidden pt-0 pb-0">
         {showGameOver ? (
-          <div className="h-full md:max-w-[420px] md:mx-auto p-4">
-            <GameOver
-              moonrocksEarned={game.moonrocks}
-              plData={plData}
-              pulls={pulls}
-              cashedOut={gameOverCashedOut}
-              expired={isExpired}
-              stake={game.stake}
-              tokenPrice={tokenPrice}
-              supply={supply}
-              target={target}
-              onPlayAgain={handlePlayAgain}
-              onOpenStash={() => setShowGameOverStash(true)}
-            />
-          </div>
+          <GameOver
+            game={game}
+            plData={plData}
+            pulls={chartPulls}
+            tokenPrice={tokenPrice}
+            supply={supply}
+            target={target}
+            onPlayAgain={handlePlayAgain}
+            onOpenStash={() => setShowGameOverStash(true)}
+            className="h-full md:max-w-[420px] md:mx-auto p-4 md:pb-8"
+          />
         ) : showShop ? (
           <GameShop
             game={shopGame}
             onConfirm={handleBuyAndExit}
             isLoading={isExitingShop}
-            className="h-full md:max-w-[420px] md:mx-auto p-4 md:p-8"
+            className="h-full md:max-w-[420px] md:mx-auto p-4 md:pb-8"
+          />
+        ) : showMilestone ? (
+          <GameMilestoneScene
+            game={sceneGame}
+            plData={plData}
+            pulls={chartPulls}
+            chartGoal={chartGoal}
+            cashOutValue={cashOutValue}
+            ante={milestoneCost(game.level + 1)}
+            nextCurseLabel={nextCurseLabel}
+            isEnteringShop={isEnteringShop}
+            isCashingOut={isCashingOut}
+            onOpenCashout={openCashout}
+            onEnterShop={handleEnterShop}
+            className="h-full md:max-w-[420px] md:mx-auto p-4 md:pb-8"
           />
         ) : (
           <GameScene
             game={sceneGame}
             plData={plData}
-            pulls={pulls}
+            pulls={chartPulls}
             chartGoal={chartGoal}
             distribution={distribution}
             progressiveDistribution={progressiveDistribution}
@@ -805,16 +749,11 @@ export const Game = () => {
             isPulling={isPulling}
             showRewardOverlay={showRewardOverlay}
             showDistributionPercent={displaySettings.showDistributionPercent}
-            cashOutValue={cashOutValue}
-            ante={milestoneCost(game.level + 1)}
-            nextCurseLabel={nextCurseLabel}
-            isEnteringShop={isEnteringShop}
-            isCashingOut={isCashingOut}
             pullerRef={pullerRef}
             outcomeRef={outcomeRef}
             onPull={handlePull}
             onOpenCashout={openCashout}
-            onEnterShop={handleEnterShop}
+            className="h-full md:max-w-[420px] md:mx-auto p-4 md:pb-8"
           />
         )}
       </div>

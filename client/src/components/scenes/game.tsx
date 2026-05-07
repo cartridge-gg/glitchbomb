@@ -6,7 +6,6 @@ import {
   type BombDetails,
   BombSlots,
   GameBalances,
-  GameChoices,
   GamePull,
   GameStats,
   type OrbOutcome,
@@ -17,13 +16,7 @@ import {
   type GameChartDataPoint,
   Outcome,
 } from "@/components/elements";
-import {
-  BagIcon,
-  Bomb2xIcon,
-  ChipIcon,
-  MoonrockIcon,
-  StickyBombIcon,
-} from "@/components/icons";
+import { BagIcon } from "@/components/icons";
 import type { Orb, OrbPulled } from "@/models";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
@@ -43,10 +36,10 @@ export interface GameSceneGame {
   discards?: boolean[];
 }
 
-const gameSceneVariants = cva("flex flex-col mx-auto h-full p-4 gap-3", {
+const gameSceneVariants = cva("flex flex-col gap-3", {
   variants: {
     variant: {
-      default: "max-w-[420px]",
+      default: "h-full min-h-0 mx-auto p-4",
     },
   },
   defaultVariants: {
@@ -76,21 +69,12 @@ export interface GameSceneProps
   showRewardOverlay?: boolean;
   showDistributionPercent?: boolean;
 
-  cashOutValue?: number;
-  ante?: number;
-  nextCurseLabel?: string;
-  isEnteringShop?: boolean;
-  isCashingOut?: boolean;
-
   pullerRef?: Ref<HTMLDivElement>;
   outcomeRef?: Ref<HTMLDivElement>;
 
   onPull: () => void;
   onOpenCashout: () => void;
-  onEnterShop: () => void;
 }
-
-type Screen = "milestone" | "play";
 
 export const GameScene = ({
   game,
@@ -107,16 +91,10 @@ export const GameScene = ({
   isPulling,
   showRewardOverlay = false,
   showDistributionPercent = false,
-  cashOutValue,
-  ante,
-  nextCurseLabel,
-  isEnteringShop = false,
-  isCashingOut = false,
   pullerRef,
   outcomeRef,
   onPull,
   onOpenCashout,
-  onEnterShop,
   variant,
   className,
   ...props
@@ -128,13 +106,6 @@ export const GameScene = ({
     () => game.bag.filter((orb) => !orb.isNone()),
     [game.bag],
   );
-
-  const screen = useMemo<Screen>(() => {
-    const milestoneReached =
-      game.points >= game.milestone && game.milestone > 0;
-    if (milestoneReached && !currentOrb) return "milestone";
-    return "play";
-  }, [game, currentOrb]);
 
   const outcomeHasMultEffect =
     currentOrb?.variant === "point" &&
@@ -156,187 +127,111 @@ export const GameScene = ({
         moonrocks={{ value: game.moonrocks }}
         chips={{ value: game.chips }}
       />
-      {screen === "milestone" ? (
-        <div className="flex flex-1 min-h-0 flex-col justify-start gap-[clamp(6px,2svh,18px)] overflow-y-auto overflow-x-hidden pb-[clamp(6px,1.1svh,12px)]">
+      <div className="flex flex-1 min-h-0 flex-col gap-4">
+        <div className="flex flex-col gap-3 h-full">
           <GameStats
             points={game.points}
             milestone={game.milestone}
             health={game.health}
             level={game.level}
           />
-          <GameChart
-            className="min-h-[140px] max-h-[140px]"
-            data={plData}
-            pulls={pulls}
-            mode="absolute"
-            title="POTENTIAL"
-            goal={chartGoal}
-          />
-          <div className="flex-1 min-h-0 flex items-center justify-center">
-            <GameChoices
-              className="h-full"
-              continue={{
-                value: ante ?? 0,
-                details: [
-                  {
-                    category: "chips",
-                    icon: <ChipIcon size="md" />,
-                    value: `+${game.points}`,
-                    label: "Chips",
-                  },
-                  ...(nextCurseLabel
-                    ? [
-                        {
-                          category: "curse" as const,
-                          icon:
-                            nextCurseLabel === "Bomberang" ? (
-                              <StickyBombIcon className="w-6 h-6 glitch-icon" />
-                            ) : (
-                              <Bomb2xIcon className="w-6 h-6 glitch-icon" />
-                            ),
-                          value: "",
-                          label:
-                            nextCurseLabel === "Bomberang"
-                              ? "Bomberang"
-                              : "2x Bomb",
-                        },
-                      ]
-                    : []),
-                ],
-                onClick: onEnterShop,
-                disabled: isEnteringShop || isCashingOut,
-                loading: isEnteringShop,
-                "data-tutorial-id": "continue-button",
-              }}
-              cashOut={{
-                value: cashOutValue ?? 0,
-                details: [
-                  {
-                    category: "moonrocks",
-                    icon: <MoonrockIcon size="md" />,
-                    value: String(game.moonrocks + game.points),
-                    label: "Moon Rocks",
-                  },
-                ],
-                onClick: onOpenCashout,
-                disabled: isEnteringShop || isCashingOut,
-                loading: isCashingOut,
-              }}
+          {/* PL Chart with outcome overlay */}
+          <div className="relative">
+            <GameChart
+              className="min-h-[140px] max-h-[140px]"
+              data={plData}
+              pulls={pulls}
+              mode="absolute"
+              title="POTENTIAL"
+              goal={chartGoal}
             />
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-1 min-h-0 flex-col gap-4">
-          <div className="flex flex-col gap-3 h-full">
-            <GameStats
-              points={game.points}
-              milestone={game.milestone}
-              health={game.health}
-              level={game.level}
-            />
-            {/* PL Chart with outcome overlay */}
-            <div className="relative">
-              <GameChart
-                className="min-h-[140px] max-h-[140px]"
-                data={plData}
-                pulls={pulls}
-                mode="absolute"
-                title="POTENTIAL"
-                goal={chartGoal}
-              />
-              {/* Outcome overlay — shown on chart so puller stays clickable */}
-              <AnimatePresence>
-                {currentOrb && (
+            {/* Outcome overlay — shown on chart so puller stays clickable */}
+            <AnimatePresence>
+              {currentOrb && (
+                <motion.div
+                  key={outcomeKey}
+                  className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                >
                   <motion.div
-                    key={outcomeKey}
-                    className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                    animate={{
+                      opacity: 1,
+                      scale: isFatalBomb ? 1.4 : 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: isFatalBomb ? 180 : 400,
+                      damping: isFatalBomb ? 10 : 15,
+                      mass: isFatalBomb ? 1.5 : 0.8,
+                    }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                      animate={{
-                        opacity: 1,
-                        scale: isFatalBomb ? 1.4 : 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: isFatalBomb ? 180 : 400,
-                        damping: isFatalBomb ? 10 : 15,
-                        mass: isFatalBomb ? 1.5 : 0.8,
-                      }}
+                    <div
+                      ref={outcomeRef}
+                      className="flex flex-col items-center gap-0"
                     >
-                      <div
-                        ref={outcomeRef}
-                        className="flex flex-col items-center gap-0"
+                      <motion.div
+                        animate={
+                          outcomeShowMultiplied
+                            ? { scale: [1.2, 1], opacity: [0.7, 1] }
+                            : { scale: 1 }
+                        }
+                        transition={{ duration: 0.25, ease: "easeOut" }}
                       >
-                        <motion.div
-                          animate={
-                            outcomeShowMultiplied
-                              ? { scale: [1.2, 1], opacity: [0.7, 1] }
-                              : { scale: 1 }
-                          }
-                          transition={{ duration: 0.25, ease: "easeOut" }}
-                        >
-                          <Outcome
-                            content={outcomeContent}
-                            variant={currentOrb.variant ?? "default"}
-                            size="md"
-                          />
-                        </motion.div>
-                        {/* Multiplier breakdown */}
-                        <AnimatePresence>
-                          {outcomeHasMultEffect && outcomeShowMultiplied && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.3, y: -4 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0 }}
-                              transition={{
-                                type: "spring",
-                                stiffness: 500,
-                                damping: 15,
-                              }}
-                              className="mt-1"
-                            >
-                              <Outcome
-                                content={`${currentOrb.basePoints} × ${currentOrb.activeMultiplier}x`}
-                                variant="multiplier"
-                                size="sm"
-                              />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>
+                        <Outcome
+                          content={outcomeContent}
+                          variant={currentOrb.variant ?? "default"}
+                          size="md"
+                        />
+                      </motion.div>
+                      {/* Multiplier breakdown */}
+                      <AnimatePresence>
+                        {outcomeHasMultEffect && outcomeShowMultiplied && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.3, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 15,
+                            }}
+                            className="mt-1"
+                          >
+                            <Outcome
+                              content={`${currentOrb.basePoints} × ${currentOrb.activeMultiplier}x`}
+                              variant="multiplier"
+                              size="sm"
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <GamePull
-              pullerRef={pullerRef}
-              lives={game.health}
-              bombs={distribution.bombs}
-              orbs={game.pullablesCount}
-              multiplier={game.multiplier}
-              values={
-                showRewardOverlay ? progressiveDistribution : distribution
-              }
-              pullLoading={isPulling}
-              showPercentages={showDistributionPercent}
-              onPull={onPull}
-            />
-            <div className="flex flex-col gap-3 md:gap-4">
-              <BombSlots
-                details={bombDetails}
-                data-tutorial-id="bomb-tracker"
-              />
-              <Actions onOpenStash={openStash} onOpenCashout={onOpenCashout} />
-            </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <GamePull
+            pullerRef={pullerRef}
+            lives={game.health}
+            bombs={distribution.bombs}
+            orbs={game.pullablesCount}
+            multiplier={game.multiplier}
+            values={showRewardOverlay ? progressiveDistribution : distribution}
+            pullLoading={isPulling}
+            showPercentages={showDistributionPercent}
+            onPull={onPull}
+          />
+          <div className="flex flex-col gap-3 md:gap-4">
+            <BombSlots details={bombDetails} data-tutorial-id="bomb-tracker" />
+            <Actions onOpenStash={openStash} onOpenCashout={onOpenCashout} />
           </div>
         </div>
-      )}
+      </div>
       <BagDialog
         open={showStash}
         onOpenChange={setShowStash}

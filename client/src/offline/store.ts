@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { DEFAULT_EXPIRATION } from "@/constants";
-import { Game, Orb, OrbPulled, PLDataPoint } from "@/models";
+import { Game, Marker, Orb, OrbPulled } from "@/models";
 import { DEFAULT_MOONROCKS } from "./constants";
 import {
   buyFromShop,
@@ -14,8 +14,8 @@ import {
 import { createSeed } from "./random";
 import type {
   OfflineGame,
+  OfflineMarker,
   OfflineOrbPulled,
-  OfflinePLDataPoint,
   OfflineState,
 } from "./types";
 
@@ -24,6 +24,19 @@ type Listener = () => void;
 const listeners = new Set<Listener>();
 let state: OfflineState = defaultState();
 
+// Marker id layout (mirrors contracts/src/models/game.cairo):
+// every level owns a band of MARKER_LEVEL_BAND ids, lower half for pull
+// markers (`pull_count_pre * 2 + orb_index`) and upper half offset by
+// MARKER_LEVEL_OFFSET for level-transition markers.
+const MARKER_LEVEL_BAND = 1024;
+const MARKER_LEVEL_OFFSET = 512;
+
+const pullMarkerId = (level: number, pullCountPre: number, orbIndex: number) =>
+  level * MARKER_LEVEL_BAND + pullCountPre * 2 + orbIndex;
+
+const levelMarkerId = (level: number, pullCount: number) =>
+  level * MARKER_LEVEL_BAND + pullCount * 2 + MARKER_LEVEL_OFFSET;
+
 function defaultState(): OfflineState {
   return {
     version: 1,
@@ -31,7 +44,7 @@ function defaultState(): OfflineState {
     activeGameId: null,
     games: {},
     pulls: [],
-    plDataPoints: [],
+    markers: [],
   };
 }
 
@@ -66,12 +79,6 @@ function ensureGame(prev: OfflineState, gameId: number): OfflineGame {
   return game;
 }
 
-function nextPlId(prev: OfflineState, gameId: number): number {
-  const existing = prev.plDataPoints.filter((p) => p.game_id === gameId);
-  if (existing.length === 0) return 0;
-  return Math.max(...existing.map((p) => p.id)) + 1;
-}
-
 export function createOfflineGame(): number {
   let createdId = 0;
   setState((prev) => {
@@ -82,10 +89,10 @@ export function createOfflineGame(): number {
     const { game: started, cost } = startGame(game);
     started.moonrocks = game.moonrocks - cost;
 
-    const plBaseId = nextPlId(prev, id);
-    const plStart: OfflinePLDataPoint = {
+    // Baseline marker (id=0) — see Game::level_marker_id contract notes.
+    const baseline: OfflineMarker = {
       game_id: id,
-      id: plBaseId,
+      id: 0,
       potential_moonrocks: game.moonrocks,
       orb: 0,
     };
@@ -95,7 +102,7 @@ export function createOfflineGame(): number {
       nextGameId: id + 1,
       activeGameId: id,
       games: { ...prev.games, [id]: started },
-      plDataPoints: [...prev.plDataPoints, plStart],
+      markers: [...prev.markers, baseline],
     };
   });
   return createdId;
@@ -120,10 +127,11 @@ export function pull(gameId: number, forcedOrbId?: number): boolean {
       if (earnings) {
         nextGame.moonrocks = game.moonrocks + earnings;
       }
-      const plBaseId = nextPlId(prev, gameId);
+
+      const pullCountPre = nextGame.pull_count - orbs.length;
 
       const pulls: OfflineOrbPulled[] = [];
-      const plPoints: OfflinePLDataPoint[] = [];
+      const newMarkers: OfflineMarker[] = [];
 
       orbs.forEach((orbId, index) => {
         pulls.push({
@@ -132,9 +140,9 @@ export function pull(gameId: number, forcedOrbId?: number): boolean {
           orb: orbId,
           potential_moonrocks: potential,
         });
-        plPoints.push({
+        newMarkers.push({
           game_id: gameId,
-          id: plBaseId + index,
+          id: pullMarkerId(nextGame.level, pullCountPre, index),
           potential_moonrocks: potential,
           orb: orbId,
         });
@@ -144,7 +152,7 @@ export function pull(gameId: number, forcedOrbId?: number): boolean {
         ...prev,
         games: { ...prev.games, [gameId]: nextGame },
         pulls: [...prev.pulls, ...pulls],
-        plDataPoints: [...prev.plDataPoints, ...plPoints],
+        markers: [...prev.markers, ...newMarkers],
       };
     });
     return true;
@@ -179,11 +187,13 @@ export function enter(gameId: number): boolean {
       const seed = createSeed();
       const { game: nextGame } = enterShop(game, seed);
 
-      const plId = nextPlId(prev, gameId);
+      // Level marker — emitted on the level the player just finished
+      // (level_up happens during exit, not enter). See contract:
+      // contracts/src/components/playable.cairo enter().
       const potential = nextGame.moonrocks + nextGame.points;
-      const plPoint: OfflinePLDataPoint = {
+      const marker: OfflineMarker = {
         game_id: gameId,
-        id: plId,
+        id: levelMarkerId(nextGame.level, nextGame.pull_count),
         potential_moonrocks: potential,
         orb: 0,
       };
@@ -191,7 +201,7 @@ export function enter(gameId: number): boolean {
       return {
         ...prev,
         games: { ...prev.games, [gameId]: nextGame },
-        plDataPoints: [...prev.plDataPoints, plPoint],
+        markers: [...prev.markers, marker],
       };
     });
     return true;
@@ -279,19 +289,16 @@ export function selectPulls(source: OfflineState, gameId: number): OrbPulled[] {
     );
 }
 
-export function selectPLDataPoints(
-  source: OfflineState,
-  gameId: number,
-): PLDataPoint[] {
-  return source.plDataPoints
-    .filter((point) => point.game_id === gameId)
+export function selectMarkers(source: OfflineState, gameId: number): Marker[] {
+  return source.markers
+    .filter((marker) => marker.game_id === gameId)
     .map(
-      (point) =>
-        new PLDataPoint(
-          BigInt(point.game_id),
-          point.id,
-          point.potential_moonrocks,
-          point.orb,
+      (marker) =>
+        new Marker(
+          BigInt(marker.game_id),
+          marker.id,
+          marker.potential_moonrocks,
+          marker.orb,
         ),
     );
 }

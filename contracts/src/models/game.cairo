@@ -1,6 +1,6 @@
 use core::num::traits::Zero;
 use crate::constants::{
-    DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH,
+    DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH, MAX_LEVEL,
 };
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
@@ -16,6 +16,16 @@ use crate::types::orbs::{Orbs, OrbsTrait};
 pub const BASE_MULTIPLIER: u16 = 100;
 pub const SUPP_MULTIPLIER: u16 = 20;
 pub const SHOP_ACTION_COST: u16 = 4;
+
+// Marker id layout: every level owns a disjoint band of 1024 ids, so
+// events from different levels can never collide. Within a band the
+// lower half is reserved for pull markers (`pull_count * 2 + offset`)
+// and the upper half for level markers (MARKER_LEVEL_OFFSET +
+// `pull_count * 2`). `pull_count: u8` caps at 255 so a pull index uses
+// at most 510 — well below the 512 split — leaving room for
+// DoubleDraw's `+1` offset.
+pub const MARKER_LEVEL_BAND: u32 = 1024;
+pub const MARKER_LEVEL_OFFSET: u32 = 512;
 
 // Curse bit positions (u8 bitmap)
 pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
@@ -147,6 +157,29 @@ pub impl GameImpl of GameTrait {
         self.milestone = Milestone::get(self.level);
     }
 
+    /// Compute the Marker id for an orb pull. `orb_index` is 0 for a
+    /// normal pull and may be 1 for the second orb when DoubleDraw is
+    /// active. `pull_count_pre` is the value of `pull_count` BEFORE the
+    /// current pull was applied (i.e. `pull_count - orbs.len()` at the
+    /// emission site). The id sits in the level's lower half so pull
+    /// markers and level markers can never collide.
+    #[inline]
+    fn pull_marker_id(self: @Game, pull_count_pre: u8, orb_index: u8) -> u32 {
+        (*self.level).into() * MARKER_LEVEL_BAND + pull_count_pre.into() * 2 + orb_index.into()
+    }
+
+    /// Compute the Marker id for a level marker (an `enter` event).
+    /// The id sits in the level's upper half (offset by
+    /// `MARKER_LEVEL_OFFSET`) so it can never collide with pull markers
+    /// in the same level. The marker is emitted before `level_up`, so
+    /// `self.level` here is the level the player just finished.
+    #[inline]
+    fn level_marker_id(self: @Game) -> u32 {
+        (*self.level).into() * MARKER_LEVEL_BAND
+            + (*self.pull_count).into() * 2
+            + MARKER_LEVEL_OFFSET
+    }
+
     #[inline]
     fn counters(self: @Game) -> Counters {
         CountersTrait::unpack(*self.counters)
@@ -252,7 +285,7 @@ pub impl GameImpl of GameTrait {
     /// Determines if the game is over based on the current health.
     #[inline]
     fn is_over(self: @Game) -> bool {
-        self.health == @0
+        self.health == @0 || (self.level == @MAX_LEVEL && self.is_completed())
     }
 
     /// Determines if the game has expired based on the current timestamp.

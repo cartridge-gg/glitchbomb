@@ -4,3 +4,5 @@ export const PROTOCOL_FEE = 0.0;
 export const MULTIPLIER_PRECISION = 1_000_000n;
 /** Default game expiration in seconds (24h). Used as a static fallback when no `expiration` is provided. */
 export const DEFAULT_EXPIRATION = 86400;
+/** Initial moonrocks balance granted on game start. Mirrors `DEFAULT_MOONROCKS` in `contracts/src/constants.cairo`. */
+export const DEFAULT_MOONROCKS = 100;
