@@ -95,7 +95,8 @@ pub mod PlayableComponent {
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let mut rng = RandomImpl::new_vrf(store.vrf_disp());
-            let (orbs, earnings, remaining, earned_points) = game.pull(rng.next_seed());
+            let (orbs, remaining, earned_points) = game.pull(rng.next_seed());
+            store.set_game(@game);
 
             // Calculate potential moonrocks and resolve the marker id.
             // Marker ids are namespaced per level (see
@@ -118,10 +119,6 @@ pub mod PlayableComponent {
                 let marker_id = game.pull_marker_id(pull_count_pre, 1);
                 store.marker(marker_id, @game, potential_moonrocks, orb_type);
             }
-
-            // [Effect] Update game earnings if exists
-            game.earn_moonrocks(earnings);
-            store.set_game(@game);
 
             // [Effect] Progressions
             // Achievements:

@@ -31,7 +31,7 @@ pub enum Orb {
 #[generate_trait]
 pub impl OrbImpl of OrbTrait {
     #[inline]
-    fn apply(self: @Orb, ref game: Game) -> u16 {
+    fn apply(self: @Orb, ref game: Game) {
         match self {
             Orb::Bomb1 => Effect::Explode.apply(ref game, 1),
             Orb::Bomb2 => Effect::Explode.apply(ref game, 2),
@@ -54,7 +54,7 @@ pub impl OrbImpl of OrbTrait {
             Orb::Moonrock40 => Effect::Moonrock.apply(ref game, 40),
             Orb::Chips15 => Effect::Chips.apply(ref game, 15),
             Orb::CurseScoreDecrease => Effect::Lose.apply(ref game, LOSS_PERCENT),
-            _ => 0,
+            _ => {},
         }
     }
 

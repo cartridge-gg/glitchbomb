@@ -285,7 +285,12 @@ pub impl GameImpl of GameTrait {
     /// Determines if the game is over based on the current health.
     #[inline]
     fn is_over(self: @Game) -> bool {
-        self.health == @0 || (self.level == @MAX_LEVEL && self.is_completed())
+        self.health == @0 || self.is_won()
+    }
+
+    #[inline]
+    fn is_won(self: @Game) -> bool {
+        self.level == @MAX_LEVEL && self.is_completed()
     }
 
     /// Determines if the game has expired based on the current timestamp.
@@ -303,6 +308,10 @@ pub impl GameImpl of GameTrait {
     /// Assesses the game state and updates the game over status.
     #[inline]
     fn assess(ref self: Game) {
+        if self.is_won() {
+            self.cash_out();
+            return;
+        }
         if self.is_over() {
             self.over = starknet::get_block_timestamp();
         }
@@ -323,14 +332,14 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn cash_out(ref self: Game) -> u16 {
+    fn cash_out(ref self: Game) {
         // [Effect] Convert points
-        let moonrocks = self.points;
-        self.points = 0;
+        if self.is_completed() {
+            self.earn_moonrocks(self.points);
+            self.points = 0;
+        }
         // [Effect] Update state
         self.over = starknet::get_block_timestamp();
-        // [Return] Moonrocks
-        moonrocks
     }
 
     #[inline]
@@ -517,7 +526,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16, u32, u16) {
+    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u32, u16) {
         // [Check] Game is not over
         self.assert_not_over();
         self.assert_not_completed();
@@ -539,7 +548,6 @@ pub impl GameImpl of GameTrait {
         };
         // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
         let mut pulled_orbs: Array<Orb> = array![];
-        let mut total_earnings: u16 = 0;
         let mut draws_done: u8 = 0;
         let total_points: u16 = self.points;
         while draws_done < draw_count && deck.remaining > 0 {
@@ -550,8 +558,7 @@ pub impl GameImpl of GameTrait {
                 self.discards = Bitmap::set(self.discards, index);
             }
             // [Effect] Apply the orb
-            let earnings = orb.apply(ref self);
-            total_earnings += earnings;
+            orb.apply(ref self);
             pulled_orbs.append(orb);
             draws_done += 1;
             // [Effect] Increment pull count
@@ -559,14 +566,10 @@ pub impl GameImpl of GameTrait {
         }
 
         // [Effect] Assess the game
-        self.over = if self.is_over() {
-            starknet::get_block_timestamp()
-        } else {
-            self.over
-        };
+        self.assess();
 
         // [Return] The pulled orbs and total earnings
-        (pulled_orbs, total_earnings, deck.remaining, self.points - total_points)
+        (pulled_orbs, deck.remaining, self.points - total_points)
     }
 
     #[inline]
@@ -819,7 +822,7 @@ mod tests {
         let initial = game.pullable_bombs_count();
         // Pull the first orb and verify the pullable count either stays equal
         // (non-bomb pulled) or decreases by exactly 1 (bomb pulled).
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         let pulled = *orbs.at(0);
         let expected = initial - pulled.one_if_bomb();
         assert_eq!(game.pullable_bombs_count(), expected);
@@ -847,7 +850,7 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         let initial = game.pullable_points_count();
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         let pulled = *orbs.at(0);
         let expected = initial - pulled.one_if_point();
         assert_eq!(game.pullable_points_count(), expected);
@@ -866,8 +869,8 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         game.earn_points(100);
-        let cash = game.cash_out();
-        assert_eq!(cash, 100);
+        game.cash_out();
+        assert_eq!(game.moonrocks, 200);
         assert_eq!(game.over, 0);
     }
 
@@ -1091,7 +1094,7 @@ mod tests {
         // [Check] No curse active
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
         // [Effect] Pull orb
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] Only 1 orb pulled
         assert_eq!(orbs.len().into(), 1);
     }
@@ -1104,7 +1107,7 @@ mod tests {
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         // [Effect] Pull orbs
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled due to DoubleDraw curse
         assert_eq!(orbs.len().into(), 2);
     }
@@ -1116,7 +1119,7 @@ mod tests {
         let discards_before = game.discards;
         // [Effect] Add DoubleDraw curse and pull
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled and discards updated for both
         assert_eq!(orbs.len().into(), 2);
         // Discards should have 2 bits set (2 orbs pulled)
@@ -1141,7 +1144,7 @@ mod tests {
         if game.over == 0 {
             let pullable = game.pullable_orbs_count();
             if pullable > 0 {
-                let (orbs, _, _, _) = game.pull('FINAL');
+                let (orbs, _, _) = game.pull('FINAL');
                 // [Check] Should only pull what's available (1 orb max)
                 assert!(orbs.len() <= pullable.into());
             }
@@ -1212,7 +1215,7 @@ mod tests {
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
         // [Check] DoubleDraw still works (pulls 2 orbs)
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         assert_eq!(orbs.len().into(), 2);
         // [Check] Demultiplier still works (halves boost)
         let multiplier_before = game.multiplier;
@@ -1487,11 +1490,11 @@ mod tests {
         // [Setup] Replace bag with a single bomb for deterministic pulls
         game.bag = array![Orb::StickyBomb].pack();
         game.discards = 0;
-        let (orbs_first, _, _, _) = game.pull(SEED);
+        let (orbs_first, _, _) = game.pull(SEED);
         assert_eq!(orbs_first.len(), 1);
         assert_eq!(game.discards, 0);
         assert_eq!(game.pullable_orbs_count(), 1);
-        let (orbs_second, _, _, _) = game.pull('SECOND');
+        let (orbs_second, _, _) = game.pull('SECOND');
         assert_eq!(orbs_second.len(), 1);
     }
 }
