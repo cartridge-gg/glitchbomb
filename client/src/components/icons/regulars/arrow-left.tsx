@@ -8,7 +8,9 @@ export const ArrowLeftIcon = forwardRef<SVGSVGElement, ArrowLeftIconProps>(
   ({ className, size, ...props }, forwardedRef) => {
     return (
       <svg
-        viewBox="0 0 16 16"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
         className={iconVariants({ size, className })}
         ref={forwardedRef}
         fill="none"
@@ -18,42 +20,33 @@ export const ArrowLeftIcon = forwardRef<SVGSVGElement, ArrowLeftIconProps>(
         {...props}
       >
         <path
-          d="M5.22168 7.44434H6.33301V6.33301H5.22168V7.44434Z"
+          d="M7.83252 11.1665L7.83252 9.49951H6.16553V11.1665L4.5 11.1665L4.5 12.832H6.16553L6.16553 14.499H7.83252V12.832H19.5V11.1665L7.83252 11.1665Z"
           fill="currentColor"
         />
         <path
-          d="M5.22168 8.55566H6.33301V9.66699H5.22168V8.55566Z"
+          d="M7.83252 14.499L7.83252 16.166H9.49951V14.499H7.83252Z"
           fill="currentColor"
         />
         <path
-          d="M5.22168 7.44434V8.55566H3V7.44434H5.22168Z"
+          d="M7.83252 7.83252V9.49951H9.49951V7.83252L7.83252 7.83252Z"
           fill="currentColor"
         />
         <path
-          d="M6.33301 6.33301V5.22168H7.44434V6.33301H6.33301Z"
+          d="M9.49951 16.166V17.8315H11.165V16.166H9.49951Z"
           fill="currentColor"
         />
         <path
-          d="M6.33301 9.66699V10.7783H7.44434V9.66699H6.33301Z"
+          d="M9.49951 6.16699L9.49951 7.83252H11.165L11.165 6.16699L9.49951 6.16699Z"
           fill="currentColor"
         />
         <path
-          d="M7.44434 5.22168V4.11035H8.55566V5.22168H7.44434Z"
+          d="M11.165 17.8315L11.165 19.5H12.8335V17.833L11.165 17.8315Z"
           fill="currentColor"
         />
         <path
-          d="M7.44434 10.7783V11.8896H8.55566V10.7783H7.44434Z"
+          d="M11.165 4.5V6.16699L12.832 6.16699V4.5L11.165 4.5Z"
           fill="currentColor"
         />
-        <path
-          d="M8.55566 4.11035V3H9.66699V4.11035H8.55566Z"
-          fill="currentColor"
-        />
-        <path
-          d="M8.55566 11.8896V13H9.66699V11.8896H8.55566Z"
-          fill="currentColor"
-        />
-        <path d="M13 7.44434V8.55566H5.22168V7.44434H13Z" fill="currentColor" />
       </svg>
     );
   },
