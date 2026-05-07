@@ -67,8 +67,8 @@ pub mod PlayableComponent {
             // [Effect] Start the game immediately (fill bag)
             let cost = game.start();
 
-            // [Event] Emit PLDataPoint at baseline (initial moonrocks)
-            store.pl_data_point(0, @game, game.moonrocks, 0);
+            // [Event] Emit Marker at baseline (initial moonrocks)
+            store.marker(0, @game, game.moonrocks, 0);
 
             // [Effect] Spend moonrocks for entry
             game.spend_moonrocks(cost);
@@ -95,28 +95,30 @@ pub mod PlayableComponent {
 
             // [Effect] Pull orb(s) - may be 2 if DoubleDraw curse is active
             let mut rng = RandomImpl::new_vrf(store.vrf_disp());
-            let (orbs, earnings, remaining, earned_points) = game.pull(rng.next_seed());
+            let (orbs, remaining, earned_points) = game.pull(rng.next_seed());
+            store.set_game(@game);
 
-            // Calculate potential moonrocks and PL id base
+            // Calculate potential moonrocks and resolve the marker id.
+            // Marker ids are namespaced per level (see
+            // `Game::pull_marker_id`) so they can never collide with
+            // level markers emitted by `enter`.
             let potential_moonrocks = game.moonrocks + game.points;
-            let pl_base_id: u32 = 1 + (game.pull_count.into() - orbs.len()) * 2;
+            let pull_count_pre: u8 = game.pull_count - orbs.len().try_into().unwrap();
 
-            // [Event] Emit OrbPulled and PLDataPoint for each orb (max 2 with DoubleDraw)
+            // [Event] Emit OrbPulled and Marker for each orb (max 2 with DoubleDraw)
             store.orb_pulled(@game, orbs.get(0), 0);
             store.orb_pulled(@game, orbs.get(1), 1);
 
             if let Option::Some(orb) = orbs.get(0) {
                 let orb_type: u8 = (*orb.unbox()).into();
-                store.pl_data_point(pl_base_id, @game, potential_moonrocks, orb_type);
+                let marker_id = game.pull_marker_id(pull_count_pre, 0);
+                store.marker(marker_id, @game, potential_moonrocks, orb_type);
             }
             if let Option::Some(orb) = orbs.get(1) {
                 let orb_type: u8 = (*orb.unbox()).into();
-                store.pl_data_point(pl_base_id + 1, @game, potential_moonrocks, orb_type);
+                let marker_id = game.pull_marker_id(pull_count_pre, 1);
+                store.marker(marker_id, @game, potential_moonrocks, orb_type);
             }
-
-            // [Effect] Update game earnings if exists
-            game.earn_moonrocks(earnings);
-            store.set_game(@game);
 
             // [Effect] Progressions
             // Achievements:
@@ -291,11 +293,6 @@ pub mod PlayableComponent {
             game.assert_not_over();
             game.assert_not_expired();
 
-            // [Effect] If level completed (at milestone), convert points to moonrocks
-            if game.is_completed() {
-                game.moonrocks += game.points;
-            }
-
             // [Effect] Cash out (marks over, clears points)
             game.cash_out();
             store.set_game(@game);
@@ -363,10 +360,12 @@ pub mod PlayableComponent {
             game.enter(rng.next_seed());
             store.set_game(@game);
 
-            // [Event] Emit PLDataPoint for ante cost
-            let pl_id: u32 = 1 + (game.pull_count.into() * 2) + game.level.into();
+            // [Event] Emit Marker for the level transition (ante cost).
+            // The id sits in the upper half of the level's id band so it
+            // can't collide with pull markers — see `Game::level_marker_id`.
+            let marker_id = game.level_marker_id();
             let potential = game.moonrocks + game.points;
-            store.pl_data_point(pl_id, @game, potential, 0);
+            store.marker(marker_id, @game, potential, 0);
 
             // [Effect] Progressions (end-of-level — before level_counters reset)
             // Achievements: Victory/Elite/Royalty (Conqueror), Flawless,

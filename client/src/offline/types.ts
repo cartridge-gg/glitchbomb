@@ -34,7 +34,7 @@ export interface OfflineOrbPulled {
   potential_moonrocks: number;
 }
 
-export interface OfflinePLDataPoint {
+export interface OfflineMarker {
   game_id: number;
   id: number;
   potential_moonrocks: number;
@@ -47,5 +47,5 @@ export interface OfflineState {
   activeGameId: number | null;
   games: Record<number, OfflineGame>;
   pulls: OfflineOrbPulled[];
-  plDataPoints: OfflinePLDataPoint[];
+  markers: OfflineMarker[];
 }

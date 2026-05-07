@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import type { GameChartDataPoint } from "@/components/elements";
-import type { OrbPulled } from "@/models";
+import { Game, type OrbPulled } from "@/models";
 import { GameOver } from "./game-over";
 
 // Mock Orb class for storybook (matches the shape consumed by GameChart tooltips).
@@ -52,6 +52,57 @@ const createMockOrb = (value: string): OrbPulled["orb"] => {
     isCurse: () => isCurse,
   } as OrbPulled["orb"];
 };
+
+interface MockGameOptions {
+  health?: number;
+  level?: number;
+  points?: number;
+  milestone?: number;
+  moonrocks?: number;
+  stake?: number;
+  over?: number;
+  expiration?: number;
+}
+
+// Build a minimal Game instance for storybook scenarios. Most fields are
+// irrelevant to the GameOver scene; only health/points/milestone/over/
+// expiration drive the title and moonrocks/stake drive the payout.
+const createMockGame = ({
+  health = 3,
+  level = 1,
+  points = 0,
+  milestone = 12,
+  moonrocks = 80,
+  stake = 3,
+  over = Math.floor(Date.now() / 1000),
+  expiration = Math.floor(Date.now() / 1000) + 3600,
+}: MockGameOptions = {}): Game =>
+  new Game(
+    1, // id
+    false, // claimed
+    level,
+    health,
+    0, // immunity
+    0, // curses
+    0, // pull_count
+    points,
+    milestone,
+    1, // multiplier
+    0, // chips
+    moonrocks,
+    over,
+    expiration,
+    [], // discards
+    [], // shop
+    stake,
+    0n, // level_counters
+    0n, // counters
+    [], // bag
+    0n, // supply
+    0n, // price
+    [], // shopPurchaseCounts
+    [], // pullables
+  );
 
 const samplePlData: GameChartDataPoint[] = [
   { value: 90, variant: "yellow", id: 0 },
@@ -119,11 +170,10 @@ const meta = {
     layout: "fullscreen",
   },
   args: {
-    moonrocksEarned: 80,
+    // Cashed out: alive, milestone not reached, over > 0
+    game: createMockGame({ health: 3, points: 5, moonrocks: 80, stake: 3 }),
     plData: samplePlData,
     pulls: samplePulls,
-    cashedOut: true,
-    stake: 3,
     tokenPrice: 0.05,
     supply: 100_000_000n,
     target: 200_000_000n,
@@ -140,8 +190,7 @@ export const Default: Story = {};
 
 export const GlitchedOut: Story = {
   args: {
-    moonrocksEarned: 0,
-    cashedOut: false,
+    game: createMockGame({ health: 0, points: 5, moonrocks: 0, stake: 3 }),
     plData: losingPlData,
     pulls: losingPulls,
   },
@@ -149,27 +198,29 @@ export const GlitchedOut: Story = {
 
 export const Expired: Story = {
   args: {
-    moonrocksEarned: 0,
-    cashedOut: false,
-    expired: true,
+    game: createMockGame({
+      health: 3,
+      points: 5,
+      moonrocks: 0,
+      stake: 3,
+      over: 0,
+      // Set expiration in the past so isExpired() is true.
+      expiration: Math.floor(Date.now() / 1000) - 60,
+    }),
     plData: losingPlData,
     pulls: losingPulls,
   },
 };
 
-export const BigWinner: Story = {
+export const Win: Story = {
   args: {
-    moonrocksEarned: 250,
-    stake: 5,
-  },
-};
-
-export const NoPayoutContext: Story = {
-  args: {
-    moonrocksEarned: 80,
-    stake: undefined,
-    tokenPrice: null,
-    supply: undefined,
-    target: undefined,
+    // Won: alive, milestone reached, over > 0
+    game: createMockGame({
+      health: 3,
+      points: 20,
+      milestone: 12,
+      moonrocks: 250,
+      stake: 5,
+    }),
   },
 };

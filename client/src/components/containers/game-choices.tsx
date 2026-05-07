@@ -23,8 +23,16 @@ export const GameChoices = ({
       )}
       {...props}
     >
-      <GameChoice variant="default" className="flex-1" {...continueProps} />
-      <GameChoice variant="secondary" className="flex-1" {...cashOut} />
+      <GameChoice
+        variant="default"
+        className="flex-1 md:max-h-[210px]"
+        {...continueProps}
+      />
+      <GameChoice
+        variant="secondary"
+        className="flex-1 md:max-h-[210px]"
+        {...cashOut}
+      />
     </div>
   );
 };

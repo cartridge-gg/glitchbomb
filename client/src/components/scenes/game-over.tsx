@@ -4,7 +4,7 @@ import { BagIcon, GlitchStateIcon, PlusIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { tokenPayout, toTokens } from "@/helpers/payout";
 import { cn } from "@/lib/utils";
-import type { OrbPulled } from "@/models";
+import type { Game, OrbPulled } from "@/models";
 import { GameBalance, GameChart, type GameChartDataPoint } from "../elements";
 import { Button } from "../ui/button";
 
@@ -22,18 +22,12 @@ const gameOverSceneVariants = cva("flex flex-col gap-8 items-stretch p-4", {
 export interface GameOverProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameOverSceneVariants> {
-  /** Moonrocks earned during the game (used for the balance pill and payout calc). */
-  moonrocksEarned: number;
+  /** The finished game; drives title, payout and balance display. */
+  game: Game;
   /** Chart data points for the P/L graph (absolute potential moonrocks). */
   plData: GameChartDataPoint[];
   /** Pulls history paired with chart points for the per-dot tooltip. */
   pulls: OrbPulled[];
-  /** True = voluntarily cashed out, false = died (health = 0). */
-  cashedOut: boolean;
-  /** True = game expired without being played to completion. */
-  expired?: boolean;
-  /** Stake tier; required to compute the GLITCH payout. */
-  stake?: number;
   /** GLITCH/USD price; required to compute the USD value. */
   tokenPrice?: number | null;
   /** Token total supply (used by the on-chain payout formula). */
@@ -44,13 +38,18 @@ export interface GameOverProps
   onOpenStash?: () => void;
 }
 
+const resolveTitle = (game: Game): string => {
+  if (game.isWon()) return "Big Win!";
+  if (game.isCashedOut()) return "Cashed Out";
+  if (game.isGlitchedOut()) return "Glitched Out";
+  if (game.isExpired()) return "Timed out";
+  return "";
+};
+
 export const GameOver = ({
-  moonrocksEarned,
+  game,
   plData,
   pulls,
-  cashedOut,
-  expired,
-  stake,
   tokenPrice,
   supply,
   target,
@@ -60,9 +59,12 @@ export const GameOver = ({
   className,
   ...props
 }: GameOverProps) => {
+  const moonrocksEarned = game.moonrocks;
+  const stake = game.stake;
+
   // Compute GLITCH payout and USD value from on-chain rewarder math.
   const { payout, value } = useMemo(() => {
-    if (stake == null || moonrocksEarned <= 0) {
+    if (moonrocksEarned <= 0) {
       return { payout: 0, value: null as number | null };
     }
     const raw = tokenPayout(moonrocksEarned, stake, supply ?? 0n, target ?? 0n);
@@ -72,16 +74,17 @@ export const GameOver = ({
     return { payout: tokens, value: usd };
   }, [stake, moonrocksEarned, supply, target, tokenPrice]);
 
-  const title = expired ? "Expired" : cashedOut ? "Cashed Out" : "Glitched Out";
+  const title = resolveTitle(game);
 
   return (
     <div
       className={cn(gameOverSceneVariants({ variant, className }))}
       {...props}
     >
-      <h2 className="h-12 text-[2.5rem] md:text-[3rem] text-green-100 uppercase self-center">
+      <h2 className="h-12 text-[2.5rem] md:text-[3rem] text-primary-100 uppercase self-center whitespace-nowrap">
         <GlitchText
           text={title}
+          className={game.isGlitchedOut() ? "animate-glitch-full" : undefined}
           style={{
             textShadow:
               "2px 2px 0px rgba(255, 0, 0, 0.25), -2px -2px 0px rgba(0, 0, 255, 0.25)",
@@ -119,7 +122,7 @@ const Payout = ({ payout }: { payout: number }) => {
     ? payout.toString()
     : payout.toFixed(2);
   return (
-    <div className="flex-1 p-6 flex flex-col justify-center items-center gap-2 rounded-t-lg bg-primary-900 shadow-[inset_1px_1px_0_0_var(--white-900)]">
+    <div className="flex-1 px-6 py-2 flex flex-col justify-center items-center gap-2 rounded-t-lg bg-primary-900 shadow-[inset_1px_1px_0_0_var(--white-900)]">
       <h2 className="text-salmon-300 font-secondary uppercase text-2xl/6">
         Payout
       </h2>
@@ -136,7 +139,7 @@ const Payout = ({ payout }: { payout: number }) => {
 const Value = ({ value }: { value: number | null }) => {
   const formatted = value != null ? `$${value.toFixed(2)}` : "—";
   return (
-    <div className="flex-1 p-6 flex flex-col justify-center items-center gap-2 rounded-b-lg bg-primary-900 shadow-[inset_1px_1px_0_0_var(--white-900)]">
+    <div className="flex-1 px-6 py-2 flex flex-col justify-center items-center gap-2 rounded-b-lg bg-primary-900 shadow-[inset_1px_1px_0_0_var(--white-900)]">
       <h2 className="text-primary-300 font-secondary uppercase text-2xl/6">
         Value
       </h2>

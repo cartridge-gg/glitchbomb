@@ -633,3 +633,44 @@ export class Orb {
     }
   }
 }
+
+/**
+ * Synthetic Orb used to represent the yellow markers on the P/L chart
+ * (game start and level transitions). It is not a real pulled orb — the
+ * contract emits a Marker with `orb=0` for the initial baseline and
+ * for each `enter` event. The chart pairs each plotted point with an
+ * `OrbPulled` to render its tooltip; using this class for those markers
+ * keeps the chart's 1:1 mapping intact (avoiding cursor drift) while
+ * showing a dedicated tooltip with custom name + description.
+ */
+export class ExtendedOrb extends Orb {
+  private readonly customName: string;
+  private readonly customDescription: string;
+
+  constructor(name: string, description: string) {
+    super(OrbType.None);
+    this.customName = name;
+    this.customDescription = description;
+  }
+
+  public override name(): string {
+    return this.customName;
+  }
+
+  public override description(): string {
+    return this.customDescription;
+  }
+
+  public override color(): string {
+    // Match the yellow used for markers on the chart.
+    return "#FACC15";
+  }
+
+  public override logCategory(): string {
+    return this.customName.toUpperCase();
+  }
+
+  public override logEffect(): string {
+    return this.customDescription.toUpperCase();
+  }
+}

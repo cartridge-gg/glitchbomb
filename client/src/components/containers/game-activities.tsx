@@ -161,7 +161,7 @@ export const GameActivities = ({
       {...props}
     >
       {/* Title */}
-      <div className="min-h-8 flex justify-between items-center gap-6">
+      <div className="flex justify-between items-center gap-6">
         <h2 className="text-2xl font-secondary text-primary-100 uppercase px-1">
           Activity
         </h2>

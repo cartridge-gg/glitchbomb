@@ -1,8 +1,16 @@
-import type { RawPLDataPoint } from "./index";
+import type { RawMarker } from "./index";
 
-const MODEL_NAME = "PLDataPoint";
+const MODEL_NAME = "Marker";
 
-export class PLDataPoint {
+/**
+ * Mirror of the contract's `Marker` event (`contracts/src/events/index.cairo`).
+ * One Marker is emitted per orb pull and per level transition (and once
+ * for the game-start baseline). The `id` follows the band-based layout
+ * defined in `contracts/src/models/game.cairo`: every level owns a
+ * disjoint band of 1024 ids (lower half = pulls, upper half = level
+ * markers). The baseline uses the special id `0`.
+ */
+export class Marker {
   gameId: bigint;
   id: number;
   potentialMoonrocks: number;
@@ -18,6 +26,21 @@ export class PLDataPoint {
     this.id = id;
     this.potentialMoonrocks = potentialMoonrocks;
     this.orb = orb;
+  }
+
+  /** Game-start baseline marker (id=0). */
+  isBaseline(): boolean {
+    return this.id === 0;
+  }
+
+  /** Level transition marker (orb=0 and not baseline). */
+  isLevelMarker(): boolean {
+    return this.orb === 0 && this.id !== 0;
+  }
+
+  /** Orb pull marker (orb>0). */
+  isPullMarker(): boolean {
+    return this.orb !== 0;
   }
 
   /**
@@ -38,7 +61,7 @@ export class PLDataPoint {
 
     // Non-orb events (level cost, game start)
     if (orbType === 0) {
-      return "green";
+      return "yellow";
     }
 
     // Bombs (1-3, 21) - red
@@ -80,14 +103,14 @@ export class PLDataPoint {
     return "green";
   }
 
-  static parse(data: RawPLDataPoint): PLDataPoint {
+  static parse(data: RawMarker): Marker {
     const props = {
       gameId: BigInt(data.game_id?.value ?? 0),
       id: Number(data.id?.value ?? 0),
       potentialMoonrocks: Number(data.potential_moonrocks?.value ?? 0),
       orb: Number(data.orb?.value ?? 0),
     };
-    return new PLDataPoint(
+    return new Marker(
       props.gameId,
       props.id,
       props.potentialMoonrocks,
@@ -99,10 +122,10 @@ export class PLDataPoint {
     return MODEL_NAME;
   }
 
-  static deduplicate(points: PLDataPoint[]): PLDataPoint[] {
+  static deduplicate(markers: Marker[]): Marker[] {
     const seen = new Set<string>();
-    return points.filter((point) => {
-      const key = `${point.gameId}-${point.id}`;
+    return markers.filter((marker) => {
+      const key = `${marker.gameId}-${marker.id}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;

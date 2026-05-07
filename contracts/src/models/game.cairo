@@ -1,6 +1,6 @@
 use core::num::traits::Zero;
 use crate::constants::{
-    DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH,
+    DEFAULT_LEVEL, DEFAULT_MOONROCKS, GAME_EXPIRATION_TIME, MAX_CAPACITY, MAX_HEALTH, MAX_LEVEL,
 };
 use crate::helpers::bitmap::Bitmap;
 use crate::helpers::deck::{Deck, DeckTrait};
@@ -16,6 +16,16 @@ use crate::types::orbs::{Orbs, OrbsTrait};
 pub const BASE_MULTIPLIER: u16 = 100;
 pub const SUPP_MULTIPLIER: u16 = 20;
 pub const SHOP_ACTION_COST: u16 = 4;
+
+// Marker id layout: every level owns a disjoint band of 1024 ids, so
+// events from different levels can never collide. Within a band the
+// lower half is reserved for pull markers (`pull_count * 2 + offset`)
+// and the upper half for level markers (MARKER_LEVEL_OFFSET +
+// `pull_count * 2`). `pull_count: u8` caps at 255 so a pull index uses
+// at most 510 — well below the 512 split — leaving room for
+// DoubleDraw's `+1` offset.
+pub const MARKER_LEVEL_BAND: u32 = 1024;
+pub const MARKER_LEVEL_OFFSET: u32 = 512;
 
 // Curse bit positions (u8 bitmap)
 pub const CURSE_DOUBLE_DRAW: u8 = 0; // Bit 0: Draw 2 orbs at a time
@@ -147,6 +157,29 @@ pub impl GameImpl of GameTrait {
         self.milestone = Milestone::get(self.level);
     }
 
+    /// Compute the Marker id for an orb pull. `orb_index` is 0 for a
+    /// normal pull and may be 1 for the second orb when DoubleDraw is
+    /// active. `pull_count_pre` is the value of `pull_count` BEFORE the
+    /// current pull was applied (i.e. `pull_count - orbs.len()` at the
+    /// emission site). The id sits in the level's lower half so pull
+    /// markers and level markers can never collide.
+    #[inline]
+    fn pull_marker_id(self: @Game, pull_count_pre: u8, orb_index: u8) -> u32 {
+        (*self.level).into() * MARKER_LEVEL_BAND + pull_count_pre.into() * 2 + orb_index.into()
+    }
+
+    /// Compute the Marker id for a level marker (an `enter` event).
+    /// The id sits in the level's upper half (offset by
+    /// `MARKER_LEVEL_OFFSET`) so it can never collide with pull markers
+    /// in the same level. The marker is emitted before `level_up`, so
+    /// `self.level` here is the level the player just finished.
+    #[inline]
+    fn level_marker_id(self: @Game) -> u32 {
+        (*self.level).into() * MARKER_LEVEL_BAND
+            + (*self.pull_count).into() * 2
+            + MARKER_LEVEL_OFFSET
+    }
+
     #[inline]
     fn counters(self: @Game) -> Counters {
         CountersTrait::unpack(*self.counters)
@@ -252,7 +285,12 @@ pub impl GameImpl of GameTrait {
     /// Determines if the game is over based on the current health.
     #[inline]
     fn is_over(self: @Game) -> bool {
-        self.health == @0
+        self.health == @0 || self.is_won()
+    }
+
+    #[inline]
+    fn is_won(self: @Game) -> bool {
+        self.health != @0 && self.level == @MAX_LEVEL && self.is_completed()
     }
 
     /// Determines if the game has expired based on the current timestamp.
@@ -270,6 +308,10 @@ pub impl GameImpl of GameTrait {
     /// Assesses the game state and updates the game over status.
     #[inline]
     fn assess(ref self: Game) {
+        if self.is_won() {
+            self.cash_out();
+            return;
+        }
         if self.is_over() {
             self.over = starknet::get_block_timestamp();
         }
@@ -290,14 +332,14 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn cash_out(ref self: Game) -> u16 {
+    fn cash_out(ref self: Game) {
         // [Effect] Convert points
-        let moonrocks = self.points;
-        self.points = 0;
+        if self.is_completed() {
+            self.earn_moonrocks(self.points);
+            self.points = 0;
+        }
         // [Effect] Update state
         self.over = starknet::get_block_timestamp();
-        // [Return] Moonrocks
-        moonrocks
     }
 
     #[inline]
@@ -484,7 +526,7 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u16, u32, u16) {
+    fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u32, u16) {
         // [Check] Game is not over
         self.assert_not_over();
         self.assert_not_completed();
@@ -506,9 +548,8 @@ pub impl GameImpl of GameTrait {
         };
         // [Effect] Draw orbs (up to draw_count, but stop if deck is empty)
         let mut pulled_orbs: Array<Orb> = array![];
-        let mut total_earnings: u16 = 0;
         let mut draws_done: u8 = 0;
-        let total_points: u16 = self.points;
+        let points: u16 = self.points;
         while draws_done < draw_count && deck.remaining > 0 {
             let index: u8 = deck.draw() - 1;
             let orb: Orb = *bag.at(index.into());
@@ -517,8 +558,7 @@ pub impl GameImpl of GameTrait {
                 self.discards = Bitmap::set(self.discards, index);
             }
             // [Effect] Apply the orb
-            let earnings = orb.apply(ref self);
-            total_earnings += earnings;
+            orb.apply(ref self);
             pulled_orbs.append(orb);
             draws_done += 1;
             // [Effect] Increment pull count
@@ -526,14 +566,11 @@ pub impl GameImpl of GameTrait {
         }
 
         // [Effect] Assess the game
-        self.over = if self.is_over() {
-            starknet::get_block_timestamp()
-        } else {
-            self.over
-        };
+        let total_points = self.points - points;
+        self.assess();
 
         // [Return] The pulled orbs and total earnings
-        (pulled_orbs, total_earnings, deck.remaining, self.points - total_points)
+        (pulled_orbs, deck.remaining, total_points)
     }
 
     #[inline]
@@ -786,7 +823,7 @@ mod tests {
         let initial = game.pullable_bombs_count();
         // Pull the first orb and verify the pullable count either stays equal
         // (non-bomb pulled) or decreases by exactly 1 (bomb pulled).
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         let pulled = *orbs.at(0);
         let expected = initial - pulled.one_if_bomb();
         assert_eq!(game.pullable_bombs_count(), expected);
@@ -814,7 +851,7 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         let initial = game.pullable_points_count();
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         let pulled = *orbs.at(0);
         let expected = initial - pulled.one_if_point();
         assert_eq!(game.pullable_points_count(), expected);
@@ -833,8 +870,8 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE);
         game.start();
         game.earn_points(100);
-        let cash = game.cash_out();
-        assert_eq!(cash, 100);
+        game.cash_out();
+        assert_eq!(game.moonrocks, 200);
         assert_eq!(game.over, 0);
     }
 
@@ -1058,7 +1095,7 @@ mod tests {
         // [Check] No curse active
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
         // [Effect] Pull orb
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] Only 1 orb pulled
         assert_eq!(orbs.len().into(), 1);
     }
@@ -1071,7 +1108,7 @@ mod tests {
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         // [Effect] Pull orbs
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled due to DoubleDraw curse
         assert_eq!(orbs.len().into(), 2);
     }
@@ -1083,7 +1120,7 @@ mod tests {
         let discards_before = game.discards;
         // [Effect] Add DoubleDraw curse and pull
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         // [Check] 2 orbs pulled and discards updated for both
         assert_eq!(orbs.len().into(), 2);
         // Discards should have 2 bits set (2 orbs pulled)
@@ -1108,7 +1145,7 @@ mod tests {
         if game.over == 0 {
             let pullable = game.pullable_orbs_count();
             if pullable > 0 {
-                let (orbs, _, _, _) = game.pull('FINAL');
+                let (orbs, _, _) = game.pull('FINAL');
                 // [Check] Should only pull what's available (1 orb max)
                 assert!(orbs.len() <= pullable.into());
             }
@@ -1179,7 +1216,7 @@ mod tests {
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
         // [Check] DoubleDraw still works (pulls 2 orbs)
-        let (orbs, _earnings, _remaining, _points) = game.pull(SEED);
+        let (orbs, _remaining, _points) = game.pull(SEED);
         assert_eq!(orbs.len().into(), 2);
         // [Check] Demultiplier still works (halves boost)
         let multiplier_before = game.multiplier;
@@ -1454,11 +1491,11 @@ mod tests {
         // [Setup] Replace bag with a single bomb for deterministic pulls
         game.bag = array![Orb::StickyBomb].pack();
         game.discards = 0;
-        let (orbs_first, _, _, _) = game.pull(SEED);
+        let (orbs_first, _, _) = game.pull(SEED);
         assert_eq!(orbs_first.len(), 1);
         assert_eq!(game.discards, 0);
         assert_eq!(game.pullable_orbs_count(), 1);
-        let (orbs_second, _, _, _) = game.pull('SECOND');
+        let (orbs_second, _, _) = game.pull('SECOND');
         assert_eq!(orbs_second.len(), 1);
     }
 }

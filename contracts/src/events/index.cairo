@@ -101,7 +101,7 @@ pub impl OrbPulledImpl of OrbPulledTrait {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::event]
-pub struct PLDataPoint {
+pub struct Marker {
     #[key]
     pub game_id: u64,
     #[key]
@@ -111,10 +111,10 @@ pub struct PLDataPoint {
 }
 
 #[generate_trait]
-pub impl PLDataPointImpl of PLDataPointTrait {
+pub impl MarkerImpl of MarkerTrait {
     #[inline]
-    fn new(id: u32, game: @Game, potential_moonrocks: u16, orb: u8) -> PLDataPoint {
-        PLDataPoint { game_id: *game.id, id, potential_moonrocks, orb }
+    fn new(id: u32, game: @Game, potential_moonrocks: u16, orb: u8) -> Marker {
+        Marker { game_id: *game.id, id, potential_moonrocks, orb }
     }
 }
 

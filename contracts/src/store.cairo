@@ -8,7 +8,7 @@ use ekubo::interfaces::positions::IPositionsDispatcher;
 use ekubo::interfaces::router::IRouterDispatcher;
 use crate::constants::WORLD_RESOURCE;
 use crate::events::claimed::ClaimedTrait;
-use crate::events::index::{GameOverTrait, GameStartedTrait, OrbPulledTrait, PLDataPointTrait};
+use crate::events::index::{GameOverTrait, GameStartedTrait, MarkerTrait, OrbPulledTrait};
 use crate::events::purchased::PurchasedTrait;
 use crate::events::started::StartedTrait;
 use crate::events::vault::{VaultClaimedTrait, VaultPaidTrait};
@@ -141,8 +141,8 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn pl_data_point(mut self: Store, id: u32, game: @Game, potential_moonrocks: u16, orb: u8) {
-        self.world.emit_event(@PLDataPointTrait::new(id, game, potential_moonrocks, orb));
+    fn marker(mut self: Store, id: u32, game: @Game, potential_moonrocks: u16, orb: u8) {
+        self.world.emit_event(@MarkerTrait::new(id, game, potential_moonrocks, orb));
     }
 
     fn claimed(mut self: Store, player_id: felt252, game_id: u64, reward: u128) {

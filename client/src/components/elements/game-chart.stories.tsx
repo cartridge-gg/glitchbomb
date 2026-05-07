@@ -1,6 +1,39 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEffect, useState } from "react";
+import { ExtendedOrb, type OrbPulled } from "@/models";
 import { GameChart, type GameChartDataPoint } from "./game-chart";
+
+const createMockOrb = (value: string): OrbPulled["orb"] => {
+  const isPoint = value.startsWith("Point");
+  const isBomb = value.startsWith("Bomb");
+  const isChips = value.startsWith("Chips");
+  const logCategory = isPoint
+    ? "POINTS"
+    : isBomb
+      ? "BOMB"
+      : isChips
+        ? "CHIPS"
+        : "ORB";
+  const color = isBomb
+    ? "#FFFFFF"
+    : isChips
+      ? "var(--orb-chips)"
+      : "var(--green-100)";
+  return {
+    value,
+    name: () => value,
+    color: () => color,
+    logCategory: () => logCategory,
+    logEffect: () => `${value} effect`,
+    isPoint: () => isPoint,
+    isMultiplier: () => false,
+    isBomb: () => isBomb,
+    isHealth: () => false,
+    isMoonrock: () => false,
+    isChips: () => isChips,
+    isCurse: () => false,
+  } as OrbPulled["orb"];
+};
 
 const meta: Meta<typeof GameChart> = {
   title: "Elements/Game Chart",
@@ -168,6 +201,113 @@ export const PotentialMoonrocks: Story = {
     data: potentialMoonrocksData,
     mode: "absolute",
     title: "POTENTIAL",
+  },
+};
+
+// Reproduces a real on-chain pull history where three consecutive pulls
+// land at the same potential value (id 10, 11, 12 all at 102). Used to
+// check that dot/tooltip alignment stays correct when y values collide.
+const repeatedYData: GameChartDataPoint[] = [
+  { value: 100, variant: "yellow", id: 0 },
+  { value: 105, variant: "green", id: 1, pullId: 1 },
+  { value: 110, variant: "green", id: 3, pullId: 2 },
+  { value: 110, variant: "red", id: 5, pullId: 3 },
+  { value: 117, variant: "green", id: 7, pullId: 4 },
+  { value: 99, variant: "red", id: 9, pullId: 5 },
+  { value: 104, variant: "green", id: 11, pullId: 6 },
+  { value: 109, variant: "green", id: 13, pullId: 7 },
+  { value: 118, variant: "green", id: 15, pullId: 8 },
+  { value: 97, variant: "red", id: 17, pullId: 9 },
+  { value: 102, variant: "green", id: 19, pullId: 10 },
+  { value: 102, variant: "blue", id: 21, pullId: 11 },
+  { value: 102, variant: "red", id: 23, pullId: 12 },
+];
+
+const repeatedYPulls: OrbPulled[] = [
+  { game_id: 1, id: 1, potential_moonrocks: 105, orb: createMockOrb("Point5") },
+  { game_id: 1, id: 2, potential_moonrocks: 110, orb: createMockOrb("Point5") },
+  { game_id: 1, id: 3, potential_moonrocks: 110, orb: createMockOrb("Bomb3") },
+  {
+    game_id: 1,
+    id: 4,
+    potential_moonrocks: 117,
+    orb: createMockOrb("PointOrb1"),
+  },
+  { game_id: 1, id: 5, potential_moonrocks: 99, orb: createMockOrb("Bomb3") },
+  { game_id: 1, id: 6, potential_moonrocks: 104, orb: createMockOrb("Point5") },
+  { game_id: 1, id: 7, potential_moonrocks: 109, orb: createMockOrb("Point5") },
+  {
+    game_id: 1,
+    id: 8,
+    potential_moonrocks: 118,
+    orb: createMockOrb("PointOrb1"),
+  },
+  { game_id: 1, id: 9, potential_moonrocks: 97, orb: createMockOrb("Bomb2") },
+  {
+    game_id: 1,
+    id: 10,
+    potential_moonrocks: 102,
+    orb: createMockOrb("Point5"),
+  },
+  {
+    game_id: 1,
+    id: 11,
+    potential_moonrocks: 102,
+    orb: createMockOrb("Chips15"),
+  },
+  { game_id: 1, id: 12, potential_moonrocks: 102, orb: createMockOrb("Bomb1") },
+] as OrbPulled[];
+
+export const RepeatedYValues: Story = {
+  args: {
+    data: repeatedYData,
+    pulls: repeatedYPulls,
+    mode: "absolute",
+    title: "POTENTIAL",
+    goal: 130,
+  },
+};
+
+// Demonstrates the synthetic markers: a "New Game" baseline at the start
+// and an "Enter level" marker between pulls 2 and 3. Hovering each yellow
+// dot shows its dedicated tooltip; the others use the natural orb tooltip.
+const withMarkersData: GameChartDataPoint[] = [
+  // Baseline (New Game).
+  { value: 100, variant: "yellow", id: 0, pullId: -1 },
+  { value: 105, variant: "green", id: 1, pullId: 1 },
+  { value: 112, variant: "green", id: 3, pullId: 2 },
+  // Level transition (synthetic, negative pullId).
+  { value: 111, variant: "yellow", id: -1000, pullId: -2 },
+  { value: 118, variant: "green", id: 7, pullId: 3 },
+  { value: 125, variant: "green", id: 9, pullId: 4 },
+];
+
+const withMarkersPulls: OrbPulled[] = [
+  {
+    game_id: 1,
+    id: -1,
+    potential_moonrocks: 100,
+    orb: new ExtendedOrb("New Game", "+100 Moonrocks"),
+  },
+  { game_id: 1, id: 1, potential_moonrocks: 105, orb: createMockOrb("Point5") },
+  { game_id: 1, id: 2, potential_moonrocks: 112, orb: createMockOrb("Point7") },
+  {
+    game_id: 1,
+    id: -2,
+    potential_moonrocks: 111,
+    orb: new ExtendedOrb("Enter level", "-1 Moonrocks"),
+  },
+  { game_id: 1, id: 3, potential_moonrocks: 118, orb: createMockOrb("Point7") },
+  { game_id: 1, id: 4, potential_moonrocks: 125, orb: createMockOrb("Point7") },
+] as OrbPulled[];
+
+export const WithMarkers: Story = {
+  args: {
+    data: withMarkersData,
+    pulls: withMarkersPulls,
+    mode: "absolute",
+    title: "POTENTIAL",
+    goal: 130,
   },
 };
 
