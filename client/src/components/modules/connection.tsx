@@ -2,6 +2,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useCallback } from "react";
 import { Connect, Profile } from "@/components/elements";
+import { openControllerProfile } from "@/helpers/controller-profile";
 import { useControllerUsername } from "@/hooks/use-controller-username";
 
 export const Connection = () => {
@@ -11,7 +12,7 @@ export const Connection = () => {
 
   const onProfileClick = useCallback(async () => {
     const controller = (connector as never as ControllerConnector)?.controller;
-    controller?.openProfile("inventory");
+    openControllerProfile(controller);
   }, [connector]);
 
   const onConnectClick = useCallback(async () => {
