@@ -447,7 +447,7 @@ export const Main = ({ children }: MainProps) => {
               onClose={closeModal}
               onConnect={isLoggedIn ? undefined : onConnect}
               onPurchase={isLoggedIn ? handleBuyGame : undefined}
-              className="w-full md:max-w-[784px] h-full md:h-auto"
+              className="w-full md:max-w-[484px] h-full md:h-auto"
             />
           </div>
         </div>

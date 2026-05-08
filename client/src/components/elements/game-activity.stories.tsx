@@ -31,6 +31,7 @@ const meta = {
   args: {
     gameId: "#24",
     moonrocks: 320,
+    multiplier: 1,
     payout: "+$0.70",
     to: "/",
     onClick: fn(),
@@ -42,14 +43,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const Glitched: Story = {
-  args: {
-    variant: "glitched",
-  },
-};
-
-export const Expired: Story = {
-  args: {
-    variant: "expired",
-  },
+export const Multipliers: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      <GameActivity {...args} multiplier={1} />
+      <GameActivity {...args} multiplier={2} />
+      <GameActivity {...args} multiplier={4} />
+      <GameActivity {...args} multiplier={6} />
+      <GameActivity {...args} multiplier={8} />
+      <GameActivity {...args} multiplier={10} />
+    </div>
+  ),
 };

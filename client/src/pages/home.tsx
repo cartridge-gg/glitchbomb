@@ -178,19 +178,18 @@ export const Home = () => {
     const expired = expiredGames.map((g) => ({
       gameId: `#${g.id}`,
       moonrocks: g.moonrocks,
+      multiplier: g.multiplier,
       payout: "EXPIRED",
       to: `/game/${g.id}`,
-      variant: "expired" as const,
       timestamp: g.expiration,
     }));
     const completed = completedGames.map((g) => {
-      const cashedOut = g.health > 0;
       return {
         gameId: `#${g.id}`,
         moonrocks: g.moonrocks,
+        multiplier: g.multiplier,
         payout: formatPayout(g.moonrocks, g.stake),
         to: `/game/${g.id}`,
-        variant: cashedOut ? ("default" as const) : ("glitched" as const),
         timestamp: g.over,
       };
     });
@@ -201,11 +200,11 @@ export const Home = () => {
     return sqlActivities.map((row) => ({
       gameId: row.username ? row.username : `#${row.gameId}`,
       moonrocks: row.score,
+      multiplier: row.multiplier / 100,
       payout: tokenPrice
         ? `$${(row.reward * tokenPrice).toFixed(2)}`
         : `${row.reward.toFixed(1)} GLITCH`,
       to: row.to,
-      variant: "default" as const,
       timestamp: row.timestamp,
     }));
   }, [sqlActivities, tokenPrice]);
