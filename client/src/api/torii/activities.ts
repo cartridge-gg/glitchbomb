@@ -4,6 +4,7 @@ import { initGrpcClient } from "./client";
 export interface ActivityRow {
   username: string;
   gameId: number;
+  multiplier: number;
   score: number;
   reward: number;
   to: string;
@@ -15,6 +16,7 @@ async function fetch(limit: number, offset: number): Promise<ActivityRow[]> {
   const query = `SELECT
     c.username,
     g.moonrocks,
+    g.multiplier,
     r.reward,
     s.player,
     s.game_id,
@@ -37,6 +39,7 @@ OFFSET ${offset};`;
     return {
       username: String(row.username || ""),
       gameId,
+      multiplier: Number(row.multiplier) || 0,
       score,
       reward,
       to: `/game/${gameId}`,

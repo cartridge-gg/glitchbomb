@@ -61,11 +61,11 @@ export const PurchaseDetail = ({
           <p
             className={cn(
               "font-secondary text-lg",
-              !previous ? "text-primary-100" : "text-tertiary-100",
+              !previous ? "text-tertiary-100" : "text-primary-100",
             )}
           >
             {previous ? (
-              <span className="font-secondary text-tertiary-400 text-lg line-through mr-2">
+              <span className="font-secondary text-primary-400 text-lg line-through mr-2">
                 {previous}
               </span>
             ) : null}
