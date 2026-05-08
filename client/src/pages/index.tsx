@@ -29,6 +29,7 @@ import { PurchaseModalProvider } from "@/contexts/purchase-modal";
 import { useSound } from "@/contexts/sound";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useOwnedGames } from "@/contexts/use-owned-games";
+import { openControllerProfile } from "@/helpers/controller-profile";
 import { MAX_SCORE, toUsd } from "@/helpers/payout";
 import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
@@ -310,7 +311,7 @@ export const Main = ({ children }: MainProps) => {
 
   const onProfileClick = useCallback(() => {
     const controller = (connector as never as ControllerConnector)?.controller;
-    controller?.openProfile("inventory");
+    openControllerProfile(controller);
   }, [connector]);
 
   const toggleLeaderboard = useCallback(
