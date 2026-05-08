@@ -125,7 +125,7 @@ export const PurchaseScene = ({
 
       <h2 className="text-2xl/8 md:text-[2.5rem] text-green-100 uppercase tracking-tight">
         <GlitchText
-          text="Play Glitch Bomb"
+          text="Play Game"
           style={{
             textShadow:
               "2px 2px 0px rgba(255, 0, 0, 0.25), -2px -2px 0px rgba(0, 0, 255, 0.25)",
@@ -159,7 +159,7 @@ export const PurchaseScene = ({
           </Button>
         ) : onPurchase ? (
           <Button
-            variant="tertiary"
+            variant="secondary"
             className="w-full min-h-12"
             onClick={onPurchase}
           >

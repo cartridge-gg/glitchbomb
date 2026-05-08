@@ -216,6 +216,7 @@ export const GameActivities = ({
                   <GameActivity
                     key={activity.to}
                     gameId={activity.gameId}
+                    multiplier={activity.multiplier}
                     payout={activity.payout}
                     moonrocks={activity.moonrocks}
                     to={activity.to}

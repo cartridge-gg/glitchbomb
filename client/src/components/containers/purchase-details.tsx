@@ -45,15 +45,15 @@ export const PurchaseDetails = ({
       {...props}
     >
       <PurchaseDetail
+        title="Maximum reward"
+        content={maxPayout}
+        loading={loading}
+      />
+      <PurchaseDetail
         title="Entry Fee"
         previous={discount ? `$${basePrice.toFixed(2)}` : undefined}
         content={`$${entryPrice.toFixed(2)}`}
         discount={discount}
-      />
-      <PurchaseDetail
-        title="Maximum reward"
-        content={maxPayout}
-        loading={loading}
       />
     </div>
   );

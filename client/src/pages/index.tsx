@@ -28,12 +28,12 @@ import { usePrices } from "@/contexts/prices";
 import { PurchaseModalProvider } from "@/contexts/purchase-modal";
 import { useSound } from "@/contexts/sound";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
+import { useOwnedGames } from "@/contexts/use-owned-games";
 import { openControllerProfile } from "@/helpers/controller-profile";
 import { MAX_SCORE, toUsd } from "@/helpers/payout";
 import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
 import { useLeaderboard } from "@/hooks/leaderboard";
-import { useOwnedGames } from "@/hooks/packs";
 import { useQuestScene } from "@/hooks/quests";
 import { useReferral } from "@/hooks/referral";
 import { toDecimal, useTokens } from "@/hooks/tokens";
@@ -448,7 +448,7 @@ export const Main = ({ children }: MainProps) => {
               onClose={closeModal}
               onConnect={isLoggedIn ? undefined : onConnect}
               onPurchase={isLoggedIn ? handleBuyGame : undefined}
-              className="w-full md:max-w-[784px] h-full md:h-auto"
+              className="w-full md:max-w-[484px] h-full md:h-auto"
             />
           </div>
         </div>
