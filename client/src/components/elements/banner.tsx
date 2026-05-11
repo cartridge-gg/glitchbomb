@@ -91,13 +91,13 @@ const Social = ({
         </div>
       )}
       <div
-        className="absolute top-0 left-0 h-full pr-8 md:pr-12 flex items-center gap-3 md:gap-4 px-4 md:px-6"
+        className="absolute inset-0 h-full pr-8 md:pr-12 flex items-center gap-3 md:gap-4 px-4 md:px-6"
         style={{
           background:
-            "linear-gradient(90deg, #000000 24%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(90deg, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0) 100%)",
         }}
       >
-        <div className="relative flex flex-col gap-1 md:gap-2 uppercase">
+        <div className="w-full relative flex flex-col gap-1 md:gap-2 uppercase">
           <span
             className="text-sm/5 md:text-lg/5 text-primary-100"
             style={{ textShadow: "2px 2px 0px rgba(0, 0, 0, 0.25)" }}
@@ -175,10 +175,10 @@ const Game = ({
         </div>
       )}
       <div
-        className="absolute top-0 left-0 h-full pr-8 md:pr-12 flex items-center gap-3 md:gap-4 px-4 md:px-6"
+        className="absolute inset-0 h-full pr-8 md:pr-12 flex items-center gap-3 md:gap-4 px-4 md:px-6"
         style={{
           background:
-            "linear-gradient(90deg, #000000 24%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(90deg, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0) 100%)",
         }}
       >
         {icon && (
