@@ -127,7 +127,7 @@ export const GameScene = ({
         moonrocks={{ value: game.moonrocks }}
         chips={{ value: game.chips }}
       />
-      <div className="flex flex-1 min-h-0 flex-col gap-4">
+      <div className="flex flex-1 min-h-0 flex-col gap-4 mt-4 md:mt-0">
         <div className="flex flex-col gap-3 h-full">
           <GameStats
             points={game.points}
@@ -225,6 +225,7 @@ export const GameScene = ({
             pullLoading={isPulling}
             showPercentages={showDistributionPercent}
             onPull={onPull}
+            className="flex-1 md:max-h-[400px]"
           />
           <div className="flex flex-col gap-3 md:gap-4">
             <BombSlots details={bombDetails} data-tutorial-id="bomb-tracker" />
