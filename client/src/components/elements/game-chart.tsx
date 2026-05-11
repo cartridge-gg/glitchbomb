@@ -1,17 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ComposedChart,
   Line,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  TapTooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { OrbPulled } from "@/models";
 
 export interface GameChartDataPoint {
@@ -46,6 +41,13 @@ export interface GameChartProps {
 // Margin around the plotting area, in px. Sized so the dots (r=6) can't
 // touch the chart edges — 10px = circle radius (6) + 4px breathing room.
 const CHART_MARGIN = { top: 10, right: 10, bottom: 10, left: 10 } as const;
+
+// Extra horizontal padding on the X axis, expressed in domain units, so
+// the first and last points aren't flush against the plot edges. Mirrors
+// the vertical padding we apply via yRange — keeps dots away from the
+// corners and makes their tooltip trigger zone easier to hit (especially
+// on touch, where the screen edge would otherwise eat half the dot).
+const X_AXIS_PADDING = 0.5;
 
 // Map variant to actual color
 const getVariantColor = (variant: GameChartDataPoint["variant"]): string => {
@@ -92,28 +94,25 @@ interface DotPayload {
 }
 
 /**
- * Build a dot renderer for Recharts <Line>. Each dot is wrapped in a
- * TapTooltip that displays the matching orb pull's category + effect when
- * hovered/tapped.
+ * Render a single chart dot as an SVG circle with a colored glow.
  *
- * The factory takes a Map keyed by pull id so each data point can look up
- * its pull by `resolvedId` (the data point's stable id). Index-based
- * mapping doesn't work because plData often contains entries that have no
- * matching pull (e.g. level markers / game start with orb=0).
+ * Tooltips are NOT attached per-dot anymore — Recharts' native <Tooltip>
+ * component handles hover/touch with magnet snapping to the nearest point
+ * on the X axis. See the <Tooltip> instance in GameChart for details.
  */
-const makeRenderDot = (pullsById: Map<number, OrbPulled> | undefined) => {
-  const RenderDot = (props: DotPayload) => {
-    const { cx, cy, payload } = props;
-    if (cx == null || cy == null) {
-      return <g />;
-    }
-    const variant = payload?.variant ?? "green";
-    const color = getVariantColor(variant);
-    const filterName = getGlowFilterId(color);
-    const isBomb = color === "#FFFFFF";
-    const dotKey = `dot-${payload?.resolvedId ?? `${cx}-${cy}`}`;
+const RenderDot = (props: DotPayload) => {
+  const { cx, cy, payload } = props;
+  if (cx == null || cy == null) {
+    return <g />;
+  }
+  const variant = payload?.variant ?? "green";
+  const color = getVariantColor(variant);
+  const filterName = getGlowFilterId(color);
+  const isBomb = color === "#FFFFFF";
+  const dotKey = `dot-${payload?.resolvedId ?? `${cx}-${cy}`}`;
 
-    const circle = (
+  return (
+    <g key={dotKey} className={isBomb ? "glitch-icon" : undefined}>
       <circle
         cx={cx}
         cy={cy}
@@ -123,59 +122,67 @@ const makeRenderDot = (pullsById: Map<number, OrbPulled> | undefined) => {
         strokeWidth={1}
         filter={`url(#${filterName})`}
       />
-    );
+    </g>
+  );
+};
 
-    const pull =
-      pullsById != null && payload?.pullId != null
-        ? pullsById.get(payload.pullId)
-        : undefined;
+/**
+ * Build a Recharts <Tooltip> content renderer that shows the pulled orb's
+ * category + effect for the currently-active data point. Returns null for
+ * points that don't correspond to a pull (e.g. level markers), so Recharts
+ * doesn't render an empty tooltip card.
+ *
+ * Recharts feeds `payload[0].payload` — the original data row — through
+ * which we read `pullId` and look up the pull in the closure's Map.
+ */
+type TooltipPayloadItem = {
+  payload?: {
+    pullId?: number;
+    variant?: GameChartDataPoint["variant"];
+  };
+};
+type ChartTooltipContentProps = {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+};
 
-    // Defensively check the orb has the expected methods before rendering
-    // a tooltip — guards against deserialized/mocked orbs missing methods.
+const makeTooltipContent = (pullsById: Map<number, OrbPulled> | undefined) => {
+  const ChartTooltipContent = ({
+    active,
+    payload,
+  }: ChartTooltipContentProps) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const row = payload[0]?.payload;
+    if (row?.pullId == null || pullsById == null) return null;
+
+    const pull = pullsById.get(row.pullId);
     const orb = pull?.orb;
     const hasOrbMethods =
       orb != null &&
       typeof orb.color === "function" &&
       typeof orb.logCategory === "function" &&
       typeof orb.logEffect === "function";
-
-    if (!hasOrbMethods) {
-      return (
-        <g key={dotKey} className={isBomb ? "glitch-icon" : undefined}>
-          {circle}
-        </g>
-      );
-    }
+    if (!hasOrbMethods) return null;
 
     const orbColor = orb.color();
     return (
-      <g key={dotKey} className={isBomb ? "glitch-icon" : undefined}>
-        {/* TooltipProvider here so each dot can be used standalone, even
-            when GameChart is rendered outside a global TooltipProvider
-            (e.g. in Storybook). delayDuration=0 matches BagItem behavior. */}
-        <TooltipProvider delayDuration={0}>
-          <TapTooltip>
-            <TooltipTrigger asChild>{circle}</TooltipTrigger>
-            <TooltipContent className="flex flex-col gap-2 bg-black-100 border border-white-800 p-3 max-w-[200px]">
-              <p
-                className="font-secondary text-base/3 uppercase"
-                style={{ color: orbColor }}
-              >
-                {orb.logCategory()}
-              </p>
-              <p
-                className="font-secondary text-sm/3 opacity-80"
-                style={{ color: orbColor }}
-              >
-                {orb.logEffect()}
-              </p>
-            </TooltipContent>
-          </TapTooltip>
-        </TooltipProvider>
-      </g>
+      <div className="flex flex-col gap-2 bg-black-100 border border-white-800 p-3 max-w-[200px] rounded-md">
+        <p
+          className="font-secondary text-base/3 uppercase"
+          style={{ color: orbColor }}
+        >
+          {orb.logCategory()}
+        </p>
+        <p
+          className="font-secondary text-sm/3 opacity-80"
+          style={{ color: orbColor }}
+        >
+          {orb.logEffect()}
+        </p>
+      </div>
     );
   };
-  return RenderDot;
+  return ChartTooltipContent;
 };
 
 // Defs containing all SVG filters used by the custom layer.
@@ -290,7 +297,129 @@ export const GameChart = ({
     }
     return map;
   }, [pulls]);
-  const renderDot = useMemo(() => makeRenderDot(pullsById), [pullsById]);
+  const tooltipContent = useMemo(
+    () => makeTooltipContent(pullsById),
+    [pullsById],
+  );
+
+  // Detect touch / no-hover device. On hover-capable devices we let Recharts'
+  // <Tooltip> handle hover natively (with magnet snap on the X axis). On
+  // touch devices we control `active` + `defaultIndex` ourselves so the
+  // tooltip opens on tap, follows the finger on slide, and only closes
+  // when the user taps outside the chart.
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none)");
+    setIsTouchDevice(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsTouchDevice(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const [mobileActiveIndex, setMobileActiveIndex] = useState<
+    number | undefined
+  >(undefined);
+  // Desktop hover-driven active index. We mirror Recharts' internal
+  // `activeTooltipIndex` here so we can draw a vertical reference line on
+  // the active point (Recharts doesn't expose its hover index through a
+  // public prop). Only used when not on a touch device.
+  const [desktopActiveIndex, setDesktopActiveIndex] = useState<
+    number | undefined
+  >(undefined);
+  const chartAreaRef = useRef<HTMLDivElement>(null);
+
+  // The single index the reference line tracks: mobile state on touch
+  // devices, desktop hover state otherwise. `undefined` hides the line.
+  const activeIndex = isTouchDevice ? mobileActiveIndex : desktopActiveIndex;
+
+  // Close mobile tooltip when the user taps outside the chart area.
+  useEffect(() => {
+    if (!isTouchDevice || mobileActiveIndex == null) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const node = chartAreaRef.current;
+      if (!node) return;
+      if (!node.contains(e.target as Node)) {
+        setMobileActiveIndex(undefined);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [isTouchDevice, mobileActiveIndex]);
+
+  // Recharts touch handlers — snap to the nearest point on X.
+  //
+  // Note: Recharts' internal touchEventsMiddleware only updates the active
+  // tooltip index on `touchmove`, not `touchstart` (see Recharts source:
+  // state/touchEventsMiddleware.js). So on `touchmove` we can rely on
+  // `nextState.activeTooltipIndex`, but on `touchstart` we have to compute
+  // the nearest dot index ourselves from the touch coordinates and the
+  // rendered <circle cx> values.
+  const handleTouchMove = (nextState: {
+    activeTooltipIndex?: number | string;
+  }) => {
+    const idx = nextState.activeTooltipIndex;
+    if (typeof idx === "number") {
+      setMobileActiveIndex(idx);
+    } else if (typeof idx === "string") {
+      const parsed = Number.parseInt(idx, 10);
+      if (Number.isFinite(parsed)) setMobileActiveIndex(parsed);
+    }
+  };
+
+  // Desktop hover handlers — mirror Recharts' active index into our state
+  // so the reference line can follow the magnet (Recharts itself snaps to
+  // the nearest X point and exposes the index in the handler's nextState).
+  const handleMouseMove = (nextState: {
+    activeTooltipIndex?: number | string;
+    isTooltipActive?: boolean;
+  }) => {
+    if (nextState.isTooltipActive === false) {
+      setDesktopActiveIndex(undefined);
+      return;
+    }
+    const idx = nextState.activeTooltipIndex;
+    if (typeof idx === "number") {
+      setDesktopActiveIndex(idx);
+    } else if (typeof idx === "string") {
+      const parsed = Number.parseInt(idx, 10);
+      if (Number.isFinite(parsed)) setDesktopActiveIndex(parsed);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setDesktopActiveIndex(undefined);
+  };
+
+  const handleTouchStart = (
+    _nextState: unknown,
+    event: React.TouchEvent<SVGGraphicsElement>,
+  ) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    // Find the rendered chart surface and the relative X of the touch.
+    const surface = chartAreaRef.current?.querySelector(".recharts-surface");
+    if (!surface) return;
+    const surfaceBox = surface.getBoundingClientRect();
+    const touchX = touch.clientX - surfaceBox.left;
+    // Pick the dot whose cx (within the surface coordinate system) is
+    // closest to the touch X. recharts-line-dots circles are emitted in
+    // data order, so the dot's positional index matches `cumulativeData`.
+    const circles = surface.querySelectorAll<SVGCircleElement>(
+      ".recharts-line-dots circle",
+    );
+    if (circles.length === 0) return;
+    let nearestIndex = 0;
+    let nearestDist = Infinity;
+    circles.forEach((circle, i) => {
+      const cx = Number.parseFloat(circle.getAttribute("cx") ?? "0");
+      const dist = Math.abs(cx - touchX);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestIndex = i;
+      }
+    });
+    setMobileActiveIndex(nearestIndex);
+  };
 
   // Calculate cumulative values at each point
   const cumulativeData = useMemo<CumulativePoint[]>(() => {
@@ -479,18 +608,19 @@ export const GameChart = ({
         </div>
 
         {/* Extended grid background — outside Recharts so it can bleed
-            past the edges with a fading mask. */}
+            past the edges with a fading mask. Vertical bleed kept modest
+            (0.75rem) to avoid collisions with surrounding UI (header). */}
         <div
           className="absolute pointer-events-none"
           style={{
-            top: "-2rem",
-            bottom: "-2rem",
+            top: "-0.75rem",
+            bottom: "-0.75rem",
             left: "-4rem",
             right: "-4rem",
             maskImage:
-              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
             WebkitMaskImage:
-              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
+              "linear-gradient(to right, transparent, black 25%, black 75%, transparent), linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
             maskComposite: "intersect",
             WebkitMaskComposite: "source-in",
           }}
@@ -520,21 +650,23 @@ export const GameChart = ({
                 strokeDasharray="4 4"
               />
             ))}
-            {/* Baseline — extends as far as the grid (past the chart edges)
-                so it isn't clipped at the canvas border. The grid SVG spans
-                top:-2rem..bottom:-2rem of the chart, so:
-                  svgHeight = chartHeight + 4rem
-                  chartHeight = 100% (svg) - 4rem
-                  plotHeight = chartHeight - margin.top - margin.bottom
-                  Y(svg) = 2rem + margin.top + plotFraction * plotHeight
-                Expressed in CSS calc() so it scales with chart height. */}
+            {/* Baseline — extends a bit past the plot area but not all the
+                way across the grid (which bleeds 4rem on each side for the
+                fading background). Y math: grid SVG spans
+                top:-0.75rem..bottom:-0.75rem, so:
+                  Y(svg) = 0.75rem + margin.top + plotFraction * plotHeight
+                  plotHeight = 100% (svg) - 1.5rem - margin.top - margin.bottom
+                X math: grid SVG extends 4rem on each side past the chart
+                container; we want the baseline to start/end near the plot
+                edges (with a small bleed) rather than at the full grid
+                edges, so we inset it by 3rem on each side. */}
             {(() => {
-              const baselineY = `calc(2rem + ${CHART_MARGIN.top}px + ${baselinePlotFraction} * (100% - 4rem - ${CHART_MARGIN.top + CHART_MARGIN.bottom}px))`;
+              const baselineY = `calc(0.75rem + ${CHART_MARGIN.top}px + ${baselinePlotFraction} * (100% - 1.5rem - ${CHART_MARGIN.top + CHART_MARGIN.bottom}px))`;
               return (
                 <line
-                  x1="0"
+                  x1="3rem"
                   y1={baselineY}
-                  x2="100%"
+                  x2="calc(100% - 3rem)"
                   y2={baselineY}
                   stroke="#15803d"
                   strokeWidth="1"
@@ -545,11 +677,86 @@ export const GameChart = ({
           </svg>
         </div>
 
+        {/* Vertical reference line on the active tooltip point — drawn
+            outside the Recharts plot area so it can bleed past the chart
+            top/bottom and fade out smoothly (avoids a hard cut at the
+            plot edges). Horizontally aligned with the Recharts plot:
+            its left/right inset matches the Y-labels width (10 = 40px)
+            plus CHART_MARGIN.left / right, so 0%..100% inside this
+            overlay maps exactly to the plot's X domain. The X position
+            of the line accounts for the X axis padding so it aligns
+            with the corresponding rendered dot:
+              domain = [-pad, n - 1 + pad]
+              X%(i)  = (i + pad) / (n - 1 + 2 * pad) * 100
+            Vertical bleed kept modest (0.75rem) so the line doesn't
+            collide with surrounding UI (e.g. the header above). */}
+        {activeIndex != null && cumulativeData.length > 0 && (
+          <div
+            className="absolute pointer-events-none z-0"
+            style={{
+              top: "-0.75rem",
+              bottom: "-0.75rem",
+              left: `calc(2.5rem + ${CHART_MARGIN.left}px)`,
+              right: `${CHART_MARGIN.right}px`,
+              maskImage:
+                "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
+            }}
+            aria-hidden="true"
+          >
+            {(() => {
+              // Mirror the upper bound that <XAxis domain={...}> uses so
+              // single-point cases (n === 1) place the line on the dot
+              // rather than at the geometric center of the plot. Recharts
+              // is given an upper bound of Math.max(n - 1, 1), and we
+              // must use the same value here to stay aligned.
+              const upper = Math.max(cumulativeData.length - 1, 1);
+              const denom = upper + 2 * X_AXIS_PADDING;
+              const xPct =
+                denom > 0 ? ((activeIndex + X_AXIS_PADDING) / denom) * 100 : 50;
+              return (
+                <svg className="absolute inset-0 w-full h-full">
+                  <line
+                    x1={`${xPct}%`}
+                    y1="0"
+                    x2={`${xPct}%`}
+                    y2="100%"
+                    stroke="var(--white-600)"
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                  />
+                </svg>
+              );
+            })()}
+          </div>
+        )}
+
         {/* Recharts area — disable focus outline on the inner SVG/wrapper
             (Recharts adds tabindex/focus styles by default). */}
-        <div className="absolute left-10 right-0 top-0 bottom-0 [&_*:focus]:outline-none [&_*:focus-visible]:outline-none">
+        <div
+          ref={chartAreaRef}
+          className="absolute left-10 right-0 top-0 bottom-0 [&_*:focus]:outline-none [&_*:focus-visible]:outline-none"
+        >
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={CHART_MARGIN}>
+            <ComposedChart
+              data={chartData}
+              margin={CHART_MARGIN}
+              // Touch handlers drive the mobile magnet: on `touchmove`
+              // Recharts itself computes `activeTooltipIndex` (nearest
+              // point on X) and we mirror it into our controlled state.
+              // On `touchstart` Recharts does NOT update its index, so we
+              // compute the nearest dot ourselves from the touch X and
+              // rendered <circle cx> values — guarantees the tooltip
+              // appears immediately on tap without requiring a slide.
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              // Desktop hover handlers — mirror Recharts' active index so
+              // the vertical reference line can highlight the same point
+              // the tooltip is currently showing.
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+            >
               <ChartFilters />
               {/* Grid is rendered by the extended grid overlay above so we
                   don't render Recharts' <CartesianGrid> here — having both
@@ -557,7 +764,12 @@ export const GameChart = ({
               <XAxis
                 dataKey="index"
                 type="number"
-                domain={[0, Math.max(cumulativeData.length - 1, 1)]}
+                // Pad the domain so the first/last points sit inside the
+                // plot rather than on the very edge — see X_AXIS_PADDING.
+                domain={[
+                  -X_AXIS_PADDING,
+                  Math.max(cumulativeData.length - 1, 1) + X_AXIS_PADDING,
+                ]}
                 hide
               />
               <YAxis
@@ -565,6 +777,26 @@ export const GameChart = ({
                 domain={[yRange.min, yRange.max]}
                 hide
                 allowDataOverflow={false}
+              />
+              {/* Single Recharts tooltip — magnet behavior is built-in:
+                  it snaps to the nearest point on the X axis.
+                  - Desktop: uncontrolled, Recharts handles hover natively.
+                  - Touch: controlled via `active` + `defaultIndex` so taps
+                    open it, slides update it, and it persists until the
+                    user taps outside (handled by the outside-pointerdown
+                    effect above).
+                  - `cursor={false}` removes Recharts' default vertical line.
+                  - `isAnimationActive={false}` keeps slide feedback instant. */}
+              <Tooltip
+                content={tooltipContent}
+                cursor={false}
+                isAnimationActive={false}
+                {...(isTouchDevice
+                  ? {
+                      active: mobileActiveIndex != null,
+                      defaultIndex: mobileActiveIndex,
+                    }
+                  : {})}
               />
               {/* Main line — Recharts handles tracing animation natively.
                   - filter applies the chromatic-glitch filter to the path.
@@ -583,7 +815,7 @@ export const GameChart = ({
                 stroke="var(--primary-400)"
                 strokeWidth={1.5}
                 filter="url(#gc-glitch-line)"
-                dot={renderDot}
+                dot={RenderDot}
                 activeDot={false}
                 isAnimationActive
                 animateNewValues
