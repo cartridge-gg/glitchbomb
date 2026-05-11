@@ -18,8 +18,12 @@ export const GameBalances = ({
 }: GameBalancesProps) => {
   return (
     <div className={cn("flex gap-4", className)} {...props}>
-      <GameBalance variant="moonrocks" {...moonrocks} />
-      <GameBalance variant="chips" {...chips} />
+      <GameBalance
+        variant="moonrocks"
+        {...moonrocks}
+        className="ml-16 md:ml-auto"
+      />
+      <GameBalance variant="chips" {...chips} className="mr-16 md:mr-0" />
     </div>
   );
 };

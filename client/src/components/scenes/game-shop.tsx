@@ -237,7 +237,7 @@ export const GameShop = ({
         chips={{ value: virtualBalance }}
       />
 
-      <div className="flex-1 flex flex-col gap-4 md:gap-6 overflow-hidden">
+      <div className="flex-1 flex flex-col gap-4 md:gap-6 overflow-hidden mt-4 md:mt-0">
         {/* Subtitle */}
         <p className="text-primary-100 font-secondary uppercase text-[22px]/6">
           Purchase Orbs
