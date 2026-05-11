@@ -38,6 +38,7 @@ import { useQuestScene } from "@/hooks/quests";
 import { useReferral } from "@/hooks/referral";
 import { toDecimal, useTokens } from "@/hooks/tokens";
 import { useControllerUsername } from "@/hooks/use-controller-username";
+import { cn } from "@/lib/utils";
 import { TutorialOverlay, useTutorial } from "@/tutorial";
 
 export { Game } from "./game";
@@ -328,6 +329,8 @@ export const Main = ({ children }: MainProps) => {
     [toggleModal],
   );
 
+  const isGameScene = pathname.startsWith("/game/");
+
   return (
     <div className="relative h-full w-screen flex flex-col overflow-hidden items-stretch bg-gradient-to-t from-black to-[#0C1806]">
       <Header
@@ -340,7 +343,7 @@ export const Main = ({ children }: MainProps) => {
         onQuests={toggleQuests}
         onAchievements={toggleAchievements}
         onSettings={toggleSettings}
-        className="relative w-full top-0 md:relative"
+        className="relative w-full top-0 md:relative z-10"
       />
       {showLeaderboard && (
         <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
@@ -458,7 +461,12 @@ export const Main = ({ children }: MainProps) => {
         openPurchaseScene={openPurchaseScene}
         handleBuyGame={handleBuyGame}
       >
-        <div className="relative flex-1 min-h-0 flex flex-col justify-between">
+        <div
+          className={cn(
+            "relative md:relative flex-1 min-h-0 flex flex-col justify-between",
+            isGameScene ? "absolute inset-0" : "",
+          )}
+        >
           {children}
           <TutorialOverlay />
         </div>
