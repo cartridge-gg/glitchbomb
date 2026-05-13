@@ -103,7 +103,7 @@
     },
     {
       "address": "0x530ecb241ae6045989c28007b0d4fe2dc64485051b04147a046f0ccf8092036",
-      "class_hash": "0x5139b92d1739d0abf5154687a03d5e84a4f3e61062aab3a449f9db3ffcc1aaf",
+      "class_hash": "0x4b7ecb851611771519475bd7c0d96f0baaa5b76780d3b01d09aef5c183f8eac",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
       "selector": "0x231fbb11b3b28f1fb0b085091d51998e87d25b375d3d78cd155f542537342cc",
@@ -125,7 +125,7 @@
     },
     {
       "address": "0x578bc64981b9440e50b47270b7bbfacd14516a950cd529f0457f220359a0870",
-      "class_hash": "0x7694466644904b7e45f436c2736dee41a47f97a08acb4167efb6c610774ba47",
+      "class_hash": "0x1c2d3af36d32aaa01fbe40a6b4c7d0ae68366ad4d15e4b8786c4946dfd51fa6",
       "init_calldata": [
         "0x0",
         "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",

@@ -374,7 +374,7 @@ const Socials = () => (
       <DiscordIcon size="md" />
     </Link>
     <Link
-      to="https://x.com/cartridge_gg"
+      to="https://x.com/glitchbombgame"
       target="_blank"
       className="flex-1 bg-primary-800 hover:bg-primary-700 cursor-pointer rounded-lg p-2 text-primary-100 flex items-center justify-center"
     >

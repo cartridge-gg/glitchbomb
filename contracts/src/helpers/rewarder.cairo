@@ -51,7 +51,7 @@ pub impl Rewarder of RewarderTrait {
         } else {
             0
         };
-        (base * TEN_POW_18 / BASE_MULTIPLIER).into()
+        (base * TEN_POW_18).into()
     }
 
     /// Calculate the supply multiplier for a given supply and target.
@@ -202,22 +202,22 @@ mod tests {
 
     #[test]
     fn test_base_at_min_threshold() {
-        // score=65, lookup=1 => 1 * TEN_POW_18 / 100
-        let expected: u256 = (TEN_POW_18 / 100).into();
+        // score=65, lookup=1 => 1 * TEN_POW_18
+        let expected: u256 = TEN_POW_18.into();
         assert_eq!(Rewarder::base(65), expected);
     }
 
     #[test]
     fn test_base_at_max_score() {
-        // score=524, lookup=1000 => 1000 * TEN_POW_18 / 100 = 10 * TEN_POW_18
-        let expected: u256 = (10 * TEN_POW_18).into();
+        // score=524, lookup=1000 => 1000 * TEN_POW_18 = 10 * TEN_POW_18
+        let expected: u256 = (1000 * TEN_POW_18).into();
         assert_eq!(Rewarder::base(524), expected);
     }
 
     #[test]
     fn test_base_tier_boundaries() {
-        let base_77: u256 = (TEN_POW_18 / 100).into();
-        let base_78: u256 = (13 * TEN_POW_18 / 100).into();
+        let base_77: u256 = (TEN_POW_18).into();
+        let base_78: u256 = (13 * TEN_POW_18).into();
         assert_eq!(Rewarder::base(77), base_77);
         assert_eq!(Rewarder::base(78), base_78);
         assert_gt!(Rewarder::base(78), Rewarder::base(77));
@@ -278,8 +278,6 @@ mod tests {
         let m = Rewarder::burn_multiplier(2 * base_val, AVG_SCORE);
         assert_eq!(m, 2 * MULTIPLIER_PRECISION);
     }
-
-    // ==================== Unit tests: amount ====================
 
     #[test]
     fn test_amount_zero_score() {
