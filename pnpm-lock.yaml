@@ -7,11 +7,11 @@ settings:
 catalogs:
   default:
     '@cartridge/connector':
-      specifier: 0.13.11-alpha.2
-      version: 0.13.11-alpha.2
+      specifier: 0.13.11
+      version: 0.13.11
     '@cartridge/controller':
-      specifier: 0.13.11-alpha.2
-      version: 0.13.11-alpha.2
+      specifier: 0.13.11
+      version: 0.13.11
     '@cartridge/ui':
       specifier: github:cartridge-gg/ui#a823aea
       version: 0.7.14-alpha.2
@@ -55,10 +55,10 @@ importers:
     dependencies:
       '@cartridge/connector':
         specifier: 'catalog:'
-        version: 0.13.11-alpha.2(@starknet-react/core@5.0.3(get-starknet-core@3.3.5(starknet@8.9.2))(react@19.2.3)(starknet@8.9.2)(typescript@5.9.3))(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
+        version: 0.13.11(@starknet-react/core@5.0.3(get-starknet-core@3.3.5(starknet@8.9.2))(react@19.2.3)(starknet@8.9.2)(typescript@5.9.3))(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
       '@cartridge/controller':
         specifier: 'catalog:'
-        version: 0.13.11-alpha.2(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
+        version: 0.13.11(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
       '@cartridge/presets':
         specifier: github:cartridge-gg/presets#0f9ded096a95840c80f4fbdfeba5d94852bdfd7b
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/0f9ded096a95840c80f4fbdfeba5d94852bdfd7b
@@ -610,16 +610,16 @@ packages:
   '@bytecodealliance/preview2-shim@0.17.6':
     resolution: {integrity: sha512-n3cM88gTen5980UOBAD6xDcNNL3ocTK8keab21bpx1ONdA+ARj7uD1qoFxOWCyKlkpSi195FH+GeAut7Oc6zZw==}
 
-  '@cartridge/connector@0.13.11-alpha.2':
-    resolution: {integrity: sha512-RL0/y+bkbYFZ1oPMYzsVDp5Yt3K2eEC8otv//EbDxQ2YYulmMRz1vzM1L/VktBjci4rJAurxmfKikZ03KvV0Xw==}
+  '@cartridge/connector@0.13.11':
+    resolution: {integrity: sha512-Ad1iXuB6+ln3lltqTcfAQs12iloAcDdlRm7FwGs4Y7cVtlVRTYODXtETmH2InSVpFTkAIx4JJzBZnSWzd/9imw==}
     peerDependencies:
       '@starknet-react/core': ^5.0.1
 
   '@cartridge/controller-wasm@0.10.0':
     resolution: {integrity: sha512-msmQFjZRRAcAbcGf0mt4z4bTvUY6H3ypgYz+imJp+S36SCabvh42vog7FttuvcVKQoVjS5hNKb3rf0YwU/plig==}
 
-  '@cartridge/controller@0.13.11-alpha.2':
-    resolution: {integrity: sha512-UqfmWjjHdb8GeEr2Y7GI0d1RWXFkVGSRtwAFaiwpSqm9dD9HMr58CFMBfh7p9VeKItIcOGCDSqL4fBxwJ0Sqpw==}
+  '@cartridge/controller@0.13.11':
+    resolution: {integrity: sha512-duljBCSATe0qWCWWJim7e5lOb/x71wGW6wd7k3MxRxHwdUn7zlI5Eqt8Vqhs5j+HQ+nUS7MauboyH1RumF/uaw==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -6918,9 +6918,9 @@ snapshots:
 
   '@bytecodealliance/preview2-shim@0.17.6': {}
 
-  '@cartridge/connector@0.13.11-alpha.2(@starknet-react/core@5.0.3(get-starknet-core@3.3.5(starknet@8.9.2))(react@19.2.3)(starknet@8.9.2)(typescript@5.9.3))(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)':
+  '@cartridge/connector@0.13.11(@starknet-react/core@5.0.3(get-starknet-core@3.3.5(starknet@8.9.2))(react@19.2.3)(starknet@8.9.2)(typescript@5.9.3))(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)':
     dependencies:
-      '@cartridge/controller': 0.13.11-alpha.2(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
+      '@cartridge/controller': 0.13.11(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)
       '@starknet-react/core': 5.0.3(get-starknet-core@3.3.5(starknet@8.9.2))(react@19.2.3)(starknet@8.9.2)(typescript@5.9.3)
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -6952,7 +6952,7 @@ snapshots:
 
   '@cartridge/controller-wasm@0.10.0': {}
 
-  '@cartridge/controller@0.13.11-alpha.2(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)':
+  '@cartridge/controller@0.13.11(@types/react@18.3.27)(react@19.2.3)(typescript@5.9.3)(zod@3.25.76)':
     dependencies:
       '@cartridge/controller-wasm': 0.10.0
       '@cartridge/penpal': 6.2.4
