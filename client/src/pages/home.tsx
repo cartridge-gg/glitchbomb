@@ -197,7 +197,6 @@ export const Home = () => {
   }, [completedGames, expiredGames, formatPayout]);
 
   const allActivityItems = useMemo<GameActivitiesProps["activities"]>(() => {
-    console.log({ sqlActivities });
     return sqlActivities.map((row) => ({
       gameId: row.username ? row.username : `#${row.gameId}`,
       moonrocks: row.score,
