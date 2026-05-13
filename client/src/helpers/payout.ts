@@ -2,7 +2,7 @@ export const TOKEN_DECIMALS = 18;
 export const QUOTE_DECIMALS = 6;
 export const TEN_POW_18 = 10n ** 18n;
 export const MULTIPLIER_PRECISION = 1_000_000n;
-const BASE_MULTIPLIER = 100n;
+const BASE_MULTIPLIER = 1n;
 
 export const MAX_SCORE = 524;
 export const STARTERPACK_COUNT = 10;
