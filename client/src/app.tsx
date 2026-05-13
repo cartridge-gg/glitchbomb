@@ -10,6 +10,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
+import { NativeAuthBridge } from "@/components/containers/native-auth-bridge";
 import { NativeNotificationBridge } from "@/components/containers/native-notification-bridge";
 import { NotificationEvents } from "@/components/containers/notification-events";
 import { LoadingScreen } from "@/components/elements/loading-screen";
@@ -186,6 +187,7 @@ function App() {
         explorer={voyager}
         provider={provider}
       >
+        <NativeAuthBridge />
         <NativeNotificationBridge />
         <DeployGate />
       </StarknetConfig>
