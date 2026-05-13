@@ -65,7 +65,7 @@ pub mod PurchaseComponent {
             let payment_receiver = starknet::get_contract_address();
             let bundle_component = get_dep_component!(@self, Bundle);
             // [Effect] Register free social bundle
-            let conditions = Twitter::new("glitchbombxyz", "1884657985219403776");
+            let conditions = Twitter::new("glitchbombgame", "1960394350858272769");
             bundle_component
                 .register(
                     world: world,

@@ -47,7 +47,7 @@ pub struct Game {
     pub level_counters: u128,
     pub counters: u128,
     pub bag: felt252, // Packed: Each orb is 5 bits, indicating its variant from the Orb enum.
-    pub supply: felt252,
+    pub supply: felt252, // FIXME: not used
     pub price: felt252,
 }
 
