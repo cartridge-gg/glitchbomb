@@ -154,11 +154,16 @@ pub impl StoreImpl of StoreTrait {
         mut self: Store,
         player_id: felt252,
         bundle_id: u32,
+        score: u16,
         quantity: u32,
         multiplier: u128,
         price: u256,
+        burn: u256,
+        supply: u256,
     ) {
-        let event = PurchasedTrait::new(player_id, bundle_id, quantity, multiplier, price);
+        let event = PurchasedTrait::new(
+            player_id, bundle_id, score, quantity, multiplier, price, burn, supply,
+        );
         self.world.emit_event(@event);
     }
 

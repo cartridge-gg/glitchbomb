@@ -115,15 +115,25 @@ pub mod PurchaseComponent {
             bundle.assert_does_exist();
 
             // [Check] Skip if bundle is free
-            let nums_address = self.get_token(world).contract_address;
-            let asset = IERC20MixinDispatcher { contract_address: nums_address };
-            let nums_supply = asset.total_supply();
+            let token_address = self.get_token(world).contract_address;
+            let asset = IERC20MixinDispatcher { contract_address: token_address };
+            let token_supply = asset.total_supply();
             if bundle.price == 0 {
                 // [Event] Emit purchase event
-                store.purchased(recipient.into(), bundle_id, quantity, MULTIPLIER_PRECISION, 0);
+                store
+                    .purchased(
+                        recipient.into(),
+                        bundle_id,
+                        0,
+                        quantity,
+                        MULTIPLIER_PRECISION,
+                        0,
+                        0,
+                        token_supply,
+                    );
 
                 // [Return] Result
-                return (recipient, MULTIPLIER_PRECISION, nums_supply, bundle.price, quantity);
+                return (recipient, MULTIPLIER_PRECISION, token_supply, bundle.price, quantity);
             }
 
             // [Interaction] Transfer the burn share to Ekubo
@@ -139,10 +149,10 @@ pub mod PurchaseComponent {
             quote.transfer(router.contract_address, amount);
 
             // [Interaction] Swap Quote token for Nums
-            let (token0, token1) = if quote.contract_address < nums_address {
-                (quote.contract_address, nums_address)
+            let (token0, token1) = if quote.contract_address < token_address {
+                (quote.contract_address, token_address)
             } else {
-                (nums_address, quote.contract_address)
+                (token_address, quote.contract_address)
             };
             let pool_key = PoolKey {
                 token0: token0,
@@ -164,13 +174,13 @@ pub mod PurchaseComponent {
 
             // [Interaction] Clear minimum
             let clearer = store.ekubo_clearer();
-            clearer.clear_minimum(IERC20Dispatcher { contract_address: nums_address }, 0);
+            clearer.clear_minimum(IERC20Dispatcher { contract_address: token_address }, 0);
             clearer.clear(IERC20Dispatcher { contract_address: quote_address });
 
             // [Interaction] Burn the corresponding amount of Nums
             let this = starknet::get_contract_address();
             let burn_amount = asset.balance_of(this);
-            let asset = ITokenDispatcher { contract_address: nums_address };
+            let asset = ITokenDispatcher { contract_address: token_address };
             if burn_amount > 0 {
                 asset.burn(burn_amount);
             }
@@ -194,14 +204,24 @@ pub mod PurchaseComponent {
 
             // [Compute] Multiplier per game
             let burn_per_game = burn_amount / quantity.into();
-            let supply_per_game = nums_supply - burn_per_game;
+            let supply_per_game = token_supply - burn_per_game;
             let avg_score = config.average_score();
             let multiplier = Rewarder::multiplier(
                 supply_per_game, config.target_supply, burn_per_game, avg_score,
             );
 
             // [Event] Emit purchase event
-            store.purchased(recipient.into(), bundle_id, quantity, multiplier, bundle.price);
+            store
+                .purchased(
+                    recipient.into(),
+                    bundle_id,
+                    avg_score,
+                    quantity,
+                    multiplier,
+                    bundle.price,
+                    burn_per_game,
+                    supply_per_game,
+                );
 
             // [Return] Result
             (recipient, multiplier, supply_per_game, bundle.price, quantity)

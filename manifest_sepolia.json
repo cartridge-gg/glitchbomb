@@ -1,8 +1,8 @@
 {
   "world": {
     "class_hash": "0x613551abceb2b37073b1149bb862ea70cf029981ce1ca47e9dd7c7ab97cb65d",
-    "address": "0x6e93be73d7980ad655b7e019148074edcb75e524b187a8b7997595ea16e2c93",
-    "seed": "glitchbomb-v0.0.30",
+    "address": "0x101dee50298835d55cc60a83db6f6036ec2186144e1a36d37e771796d9855c4",
+    "seed": "glitchbomb-v0.0.31",
     "name": "Glitch Bomb",
     "entrypoints": [
       "uuid",
@@ -33,7 +33,7 @@
   },
   "contracts": [
     {
-      "address": "0x65dadf5a51c32f643c0877667c34b51d6bc1a1b2e3b21238bd25ec021e4ed06",
+      "address": "0x2cd23ffa6c26f2a5d2a28012ad46eac9905c232ed8574fb6a2c6aa33eb8fc2",
       "class_hash": "0x55562e63cd68c815aba74e58e9c4e6e59a65b079b74e6a5405c2e7301ac4997",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Collection",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "address": "0x6a90be0f7ad7d4f1336b5ebed9f709981f77636fc8ae1e96dbc998b788e3fd0",
+      "address": "0x322c397d90409f1463a845af5e20e75b680b71c3798df881285f520e9a55343",
       "class_hash": "0x62899f6844d4ebc85ba55f0546e696b92d83896605e99473f73362e8736ae8",
       "init_calldata": [
         "0x2540BE400",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "address": "0x73d59f0dbbe0842fbdaa79c0a85223ac6147954f7783b604b8b411e441ef664",
+      "address": "0x594095ea946c64a735e9526e878e25c670be9187b64b0fe5bf444b1828075ad",
       "class_hash": "0x7494192fb25f048dff5fa12914bb4b048bc1416185b5eafa8bf8f5a19bc9e95",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Governor",
@@ -102,7 +102,7 @@
       ]
     },
     {
-      "address": "0x530ecb241ae6045989c28007b0d4fe2dc64485051b04147a046f0ccf8092036",
+      "address": "0x1dcb2537358273e146f4b1b537e1e5ee2b2ef5d57b6666f93f1c9b047f607f0",
       "class_hash": "0x2506cdfde111cf1fb83b2c269391f31cf96fbeab5dbecff9fe19972dc0f78cf",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Play",
@@ -124,8 +124,8 @@
       ]
     },
     {
-      "address": "0x578bc64981b9440e50b47270b7bbfacd14516a950cd529f0457f220359a0870",
-      "class_hash": "0x1c2d3af36d32aaa01fbe40a6b4c7d0ae68366ad4d15e4b8786c4946dfd51fa6",
+      "address": "0x51da582d2f0d8b0de19a073c055b890b9a880f28e60df6db8a44b5e10f0198b",
+      "class_hash": "0x7fd320b5f46cd909ef089e92f60387955430c51721c38872cf20334db2bd61d",
       "init_calldata": [
         "0x0",
         "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",
@@ -137,7 +137,7 @@
         "0xD3C21BCECCEDA1000000",
         "0x46",
         "0x32",
-        "0xA",
+        "0x64",
         "0xccccccccccccccccccccccccccccccc",
         "0x56a4c",
         "0x073ec792c33b52d5f96940c2860d512b3884f2127d25e023eb9d44a678e4b971",
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "address": "0x5a52afd962d37b557df6e703062e3f238f60a1805484c501690c925666b8f3",
+      "address": "0x611012d4ee37efa04bdcc8a91eb3b5c6cbdda452f22aaf142557109f1b5b848",
       "class_hash": "0x233c70ba6c01d8df63ab5ad1a267990ae7e4774f65552688fd8b304190fa0c2",
       "init_calldata": [
         "0xD3C21BCECCEDA1000000",
@@ -193,7 +193,7 @@
       ]
     },
     {
-      "address": "0x381cdc139bd0bb8eff8eb988010df3a1275031f7a2c5b2e744447bc8ec903e2",
+      "address": "0x6ab857ee0ad3588559d9a63c8bae1edaff5137fb54df5de91e62d8566fac4ff",
       "class_hash": "0x6b33d735a5b7eba18cf2f5d027698c57afb10633c01a46232e67decb6364a12",
       "init_calldata": [
         "0xe10",
@@ -221,7 +221,7 @@
       ]
     },
     {
-      "address": "0x2c620debdaaf544f6643e3b4aebf5e6285163d05d4a0119e555097313e92a11",
+      "address": "0x262b6f435625190908b9e2d3db893d17a968f05b54560a7d0010d91c3c35e00",
       "class_hash": "0x174eca3df4baa311b5ac26b16efa1da3d00145e3a41616fa4d6515b6e3c72e4",
       "init_calldata": [
         "0x1",
@@ -256,7 +256,7 @@
       ]
     },
     {
-      "address": "0x4b3445d7b929bcef7977495982c4fc8e34cd4dbe4849bfbc4a24edde734d6ec",
+      "address": "0x4d379e2745fc735ab31160258549f5477f0ae8c3fb54d1d4c141d19d4868de6",
       "class_hash": "0x3a719f7706a91e4c522a85ece43731fb875e10602dbead3fc346cc39ce4e9ef",
       "init_calldata": [],
       "tag": "GLITCHBOMB-Vrf",
@@ -1279,6 +1279,11 @@
           "key": false
         },
         {
+          "name": "score",
+          "type": "core::integer::u16",
+          "key": false
+        },
+        {
           "name": "quantity",
           "type": "core::integer::u32",
           "key": false
@@ -1297,9 +1302,19 @@
           "name": "price",
           "type": "core::integer::u256",
           "key": false
+        },
+        {
+          "name": "burn",
+          "type": "core::integer::u256",
+          "key": false
+        },
+        {
+          "name": "supply",
+          "type": "core::integer::u256",
+          "key": false
         }
       ],
-      "class_hash": "0x45ec64d0670252b4d146e55a0850be5286c13a848ab54686ba30e34549dd0b4",
+      "class_hash": "0x6c720b9322d8cf9b31e10fd31c9a70a0b21123ea321750a5c5073a10c92227f",
       "tag": "GLITCHBOMB-Purchased",
       "selector": "0x7411c7f680a45f897ec4f663c61adf2ca79ada423a6d9bae5f2d514b3611557"
     },
@@ -4975,6 +4990,10 @@
           "type": "core::integer::u32"
         },
         {
+          "name": "score",
+          "type": "core::integer::u16"
+        },
+        {
           "name": "quantity",
           "type": "core::integer::u32"
         },
@@ -4989,6 +5008,14 @@
         {
           "name": "price",
           "type": "core::integer::u256"
+        },
+        {
+          "name": "burn",
+          "type": "core::integer::u256"
+        },
+        {
+          "name": "supply",
+          "type": "core::integer::u256"
         }
       ]
     },
@@ -4999,6 +5026,10 @@
         {
           "name": "starterpack_id",
           "type": "core::integer::u32"
+        },
+        {
+          "name": "score",
+          "type": "core::integer::u16"
         },
         {
           "name": "quantity",
@@ -5014,6 +5045,14 @@
         },
         {
           "name": "price",
+          "type": "core::integer::u256"
+        },
+        {
+          "name": "burn",
+          "type": "core::integer::u256"
+        },
+        {
+          "name": "supply",
           "type": "core::integer::u256"
         }
       ]
