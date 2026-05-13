@@ -178,7 +178,7 @@ export const Home = () => {
     const expired = expiredGames.map((g) => ({
       gameId: `#${g.id}`,
       moonrocks: g.moonrocks,
-      multiplier: g.multiplier,
+      multiplier: g.stake / 1e6,
       payout: "EXPIRED",
       to: `/game/${g.id}`,
       timestamp: g.expiration,
@@ -187,7 +187,7 @@ export const Home = () => {
       return {
         gameId: `#${g.id}`,
         moonrocks: g.moonrocks,
-        multiplier: g.multiplier,
+        multiplier: g.stake / 1e6,
         payout: formatPayout(g.moonrocks, g.stake),
         to: `/game/${g.id}`,
         timestamp: g.over,
@@ -200,7 +200,7 @@ export const Home = () => {
     return sqlActivities.map((row) => ({
       gameId: row.username ? row.username : `#${row.gameId}`,
       moonrocks: row.score,
-      multiplier: row.multiplier / 100,
+      multiplier: row.stake / 1e6,
       payout: tokenPrice
         ? `$${(row.reward * tokenPrice).toFixed(2)}`
         : `${row.reward.toFixed(1)} GLITCH`,

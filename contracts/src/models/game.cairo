@@ -65,7 +65,7 @@ pub mod Errors {
 
 #[generate_trait]
 pub impl GameImpl of GameTrait {
-    fn new(id: u64, stake: u128) -> Game {
+    fn new(id: u64, stake: u128, price: felt252) -> Game {
         Game {
             id: id,
             claimed: false,
@@ -88,7 +88,7 @@ pub impl GameImpl of GameTrait {
             level_counters: 0,
             counters: 0,
             supply: 0,
-            price: 0,
+            price: price,
         }
     }
 
@@ -673,11 +673,12 @@ mod tests {
 
     const GAME_ID: u64 = 1;
     const STAKE: u128 = 1;
+    const PRICE: felt252 = 0;
     const SEED: felt252 = 'SEED';
 
     #[test]
     fn test_game_new() {
-        let game = GameTrait::new(GAME_ID, STAKE);
+        let game = GameTrait::new(GAME_ID, STAKE, PRICE);
         assert_eq!(game.id, GAME_ID);
         assert_eq!(game.over, 0);
         assert_eq!(game.level, DEFAULT_LEVEL);
@@ -692,7 +693,7 @@ mod tests {
 
     #[test]
     fn test_game_start() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         let cost = game.start();
         assert_eq!(cost, Milestone::cost(DEFAULT_LEVEL));
         assert_eq!(game.bag != 0, true);
@@ -700,7 +701,7 @@ mod tests {
 
     #[test]
     fn test_game_add() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag = game.bag;
         game.add(Orb::Point5);
@@ -710,7 +711,7 @@ mod tests {
 
     #[test]
     fn test_game_take_damage() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.take_damage(1);
         assert_eq!(game.health, MAX_HEALTH - 1);
@@ -718,7 +719,7 @@ mod tests {
 
     #[test]
     fn test_game_earn_points() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(10);
         assert_eq!(game.points, 10);
@@ -726,7 +727,7 @@ mod tests {
 
     #[test]
     fn test_game_earn_chips() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_chips(10);
         assert_eq!(game.chips, 10);
@@ -734,7 +735,7 @@ mod tests {
 
     #[test]
     fn test_game_spend() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_chips(20);
         game.spend(10);
@@ -743,7 +744,7 @@ mod tests {
 
     #[test]
     fn test_game_heal() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.take_damage(MAX_HEALTH - 1);
         game.heal(MAX_HEALTH - 1);
@@ -752,7 +753,7 @@ mod tests {
 
     #[test]
     fn test_game_restore() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.take_damage(MAX_HEALTH - 1);
         game.restore();
@@ -761,7 +762,7 @@ mod tests {
 
     #[test]
     fn test_game_level_up() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.level_up();
         assert_eq!(game.level, DEFAULT_LEVEL + 1);
@@ -769,7 +770,7 @@ mod tests {
 
     #[test]
     fn test_game_immune() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.immune(1);
         assert_eq!(game.immunity, 1);
@@ -777,7 +778,7 @@ mod tests {
 
     #[test]
     fn test_game_boost() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.boost(50);
         assert_eq!(game.multiplier, BASE_MULTIPLIER + 50);
@@ -785,7 +786,7 @@ mod tests {
 
     #[test]
     fn test_game_pullable_orbs_count() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let count = game.pullable_orbs_count();
         game.add(Orb::Point5);
@@ -794,14 +795,14 @@ mod tests {
 
     #[test]
     fn test_game_pulled_bombs_count() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         assert_eq!(game.pulled_bombs_count(), 0);
     }
 
     #[test]
     fn test_game_pullable_bombs_count() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // Initial bag contains 2 x Bomb1, 1 x Bomb2, 1 x Bomb3 = 4 bombs.
         assert_eq!(game.pullable_bombs_count(), 4);
@@ -818,7 +819,7 @@ mod tests {
 
     #[test]
     fn test_game_pullable_bombs_count_excludes_discarded() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let initial = game.pullable_bombs_count();
         // Pull the first orb and verify the pullable count either stays equal
@@ -831,7 +832,7 @@ mod tests {
 
     #[test]
     fn test_game_pullable_points_count() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // Initial bag contains 3 x Point5, 1 x PointOrb1, 1 x PointBomb4 = 5 points.
         assert_eq!(game.pullable_points_count(), 5);
@@ -848,7 +849,7 @@ mod tests {
 
     #[test]
     fn test_game_pullable_points_count_excludes_discarded() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let initial = game.pullable_points_count();
         let (orbs, _remaining, _points) = game.pull(SEED);
@@ -859,7 +860,7 @@ mod tests {
 
     #[test]
     fn test_game_is_over() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.take_damage(MAX_HEALTH);
         assert_eq!(game.is_over(), true);
@@ -867,7 +868,7 @@ mod tests {
 
     #[test]
     fn test_game_cash_out() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.cash_out();
@@ -877,7 +878,7 @@ mod tests {
 
     #[test]
     fn test_game_enter() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 100;
         game.earn_points(100);
@@ -890,7 +891,7 @@ mod tests {
 
     #[test]
     fn test_game_buy() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.enter(SEED);
@@ -903,7 +904,7 @@ mod tests {
 
     #[test]
     fn test_game_buy_then_exit() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 100;
         game.earn_points(100);
@@ -920,7 +921,7 @@ mod tests {
 
     #[test]
     fn test_game_burn() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.enter(SEED);
@@ -934,7 +935,7 @@ mod tests {
 
     #[test]
     fn test_game_price_escalation() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(200);
         game.enter(SEED);
@@ -953,7 +954,7 @@ mod tests {
     #[test]
     #[should_panic(expected: 'Game: shop burn used')]
     fn test_game_burn_only_once() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.enter(SEED);
@@ -965,7 +966,7 @@ mod tests {
     #[test]
     #[should_panic(expected: 'Game: cannot burn bomb')]
     fn test_game_cannot_burn_bomb() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.enter(SEED);
@@ -975,7 +976,7 @@ mod tests {
 
     #[test]
     fn test_game_purchase_counts_persist_across_shops() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 500;
         game.earn_points(200);
@@ -998,7 +999,7 @@ mod tests {
 
     #[test]
     fn test_game_discards_reset_on_enter_shop() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.discards = 0b1011;
         game.earn_points(12); // Reach milestone to enter shop
@@ -1008,7 +1009,7 @@ mod tests {
 
     #[test]
     fn test_game_escalation_persists_across_buy_calls() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(200);
         game.enter(SEED);
@@ -1036,7 +1037,7 @@ mod tests {
 
     #[test]
     fn test_game_burn_reduces_bag_size() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         let bag_before: Orbs = OrbsTrait::unpack(game.bag);
@@ -1050,7 +1051,7 @@ mod tests {
     #[test]
     #[should_panic(expected: 'Game: invalid bag index')]
     fn test_game_burn_invalid_index() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(100);
         game.enter(SEED);
@@ -1061,7 +1062,7 @@ mod tests {
     #[test]
     #[should_panic(expected: 'Game: cannot afford')]
     fn test_game_burn_insufficient_chips() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.earn_points(12); // Reach milestone to enter shop
         game.enter(SEED);
@@ -1075,14 +1076,14 @@ mod tests {
 
     #[test]
     fn test_game_has_curse_false_by_default() {
-        let game = GameTrait::new(GAME_ID, STAKE);
+        let game = GameTrait::new(GAME_ID, STAKE, PRICE);
         assert_eq!(game.curses, 0);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
     }
 
     #[test]
     fn test_game_add_curse() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), true);
@@ -1090,7 +1091,7 @@ mod tests {
 
     #[test]
     fn test_game_pull_without_double_draw() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Check] No curse active
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DOUBLE_DRAW), false);
@@ -1102,7 +1103,7 @@ mod tests {
 
     #[test]
     fn test_game_pull_with_double_draw() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Effect] Add DoubleDraw curse
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
@@ -1115,7 +1116,7 @@ mod tests {
 
     #[test]
     fn test_game_pull_double_draw_updates_discards() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let discards_before = game.discards;
         // [Effect] Add DoubleDraw curse and pull
@@ -1129,7 +1130,7 @@ mod tests {
 
     #[test]
     fn test_game_pull_double_draw_when_only_one_orb_left() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Effect] Add DoubleDraw curse
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
@@ -1156,13 +1157,13 @@ mod tests {
 
     #[test]
     fn test_game_demultiplier_curse_not_active_by_default() {
-        let game = GameTrait::new(GAME_ID, STAKE);
+        let game = GameTrait::new(GAME_ID, STAKE, PRICE);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), false);
     }
 
     #[test]
     fn test_game_add_demultiplier_curse() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), false);
         GameTrait::add_curse(ref game, CURSE_DEMULTIPLIER);
         assert_eq!(GameTrait::has_curse(game.curses, CURSE_DEMULTIPLIER), true);
@@ -1170,7 +1171,7 @@ mod tests {
 
     #[test]
     fn test_game_boost_without_demultiplier() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let multiplier_before = game.multiplier;
         // [Effect] Boost without curse
@@ -1181,7 +1182,7 @@ mod tests {
 
     #[test]
     fn test_game_boost_with_demultiplier() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let multiplier_before = game.multiplier;
         // [Effect] Add Demultiplier curse
@@ -1194,7 +1195,7 @@ mod tests {
 
     #[test]
     fn test_game_boost_with_demultiplier_odd_value() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let multiplier_before = game.multiplier;
         // [Effect] Add Demultiplier curse
@@ -1207,7 +1208,7 @@ mod tests {
 
     #[test]
     fn test_game_multiple_curses_active() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Effect] Add both curses
         GameTrait::add_curse(ref game, CURSE_DOUBLE_DRAW);
@@ -1228,7 +1229,7 @@ mod tests {
 
     #[test]
     fn test_game_bag_reshuffles_when_empty() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag: Orbs = OrbsTrait::unpack(game.bag);
         let bag_size: u8 = bag.len().try_into().unwrap();
@@ -1251,7 +1252,7 @@ mod tests {
 
     #[test]
     fn test_game_bag_keeps_added_orbs_after_reshuffle() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag: Orbs = OrbsTrait::unpack(game.bag);
         let initial_bag_size: u8 = bag.len().try_into().unwrap();
@@ -1281,7 +1282,7 @@ mod tests {
 
     #[test]
     fn test_game_reshuffle_resets_discards() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag: Orbs = OrbsTrait::unpack(game.bag);
         let bag_size: u8 = bag.len().try_into().unwrap();
@@ -1307,7 +1308,7 @@ mod tests {
 
     #[test]
     fn test_game_exit_applies_double_bomb_on_level_4() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 5000;
         // [Info] Advance to level 4
@@ -1332,7 +1333,7 @@ mod tests {
 
     #[test]
     fn test_game_exit_applies_sticky_bomb_on_level_6() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 5000;
         // [Info] Advance to level 6
@@ -1363,7 +1364,7 @@ mod tests {
 
     #[test]
     fn test_game_exit_applies_double_bomb_on_level_7() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         game.moonrocks = 5000;
         // [Info] Advance to level 7
@@ -1397,7 +1398,7 @@ mod tests {
 
     #[test]
     fn test_curse_demultiplier_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Effect] Apply Demultiplier curse directly
         let curse: Curse = 1_u8.into(); // Demultiplier
@@ -1408,7 +1409,7 @@ mod tests {
 
     #[test]
     fn test_curse_double_draw_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Effect] Apply DoubleDraw curse directly
         let curse: Curse = 2_u8.into(); // DoubleDraw
@@ -1419,7 +1420,7 @@ mod tests {
 
     #[test]
     fn test_curse_sticky_bomb_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Apply StickyBomb curse directly
@@ -1435,7 +1436,7 @@ mod tests {
 
     #[test]
     fn test_curse_double_bomb_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Apply DoubleBomb curse directly
@@ -1452,7 +1453,7 @@ mod tests {
 
     #[test]
     fn test_curse_normal_bomb_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Apply NormalBomb curse directly
@@ -1469,7 +1470,7 @@ mod tests {
 
     #[test]
     fn test_curse_score_decrease_apply() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         let bag_len_before: u32 = OrbsTrait::unpack(game.bag).len();
         // [Effect] Apply ScoreDecrease curse directly
@@ -1486,7 +1487,7 @@ mod tests {
 
     #[test]
     fn test_game_sticky_bomb_keeps_bomb_pullable() {
-        let mut game = GameTrait::new(GAME_ID, STAKE);
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         // [Setup] Replace bag with a single bomb for deterministic pulls
         game.bag = array![Orb::StickyBomb].pack();

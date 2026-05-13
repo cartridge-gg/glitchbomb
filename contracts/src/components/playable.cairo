@@ -62,7 +62,9 @@ pub mod PlayableComponent {
             let mut store = StoreImpl::new(world);
 
             // [Effect] Create game with starterpack stake
-            let mut game = GameTrait::new(id: game_id, stake: multiplier);
+            let mut game = GameTrait::new(
+                id: game_id, stake: multiplier, price: price.try_into().unwrap(),
+            );
 
             // [Effect] Start the game immediately (fill bag)
             let cost = game.start();

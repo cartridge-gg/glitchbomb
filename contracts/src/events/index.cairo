@@ -9,10 +9,13 @@ pub struct Purchased {
     #[key]
     pub player_id: felt252,
     pub starterpack_id: u32,
+    pub score: u16,
     pub quantity: u32,
     pub multiplier: u128,
     pub time: u64,
     pub price: u256,
+    pub burn: u256,
+    pub supply: u256,
 }
 
 #[derive(Copy, Drop, Serde)]
