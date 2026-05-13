@@ -2,18 +2,18 @@ import { NAMESPACE } from "@/constants";
 import { initGrpcClient } from "./client";
 
 export interface ActivityRow {
-  username: string;
-  gameId: number;
-  stake: number;
-  score: number;
-  reward: number;
-  to: string;
-  timestamp: number;
+	username: string;
+	gameId: number;
+	stake: number;
+	score: number;
+	reward: number;
+	to: string;
+	timestamp: number;
 }
 
 async function fetch(limit: number, offset: number): Promise<ActivityRow[]> {
-  const client = initGrpcClient();
-  const query = `SELECT
+	const client = initGrpcClient();
+	const query = `SELECT
     c.username,
     g.moonrocks,
     g.stake,
@@ -30,25 +30,25 @@ ORDER BY timestamp DESC
 LIMIT ${limit}
 OFFSET ${offset};`;
 
-  const rows = await client.executeSql(query);
+	const rows = await client.executeSql(query);
 
-  return rows.map((row) => {
-    const gameId = Number(row.game_id) || 0;
-    const score = Number(parseInt(String(row.moonrocks), 10));
-    const reward = Number(BigInt(String(row.reward || "0x0")) / 10n ** 18n);
-    return {
-      username: String(row.username || ""),
-      gameId,
-      stake: Number(row.stake) || 0,
-      score,
-      reward,
-      to: `/game/${gameId}`,
-      timestamp: Number(row.timestamp) || 0,
-    };
-  });
+	return rows.map((row) => {
+		const gameId = Number(row.game_id) || 0;
+		const score = Number(parseInt(String(row.moonrocks), 10));
+		const reward = Number(parseInt(String(row.reward) || "0x0", 16));
+		return {
+			username: String(row.username || ""),
+			gameId,
+			stake: Number(row.stake) || 0,
+			score,
+			reward,
+			to: `/game/${gameId}`,
+			timestamp: Number(row.timestamp) || 0,
+		};
+	});
 }
 
 export const Activities = {
-  keys: () => ["activities"] as const,
-  fetch,
+	keys: () => ["activities"] as const,
+	fetch,
 };

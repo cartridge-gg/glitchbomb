@@ -580,8 +580,7 @@ pub impl GameImpl of GameTrait {
         // [Effect] Claim
         self.claimed = true;
         // [Return] Reward amount
-        let reward: u256 = Rewarder::amount(self.moonrocks, self.stake);
-        reward * self.stake.into()
+        Rewarder::amount(self.moonrocks, self.stake)
     }
 }
 

@@ -297,4 +297,11 @@ mod tests {
         let reward = Rewarder::amount(AVG_SCORE, MULTIPLIER_PRECISION);
         assert_eq!(reward, Rewarder::base(AVG_SCORE));
     }
+
+    #[test]
+    fn test_rewarder_case_001() {
+        let multiplier = 0x00000000000000000000000000512c21;
+        let reward = Rewarder::amount(93, multiplier);
+        println!("Reward: {}", reward);
+    }
 }
