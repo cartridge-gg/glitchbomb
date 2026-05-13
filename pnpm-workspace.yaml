@@ -24,8 +24,8 @@ overrides:
   "@cartridge/presets": "github:cartridge-gg/presets#0f9ded096a95840c80f4fbdfeba5d94852bdfd7b"
 
 catalog:
-  "@cartridge/connector": "0.13.11"
-  "@cartridge/controller": "0.13.11"
+  "@cartridge/connector": "0.13.11-alpha.2"
+  "@cartridge/controller": "0.13.11-alpha.2"
   "@cartridge/presets": "github:cartridge-gg/presets#0f9ded096a95840c80f4fbdfeba5d94852bdfd7b"
   "@cartridge/ui": "github:cartridge-gg/ui#a823aea"
   "@dojoengine/core": "1.8.8"
