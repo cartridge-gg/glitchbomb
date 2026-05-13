@@ -1,6 +1,13 @@
 packages:
   - "client"
 
+# Allow exotic subdependencies (URL/git tarballs pulled in transitively).
+# pnpm 11 blocks them by default; we already depend on URL tarballs
+# (@cartridge/ui, @cartridge/presets, @storybook/addon-mcp), so their
+# transitive URL deps must be allowed. Direct exotic deps still require
+# explicit opt-in in package.json.
+blockExoticSubdeps: false
+
 allowBuilds:
   "@reown/appkit": false
   "@swc/core": true
@@ -9,10 +16,17 @@ allowBuilds:
   msgpackr-extract: false
   protobufjs: false
 
+# Force a single, resolvable @cartridge/presets across the dep graph.
+# @cartridge/ui@a823aea pins @cartridge/presets#90a5fe0, but pnpm 11's git
+# resolver rejects short hashes that no longer exist in the repo refs.
+# Override (and bump the catalog entry to) a current resolvable commit.
+overrides:
+  "@cartridge/presets": "github:cartridge-gg/presets#0f9ded096a95840c80f4fbdfeba5d94852bdfd7b"
+
 catalog:
   "@cartridge/connector": "0.13.11-alpha.2"
   "@cartridge/controller": "0.13.11-alpha.2"
-  "@cartridge/presets": "github:cartridge-gg/presets#07cb073"
+  "@cartridge/presets": "github:cartridge-gg/presets#0f9ded096a95840c80f4fbdfeba5d94852bdfd7b"
   "@cartridge/ui": "github:cartridge-gg/ui#a823aea"
   "@dojoengine/core": "1.8.8"
   "@dojoengine/grpc": "1.8.7"
