@@ -35,7 +35,7 @@ OFFSET ${offset};`;
   return rows.map((row) => {
     const gameId = Number(row.game_id) || 0;
     const score = Number(parseInt(String(row.moonrocks), 10));
-    const reward = Number(BigInt(String(row.reward || "0x0")) / 10n ** 18n);
+    const reward = Number(parseInt(String(row.reward) || "0x0", 16));
     return {
       username: String(row.username || ""),
       gameId,
