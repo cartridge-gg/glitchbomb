@@ -15,11 +15,7 @@ import { useAppData } from "@/contexts/use-app-data";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useLoadingSignal } from "@/contexts/use-loading";
 import { useOwnedGames } from "@/contexts/use-owned-games";
-import {
-  maxPayout as maxPayoutRaw,
-  tokenPayout,
-  toTokens,
-} from "@/helpers/payout";
+import { maxPayout as maxPayoutRaw, toTokens } from "@/helpers/payout";
 import { useActivities } from "@/hooks/activities";
 import { useBanners } from "@/hooks/banner";
 import { useTokens } from "@/hooks/tokens";
@@ -105,16 +101,6 @@ export const Home = () => {
   );
   const target = config?.target_supply ?? 0n;
 
-  const formatPayout = useCallback(
-    (score: number, stake: number) => {
-      if (score <= 0) return "$0.00";
-      const glitch = toTokens(tokenPayout(score, stake, supply, target));
-      if (tokenPrice) return `$${(glitch * tokenPrice).toFixed(2)}`;
-      return `${glitch.toFixed(1)} GLITCH`;
-    },
-    [supply, target, tokenPrice],
-  );
-
   const formatMaxPayout = useCallback(
     (stake: number) => {
       const raw = maxPayoutRaw(stake, supply, target);
@@ -174,6 +160,22 @@ export const Home = () => {
     [gameList],
   );
 
+  const sqlActivityByGameId = useMemo(() => {
+    const map = new Map<number, (typeof sqlActivities)[number]>();
+    for (const row of sqlActivities) {
+      if (!map.has(row.gameId)) map.set(row.gameId, row);
+    }
+    return map;
+  }, [sqlActivities]);
+
+  const formatRewardPayout = useCallback(
+    (reward: number) => {
+      if (tokenPrice) return `$${(reward * tokenPrice).toFixed(2)}`;
+      return `${reward.toFixed(1)} GLITCH`;
+    },
+    [tokenPrice],
+  );
+
   const playerActivityItems = useMemo<GameActivitiesProps["activities"]>(() => {
     const expired = expiredGames.map((g) => ({
       gameId: `#${g.id}`,
@@ -184,30 +186,30 @@ export const Home = () => {
       timestamp: g.expiration,
     }));
     const completed = completedGames.map((g) => {
+      const sqlActivity = sqlActivityByGameId.get(g.id);
+      const reward = sqlActivity?.reward ?? 0;
       return {
         gameId: `#${g.id}`,
         moonrocks: g.moonrocks,
         multiplier: g.stake / 1e6,
-        payout: formatPayout(g.moonrocks, g.stake),
+        payout: formatRewardPayout(reward),
         to: `/game/${g.id}`,
         timestamp: g.over,
       };
     });
     return [...expired, ...completed].sort((a, b) => b.timestamp - a.timestamp);
-  }, [completedGames, expiredGames, formatPayout]);
+  }, [completedGames, expiredGames, formatRewardPayout, sqlActivityByGameId]);
 
   const allActivityItems = useMemo<GameActivitiesProps["activities"]>(() => {
     return sqlActivities.map((row) => ({
       gameId: row.username ? row.username : `#${row.gameId}`,
       moonrocks: row.score,
       multiplier: row.stake / 1e6,
-      payout: tokenPrice
-        ? `$${(row.reward * tokenPrice).toFixed(2)}`
-        : `${row.reward.toFixed(1)} GLITCH`,
+      payout: formatRewardPayout(row.reward),
       to: row.to,
       timestamp: row.timestamp,
     }));
-  }, [sqlActivities, tokenPrice]);
+  }, [sqlActivities, formatRewardPayout]);
 
   const handlePlay = useCallback(
     (id: number) => {
