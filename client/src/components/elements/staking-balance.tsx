@@ -27,7 +27,7 @@ export interface StakingBalanceProps
 
 export const StakingBalance = ({
   title = "Staked",
-  token = "vNUMS",
+  token = "vGLITCH",
   stakedAmount = 0,
   totalShare = 0,
   variant,

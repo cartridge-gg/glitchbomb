@@ -103,7 +103,7 @@ const options: ControllerOptions = {
   policies: buildPolicies(),
   preset: "glitch-bomb",
   // namespace: "GLITCHBOMB",
-  slot: "glitchbomb",
+  slot: "gbomb-sepolia",
 };
 
 const connectors = [new ControllerConnector(options) as never as Connector];
