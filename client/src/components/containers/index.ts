@@ -6,6 +6,7 @@ export * from "./bomb-slots";
 export * from "./cash-out-confirmation";
 export * from "./confirmation-dialog";
 export * from "./confirmation-prefs";
+export * from "./events";
 export * from "./game-activities";
 export * from "./game-balances";
 export * from "./game-cards";

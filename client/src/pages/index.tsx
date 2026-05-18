@@ -7,7 +7,7 @@ import {
 } from "@starknet-react/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Header, Settings } from "@/components/containers";
+import { Events, Header, Settings } from "@/components/containers";
 import {
   AchievementScene,
   LeaderboardScene,
@@ -23,6 +23,7 @@ import {
 } from "@/config";
 import { useAudio } from "@/contexts/audio";
 import { useBundles } from "@/contexts/bundles";
+import { useControllers } from "@/contexts/controllers";
 import { useModal } from "@/contexts/modal";
 import { usePrices } from "@/contexts/prices";
 import { PurchaseModalProvider } from "@/contexts/purchase-modal";
@@ -34,6 +35,7 @@ import { boostedMultiplier, MAX_SCORE, toUsd } from "@/helpers/payout";
 import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
 import { useLeaderboard } from "@/hooks/leaderboard";
+import { useLiveEvents } from "@/hooks/live-events";
 import { useQuestScene } from "@/hooks/quests";
 import { useReferral } from "@/hooks/referral";
 import { toDecimal, useTokens } from "@/hooks/tokens";
@@ -107,6 +109,9 @@ export const Main = ({ children }: MainProps) => {
   const questsProps = useQuestScene();
   const { achievements: achievementRows } = useAchievementScene();
   const { data: referralRows } = useReferral();
+  const { starteds, claimeds } = useLiveEvents();
+  const { find: findController, loading: controllersLoading } =
+    useControllers();
 
   const tokenAddress = getTokenAddress(chain.id);
   const faucetAddress = getFaucetAddress(chain.id);
@@ -329,6 +334,35 @@ export const Main = ({ children }: MainProps) => {
   );
 
   const isGameScene = pathname.startsWith("/game/");
+  const isHomeScene = pathname === "/";
+
+  const liveEvents = useMemo(() => {
+    if (controllersLoading) return [];
+    return [
+      ...claimeds.map((claimed) => claimed.getEvent()),
+      ...starteds.map((started) => started.getEvent()),
+    ]
+      .map((event) => {
+        const controller = (() => {
+          try {
+            return findController(event.username);
+          } catch {
+            return undefined;
+          }
+        })();
+        const address = event.username;
+        const fallback =
+          address.length > 10
+            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+            : address;
+        return {
+          ...event,
+          username: controller?.username || fallback,
+        };
+      })
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 10);
+  }, [claimeds, starteds, findController, controllersLoading]);
 
   return (
     <div className="relative h-full w-screen flex flex-col overflow-hidden items-stretch bg-gradient-to-t from-black to-[#0C1806]">
@@ -344,6 +378,9 @@ export const Main = ({ children }: MainProps) => {
         onSettings={toggleSettings}
         className="relative w-full top-0 md:relative z-10"
       />
+      {isHomeScene && liveEvents.length > 0 && (
+        <Events events={liveEvents} className="hidden md:block" />
+      )}
       {showLeaderboard && (
         <div className="absolute inset-0 z-50 flex-1 bg-black/70 backdrop-blur-[4px]">
           <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1 flex items-center justify-center">
