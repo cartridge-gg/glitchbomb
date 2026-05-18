@@ -8,14 +8,7 @@ pub fn NAME() -> ByteArray {
 #[starknet::interface]
 pub trait IPlay<T> {
     fn mint(ref self: T, player: ContractAddress, quantity: u32);
-    fn create(
-        ref self: T,
-        player: ContractAddress,
-        multiplier: u128,
-        supply: u256,
-        price: u256,
-        quantity: u32,
-    );
+    fn create(ref self: T, player: ContractAddress, multiplier: u128, price: u256, quantity: u32);
     fn pull(ref self: T, game_id: u64);
     fn cash_out(ref self: T, game_id: u64);
     fn enter(ref self: T, game_id: u64);
@@ -33,7 +26,6 @@ pub mod Play {
     use dojo::world::WorldStorageTrait;
     use leaderboard::components::rankable::RankableComponent;
     use openzeppelin::access::accesscontrol::{AccessControlComponent, DEFAULT_ADMIN_ROLE};
-    use openzeppelin::interfaces::token::erc20::{IERC20MixinDispatcher, IERC20MixinDispatcherTrait};
     use openzeppelin::introspection::src5::SRC5Component;
     use quest::component::Component as QuestComponent;
     use quest::component::Component::QuestTrait;
@@ -46,7 +38,6 @@ pub mod Play {
         ICollectionDispatcher, ICollectionDispatcherTrait, NAME as COLLECTION,
     };
     use crate::systems::setup::NAME as SETUP;
-    use crate::systems::token::NAME as TOKEN;
     use crate::systems::treasury::NAME as TREASURY;
     use super::*;
 
@@ -201,16 +192,12 @@ pub mod Play {
             let (collection_address, _) = world.dns(@COLLECTION()).expect('Collection not found!');
             let collection = ICollectionDispatcher { contract_address: collection_address };
             // [Effect] Create games
-            let world = self.world(@NAMESPACE());
-            let (token_address, _) = world.dns(@TOKEN()).expect('Token not found!');
-            let asset = IERC20MixinDispatcher { contract_address: token_address };
-            let supply = asset.total_supply();
             let multiplier = MULTIPLIER_PRECISION;
             while quantity > 0 {
                 // [Interaction] Mint a game
                 let game_id = collection.mint(player, true);
                 // [Effect] Create game
-                self.playable.create(world, player, game_id, multiplier, supply, 0);
+                self.playable.create(world, player, game_id, multiplier, 0);
                 quantity -= 1;
             }
         }
@@ -219,7 +206,6 @@ pub mod Play {
             ref self: ContractState,
             player: ContractAddress,
             multiplier: u128,
-            supply: u256,
             price: u256,
             mut quantity: u32,
         ) {
@@ -236,7 +222,7 @@ pub mod Play {
                 // [Interaction] Mint a game
                 let game_id = collection.mint(player, true);
                 // [Effect] Create game
-                self.playable.create(world, player, game_id, multiplier, supply, price);
+                self.playable.create(world, player, game_id, multiplier, price);
                 quantity -= 1;
             }
         }

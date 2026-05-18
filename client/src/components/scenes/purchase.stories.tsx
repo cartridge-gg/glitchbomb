@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { fn } from "storybook/test";
-import { MAX_SCORE, STARTERPACK_COUNT } from "@/helpers/payout";
+import {
+  boostedMultiplier,
+  MAX_SCORE,
+  STARTERPACK_COUNT,
+} from "@/helpers/payout";
 import { PurchaseScene, type PurchaseSceneProps } from "./purchase";
 
 const meta = {
@@ -61,10 +65,10 @@ export const Default: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={1} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 2.0,
-    playPrice: 1.96,
+    price: 2.0,
     tokenPrice: 0.0042,
-    multiplier: 1,
+    baseMultiplier: 1,
+    realMultiplier: boostedMultiplier(1),
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
     stakesTotal: STARTERPACK_COUNT,
@@ -78,10 +82,10 @@ export const HighTier: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={5} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 10.0,
-    playPrice: 9.5,
+    price: 10.0,
     tokenPrice: 0.0042,
-    multiplier: 5,
+    baseMultiplier: 5,
+    realMultiplier: boostedMultiplier(5),
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
     stakesTotal: STARTERPACK_COUNT,
@@ -95,10 +99,10 @@ export const MaxTier: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={10} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 20.0,
-    playPrice: 18.0,
+    price: 20.0,
     tokenPrice: 0.0042,
-    multiplier: 10,
+    baseMultiplier: 10,
+    realMultiplier: boostedMultiplier(10),
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
     stakesTotal: STARTERPACK_COUNT,
@@ -112,10 +116,10 @@ export const NoPrice: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={1} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 2.0,
-    playPrice: 1.96,
+    price: 2.0,
     tokenPrice: 0,
-    multiplier: 1,
+    baseMultiplier: 1,
+    realMultiplier: boostedMultiplier(1),
     loading: true,
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
@@ -130,10 +134,10 @@ export const WithConnect: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={1} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 2.0,
-    playPrice: 1.96,
+    price: 2.0,
     tokenPrice: 0.0042,
-    multiplier: 1,
+    baseMultiplier: 1,
+    realMultiplier: boostedMultiplier(1),
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
     stakesTotal: STARTERPACK_COUNT,
@@ -148,10 +152,10 @@ export const ReadOnly: Story = {
   render: (args) => <PurchaseSceneWrapper {...args} initialStakeIndex={1} />,
   args: {
     slotCount: MAX_SCORE,
-    basePrice: 2.0,
-    playPrice: 1.96,
+    price: 2.0,
     tokenPrice: 0.0042,
-    multiplier: 1,
+    baseMultiplier: 1,
+    realMultiplier: boostedMultiplier(1),
     targetSupply: TARGET_SUPPLY,
     currentSupply: CURRENT_SUPPLY,
     stakesTotal: STARTERPACK_COUNT,

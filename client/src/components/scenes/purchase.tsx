@@ -31,10 +31,13 @@ export interface PurchaseSceneProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof purchaseSceneVariants> {
   slotCount: number;
-  basePrice: number;
-  playPrice: number;
+  /** Entry fee in USD. */
+  price: number;
   tokenPrice: number;
-  multiplier: number;
+  /** Unboosted reward multiplier (tier 1-STARTERPACK_COUNT). */
+  baseMultiplier: number;
+  /** Boosted reward multiplier — the one actually applied on-chain. */
+  realMultiplier: number;
   loading?: boolean;
   expiration?: number;
   targetSupply: bigint;
@@ -47,10 +50,10 @@ export interface PurchaseSceneProps
 
 export const PurchaseScene = ({
   slotCount,
-  basePrice,
-  playPrice,
+  price,
   tokenPrice,
-  multiplier,
+  baseMultiplier,
+  realMultiplier,
   loading,
   expiration,
   targetSupply,
@@ -64,24 +67,34 @@ export const PurchaseScene = ({
   ...props
 }: PurchaseSceneProps) => {
   const lastStableChartRef = useRef<{
-    chartValues: number[];
-    chartAbscissa: number;
-    maxPayoutTokens: number;
-    maxPayout: number;
+    realMaxPayout: number;
+    baseMaxPayout: number;
   } | null>(null);
 
-  const { maxPayoutTokens, maxPayout } = useMemo(() => {
+  const { realMaxPayout, baseMaxPayout } = useMemo(() => {
     if (loading && lastStableChartRef.current) {
       return lastStableChartRef.current;
     }
-    const result = ChartHelper.calculate({
+    const real = ChartHelper.calculate({
       slotCount,
       currentSupply,
       targetSupply,
       tokenPrice,
-      playPrice,
-      multiplier,
+      price,
+      multiplier: realMultiplier,
     });
+    const base = ChartHelper.calculate({
+      slotCount,
+      currentSupply,
+      targetSupply,
+      tokenPrice,
+      price,
+      multiplier: baseMultiplier,
+    });
+    const result = {
+      realMaxPayout: real.maxPayout,
+      baseMaxPayout: base.maxPayout,
+    };
     if (!loading) lastStableChartRef.current = result;
     return result;
   }, [
@@ -89,29 +102,30 @@ export const PurchaseScene = ({
     currentSupply,
     targetSupply,
     tokenPrice,
-    playPrice,
-    multiplier,
+    price,
+    baseMultiplier,
+    realMultiplier,
     loading,
   ]);
 
   const detailsProps = useMemo(
     () => ({
-      basePrice,
-      entryPrice: playPrice,
-      maxPayout: `${maxPayoutTokens.toFixed(0).toLocaleString()} GLITCH ~ $${maxPayout.toFixed(2).toLocaleString()}`,
+      price,
+      baseMaxPayout,
+      realMaxPayout,
       loading,
     }),
-    [basePrice, playPrice, loading, maxPayoutTokens, maxPayout],
+    [price, baseMaxPayout, realMaxPayout, loading],
   );
 
   const chartProps = useMemo(
     () => ({
-      stake: multiplier,
+      stake: realMultiplier,
       tokenPrice,
       supply: currentSupply,
       target: targetSupply,
     }),
-    [multiplier, tokenPrice, currentSupply, targetSupply],
+    [realMultiplier, tokenPrice, currentSupply, targetSupply],
   );
 
   return (
@@ -164,7 +178,7 @@ export const PurchaseScene = ({
             onClick={onPurchase}
           >
             <span className="px-1 font-secondary font-[22px]/3 uppercase">
-              {`Purchase - $${playPrice.toFixed(2)}`}
+              {`Purchase - $${price.toFixed(2)}`}
             </span>
           </Button>
         ) : null}

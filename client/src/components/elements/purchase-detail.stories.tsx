@@ -24,7 +24,7 @@ export const Default: Story = {
   },
 };
 
-export const Discount: Story = {
+export const Boost: Story = {
   args: {
     title: "Maximum Reward",
     content: "$11.20",

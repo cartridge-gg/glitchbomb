@@ -19,25 +19,25 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    basePrice: 2.0,
-    entryPrice: 1.98,
-    maxPayout: "$11.20",
+    price: 2.0,
+    baseMaxPayout: 11.0,
+    realMaxPayout: 11.11,
   },
 };
 
-export const Discounted: Story = {
+export const Boosted: Story = {
   args: {
-    basePrice: 10.0,
-    entryPrice: 9.5,
-    maxPayout: "$54.00",
+    price: 10.0,
+    baseMaxPayout: 54.0,
+    realMaxPayout: 56.7,
   },
 };
 
 export const Loading: Story = {
   args: {
-    basePrice: 2.0,
-    entryPrice: 1.98,
-    maxPayout: "—",
+    price: 2.0,
+    baseMaxPayout: 0,
+    realMaxPayout: 0,
     loading: true,
   },
 };

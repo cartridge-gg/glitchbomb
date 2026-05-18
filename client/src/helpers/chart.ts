@@ -6,9 +6,13 @@ export interface ChartCalculationParams {
   targetSupply: bigint;
   /** Token price in USD (e.g., 0.0042). */
   tokenPrice: number;
-  /** Play price in USD, used for break-even calculation. */
-  playPrice: number;
-  /** In gbomb domain this is the stake (1-STARTERPACK_COUNT). */
+  /** Entry fee in USD, used for break-even calculation. */
+  price: number;
+  /**
+   * Stake reward multiplier. May be fractional once the on-chain purchase
+   * boost is applied (e.g. tier 1 → 1.01, tier 10 → 11). For previewing
+   * the unboosted curve pass the integer tier directly.
+   */
   multiplier: number;
 }
 
@@ -33,7 +37,7 @@ export const ChartHelper = {
       currentSupply,
       targetSupply,
       tokenPrice,
-      playPrice,
+      price,
       multiplier,
     } = params;
 
@@ -53,7 +57,7 @@ export const ChartHelper = {
     let chartAbscissa = slotCount;
     if (chartValues.length > 0) {
       const breakevenIndex = chartValues.findIndex(
-        (reward) => reward * tokenPrice > playPrice,
+        (reward) => reward * tokenPrice > price,
       );
       chartAbscissa = breakevenIndex !== -1 ? breakevenIndex + 1 : slotCount;
     }

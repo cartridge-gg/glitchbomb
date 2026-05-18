@@ -22,6 +22,7 @@ pub trait ISetup<T> {
     fn create_achievements(ref self: T);
     fn create_quests(ref self: T);
     fn create_bundles(ref self: T, entry_price: u128, bundle_allower: ContractAddress);
+    fn fix(ref self: T, entry_price: u128, bundle_allower: ContractAddress);
 }
 
 const ADMIN_ROLE: felt252 = selector!("ADMIN_ROLE");
@@ -154,12 +155,12 @@ pub mod Setup {
         ) {
             let mut contract_state = self.get_contract_mut();
             let world = contract_state.world(@NAMESPACE());
-            let (recipient, multiplier, supply, price, quantity) = contract_state
+            let (recipient, multiplier, price, quantity) = contract_state
                 .purchase
                 .execute(world, recipient, bundle_id, quantity);
             let play_address = world.dns_address(@PLAY()).expect('Play contract not found!');
             let play = IPlayDispatcher { contract_address: play_address };
-            play.create(recipient, multiplier, supply, price, quantity);
+            play.create(recipient, multiplier, price, quantity);
         }
         fn supply(
             self: @BundleComponent::ComponentState<ContractState>, bundle_id: u32,
@@ -456,6 +457,14 @@ pub mod Setup {
             // [Effect] Initialize starterpacks
             let world = self.world(@NAMESPACE());
             self.purchase.initialize(world, entry_price.into(), bundle_allower);
+        }
+
+        fn fix(ref self: ContractState, entry_price: u128, bundle_allower: ContractAddress) {
+            // [Check] Caller is allowed
+            self.accesscontrol.assert_only_role(ADMIN_ROLE);
+            // [Effect] Initialize starterpacks
+            let world = self.world(@NAMESPACE());
+            self.purchase.fix(world, entry_price.into(), bundle_allower);
         }
     }
 }

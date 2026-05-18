@@ -50,8 +50,8 @@ const PAD_B = 8;
 const PLOT_W = CHART_W - PAD_L - PAD_R;
 const PLOT_H = CHART_H - PAD_T - PAD_B;
 
-const FLAG_W = 103.74;
-const FLAG_BODY_W = 93;
+const FLAG_W = 123;
+const FLAG_BODY_W = 113;
 const FLAG_TIP_W = FLAG_W - FLAG_BODY_W;
 const FLAG_H = 24;
 const FLAG_RIGHT = CHART_W - PAD_R;
@@ -88,7 +88,7 @@ export const PayoutChart = ({
       ? maxTokens * tokenPrice
       : null;
   const maxUsdLabel = maxUsd != null ? `$${maxUsd.toFixed(2)}` : null;
-  const flagLabel = `${formatTokens(maxTokens)} GLITCH`;
+  const flagLabel = `${maxTokens.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} GLITCH`;
 
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverScore, setHoverScore] = useState<number | null>(null);

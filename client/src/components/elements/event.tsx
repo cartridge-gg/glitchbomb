@@ -25,10 +25,15 @@ export interface EventProps
   price?: bigint;
 }
 
+// Color scheme mirrors `game-activity.tsx` so the live ticker matches the
+// activity tab buckets (1x..10x+).
 const getColor = (multiplier: number) => {
-  if (multiplier > 6) return "text-red-100 group-hover:text-red-200";
-  if (multiplier > 1) return "text-yellow-100 group-hover:text-yellow-200";
-  return "text-mauve-100 group-hover:text-mauve-200";
+  if (multiplier >= 10) return "text-salmon-100 group-hover:text-salmon-200";
+  if (multiplier >= 8) return "text-red-100 group-hover:text-red-200";
+  if (multiplier >= 6) return "text-orange-100 group-hover:text-orange-200";
+  if (multiplier >= 4) return "text-yellow-100 group-hover:text-yellow-200";
+  if (multiplier >= 2) return "text-blue-100 group-hover:text-blue-200";
+  return "text-green-100 group-hover:text-green-200";
 };
 
 export const Event = ({
@@ -53,7 +58,7 @@ export const Event = ({
       <div className="flex items-center gap-2 p-1 bg-white-900 rounded">
         <span
           className={cn(
-            "text-mauve-100 text-lg/3 font-primary translate-y-px tracking-wider font-thin whitespace-nowrap",
+            "text-primary-100 text-lg/3 font-primary translate-y-px tracking-wider font-thin whitespace-nowrap",
             multiplier
               ? getColor(multiplier)
               : earning
@@ -90,7 +95,7 @@ export const Event = ({
               {earning.toLocaleString()}
             </strong>
           </div>
-          <p className="whitespace-nowrap">NUMS</p>
+          <p className="whitespace-nowrap">GLITCH</p>
         </div>
       )}
     </Link>

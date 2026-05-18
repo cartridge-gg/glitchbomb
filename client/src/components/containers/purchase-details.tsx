@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils";
 export interface PurchaseDetailsProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof purchaseDetailsVariants> {
-  basePrice: number;
-  entryPrice: number;
-  maxPayout: string;
+  /** Entry fee in USD. */
+  price: number;
+  /** Unboosted maximum reward in USD (struck through when boosted). */
+  baseMaxPayout: number;
+  /** Boosted maximum reward in USD (the actual reward the player gets). */
+  realMaxPayout: number;
   loading?: boolean;
 }
 
@@ -26,17 +29,17 @@ const purchaseDetailsVariants = cva(
 );
 
 export const PurchaseDetails = ({
-  basePrice,
-  entryPrice,
-  maxPayout,
+  price,
+  baseMaxPayout,
+  realMaxPayout,
   loading,
   variant,
   className,
   ...props
 }: PurchaseDetailsProps) => {
-  const discount =
-    basePrice !== entryPrice
-      ? `-${(((basePrice - entryPrice) / basePrice) * 100).toFixed(0)}%`
+  const boost =
+    baseMaxPayout > 0 && realMaxPayout !== baseMaxPayout
+      ? `+${(((realMaxPayout - baseMaxPayout) / baseMaxPayout) * 100).toFixed(0)}%`
       : undefined;
 
   return (
@@ -46,15 +49,12 @@ export const PurchaseDetails = ({
     >
       <PurchaseDetail
         title="Maximum reward"
-        content={maxPayout}
+        previous={boost ? `$${baseMaxPayout.toFixed(2)}` : undefined}
+        content={`$${realMaxPayout.toFixed(2)}`}
+        discount={boost}
         loading={loading}
       />
-      <PurchaseDetail
-        title="Entry Fee"
-        previous={discount ? `$${basePrice.toFixed(2)}` : undefined}
-        content={`$${entryPrice.toFixed(2)}`}
-        discount={discount}
-      />
+      <PurchaseDetail title="Entry Fee" content={`$${price.toFixed(2)}`} />
     </div>
   );
 };
