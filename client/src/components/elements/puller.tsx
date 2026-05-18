@@ -50,7 +50,7 @@ const VARIANT_COLORS = {
     cssVar: "#FFFFFF",
   },
   point: {
-    cssVar: "var(--green-400)",
+    cssVar: "var(--primary-100)",
   },
   multiplier: {
     cssVar: "var(--orb-multiplier)",
