@@ -30,7 +30,7 @@ import { useSound } from "@/contexts/sound";
 import { useEntitiesContext } from "@/contexts/use-entities-context";
 import { useOwnedGames } from "@/contexts/use-owned-games";
 import { openControllerProfile } from "@/helpers/controller-profile";
-import { MAX_SCORE, toUsd } from "@/helpers/payout";
+import { boostedMultiplier, MAX_SCORE, toUsd } from "@/helpers/payout";
 import { useAchievementScene } from "@/hooks/achievements";
 import { useActions } from "@/hooks/actions";
 import { useLeaderboard } from "@/hooks/leaderboard";
@@ -169,17 +169,16 @@ export const Main = ({ children }: MainProps) => {
     return bundles[bundleIndex - 1];
   }, [bundles, bundleIndex]);
 
-  // stake = floor(bundle.price / base_price) + 1 (matches on-chain tierPrice formula)
+  // stake = bundle.price / base_price (on-chain: price = stake * base_price)
   const stake = useMemo(() => {
     if (!bundle || !config?.base_price || config.base_price === 0n) return 1;
-    return Number(bundle.price / config.base_price) + 1;
+    return Number(bundle.price / config.base_price);
   }, [bundle, config?.base_price]);
 
-  const playPriceUsd = useMemo(() => toUsd(bundle?.price ?? 0n), [bundle]);
-  const basePriceUsd = useMemo(() => {
-    const basePrice = config?.base_price ?? 0n;
-    return toUsd(basePrice * BigInt(stake));
-  }, [config?.base_price, stake]);
+  const priceUsd = useMemo(() => toUsd(bundle?.price ?? 0n), [bundle]);
+  // Reward boost: on-chain inflates the burn amount by `stake%`, which yields
+  // a `(1 + stake/100)` multiplier on top of the base `stake` tier rewards.
+  const realMultiplier = useMemo(() => boostedMultiplier(stake), [stake]);
 
   const onConnect = useCallback(
     () => connectAsync({ connector: connectors[0] }).then(() => undefined),
@@ -436,10 +435,10 @@ export const Main = ({ children }: MainProps) => {
           <div className="absolute inset-0 z-50 m-2 md:m-6 flex-1 flex items-center justify-center">
             <PurchaseScene
               slotCount={MAX_SCORE}
-              basePrice={basePriceUsd}
-              playPrice={playPriceUsd}
+              price={priceUsd}
               tokenPrice={tokenPrice ?? 0}
-              multiplier={stake}
+              baseMultiplier={stake}
+              realMultiplier={realMultiplier}
               loading={!tokenPrice || !bundle}
               targetSupply={target}
               currentSupply={supply}

@@ -6,8 +6,13 @@ const BASE_MULTIPLIER = 1n;
 
 export const MAX_SCORE = 524;
 export const STARTERPACK_COUNT = 10;
-export const PRICE_MULTIPLIER = 100_000n;
 export const DEFAULT_ENTRY_PRICE = 2_000_000n;
+/**
+ * Fixed-point scale used to convert a fractional reward multiplier
+ * (e.g. boosted `stake * (1 + stake / 100)`) into integer math without
+ * losing precision.
+ */
+const STAKE_PRECISION = 10_000n;
 
 const REWARD_TIERS: [number, bigint][] = [
   [524, 1000n],
@@ -73,18 +78,25 @@ export function amount(score: number, multiplier: bigint): bigint {
 }
 
 /**
- * Preview (stake = tier 1–10): tier × supplyMultiplier.
- * In-game (stake = pre-computed MULTIPLIER_PRECISION-based value from contract): used as-is.
+ * Preview (stake = tier 1..STARTERPACK_COUNT, may be fractional once the
+ *   purchase boost is applied — e.g. tier 10 → 11): `tier × supplyMultiplier`.
+ * In-game (stake = pre-computed `MULTIPLIER_PRECISION`-based value from the
+ *   contract, e.g. ≥ 1_000_000): used as-is.
+ *
+ * The boundary is set at `MULTIPLIER_PRECISION / 2`: any preview tier
+ * (including its boosted form) stays well below that, while any on-chain
+ * stake is at least one full `MULTIPLIER_PRECISION` unit.
  */
 function effectiveMultiplier(
   stake: number,
   supply: bigint,
   target: bigint,
 ): bigint {
-  if (stake > STARTERPACK_COUNT) {
-    return BigInt(stake);
+  if (BigInt(Math.round(stake)) >= MULTIPLIER_PRECISION / 2n) {
+    return BigInt(Math.round(stake));
   }
-  return BigInt(stake) * supplyMultiplier(supply, target);
+  const scaledStake = BigInt(Math.round(stake * Number(STAKE_PRECISION)));
+  return (scaledStake * supplyMultiplier(supply, target)) / STAKE_PRECISION;
 }
 
 export function tokenPayout(
@@ -105,19 +117,26 @@ export function toUsd(rawAmount: bigint | number): number {
   return Number(rawAmount) / 10 ** QUOTE_DECIMALS;
 }
 
-/** Tier price in USDC raw units: stake * base_price * (PM - stake * PM / 100) / PM */
+/** Tier price in USDC raw units: `stake * base_price`. */
 export function tierPrice(stake: number): bigint {
-  const s = BigInt(stake);
-  return (
-    (s *
-      DEFAULT_ENTRY_PRICE *
-      (PRICE_MULTIPLIER - (s * PRICE_MULTIPLIER) / 100n)) /
-    PRICE_MULTIPLIER
-  );
+  return BigInt(stake) * DEFAULT_ENTRY_PRICE;
 }
 
-export function tierFullPrice(stake: number): bigint {
-  return BigInt(stake) * DEFAULT_ENTRY_PRICE;
+/**
+ * Reward boost applied at purchase time: the contract inflates the burn
+ * amount by `stake%`, which translates into a `(1 + stake/100)` multiplier
+ * on top of the base `stake` tier when computing rewards.
+ *
+ * Returns the boosted "real" multiplier used to draw the reward curve.
+ * Example: `boostedMultiplier(3) = 3.09`.
+ */
+export function boostedMultiplier(stake: number): number {
+  return stake * (1 + stake / 100);
+}
+
+/** Boost percentage label for tier `stake` (e.g. `3` → `"+3%"`). */
+export function boostPercent(stake: number): number {
+  return stake;
 }
 
 export const TIER_PRICES: bigint[] = Array.from(
