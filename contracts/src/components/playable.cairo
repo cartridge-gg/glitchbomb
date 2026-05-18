@@ -55,7 +55,6 @@ pub mod PlayableComponent {
             player: ContractAddress,
             game_id: u64,
             multiplier: u128,
-            supply: u256,
             price: u256,
         ) {
             // [Setup] Store

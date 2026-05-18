@@ -82,10 +82,7 @@ pub mod PurchaseComponent {
             for index in 0..BUNDLE_COUNT {
                 // [Interaction] Register starterpack
                 let stake: u256 = (index + 1).into();
-                let price = stake
-                    * base_price
-                    * (MULTIPLIER - stake * MULTIPLIER / 100)
-                    / MULTIPLIER;
+                let price = stake * base_price;
                 let _bundle_id = bundle_component
                     .register(
                         world: world,
@@ -100,13 +97,56 @@ pub mod PurchaseComponent {
             };
         }
 
+        fn fix(
+            ref self: ComponentState<TContractState>,
+            world: WorldStorage,
+            base_price: u256,
+            allower: ContractAddress,
+        ) {
+            // [Setup] Store
+            let mut store = StoreImpl::new(world);
+            let payment_token = store.quote_disp().contract_address;
+            // [Effect] Register and store all starterpacks
+            let payment_receiver = starknet::get_contract_address();
+            let bundle_component = get_dep_component!(@self, Bundle);
+            // [Effect] Register free social bundle
+            bundle_component
+                .update(
+                    world: world,
+                    bundle_id: 0,
+                    referral_percentage: REFERRAL_PERCENTAGE,
+                    reissuable: false,
+                    price: 0,
+                    payment_token: payment_token,
+                    payment_receiver: payment_receiver,
+                    allower: allower,
+                );
+            // [Effect] Register paid bundles
+            for index in 0..BUNDLE_COUNT {
+                // [Interaction] Register starterpack
+                let stake: u256 = (index + 1).into();
+                let price = stake * base_price;
+                let _bundle_id = bundle_component
+                    .update(
+                        world: world,
+                        bundle_id: (index + 1).into(),
+                        referral_percentage: REFERRAL_PERCENTAGE,
+                        reissuable: true,
+                        price: price,
+                        payment_token: payment_token,
+                        payment_receiver: payment_receiver,
+                        allower: 0.try_into().unwrap(),
+                    );
+            };
+        }
+
         fn execute(
             ref self: ComponentState<TContractState>,
             world: WorldStorage,
             recipient: ContractAddress,
             bundle_id: u32,
             quantity: u32,
-        ) -> (ContractAddress, u128, u256, u256, u32) {
+        ) -> (ContractAddress, u128, u256, u32) {
             // [Setup] Store
             let store = StoreImpl::new(world);
 
@@ -133,17 +173,12 @@ pub mod PurchaseComponent {
                     );
 
                 // [Return] Result
-                return (recipient, MULTIPLIER_PRECISION, token_supply, bundle.price, quantity);
+                return (recipient, MULTIPLIER_PRECISION, bundle.price, quantity);
             }
 
             // [Interaction] Transfer the burn share to Ekubo
             let config = store.config();
-            let pack_multiplier = bundle.price / config.base_price + 1;
-            let amount = quantity.into()
-                * pack_multiplier
-                * config.base_price
-                * config.burn_percentage.into()
-                / 100_u256;
+            let amount = quantity.into() * bundle.price * config.burn_percentage.into() / 100_u256;
             let quote = IERC20MixinDispatcher { contract_address: bundle.payment_token };
             let router = store.ekubo_router();
             quote.transfer(router.contract_address, amount);
@@ -177,7 +212,7 @@ pub mod PurchaseComponent {
             clearer.clear_minimum(IERC20Dispatcher { contract_address: token_address }, 0);
             clearer.clear(IERC20Dispatcher { contract_address: quote_address });
 
-            // [Interaction] Burn the corresponding amount of Nums
+            // [Interaction] Burn the corresponding amount of GLITCH tokens
             let this = starknet::get_contract_address();
             let burn_amount = asset.balance_of(this);
             let asset = ITokenDispatcher { contract_address: token_address };
@@ -203,8 +238,9 @@ pub mod PurchaseComponent {
             }
 
             // [Compute] Multiplier per game
-            let burn_per_game = burn_amount / quantity.into();
-            let supply_per_game = token_supply - burn_per_game;
+            let boost = burn_amount * bundle.price / config.base_price / 100;
+            let burn_per_game = (burn_amount + boost) / quantity.into();
+            let supply_per_game = token_supply - burn_amount / quantity.into();
             let avg_score = config.average_score();
             let multiplier = Rewarder::multiplier(
                 supply_per_game, config.target_supply, burn_per_game, avg_score,
@@ -224,7 +260,7 @@ pub mod PurchaseComponent {
                 );
 
             // [Return] Result
-            (recipient, multiplier, supply_per_game, bundle.price, quantity)
+            (recipient, multiplier, bundle.price, quantity)
         }
     }
 
