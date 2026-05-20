@@ -525,6 +525,33 @@ pub impl GameImpl of GameTrait {
         self.curses = self.curses | mask;
     }
 
+    /// Quantity passed to `CountersTrait::add` after an orb effect resolves.
+    #[inline]
+    fn pull_counter_quantity(
+        orb: Orb, points_before: u16, health_before: u8, moonrocks_before: u16, ref self: Game,
+    ) -> u16 {
+        if orb.one_if_point() == 1 {
+            return self.points - points_before;
+        }
+        if orb.one_if_health() == 1 {
+            return (self.health - health_before).into();
+        }
+        match orb {
+            Orb::Moonrock15 | Orb::Moonrock40 => self.moonrocks - moonrocks_before,
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn track_pull_counters(ref self: Game, orb: Orb, quantity: u16) {
+        let mut game_counters: Counters = self.counters();
+        game_counters.add(orb, quantity);
+        self.counters = game_counters.pack();
+        let mut level_counters: Counters = self.level_counters();
+        level_counters.add(orb, quantity);
+        self.level_counters = level_counters.pack();
+    }
+
     #[inline]
     fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u32, u16) {
         // [Check] Game is not over
@@ -557,8 +584,15 @@ pub impl GameImpl of GameTrait {
             if orb != Orb::StickyBomb {
                 self.discards = Bitmap::set(self.discards, index);
             }
-            // [Effect] Apply the orb
+            // [Effect] Apply the orb and update packed counters
+            let points_before: u16 = self.points;
+            let health_before: u8 = self.health;
+            let moonrocks_before: u16 = self.moonrocks;
             orb.apply(ref self);
+            let quantity = Self::pull_counter_quantity(
+                orb, points_before, health_before, moonrocks_before, ref self,
+            );
+            Self::track_pull_counters(ref self, orb, quantity);
             pulled_orbs.append(orb);
             draws_done += 1;
             // [Effect] Increment pull count
@@ -797,6 +831,22 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         assert_eq!(game.pulled_bombs_count(), 0);
+    }
+
+    #[test]
+    fn test_pull_increments_bomb3_count() {
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
+        game.start();
+        game.bag = array![Orb::Bomb3, Orb::Bomb3, Orb::Bomb3].pack();
+        game.discards = 0;
+        game.immune(3);
+        let mut i: u8 = 0;
+        while i < 3 {
+            game.pull(SEED + i.into());
+            i += 1;
+        }
+        assert_eq!(game.counters().bomb3_count, 3);
+        assert_eq!(game.level_counters().bomb3_count, 3);
     }
 
     #[test]
