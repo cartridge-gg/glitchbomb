@@ -1,8 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { QuestNodes } from "@/components/containers/quest-nodes";
 import { Quests, type QuestsProps } from "@/components/containers/quests";
 import { Close } from "@/components/elements/close";
 import { QuestCount } from "@/components/elements/quest-count";
-import { QuestGift } from "@/components/elements/quest-gift";
 import { QuestRefresh } from "@/components/elements/quest-refresh";
 import { GlitchText } from "@/components/ui/glitch-text";
 
@@ -58,17 +58,17 @@ export const QuestScene = ({
             </h2>
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <QuestCount
-                count={completedCount}
-                total={questsProps.quests.length}
-              />
-              <QuestGift direction="left" />
-            </div>
-
+          <div className="flex flex-row items-center justify-between gap-4">
             <QuestRefresh expiration={questsProps.expiration} />
+            <QuestCount
+              count={completedCount}
+              total={questsProps.quests.length}
+            />
           </div>
+
+          {questsProps.nodes && questsProps.nodes.length > 0 ? (
+            <QuestNodes nodes={questsProps.nodes} />
+          ) : null}
         </div>
 
         <Quests {...questsProps} className="min-h-0 flex-1" />

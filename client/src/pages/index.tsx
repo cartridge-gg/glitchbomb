@@ -265,8 +265,10 @@ export const Main = ({ children }: MainProps) => {
         username: row.username || row.player.slice(0, 8),
         score: row.games_played,
         reward: row.total_reward,
+        variant:
+          row.username === username ? ("highlighted" as const) : undefined,
       })),
-    [leaderboardRows],
+    [leaderboardRows, username],
   );
 
   const referralPayments = useMemo(
