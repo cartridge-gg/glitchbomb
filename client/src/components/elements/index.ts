@@ -52,6 +52,7 @@ export * from "./purchase-disclaimer";
 export * from "./quest-card";
 export * from "./quest-count";
 export * from "./quest-gift";
+export * from "./quest-node";
 export * from "./quest-refresh";
 export * from "./rarity-pill";
 export * from "./recent-pulls";

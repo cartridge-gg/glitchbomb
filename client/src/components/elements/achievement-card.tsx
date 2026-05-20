@@ -24,12 +24,10 @@ const achievementCardVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-white-900 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
-        complete:
-          "gap-2 px-4 py-3 md:px-6 md:py-6 rounded-lg bg-green-800 shadow-[inset_1px_1px_0px_rgba(255,255,255,0.04),1px_1px_0px_rgba(0,0,0,0.12)]",
+        default: "gap-2 p-4 rounded-lg bg-white-900",
+        complete: "gap-2 p-4 rounded-lg bg-green-800",
         float:
-          "gap-2 p-6 rounded-xl bg-black-200 border-2 border-black-100 shadow-[0px_4px_4px_rgba(0,0,0,0.25)] backdrop-blur-[12px]",
+          "gap-2 p-6 rounded-xl bg-black-200 border-2 border-black-100 backdrop-blur-[12px]",
       },
     },
     defaultVariants: {
