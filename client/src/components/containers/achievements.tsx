@@ -5,12 +5,6 @@ import {
   type AchievementCardProps,
   AchievementItem,
 } from "@/components/elements";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface AchievementsProps
@@ -90,7 +84,7 @@ export const Achievements = ({
       {...props}
     >
       {featured && (
-        <div className="flex w-full px-1 md:hidden">
+        <div className="flex w-full px-1">
           <AchievementCard
             key={selected}
             {...featured}
@@ -104,106 +98,59 @@ export const Achievements = ({
         className="flex flex-col gap-6 flex-1 h-full overflow-y-auto px-1 pb-2 md:pb-0"
         style={{ scrollbarWidth: "none" }}
       >
-        <TooltipProvider delayDuration={0}>
-          {earned.length > 0 && (
-            <AchievementSection title="Earned">
-              {earned.map((item) => {
-                const index = achievements.indexOf(item);
-                return (
-                  <AchievementItemWithTooltip
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    itemVariant="complete"
-                    selected={selected === index}
-                    hidden={false}
-                    isNew={newAchievementIds?.has(item.id)}
-                    onSelect={() => setSelected(index)}
-                  />
-                );
-              })}
-              {renderGridPadding(earned.length)}
-            </AchievementSection>
-          )}
+        {earned.length > 0 && (
+          <AchievementSection title="Earned">
+            {earned.map((item) => {
+              const index = achievements.indexOf(item);
+              return (
+                <AchievementItem
+                  key={item.id}
+                  icon={item.icon}
+                  name={item.title}
+                  count={item.count}
+                  total={item.total}
+                  variant="complete"
+                  selected={selected === index}
+                  hidden={false}
+                  isNew={newAchievementIds?.has(item.id)}
+                  onClick={() => setSelected(index)}
+                />
+              );
+            })}
+            {renderGridPadding(earned.length)}
+          </AchievementSection>
+        )}
 
-          {remaining.length > 0 && (
-            <AchievementSection title="Remaining">
-              {remaining.map((item) => {
-                const index = achievements.indexOf(item);
-                return (
-                  <AchievementItemWithTooltip
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    itemVariant="default"
-                    selected={selected === index}
-                    hidden={item.hidden || false}
-                    isNew={newAchievementIds?.has(item.id)}
-                    onSelect={() => setSelected(index)}
-                  />
-                );
-              })}
-              {renderGridPadding(remaining.length)}
-            </AchievementSection>
-          )}
-        </TooltipProvider>
+        {remaining.length > 0 && (
+          <AchievementSection title="Remaining">
+            {remaining.map((item) => {
+              const index = achievements.indexOf(item);
+              const isHidden = item.hidden || false;
+              return (
+                <AchievementItem
+                  key={item.id}
+                  icon={item.icon}
+                  name={item.title}
+                  count={item.count}
+                  total={item.total}
+                  variant="default"
+                  selected={selected === index}
+                  hidden={isHidden}
+                  isNew={newAchievementIds?.has(item.id)}
+                  onClick={() => {
+                    if (isHidden) return;
+                    setSelected(index);
+                  }}
+                />
+              );
+            })}
+            {renderGridPadding(remaining.length)}
+          </AchievementSection>
+        )}
       </div>
     </div>
   );
 };
-
-const AchievementItemWithTooltip = ({
-  item,
-  index,
-  itemVariant,
-  selected,
-  hidden,
-  isNew,
-  onSelect,
-}: {
-  item: AchievementCardProps;
-  index: number;
-  itemVariant: "default" | "complete";
-  selected: boolean;
-  hidden: boolean;
-  isNew?: boolean;
-  onSelect: () => void;
-}) => (
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <div>
-        <AchievementItem
-          icon={item.icon}
-          name={item.title}
-          count={item.count}
-          total={item.total}
-          variant={itemVariant}
-          selected={selected}
-          hidden={hidden}
-          isNew={isNew}
-          onClick={() => {
-            if (window.matchMedia("(min-width: 768px)").matches || hidden)
-              return;
-            onSelect();
-          }}
-          className="md:!outline-0"
-        />
-      </div>
-    </TooltipTrigger>
-    <TooltipContent
-      side="top"
-      sideOffset={8}
-      className="hidden md:block bg-transparent border-none shadow-none p-0 rounded-none w-[400px] !animate-none"
-    >
-      <AchievementCard
-        key={index}
-        {...item}
-        variant="float"
-        className={cn("w-full", hidden && "hidden")}
-      />
-    </TooltipContent>
-  </Tooltip>
-);
 
 const AchievementSection = ({
   title,

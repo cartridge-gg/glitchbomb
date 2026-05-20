@@ -23,8 +23,8 @@ const achievementItemVariants = cva(
   {
     variants: {
       variant: {
-        default: "cursor-pointer md:cursor-default bg-white-900",
-        complete: "cursor-pointer md:cursor-default bg-green-800",
+        default: "cursor-pointer bg-white-900",
+        complete: "cursor-pointer bg-green-800",
         empty: "bg-black-800 border border-dashed border-white-800",
       },
     },
@@ -70,7 +70,7 @@ export const AchievementItem = ({
     >
       {isNew && <NotificationPing />}
       {selected && (
-        <div className="absolute inset-0 rounded-lg outline outline-2 outline-white-100 md:hidden" />
+        <div className="absolute inset-0 rounded-lg outline outline-2 outline-white-100" />
       )}
       <AchievementIcon
         icon={hidden ? "fa-trophy" : (icon ?? "")}
