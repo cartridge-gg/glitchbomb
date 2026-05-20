@@ -46,7 +46,7 @@ export const Events = ({
   useEffect(() => {
     if (!api) return;
     api.scrollTo(0, false);
-  }, [api, events]);
+  }, [api]);
 
   return (
     <div className={cn(eventsVariants({ variant, className }))} {...props}>

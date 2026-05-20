@@ -71,6 +71,9 @@ pub mod PlayableComponent {
             // [Event] Emit Marker at baseline (initial moonrocks)
             store.marker(0, @game, game.moonrocks, 0);
 
+            // [Event] Start Game
+            store.started(player.into(), game_id, multiplier);
+
             // [Effect] Spend moonrocks for entry
             game.spend_moonrocks(cost);
             store.set_game(@game);
