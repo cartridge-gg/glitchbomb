@@ -525,25 +525,17 @@ pub impl GameImpl of GameTrait {
         self.curses = self.curses | mask;
     }
 
-    /// Quantity passed to `CountersTrait::add` after an orb effect resolves.
     #[inline]
-    fn pull_counter_quantity(
-        orb: Orb, points_before: u16, health_before: u8, moonrocks_before: u16, ref self: Game,
-    ) -> u16 {
-        if orb.one_if_point() == 1 {
-            return self.points - points_before;
-        }
-        if orb.one_if_health() == 1 {
-            return (self.health - health_before).into();
-        }
-        match orb {
-            Orb::Moonrock15 | Orb::Moonrock40 => self.moonrocks - moonrocks_before,
-            _ => 0,
-        }
-    }
-
-    #[inline]
-    fn track_pull_counters(ref self: Game, orb: Orb, quantity: u16) {
+    fn track(ref self: Game, orb: Orb, points: u16, health: u8, moonrocks: u16) {
+        let quantity: u16 = if orb.one_if_point() == 1 {
+            self.points - points
+        } else if orb.one_if_health() == 1 {
+            (self.health - health).into()
+        } else if orb.one_if_moonrock() == 1 {
+            self.moonrocks - moonrocks
+        } else {
+            0
+        };
         let mut game_counters: Counters = self.counters();
         game_counters.add(orb, quantity);
         self.counters = game_counters.pack();
@@ -585,14 +577,11 @@ pub impl GameImpl of GameTrait {
                 self.discards = Bitmap::set(self.discards, index);
             }
             // [Effect] Apply the orb and update packed counters
-            let points_before: u16 = self.points;
-            let health_before: u8 = self.health;
-            let moonrocks_before: u16 = self.moonrocks;
+            let previous_points: u16 = self.points;
+            let previous_health: u8 = self.health;
+            let previous_moonrocks: u16 = self.moonrocks;
             orb.apply(ref self);
-            let quantity = Self::pull_counter_quantity(
-                orb, points_before, health_before, moonrocks_before, ref self,
-            );
-            Self::track_pull_counters(ref self, orb, quantity);
+            self.track(orb, previous_points, previous_health, previous_moonrocks);
             pulled_orbs.append(orb);
             draws_done += 1;
             // [Effect] Increment pull count
