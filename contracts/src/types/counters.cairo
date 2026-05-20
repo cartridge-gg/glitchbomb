@@ -1,5 +1,5 @@
 use core::num::traits::Pow;
-use crate::types::orb::Orb;
+use crate::types::orb::{Orb, OrbTrait};
 
 // Constants
 
@@ -67,94 +67,30 @@ pub impl CountersImpl of CountersTrait {
     fn add(ref self: Counters, orb: Orb, quantity: u16) {
         self.pull_count += 1;
         match orb {
-            Orb::Bomb1 => {
-                self.bomb_count += 1;
-                self.streak_bombs += 1;
-                self.streak_multipliers = 0;
-            },
-            Orb::Bomb2 => {
-                self.bomb_count += 1;
-                self.streak_bombs += 1;
-                self.streak_multipliers = 0;
-            },
+            Orb::Bomb1 => { self.bomb_count += 1; },
+            Orb::Bomb2 => { self.bomb_count += 1; },
             Orb::Bomb3 => {
                 self.bomb_count += 1;
                 self.bomb3_count += 1;
-                self.streak_bombs += 1;
-                self.streak_multipliers = 0;
             },
-            Orb::StickyBomb => {
-                self.bomb_count += 1;
-                self.streak_bombs += 1;
-                self.streak_multipliers = 0;
-            },
-            Orb::Health1 => {
-                self.health_amount += quantity;
-                self.streak_bombs = 0;
-                self.streak_multipliers = 0;
-            },
-            Orb::Health2 => {
-                self.health_amount += quantity;
-                self.streak_bombs = 0;
-                self.streak_multipliers = 0;
-            },
-            Orb::Health3 => {
-                self.health_amount += quantity;
-                self.streak_bombs = 0;
-                self.streak_multipliers = 0;
-            },
-            Orb::Multiplier50 => {
-                self.streak_multipliers += 1;
-                self.streak_bombs = 0;
-            },
-            Orb::Multiplier100 => {
-                self.streak_multipliers += 1;
-                self.streak_bombs = 0;
-            },
-            Orb::Multiplier150 => {
-                self.streak_multipliers += 1;
-                self.streak_bombs = 0;
-            },
-            Orb::Point5 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Point6 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Point7 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Point8 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Point9 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::PointOrb1 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::PointBomb4 => {
-                self.point_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Moonrock15 => {
-                self.moonrock_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            Orb::Moonrock40 => {
-                self.moonrock_amount += quantity;
-                self.streak_multipliers = 0;
-            },
-            _ => {
-                self.streak_multipliers = 0;
-                self.streak_bombs = 0;
-            },
+            Orb::StickyBomb => { self.bomb_count += 1; },
+            Orb::Health1 | Orb::Health2 | Orb::Health3 => { self.health_amount += quantity; },
+            Orb::Point5 | Orb::Point6 | Orb::Point7 | Orb::Point8 | Orb::Point9 | Orb::PointOrb1 |
+            Orb::PointBomb4 => { self.point_amount += quantity; },
+            Orb::Moonrock15 | Orb::Moonrock40 => { self.moonrock_amount += quantity; },
+            _ => {},
+        }
+        // Streaks: only bombs extend bomb streak; only multipliers extend multiplier streak;
+        // everything else breaks both (points, moonrocks, chips, curses, etc.).
+        if orb.one_if_bomb() == 1 {
+            self.streak_bombs += 1;
+            self.streak_multipliers = 0;
+        } else if orb.one_if_multiplier() == 1 {
+            self.streak_multipliers += 1;
+            self.streak_bombs = 0;
+        } else {
+            self.streak_bombs = 0;
+            self.streak_multipliers = 0;
         }
     }
 
@@ -244,5 +180,38 @@ mod tests {
             "Counters: streak_multipliers mismatch",
         );
         assert_eq!(counters.streak_save, unpacked.streak_save, "Counters: streak_save mismatch");
+    }
+
+    #[test]
+    fn test_add_streak_bombs_breaks_on_point_orb() {
+        let mut counters = CountersTrait::new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        counters.add(Orb::Bomb1, 0);
+        counters.add(Orb::Bomb2, 0);
+        assert_eq!(counters.streak_bombs, 2);
+        counters.add(Orb::Point5, 10);
+        assert_eq!(counters.streak_bombs, 0);
+        assert_eq!(counters.streak_multipliers, 0);
+    }
+
+    #[test]
+    fn test_add_streak_bombs_breaks_on_moonrock_orb() {
+        let mut counters = CountersTrait::new(0, 0, 0, 0, 0, 0, 0, 2, 0, 0);
+        counters.add(Orb::Moonrock15, 15);
+        assert_eq!(counters.streak_bombs, 0);
+    }
+
+    #[test]
+    fn test_add_streak_multipliers_breaks_on_bomb() {
+        let mut counters = CountersTrait::new(0, 0, 0, 0, 0, 0, 0, 0, 3, 0);
+        counters.add(Orb::Bomb3, 0);
+        assert_eq!(counters.streak_multipliers, 0);
+        assert_eq!(counters.streak_bombs, 1);
+    }
+
+    #[test]
+    fn test_add_streak_multipliers_breaks_on_point_orb() {
+        let mut counters = CountersTrait::new(0, 0, 0, 0, 0, 0, 0, 0, 2, 0);
+        counters.add(Orb::Point7, 8);
+        assert_eq!(counters.streak_multipliers, 0);
     }
 }

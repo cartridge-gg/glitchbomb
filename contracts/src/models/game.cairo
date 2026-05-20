@@ -526,6 +526,25 @@ pub impl GameImpl of GameTrait {
     }
 
     #[inline]
+    fn track(ref self: Game, orb: Orb, points: u16, health: u8, moonrocks: u16) {
+        let quantity: u16 = if orb.one_if_point() == 1 {
+            self.points - points
+        } else if orb.one_if_health() == 1 {
+            (self.health - health).into()
+        } else if orb.one_if_moonrock() == 1 {
+            self.moonrocks - moonrocks
+        } else {
+            0
+        };
+        let mut game_counters: Counters = self.counters();
+        game_counters.add(orb, quantity);
+        self.counters = game_counters.pack();
+        let mut level_counters: Counters = self.level_counters();
+        level_counters.add(orb, quantity);
+        self.level_counters = level_counters.pack();
+    }
+
+    #[inline]
     fn pull(ref self: Game, seed: felt252) -> (Array<Orb>, u32, u16) {
         // [Check] Game is not over
         self.assert_not_over();
@@ -557,8 +576,12 @@ pub impl GameImpl of GameTrait {
             if orb != Orb::StickyBomb {
                 self.discards = Bitmap::set(self.discards, index);
             }
-            // [Effect] Apply the orb
+            // [Effect] Apply the orb and update packed counters
+            let previous_points: u16 = self.points;
+            let previous_health: u8 = self.health;
+            let previous_moonrocks: u16 = self.moonrocks;
             orb.apply(ref self);
+            self.track(orb, previous_points, previous_health, previous_moonrocks);
             pulled_orbs.append(orb);
             draws_done += 1;
             // [Effect] Increment pull count
@@ -797,6 +820,22 @@ mod tests {
         let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
         game.start();
         assert_eq!(game.pulled_bombs_count(), 0);
+    }
+
+    #[test]
+    fn test_pull_increments_bomb3_count() {
+        let mut game = GameTrait::new(GAME_ID, STAKE, PRICE);
+        game.start();
+        game.bag = array![Orb::Bomb3, Orb::Bomb3, Orb::Bomb3].pack();
+        game.discards = 0;
+        game.immune(3);
+        let mut i: u8 = 0;
+        while i < 3 {
+            game.pull(SEED + i.into());
+            i += 1;
+        }
+        assert_eq!(game.counters().bomb3_count, 3);
+        assert_eq!(game.level_counters().bomb3_count, 3);
     }
 
     #[test]

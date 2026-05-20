@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect, useState } from "react";
+import { TimerIcon } from "@/components/icons/regulars/timer";
 import { Formatter } from "@/helpers";
 import { cn } from "@/lib/utils";
 
@@ -9,19 +10,16 @@ export interface QuestRefreshProps
   expiration: number;
 }
 
-const questRefreshVariants = cva(
-  "select-none flex items-center px-3 py-2.5 gap-2 h-10 self-stretch",
-  {
-    variants: {
-      variant: {
-        default: "",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
+const questRefreshVariants = cva("select-none flex items-center gap-0.5", {
+  variants: {
+    variant: {
+      default: "text-yellow-100 bg-yellow-900 px-1.5 py-1 rounded-lg",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 const getCountdown = (exp: number) => {
   if (!exp) return Formatter.countdown(0);
@@ -56,13 +54,8 @@ export const QuestRefresh = ({
       className={cn(questRefreshVariants({ variant, className }))}
       {...props}
     >
-      <p
-        className="font-secondary text-2xl/4 text-yellow-100"
-        style={{ textShadow: "2px 2px 0px rgba(0, 0, 0, 0.24)" }}
-      >
-        <span className="text-yellow-400 font-secondary">New Quests in: </span>
-        {countdown}
-      </p>
+      <TimerIcon size="md" className="shrink-0" />
+      <p className="font-secondary text-2xl/[13px] px-1">{countdown}</p>
     </div>
   );
 };

@@ -10,11 +10,11 @@ export interface QuestCountProps
 }
 
 const questCountVariants = cva(
-  "flex justify-center items-center p-2.5 gap-2 bg-white-900 rounded-lg",
+  "flex justify-center items-center px-1.5 py-1 gap-0.5",
   {
     variants: {
       variant: {
-        default: "",
+        default: "bg-primary-900 rounded-lg",
       },
     },
     defaultVariants: {
@@ -33,9 +33,11 @@ export const QuestCount = ({
   return (
     <div className={cn(questCountVariants({ variant, className }))} {...props}>
       <QuestIcon size="md" className="text-primary-100" />
-      <div className="flex items-center gap-1 text-2xl/[13px]">
+      <div className="flex items-center gap-0.5 text-2xl/[13px] px-1">
         <span className="text-primary-100 font-secondary">{count}</span>
-        <span className="text-white-400 font-secondary">/</span>
+        <span className="text-white-400 font-secondary text-base/[13px]">
+          /
+        </span>
         <span className="text-white-100 font-secondary">{total}</span>
       </div>
     </div>

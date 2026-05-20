@@ -50,6 +50,30 @@ const sampleQuests = [
     count: 6,
     total: 10,
   },
+  {
+    id: "quest-4",
+    icon: "fa-fire",
+    title: "Hot Streak",
+    description: "Cash out 3 times in a row.",
+    count: 1,
+    total: 3,
+  },
+  {
+    id: "quest-5",
+    icon: "fa-chart-line",
+    title: "High Roller",
+    description: "Reach 500 points in one run.",
+    count: 0,
+    total: 500,
+  },
+];
+
+const sampleNodes = [
+  { variant: "default" as const, completed: true },
+  { variant: "default" as const, completed: true },
+  { variant: "gift" as const, completed: true },
+  { variant: "default" as const },
+  { variant: "gift" as const },
 ];
 
 const EXPIRATION = Math.floor(Date.now() / 1000) + 12 * 3600 + 24 * 60;
@@ -59,6 +83,7 @@ export const Default: Story = {
     questsProps: {
       quests: sampleQuests,
       expiration: EXPIRATION,
+      nodes: sampleNodes,
     },
     onClose: fn(),
     className: "w-full",
@@ -70,6 +95,7 @@ export const AllCompleted: Story = {
     questsProps: {
       quests: sampleQuests.map((quest) => ({ ...quest, count: quest.total })),
       expiration: EXPIRATION,
+      nodes: sampleNodes.map((node) => ({ ...node, completed: true })),
     },
     onClose: fn(),
     className: "w-full",
@@ -81,6 +107,7 @@ export const Empty: Story = {
     questsProps: {
       quests: [],
       expiration: EXPIRATION,
+      nodes: [],
     },
     onClose: fn(),
     className: "w-full",

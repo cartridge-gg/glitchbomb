@@ -30,7 +30,7 @@ pub const INTERVAL_HARD: u64 = 7 * ONE_DAY;
 
 // Types
 
-#[derive(Copy, Drop)]
+#[derive(Copy, Drop, PartialEq)]
 pub enum QuestType {
     None,
     // Easy One (Day 1–7)
@@ -179,11 +179,7 @@ pub impl QuestImpl of IQuest {
     }
 
     fn reward(self: QuestType) -> bool {
-        match self {
-            QuestType::DailyFinisherThree => true,
-            QuestType::DailyFinisherFive => true,
-            _ => false,
-        }
+        self == QuestType::DailyFinisherThree || self == QuestType::DailyFinisherFive
     }
 }
 

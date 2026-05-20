@@ -3,6 +3,7 @@ import {
   QuestCard,
   type QuestCardProps,
 } from "@/components/elements/quest-card";
+import type { QuestNodeProps } from "@/components/elements/quest-node";
 import { cn } from "@/lib/utils";
 
 export interface QuestsProps
@@ -10,6 +11,7 @@ export interface QuestsProps
     VariantProps<typeof questsVariants> {
   quests: (QuestCardProps & { id: string })[];
   expiration: number;
+  nodes?: QuestNodeProps[];
   newQuestIds?: Set<string>;
 }
 

@@ -132,6 +132,15 @@ pub impl OrbImpl of OrbTrait {
             _ => 0,
         }
     }
+
+    #[inline]
+    fn one_if_moonrock(self: @Orb) -> u8 {
+        match self {
+            Orb::Moonrock15 => 1,
+            Orb::Moonrock40 => 1,
+            _ => 0,
+        }
+    }
 }
 
 pub impl IntoOrbU8 of Into<Orb, u8> {
