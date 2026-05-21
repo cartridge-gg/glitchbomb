@@ -7,6 +7,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import { DEFAULT_THEME, useTheme } from "@/contexts/theme";
 
 /**
  * Merges current search params into the destination for internal navigation.
@@ -60,8 +61,10 @@ export function Navigate({ to, ...props }: NavigateProps) {
 export function usePreserveSearchNavigate() {
   const navigate = useNavigate();
   const { search } = useLocation();
+  const { setTheme } = useTheme();
 
   return (to: To | number, options?: { replace?: boolean; state?: object }) => {
+    setTheme(DEFAULT_THEME);
     if (typeof to === "number") {
       navigate(to);
       return;

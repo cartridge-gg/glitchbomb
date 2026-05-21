@@ -122,15 +122,15 @@
     --primary-800: var(--green-800);
     --primary-900: var(--green-900);
 
-    --secondary-100: var(--forest-100);
-    --secondary-200: var(--forest-200);
-    --secondary-300: var(--forest-300);
-    --secondary-400: var(--forest-400);
-    --secondary-500: var(--forest-500);
-    --secondary-600: var(--forest-600);
-    --secondary-700: var(--forest-700);
-    --secondary-800: var(--forest-800);
-    --secondary-900: var(--forest-900);
+    --secondary-100: var(--yellow-100);
+    --secondary-200: var(--yellow-200);
+    --secondary-300: var(--yellow-300);
+    --secondary-400: var(--yellow-400);
+    --secondary-500: var(--yellow-500);
+    --secondary-600: var(--yellow-600);
+    --secondary-700: var(--yellow-700);
+    --secondary-800: var(--yellow-800);
+    --secondary-900: var(--yellow-900);
 
     --tertiary-100: var(--salmon-100);
     --tertiary-200: var(--salmon-200);

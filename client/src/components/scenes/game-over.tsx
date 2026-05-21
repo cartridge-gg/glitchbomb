@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { BagIcon, GlitchStateIcon, PlusIcon } from "@/components/icons";
 import { GlitchText } from "@/components/ui/glitch-text";
+import { DEFAULT_THEME, useTheme } from "@/contexts/theme";
 import { tokenPayout, toTokens } from "@/helpers/payout";
 import { cn } from "@/lib/utils";
 import type { Game, OrbPulled } from "@/models";
@@ -59,6 +60,15 @@ export const GameOver = ({
   className,
   ...props
 }: GameOverProps) => {
+  const { setTheme } = useTheme();
+  const isGlitchedOut = game.isGlitchedOut();
+
+  useEffect(() => {
+    if (!isGlitchedOut) return;
+    setTheme("glitch");
+    return () => setTheme(DEFAULT_THEME);
+  }, [isGlitchedOut, setTheme]);
+
   const moonrocksEarned = game.moonrocks;
   const stake = game.stake;
 
