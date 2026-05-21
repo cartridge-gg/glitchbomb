@@ -3,13 +3,16 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useLocation } from "react-router-dom";
 
-export type Theme = "default";
+export type Theme = "default" | "glitch";
+
+export const DEFAULT_THEME: Theme = "default";
 
 const THEME_COLORS: Record<
   Theme,
@@ -17,6 +20,11 @@ const THEME_COLORS: Record<
 > = {
   default: {
     primary: "green",
+    secondary: "yellow",
+    tertiary: "salmon",
+  },
+  glitch: {
+    primary: "red",
     secondary: "yellow",
     tertiary: "salmon",
   },
@@ -39,7 +47,52 @@ function applyTheme(theme: Theme) {
   setTimeout(() => root.classList.remove("theme-transitioning"), 500);
 }
 
-const THEME_STORAGE_KEY = "theme";
+const THEME_STORAGE_KEY = "gbomb-theme";
+/** Bump when DEFAULT_THEME changes so stored prefs reset to the new default. */
+const THEME_STORAGE_VERSION = 2;
+
+type StoredTheme = { v: number; theme: Theme };
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && value in THEME_COLORS;
+}
+
+function readStoredTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (!saved) return null;
+  try {
+    const parsed: unknown = JSON.parse(saved);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "v" in parsed &&
+      (parsed as StoredTheme).v === THEME_STORAGE_VERSION &&
+      isTheme((parsed as StoredTheme).theme)
+    ) {
+      return (parsed as StoredTheme).theme;
+    }
+  } catch {
+    // ignore malformed stored theme
+  }
+  return null;
+}
+
+function writeStoredTheme(theme: Theme) {
+  localStorage.setItem(
+    THEME_STORAGE_KEY,
+    JSON.stringify({ v: THEME_STORAGE_VERSION, theme } satisfies StoredTheme),
+  );
+}
+
+function resolveTheme(): Theme {
+  return readStoredTheme() ?? DEFAULT_THEME;
+}
+
+// Apply before React paints to avoid a flash of default.css colors.
+if (typeof document !== "undefined") {
+  applyTheme(resolveTheme());
+}
 
 interface ThemeContextType {
   theme: Theme;
@@ -47,51 +100,44 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "default",
+  theme: DEFAULT_THEME,
   setTheme: () => {},
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => useContext(ThemeContext);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [preference, setPreference] = useState<Theme | null>(() => {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    if (!saved) return null;
-    try {
-      const parsed = JSON.parse(saved);
-      if (typeof parsed === "string" && parsed in THEME_COLORS) {
-        return parsed as Theme;
-      }
-    } catch {
-      // ignore malformed stored theme
-    }
-    return null;
+/** Resets to the default palette whenever the user changes route. */
+function ThemeRouteSync({ setTheme }: { setTheme: (theme: Theme) => void }) {
+  const { pathname } = useLocation();
+  const prevPathname = useRef(pathname);
+
+  useLayoutEffect(() => {
+    if (prevPathname.current === pathname) return;
+    prevPathname.current = pathname;
+    setTheme(DEFAULT_THEME);
   });
 
-  const theme: Theme = useMemo(() => {
-    if (preference !== null) return preference;
-    return "default";
-  }, [preference]);
+  return null;
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(resolveTheme);
 
   useLayoutEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
-  useEffect(() => {
-    if (preference === null) {
-      setPreference("default");
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify("default"));
-    }
-  }, [preference]);
-
-  const setTheme = useCallback((t: Theme) => {
-    setPreference(t);
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(t));
+  const setTheme = useCallback((next: Theme) => {
+    setThemeState(next);
+    writeStoredTheme(next);
   }, []);
 
+  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={value}>
+      <ThemeRouteSync setTheme={setTheme} />
       {children}
     </ThemeContext.Provider>
   );

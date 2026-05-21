@@ -1,9 +1,12 @@
+import type { TouchEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ComposedChart,
   Line,
+  type MouseHandlerDataParam,
   ResponsiveContainer,
   Tooltip,
+  type TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -135,24 +138,15 @@ const RenderDot = (props: DotPayload) => {
  * Recharts feeds `payload[0].payload` — the original data row — through
  * which we read `pullId` and look up the pull in the closure's Map.
  */
-type TooltipPayloadItem = {
-  payload?: {
-    pullId?: number;
-    variant?: GameChartDataPoint["variant"];
-  };
-};
-type ChartTooltipContentProps = {
-  active?: boolean;
-  payload?: TooltipPayloadItem[];
+type ChartTooltipRow = {
+  pullId?: number;
+  variant?: GameChartDataPoint["variant"];
 };
 
 const makeTooltipContent = (pullsById: Map<number, OrbPulled> | undefined) => {
-  const ChartTooltipContent = ({
-    active,
-    payload,
-  }: ChartTooltipContentProps) => {
-    if (!active || !payload || payload.length === 0) return null;
-    const row = payload[0]?.payload;
+  const ChartTooltipContent = ({ active, payload }: TooltipContentProps) => {
+    if (!active || payload.length === 0) return null;
+    const row = payload[0]?.payload as ChartTooltipRow | undefined;
     if (row?.pullId == null || pullsById == null) return null;
 
     const pull = pullsById.get(row.pullId);
@@ -346,6 +340,18 @@ export const GameChart = ({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [isTouchDevice, mobileActiveIndex]);
 
+  // Recharts v3: activeTooltipIndex is number | string | null | undefined.
+  const activeTooltipIndexToNumber = (
+    idx: MouseHandlerDataParam["activeTooltipIndex"],
+  ): number | undefined => {
+    if (typeof idx === "number") return idx;
+    if (typeof idx === "string") {
+      const parsed = Number.parseInt(idx, 10);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  };
+
   // Recharts touch handlers — snap to the nearest point on X.
   //
   // Note: Recharts' internal touchEventsMiddleware only updates the active
@@ -354,36 +360,21 @@ export const GameChart = ({
   // `nextState.activeTooltipIndex`, but on `touchstart` we have to compute
   // the nearest dot index ourselves from the touch coordinates and the
   // rendered <circle cx> values.
-  const handleTouchMove = (nextState: {
-    activeTooltipIndex?: number | string;
-  }) => {
-    const idx = nextState.activeTooltipIndex;
-    if (typeof idx === "number") {
-      setMobileActiveIndex(idx);
-    } else if (typeof idx === "string") {
-      const parsed = Number.parseInt(idx, 10);
-      if (Number.isFinite(parsed)) setMobileActiveIndex(parsed);
-    }
+  const handleTouchMove = (nextState: MouseHandlerDataParam) => {
+    const parsed = activeTooltipIndexToNumber(nextState.activeTooltipIndex);
+    if (parsed !== undefined) setMobileActiveIndex(parsed);
   };
 
   // Desktop hover handlers — mirror Recharts' active index into our state
   // so the reference line can follow the magnet (Recharts itself snaps to
   // the nearest X point and exposes the index in the handler's nextState).
-  const handleMouseMove = (nextState: {
-    activeTooltipIndex?: number | string;
-    isTooltipActive?: boolean;
-  }) => {
+  const handleMouseMove = (nextState: MouseHandlerDataParam) => {
     if (nextState.isTooltipActive === false) {
       setDesktopActiveIndex(undefined);
       return;
     }
-    const idx = nextState.activeTooltipIndex;
-    if (typeof idx === "number") {
-      setDesktopActiveIndex(idx);
-    } else if (typeof idx === "string") {
-      const parsed = Number.parseInt(idx, 10);
-      if (Number.isFinite(parsed)) setDesktopActiveIndex(parsed);
-    }
+    const parsed = activeTooltipIndexToNumber(nextState.activeTooltipIndex);
+    if (parsed !== undefined) setDesktopActiveIndex(parsed);
   };
 
   const handleMouseLeave = () => {
@@ -391,8 +382,8 @@ export const GameChart = ({
   };
 
   const handleTouchStart = (
-    _nextState: unknown,
-    event: React.TouchEvent<SVGGraphicsElement>,
+    _nextState: MouseHandlerDataParam,
+    event: TouchEvent<SVGGraphicsElement>,
   ) => {
     const touch = event.touches[0];
     if (!touch) return;
@@ -633,7 +624,7 @@ export const GameChart = ({
                 y1="0"
                 x2={`${pos}%`}
                 y2="100%"
-                stroke="rgba(20, 83, 45, 0.4)"
+                stroke="var(--primary-700)"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -645,7 +636,7 @@ export const GameChart = ({
                 y1={`${pos}%`}
                 x2="100%"
                 y2={`${pos}%`}
-                stroke="rgba(20, 83, 45, 0.4)"
+                stroke="var(--primary-700)"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -668,7 +659,7 @@ export const GameChart = ({
                   y1={baselineY}
                   x2="calc(100% - 3rem)"
                   y2={baselineY}
-                  stroke="#15803d"
+                  stroke="var(--primary-300)"
                   strokeWidth="1"
                   strokeDasharray="4 4"
                 />
@@ -716,7 +707,10 @@ export const GameChart = ({
               const xPct =
                 denom > 0 ? ((activeIndex + X_AXIS_PADDING) / denom) * 100 : 50;
               return (
-                <svg className="absolute inset-0 w-full h-full">
+                <svg
+                  className="absolute inset-0 w-full h-full"
+                  aria-hidden="true"
+                >
                   <line
                     x1={`${xPct}%`}
                     y1="0"
@@ -812,7 +806,7 @@ export const GameChart = ({
                 key={chartData.length}
                 type="linear"
                 dataKey="cumulative"
-                stroke="var(--primary-400)"
+                stroke="var(--white-400)"
                 strokeWidth={1.5}
                 filter="url(#gc-glitch-line)"
                 dot={RenderDot}

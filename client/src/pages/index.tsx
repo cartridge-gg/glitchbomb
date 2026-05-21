@@ -367,7 +367,7 @@ export const Main = ({ children }: MainProps) => {
   }, [claimeds, starteds, findController, controllersLoading]);
 
   return (
-    <div className="relative h-full w-screen flex flex-col overflow-hidden items-stretch bg-gradient-to-t from-black to-[#0C1806]">
+    <div className="relative h-full w-screen flex flex-col overflow-hidden items-stretch bg-gradient-to-t from-black to-[var(--primary-800)]">
       <Header
         tokenBalance={tokenBalance}
         faucetBalance={isMainnet ? undefined : faucetBalance}
